@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate File Compressor | Compress PDF, JPG, PNG & Images Online</title>
-    <meta name="description" content="Free online tool to compress PDF, JPG, PNG, and other image formats to your desired size in KB or MB. Fast, secure, and easy to use without losing quality.">
-    <meta name="keywords" content="file compressor, compress pdf, reduce image size, jpg compressor, png shrinker, compress to custom size, online file optimizer">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://yourdomain.com/compressor">
-    
-    <meta name="geo.region" content="IN-DL" />
-    <meta name="geo.placename" content="New Delhi" />
-    <meta name="geo.position" content="28.6139;77.2090" />
-    <meta name="ICBM" content="28.6139, 77.2090" />
-
+    <meta name="description" content="Free online tool to compress PDF, JPG, PNG, and other image formats to your desired size in KB or MB.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- PDF.js: renders PDF pages to canvas (real compression possible) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- pdf-lib: creates new PDF from images -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
     <style>
@@ -22,504 +17,492 @@
             --primary: #4f46e5;
             --primary-hover: #4338ca;
             --bg: #f8fafc;
-            --card-bg: #ffffff;
+            --card: #ffffff;
             --text: #1e293b;
-            --text-light: #64748b;
+            --muted: #64748b;
             --border: #e2e8f0;
-            --success: #10b981;
+            --green: #10b981;
+            --red: #e11d48;
+            --amber: #f59e0b;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 860px; margin: 36px auto; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
+        header { text-align: center; margin-bottom: 36px; }
+        header h1 { font-size: 2rem; color: var(--primary); margin-bottom: 8px; }
+        header p { color: var(--muted); font-size: 1rem; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        header p {
-            color: var(--text-light);
-            font-size: 1.1rem;
-        }
-
-        .tool-card {
-            background: var(--card-bg);
+        .card {
+            background: var(--card);
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            padding: 28px;
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.07);
             border: 1px solid var(--border);
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
-        .upload-area {
+        /* Upload */
+        .drop-zone {
             border: 2px dashed var(--primary);
             border-radius: 12px;
-            padding: 40px 20px;
+            padding: 38px 20px;
             text-align: center;
             cursor: pointer;
             background: #f5f3ff;
-            transition: all 0.3s ease;
+            transition: background .25s;
         }
+        .drop-zone:hover, .drop-zone.over { background: #ede9fe; }
+        .drop-zone svg { display: block; margin: 0 auto 10px; }
+        .drop-zone p { font-weight: 500; }
+        .drop-zone small { color: var(--muted); font-size: .8rem; }
+        #fileInput { display: none; }
 
-        .upload-area:hover {
-            background: #ede9fe;
-        }
-
-        .upload-area p {
-            margin-top: 10px;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        #fileInput {
-            display: none;
-        }
-
+        /* File info */
         .file-info {
             display: none;
-            margin-top: 25px;
-            padding: 15px;
+            margin-top: 18px;
+            padding: 13px 15px;
             background: #f1f5f9;
+            border-left: 4px solid var(--primary);
             border-radius: 8px;
-            border-left: 5px solid var(--primary);
+            font-size: .9rem;
         }
+        .file-info p { margin-bottom: 3px; }
+        .file-info strong { color: var(--text); }
 
-        .file-info p {
-            font-size: 0.95rem;
-            margin-bottom: 5px;
-        }
-
-        .file-info span {
-            font-weight: 600;
-        }
-
+        /* Controls */
         .controls {
-            margin-top: 25px;
             display: none;
+            margin-top: 18px;
+            align-items: flex-end;
+            gap: 12px;
             grid-template-columns: 1fr auto;
-            gap: 15px;
-            align-items: end;
         }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .inputs-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="number"], select {
-            padding: 12px;
+        label.ctrl-label { display: block; font-weight: 600; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+        .size-inputs { display: flex; gap: 8px; }
+        input[type=number], select {
+            padding: 11px 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: .97rem;
             outline: none;
-            background: var(--card-bg);
+            background: var(--card);
+            transition: border-color .2s;
         }
-
-        input[type="number"] {
-            flex: 1;
-        }
-
-        .btn-compress {
+        input[type=number]:focus, select:focus { border-color: var(--primary); }
+        input[type=number] { flex: 1; }
+        .btn-primary {
             background: var(--primary);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 14px 28px;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: .97rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
-            height: fit-content;
+            transition: background .2s;
+            white-space: nowrap;
         }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
 
-        .btn-compress:hover {
-            background: var(--primary-hover);
-        }
+        /* Progress */
+        .progress-wrap { display: none; margin-top: 18px; }
+        .progress-text { font-size: .83rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+        .progress-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; width: 0; transition: width .3s ease; }
 
-        .status {
-            margin-top: 15px;
-            font-weight: 500;
-            text-align: center;
+        /* Result */
+        .result-box {
             display: none;
-            color: var(--primary);
-        }
-
-        .download-area {
-            display: none;
-            margin-top: 25px;
-            text-align: center;
-            padding: 20px;
-            background: #ecfdf5;
+            margin-top: 20px;
             border-radius: 12px;
-            border: 1px solid #a7f3d0;
+            padding: 18px 20px;
         }
+        .result-box.ok  { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .result-box.warn{ background: #fffbeb; border: 1px solid #fcd34d; }
+        .result-box h3 { font-size: 1rem; margin-bottom: 10px; }
+        .result-box.ok   h3 { color: var(--green); }
+        .result-box.warn h3 { color: var(--amber); }
 
-        .btn-download {
-            background: var(--success);
-            color: white;
+        .size-row { display: flex; align-items: center; gap: 14px; font-size: .9rem; margin-bottom: 14px; flex-wrap: wrap; }
+        .sz-old { color: var(--red); text-decoration: line-through; }
+        .sz-arrow { color: var(--muted); }
+        .sz-new { color: var(--green); font-weight: 700; font-size: 1.05rem; }
+
+        .btn-dl {
+            display: inline-block;
+            background: var(--green);
+            color: #fff;
             text-decoration: none;
-            padding: 12px 30px;
+            padding: 10px 26px;
             border-radius: 8px;
             font-weight: 600;
-            display: inline-block;
-            margin-top: 10px;
-            transition: opacity 0.2s;
+            font-size: .93rem;
+            transition: opacity .2s;
         }
+        .btn-dl:hover { opacity: .88; }
 
-        .btn-download:hover {
-            opacity: 0.9;
-        }
+        /* SEO */
+        .seo { background: var(--card); border-radius: 16px; padding: 36px; border: 1px solid var(--border); }
+        .seo h2 { font-size: 1.6rem; margin-bottom: 10px; }
+        .seo h3 { font-size: 1.1rem; color: var(--primary); margin: 20px 0 8px; }
+        .seo p, .seo li { color: var(--muted); font-size: .95rem; margin-bottom: 8px; }
+        .seo ul { margin-left: 18px; }
 
-        .seo-content {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 40px;
-            border: 1px solid var(--border);
-        }
-
-        .seo-content h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: var(--text);
-        }
-
-        .seo-content h3 {
-            font-size: 1.3rem;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .seo-content p {
-            color: var(--text-light);
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .seo-content ul {
-            margin-left: 20px;
-            margin-bottom: 20px;
-            color: var(--text-light);
-        }
-
-        .seo-content li {
-            margin-bottom: 8px;
-        }
-
-        @media (max-width: 600px) {
-            .controls {
-                grid-template-columns: 1fr;
-            }
-            .btn-compress {
-                width: 100%;
-            }
+        @media(max-width:580px){
+            .controls { grid-template-columns: 1fr; }
+            .btn-primary { width: 100%; }
         }
     </style>
 </head>
 <body>
+<div class="container">
+    <header>
+        <h1>Smart All-In-One File Compressor</h1>
+        <p>Compress PDFs, JPGs, PNGs, and WEBP images to your exact target size — all inside your browser.</p>
+    </header>
 
-    <div class="container">
-        <header>
-            <h1>Smart All-In-One File Compressor</h1>
-            <p>Reduce the size of your PDFs, JPGs, PNGs, and Images instantly to your exact target size.</p>
-        </header>
+    <main>
+        <div class="card">
+            <!-- Upload -->
+            <div class="drop-zone" id="dropZone" onclick="fileInput.click()">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & Drop your file here or <span style="color:var(--primary);font-weight:700;">Browse</span></p>
+                <small>Supports: PDF, JPG, JPEG, PNG, WEBP</small>
+                <input type="file" id="fileInput" accept="image/*,application/pdf">
+            </div>
 
-        <main>
-            <div class="tool-card">
-                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    <p>Drag & Drop your file here or <span>Browse</span></p>
-                    <span style="font-size: 0.8rem; color: var(--text-light);">Supports: PDF, JPG, JPEG, PNG, WEBP</span>
-                    <input type="file" id="fileInput" accept="image/*, application/pdf">
-                </div>
+            <!-- File info -->
+            <div class="file-info" id="fileInfo">
+                <p><strong>Name:</strong> <span id="fileName"></span></p>
+                <p><strong>Type:</strong> <span id="fileType"></span></p>
+                <p><strong>Current Size:</strong> <span id="currentSize" style="color:var(--red);font-weight:600;"></span></p>
+            </div>
 
-                <div class="file-info" id="fileInfo">
-                    <p><strong>File Name:</strong> <span id="fileName">-</span></p>
-                    <p><strong>File Type:</strong> <span id="fileType">-</span></p>
-                    <p><strong>Current Size:</strong> <span id="currentSize" style="color: #e11d48;">-</span></p>
-                </div>
-
-                <div class="controls" id="controlBox">
-                    <div class="input-group">
-                        <label for="targetSize">Enter Desired Target Size:</label>
-                        <div class="inputs-container">
-                            <input type="number" id="targetSize" placeholder="E.g., 200" min="1">
-                            <select id="sizeUnit">
-                                <option value="KB">KB</option>
-                                <option value="MB">MB</option>
-                            </select>
-                        </div>
+            <!-- Controls -->
+            <div class="controls" id="controlBox">
+                <div>
+                    <label class="ctrl-label" for="targetSize">Target Size:</label>
+                    <div class="size-inputs">
+                        <input type="number" id="targetSize" placeholder="e.g. 40" min="1" step="any">
+                        <select id="sizeUnit">
+                            <option value="KB">KB</option>
+                            <option value="MB">MB</option>
+                        </select>
                     </div>
-                    <button class="btn-compress" id="compressBtn">Compress File</button>
                 </div>
+                <button class="btn-primary" id="compressBtn">Compress File</button>
+            </div>
 
-                <div class="status" id="statusMessage">Processing, please wait...</div>
-
-                <div class="download-area" id="downloadArea">
-                    <p style="color: var(--success); font-weight: 600;">🎉 File compressed successfully!</p>
-                    <p>New Size: <span id="newSize" style="font-weight: 700;">-</span></p>
-                    <a href="#" class="btn-download" id="downloadLink" download>Download Compressed File</a>
+            <!-- Progress -->
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-text" id="progressText">Processing…</div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
 
-            <article class="seo-content">
-                <h2>How to Use the Online File Compressor & Its Incredible Benefits</h2>
-                <p>In today's digital world, handling massive file sizes can be a major headache. Whether you are trying to submit an official job application form, upload mandatory government documents, or optimize image assets for your blogging website, you often run into strict size limits. Our intelligent All-In-One File Compressor is engineered specifically to eliminate these roadblocks entirely in just a few clicks.</p>
-                
-                <h3>Step-by-Step Guide: How to Compress Your Files</h3>
-                <p>We designed this system to be straightforward, lightning-fast, and deeply intuitive. Follow these simple steps to optimize your documents and photos:</p>
-                <ul>
-                    <li><strong>Step 1: Upload Your Target Document:</strong> Simply drag and drop your PDF or image file (such as JPEG, PNG, or WEBP) straight into the dotted drag-and-drop zone. Alternatively, click "Browse" to look up files from your local storage.</li>
-                    <li><strong>Step 2: Review Original File Size:</strong> The second your file touches the system, our dynamic checker immediately calculates and prints the exact current file size right beneath the upload container.</li>
-                    <li><strong>Step 3: Define Custom Target Size:</strong> Inside the smart configurations box, enter the specific numeric metric you require. Switch the adjacent dropdown toggle to either KB (Kilobytes) or MB (Megabytes) based entirely on your target requirement.</li>
-                    <li><strong>Step 4: Execute Optimization:</strong> Click the "Compress File" action button. Our specialized smart algorithms will rapidly analyze, re-encode, and process the file on-the-fly.</li>
-                    <li><strong>Step 5: Save & Download:</strong> Once processing concludes successfully, the action window unlocks a verified preview detailing your optimized file metrics. Click the green "Download" button to save it back to your hard drive instantly.</li>
-                </ul>
+            <!-- Result -->
+            <div class="result-box" id="resultBox">
+                <h3 id="resultTitle"></h3>
+                <div class="size-row">
+                    <span class="sz-old" id="szOld"></span>
+                    <span class="sz-arrow">→</span>
+                    <span class="sz-new" id="szNew"></span>
+                </div>
+                <a href="#" class="btn-dl" id="dlLink" download>⬇ Download Compressed File</a>
+            </div>
+        </div>
 
-                <h3>Core Key Advantages of Using This Advanced Multi-Format Utility</h3>
-                <p>Unlike generic online processing tools that severely degrade visual fidelity or steal private user data, this client-side architecture gives you high efficiency and premium security advantages:</p>
-                
-                <h4>1. Complete Data Security & Privacy Safehouse</h4>
-                <p>Because our algorithms process everything right inside your browser session, your highly confidential PDFs, signatures, and personal photos never leave your device. Nothing gets uploaded to external cloud storage servers. You have zero risk of private identity theft.</p>
+        <article class="seo">
+            <h2>How to Compress Files Online</h2>
+            <p>Upload your file, enter a target size in KB or MB, and click Compress. The tool works entirely in your browser — no file is uploaded to any server.</p>
+            <h3>Steps</h3>
+            <ul>
+                <li>Drop or browse your PDF or image file.</li>
+                <li>Enter your target size (e.g. 40 KB).</li>
+                <li>Click Compress and download the result.</li>
+            </ul>
+            <h3>PDF Compression — How It Works</h3>
+            <p>PDFs are rendered page-by-page into images using PDF.js, then recompressed as JPEG at the quality needed to hit your target, and finally packaged back into a PDF. This achieves genuine size reduction unlike metadata-only approaches.</p>
+        </article>
+    </main>
+</div>
 
-                <h4>2. Precise Target Dimension Control</h4>
-                <p>Most basic reduction tools force you onto static percentages like "Reduce by 50%". Our dynamic compression platform lets you type the absolute target requirement required by web application systems (such as keeping a passport photo strictly under 50 KB).</p>
+<script>
+// ── PDF.js worker (CDN) ──────────────────────────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-                <h4>3. Multi-Format Universal Integration</h4>
-                <p>You no longer need separate applications for shrinking portable document formats and photo layouts. Our workspace manages modern extensions seamlessly in one clean tab, avoiding messy tool switching fatigue.</p>
-                
-                <h4>4. Accelerated Page Load Optimization for SEO Growth</h4>
-                <p>If you are a web webmaster or application engineer, pushing bloated media assets to production damages Core Web Vitals scores. Compressing heavy assets down to size ensures snappy rendering loops, minimized bandwidth drain, and superior search rankings on Google.</p>
-            </article>
-        </main>
-    </div>
+// ── Elements ─────────────────────────────────────────────────────────────────
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const fileInfo    = document.getElementById('fileInfo');
+const fileName    = document.getElementById('fileName');
+const fileType    = document.getElementById('fileType');
+const currentSize = document.getElementById('currentSize');
+const controlBox  = document.getElementById('controlBox');
+const compressBtn = document.getElementById('compressBtn');
+const progressWrap= document.getElementById('progressWrap');
+const progressText= document.getElementById('progressText');
+const progressFill= document.getElementById('progressFill');
+const resultBox   = document.getElementById('resultBox');
+const resultTitle = document.getElementById('resultTitle');
+const szOld       = document.getElementById('szOld');
+const szNew       = document.getElementById('szNew');
+const dlLink      = document.getElementById('dlLink');
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const dropZone = document.getElementById('dropZone');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileNameEl = document.getElementById('fileName');
-        const fileTypeEl = document.getElementById('fileType');
-        const currentSizeEl = document.getElementById('currentSize');
-        const controlBox = document.getElementById('controlBox');
-        const compressBtn = document.getElementById('compressBtn');
-        const statusMessage = document.getElementById('statusMessage');
-        const downloadArea = document.getElementById('downloadArea');
-        const downloadLink = document.getElementById('downloadLink');
-        const newSizeEl = document.getElementById('newSize');
+let selectedFile = null;
 
-        let selectedFile = null;
+// ── Drag & Drop ───────────────────────────────────────────────────────────────
+['dragenter','dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
+['dragleave','drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
+dropZone.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value=''; });
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.style.background = '#ede9fe'; }, false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.style.background = '#f5f3ff'; }, false);
-        });
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if(files.length) handleFile(files[0]);
-        });
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' Bytes';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+}
 
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files.length) handleFile(e.target.files[0]);
-        });
+function setProgress(pct, label) {
+    progressFill.style.width = pct + '%';
+    progressText.textContent = label;
+}
 
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+function showResult(blob, origSize, filename, reached) {
+    progressWrap.style.display = 'none';
+    compressBtn.disabled = false;
+
+    const url = URL.createObjectURL(blob);
+    dlLink.href = url;
+    dlLink.download = filename;
+    szOld.textContent = fmt(origSize);
+    szNew.textContent = fmt(blob.size);
+
+    resultBox.className = 'result-box ' + (reached ? 'ok' : 'warn');
+    resultTitle.textContent = reached
+        ? '✅ Compressed successfully!'
+        : '⚠️ Best possible compression applied (target not fully reached)';
+    resultBox.style.display = 'block';
+}
+
+// ── File picked ───────────────────────────────────────────────────────────────
+function handleFile(file) {
+    selectedFile = file;
+    fileName.textContent    = file.name;
+    fileType.textContent    = file.type || 'Unknown';
+    currentSize.textContent = fmt(file.size);
+    fileInfo.style.display  = 'block';
+    controlBox.style.display= 'grid';
+    resultBox.style.display = 'none';
+    progressWrap.style.display = 'none';
+}
+
+// ── Compress button ───────────────────────────────────────────────────────────
+compressBtn.addEventListener('click', async () => {
+    const val  = parseFloat(document.getElementById('targetSize').value);
+    const unit = document.getElementById('sizeUnit').value;
+    if (!val || val <= 0) { alert('Please enter a valid target size.'); return; }
+
+    let targetBytes = val * 1024;
+    if (unit === 'MB') targetBytes *= 1024;
+
+    if (targetBytes >= selectedFile.size) {
+        alert('Target size is already equal to or larger than the current file. No compression needed!');
+        return;
+    }
+
+    compressBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    resultBox.style.display    = 'none';
+    setProgress(5, 'Starting…');
+
+    try {
+        if (selectedFile.type === 'application/pdf') {
+            await compressPDF(selectedFile, targetBytes);
+        } else if (selectedFile.type.startsWith('image/')) {
+            await compressImage(selectedFile, targetBytes);
+        } else {
+            alert('Unsupported file type.'); compressBtn.disabled = false;
+            progressWrap.style.display = 'none';
         }
+    } catch (err) {
+        console.error(err);
+        alert('Error: ' + err.message);
+        compressBtn.disabled = false;
+        progressWrap.style.display = 'none';
+    }
+});
 
-        function handleFile(file) {
-            selectedFile = file;
-            fileNameEl.textContent = file.name;
-            fileTypeEl.textContent = file.type || 'Unknown';
-            currentSizeEl.textContent = formatBytes(file.size);
-            
-            fileInfo.style.display = 'block';
-            controlBox.style.display = 'grid';
-            downloadArea.style.display = 'none';
-            statusMessage.style.display = 'none';
-        }
+// ═══════════════════════════════════════════════════════════════════════════════
+// IMAGE COMPRESSION
+// Binary-search on JPEG quality at full resolution; only shrink dimensions
+// if quality alone can't reach the target.
+// ═══════════════════════════════════════════════════════════════════════════════
+function dataURItoBlob(dataURI) {
+    const [head, data] = dataURI.split(',');
+    const mime = head.match(/:(.*?);/)[1];
+    const raw  = atob(data);
+    const buf  = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return new Blob([buf], { type: mime });
+}
 
-        compressBtn.addEventListener('click', async () => {
-            const targetSizeVal = parseFloat(document.getElementById('targetSize').value);
-            const unit = document.getElementById('sizeUnit').value;
+function compressImage(file, targetBytes) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Cannot read file'));
+        reader.onload  = e => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Cannot load image'));
+            img.onload  = () => {
+                setProgress(20, 'Analyzing image…');
+                const canvas = document.createElement('canvas');
+                const ctx    = canvas.getContext('2d');
+                const origW  = img.width, origH = img.height;
 
-            if (!targetSizeVal || targetSizeVal <= 0) {
-                alert('Please enter a valid target size.');
-                return;
-            }
+                let best = null, reached = false;
 
-            let targetBytes = targetSizeVal * 1024;
-            if (unit === 'MB') targetBytes *= 1024;
-
-            if (targetBytes >= selectedFile.size) {
-                alert('Target size is already larger than or equal to current file size. No compression needed!');
-                return;
-            }
-
-            statusMessage.style.display = 'block';
-            downloadArea.style.display = 'none';
-
-            try {
-                if (selectedFile.type === 'application/pdf') {
-                    await compressPDF(selectedFile, targetBytes);
-                } else if (selectedFile.type.startsWith('image/')) {
-                    await compressImage(selectedFile, targetBytes);
-                } else {
-                    alert('Unsupported file format chosen.');
-                    statusMessage.style.display = 'none';
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Error occurred while trying to process this file.');
-                statusMessage.style.display = 'none';
-            }
-        });
-
-        function compressImage(file, targetBytes) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function (event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function () {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    let ratio = Math.sqrt(targetBytes / file.size);
-                    if (ratio > 0.9) ratio = 0.9;
-
-                    canvas.width = width * ratio;
-                    canvas.height = height * ratio;
-
-                    const ctx = canvas.getContext('2d');
+                for (let scale = 1.0; scale >= 0.05; scale -= 0.05) {
+                    canvas.width  = Math.max(1, Math.round(origW * scale));
+                    canvas.height = Math.max(1, Math.round(origH * scale));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    let quality = 0.85;
-                    let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                    let resultBlob = dataURItoBlob(dataUrl);
-
-                    while (resultBlob.size > targetBytes && quality > 0.1) {
-                        quality -= 0.05;
-                        dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        resultBlob = dataURItoBlob(dataUrl);
+                    // Binary search on quality
+                    let lo = 0.01, hi = 0.95, found = null;
+                    for (let i = 0; i < 20; i++) {
+                        const mid  = (lo + hi) / 2;
+                        const blob = dataURItoBlob(canvas.toDataURL('image/jpeg', mid));
+                        if (blob.size <= targetBytes) { found = blob; lo = mid; }
+                        else hi = mid;
+                        if (hi - lo < 0.003) break;
                     }
+                    if (found) { best = found; reached = true; break; }
 
-                    setupDownload(resultBlob, file.name.substring(0, file.name.lastIndexOf('.')) + '_compressed.jpg');
-                };
-            };
-        }
+                    // Keep smallest achieved so far
+                    const probe = dataURItoBlob(canvas.toDataURL('image/jpeg', 0.01));
+                    if (!best || probe.size < best.size) best = probe;
 
-        // IMPROVED: High-efficiency dynamic PDF content downscaling loop
-        async function compressPDF(file, targetBytes) {
-            const fileArrayBuffer = await file.arrayBuffer();
-            let pdfDoc = await PDFLib.PDFDocument.load(fileArrayBuffer);
-            
-            // Step 1: Meta structural pruning
-            pdfDoc.setTitle('');
-            pdfDoc.setAuthor('');
-            pdfDoc.setSubject('');
-            pdfDoc.setKeywords([]);
-            pdfDoc.setProducer('');
-            pdfDoc.setCreator('');
-
-            let pdfBytes = await pdfDoc.save({ useObjectStreams: true });
-            let resultBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-
-            // Step 2: Adaptive Compression fallback if structural pruning is insufficient
-            if (resultBlob.size > targetBytes) {
-                const pages = pdfDoc.getPages();
-                const totalPages = pages.length;
-                
-                // Initialize downscaled structural document
-                const compressedPdfDoc = await PDFLib.PDFDocument.create();
-                
-                // Target compression factor ratio allocation per page matrix
-                let scaleFactor = Math.min(0.7, Math.sqrt(targetBytes / resultBlob.size));
-                
-                for (let i = 0; i < totalPages; i++) {
-                    const currentPage = pages[i];
-                    const { width, height } = currentPage.getSize();
-                    
-                    // Create an auxiliary workflow simulation to scale elements dynamically
-                    const embeddedPage = await compressedPdfDoc.embedPage(currentPage);
-                    const newPage = compressedPdfDoc.addPage([width * scaleFactor, height * scaleFactor]);
-                    
-                    newPage.drawPage(embeddedPage, {
-                        x: 0,
-                        y: 0,
-                        width: width * scaleFactor,
-                        height: height * scaleFactor,
-                    });
+                    setProgress(20 + Math.round((1 - scale) * 60), `Trying ${(scale * 100).toFixed(0)}% size…`);
                 }
-                
-                pdfBytes = await compressedPdfDoc.save({ useObjectStreams: true });
-                resultBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-            }
-            
-            setupDownload(resultBlob, file.name.substring(0, file.name.lastIndexOf('.')) + '_compressed.pdf');
+
+                setProgress(95, 'Saving…');
+                const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
+                showResult(best, file.size, outName, reached);
+                resolve();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PDF COMPRESSION  — TRUE approach using PDF.js
+//
+// How it works:
+//   1. Load PDF with PDF.js (same engine as Chrome's built-in viewer)
+//   2. Render each page to a canvas at a chosen DPI
+//   3. Convert canvas → JPEG with binary-searched quality
+//   4. Embed each JPEG into a new PDF using pdf-lib
+//
+// This is the only browser-side method that achieves real byte reduction
+// because it re-rasterises and re-encodes the page content.
+// ═══════════════════════════════════════════════════════════════════════════════
+async function compressPDF(file, targetBytes) {
+    setProgress(8, 'Loading PDF…');
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfJS       = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages    = pdfJS.numPages;
+
+    setProgress(15, `Loaded ${numPages} page(s). Rendering…`);
+
+    // We'll try several quality levels to binary-search toward the target.
+    // Each attempt renders all pages and builds a full PDF blob.
+    // To avoid re-rendering on every quality tweak, we render once per scale
+    // and binary-search quality on the JPEG step.
+
+    // Scale = pixels per CSS px at 1× zoom; start at 1.5 (≈108 ppi), go down.
+    const scales = [2.0, 1.5, 1.2, 1.0, 0.8, 0.6, 0.5, 0.4, 0.3];
+
+    let bestBlob = null, reached = false;
+
+    outerLoop:
+    for (let si = 0; si < scales.length; si++) {
+        const scale = scales[si];
+        setProgress(15 + si * 8, `Rendering pages at scale ${scale}…`);
+
+        // Render all pages to canvases
+        const pageCanvases = [];
+        for (let p = 1; p <= numPages; p++) {
+            const page     = await pdfJS.getPage(p);
+            const viewport = page.getViewport({ scale });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = Math.round(viewport.width);
+            canvas.height  = Math.round(viewport.height);
+            const ctx      = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            pageCanvases.push(canvas);
         }
 
-        function dataURItoBlob(dataURI) {
-            const byteString = atob(dataURI.split(',')[1]);
-            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            return new Blob([ab], {type: mimeString});
+        // Binary-search JPEG quality to hit targetBytes
+        let lo = 0.01, hi = 0.95, foundBlob = null;
+        for (let iter = 0; iter < 18; iter++) {
+            const mid     = (lo + hi) / 2;
+            const blob    = await buildPdfFromCanvases(pageCanvases, mid);
+
+            if (blob.size <= targetBytes) { foundBlob = blob; lo = mid; }
+            else hi = mid;
+            if (hi - lo < 0.004) break;
         }
 
-        function setupDownload(blob, outputFilename) {
-            statusMessage.style.display = 'none';
-            newSizeEl.textContent = formatBytes(blob.size);
-            
-            const url = URL.createObjectURL(blob);
-            downloadLink.href = url;
-            downloadLink.download = outputFilename;
-            downloadArea.style.display = 'block';
+        if (foundBlob) {
+            bestBlob = foundBlob; reached = true; break outerLoop;
         }
-    </script>
+
+        // Keep smallest so far (lowest quality at this scale)
+        const probe = await buildPdfFromCanvases(pageCanvases, 0.01);
+        if (!bestBlob || probe.size < bestBlob.size) bestBlob = probe;
+    }
+
+    setProgress(97, 'Saving PDF…');
+    const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
+    showResult(bestBlob, file.size, outName, reached);
+}
+
+// Build a PDF blob from an array of canvases at given JPEG quality
+async function buildPdfFromCanvases(canvases, quality) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    for (const canvas of canvases) {
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+        const jpegBytes   = base64ToBytes(jpegDataUrl.split(',')[1]);
+        const jpegImage   = await pdfDoc.embedJpg(jpegBytes);
+        const page        = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
+        page.drawImage(jpegImage, { x: 0, y: 0, width: jpegImage.width, height: jpegImage.height });
+    }
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    return new Blob([bytes], { type: 'application/pdf' });
+}
+
+function base64ToBytes(b64) {
+    const raw = atob(b64);
+    const buf = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return buf;
+}
+</script>
 </body>
 </html>
