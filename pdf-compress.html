@@ -3,501 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexPDF - Premium PDF Workspace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <title>Ultimate File Compressor | Compress PDF, JPG, PNG & Images Online</title>
+    <meta name="description" content="Free online tool to compress PDF, JPG, PNG, and other image formats to your desired size in KB or MB.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- PDF.js: renders PDF pages to canvas (real compression possible) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- pdf-lib: creates new PDF from images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --green: #10b981;
+            --red: #e11d48;
+            --amber: #f59e0b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 860px; margin: 36px auto; }
+
+        header { text-align: center; margin-bottom: 36px; }
+        header h1 { font-size: 2rem; color: var(--primary); margin-bottom: 8px; }
+        header p { color: var(--muted); font-size: 1rem; }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.07);
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        /* Upload */
+        .drop-zone {
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 38px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f3ff;
+            transition: background .25s;
+        }
+        .drop-zone:hover, .drop-zone.over { background: #ede9fe; }
+        .drop-zone svg { display: block; margin: 0 auto 10px; }
+        .drop-zone p { font-weight: 500; }
+        .drop-zone small { color: var(--muted); font-size: .8rem; }
+        #fileInput { display: none; }
+
+        /* File info */
+        .file-info {
+            display: none;
+            margin-top: 18px;
+            padding: 13px 15px;
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            font-size: .9rem;
+        }
+        .file-info p { margin-bottom: 3px; }
+        .file-info strong { color: var(--text); }
+
+        /* Controls */
+        .controls {
+            display: none;
+            margin-top: 18px;
+            align-items: flex-end;
+            gap: 12px;
+            grid-template-columns: 1fr auto;
+        }
+        label.ctrl-label { display: block; font-weight: 600; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+        .size-inputs { display: flex; gap: 8px; }
+        input[type=number], select {
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .97rem;
+            outline: none;
+            background: var(--card);
+            transition: border-color .2s;
+        }
+        input[type=number]:focus, select:focus { border-color: var(--primary); }
+        input[type=number] { flex: 1; }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: .97rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            white-space: nowrap;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+        /* Progress */
+        .progress-wrap { display: none; margin-top: 18px; }
+        .progress-text { font-size: .83rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+        .progress-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; width: 0; transition: width .3s ease; }
+
+        /* Result */
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+        .result-box.ok  { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .result-box.warn{ background: #fffbeb; border: 1px solid #fcd34d; }
+        .result-box h3 { font-size: 1rem; margin-bottom: 10px; }
+        .result-box.ok   h3 { color: var(--green); }
+        .result-box.warn h3 { color: var(--amber); }
+
+        .size-row { display: flex; align-items: center; gap: 14px; font-size: .9rem; margin-bottom: 14px; flex-wrap: wrap; }
+        .sz-old { color: var(--red); text-decoration: line-through; }
+        .sz-arrow { color: var(--muted); }
+        .sz-new { color: var(--green); font-weight: 700; font-size: 1.05rem; }
+
+        .btn-dl {
+            display: inline-block;
+            background: var(--green);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 26px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: .93rem;
+            transition: opacity .2s;
+        }
+        .btn-dl:hover { opacity: .88; }
+
+        /* SEO */
+        .seo { background: var(--card); border-radius: 16px; padding: 36px; border: 1px solid var(--border); }
+        .seo h2 { font-size: 1.6rem; margin-bottom: 10px; }
+        .seo h3 { font-size: 1.1rem; color: var(--primary); margin: 20px 0 8px; }
+        .seo p, .seo li { color: var(--muted); font-size: .95rem; margin-bottom: 8px; }
+        .seo ul { margin-left: 18px; }
+
+        @media(max-width:580px){
+            .controls { grid-template-columns: 1fr; }
+            .btn-primary { width: 100%; }
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen text-gray-800">
+<body>
+<div class="container">
+    <header>
+        <h1>Smart All-In-One File Compressor</h1>
+        <p>Compress PDFs, JPGs, PNGs, and WEBP images to your exact target size — all inside your browser.</p>
+    </header>
 
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showDashboard()">
-                <div class="bg-red-500 text-white p-2 rounded-lg shadow-md shadow-red-200">
-                    <i class="fa-solid fa-file-pdf text-xl"></i>
-                </div>
-                <span class="text-xl font-bold tracking-tight bg-gradient-to-r reduction from-red-600 to-orange-500 bg-clip-text text-transparent">NexPDF Studio</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="text-xs font-semibold px-2.5 py-1 bg-green-100 text-green-700 rounded-full">All Tools Active</span>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        <div id="dashboard-view">
-            <div class="text-center mb-10">
-                <h1 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">Every PDF tool you need, at your fingertips</h1>
-                <p class="mt-3 text-lg text-gray-500">100% secure client-side processing. Your files never leave your device.</p>
+    <main>
+        <div class="card">
+            <!-- Upload -->
+            <div class="drop-zone" id="dropZone" onclick="fileInput.click()">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & Drop your file here or <span style="color:var(--primary);font-weight:700;">Browse</span></p>
+                <small>Supports: PDF, JPG, JPEG, PNG, WEBP</small>
+                <input type="file" id="fileInput" accept="image/*,application/pdf">
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="tools-grid">
-                </div>
-        </div>
-
-        <div id="workspace-view" class="hidden">
-            <button onclick="showDashboard()" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-500 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-            </button>
-            
-            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 flex items-center gap-4 bg-gradient-to-r from-gray-50 to-white" id="tool-header">
-                    </div>
-                
-                <div class="p-8" id="tool-body">
-                    </div>
+            <!-- File info -->
+            <div class="file-info" id="fileInfo">
+                <p><strong>Name:</strong> <span id="fileName"></span></p>
+                <p><strong>Type:</strong> <span id="fileType"></span></p>
+                <p><strong>Current Size:</strong> <span id="currentSize" style="color:var(--red);font-weight:600;"></span></p>
             </div>
-        </div>
 
-    </main>
-
-    <div id="processing-loader" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden flex-col items-center justify-content justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm text-center">
-            <div class="animate-spin rounded-full h-14 w-14 border-4 border-red-500 border-t-transparent mb-4"></div>
-            <h3 class="text-lg font-bold text-gray-900" id="loader-title">Processing File...</h3>
-            <p class="text-sm text-gray-500 mt-1">Please wait while our engine manages your document layout flawlessly.</p>
-        </div>
-    </div>
-
-    <script>
-        // Comprehensive Tool Schema representing all 30 applications from the image
-        const toolsData = [
-            // Row 1
-            { id: "merge", title: "Merge PDF", icon: "fa-layer-group", color: "from-orange-500 to-red-500", desc: "Combine PDFs in the order you want with the easiest PDF merger available.", type: "core" },
-            { id: "split", title: "Split PDF", icon: "fa-scissors", color: "from-red-500 to-pink-500", desc: "Separate one page or a whole set for easy conversion into independent PDF files.", type: "core" },
-            { id: "compress", title: "Compress PDF", icon: "fa-compress", color: "from-green-500 to-teal-500", desc: "Reduce file size while optimizing for maximal PDF quality.", type: "interactive" },
-            { id: "pdf-to-word", title: "PDF to Word", icon: "fa-file-word", color: "from-blue-500 to-indigo-500", desc: "Easily convert your PDF files into easy to edit DOC and DOCX documents.", type: "interactive" },
-            { id: "pdf-to-ppt", title: "PDF to PowerPoint", icon: "fa-file-powerpoint", color: "from-orange-600 to-amber-500", desc: "Turn your PDF files into easy to edit PPT and PPTX slideshows.", type: "interactive" },
-            { id: "pdf-to-excel", title: "PDF to Excel", icon: "fa-file-excel", color: "from-emerald-600 to-green-500", desc: "Pull data straight from PDFs into Excel spreadsheets in a few short seconds.", type: "interactive" },
-            
-            // Row 2
-            { id: "word-to-pdf", title: "Word to PDF", icon: "fa-file-pdf", color: "from-blue-600 to-blue-400", desc: "Make DOC and DOCX files easy to read by converting them to PDF.", type: "interactive" },
-            { id: "ppt-to-pdf", title: "PowerPoint to PDF", icon: "fa-file-pdf", color: "from-orange-500 to-red-400", desc: "Make PPT and PPTX slideshows easy to view by converting them to PDF.", type: "interactive" },
-            { id: "excel-to-pdf", title: "Excel to PDF", icon: "fa-file-pdf", color: "from-green-600 to-green-400", desc: "Make EXCEL spreadsheets easy to read by converting them to PDF.", type: "interactive" },
-            { id: "edit-pdf", title: "Edit PDF", icon: "fa-pen-to-square", color: "from-purple-500 to-indigo-500", desc: "Add text, images, shapes or freehand annotations to a PDF document.", type: "interactive" },
-            { id: "pdf-to-jpg", title: "PDF to JPG", icon: "fa-image", color: "from-yellow-500 to-amber-500", desc: "Convert each PDF page into a JPG or extract all images contained in a PDF.", type: "interactive" },
-            { id: "jpg-to-pdf", title: "JPG to PDF", icon: "fa-file-image", color: "from-amber-500 to-orange-500", desc: "Convert JPG images to PDF in seconds. Easily adjust orientation and margins.", type: "core" },
-            
-            // Row 3
-            { id: "sign-pdf", title: "Sign PDF", icon: "fa-signature", color: "from-blue-500 to-cyan-500", desc: "Sign yourself or request electronic signatures from others smoothly.", type: "interactive" },
-            { id: "watermark", title: "Watermark", icon: "fa-stamp", color: "from-pink-500 to-rose-500", desc: "Stamp an image or text over your PDF in seconds. Choose typography & position.", type: "interactive" },
-            { id: "rotate-pdf", title: "Rotate PDF", icon: "fa-rotate", color: "from-purple-500 to-pink-500", desc: "Rotate your PDFs the way you need them. Rotate multiple PDFs at once!", type: "core" },
-            { id: "html-to-pdf", title: "HTML to PDF", icon: "fa-code", color: "from-yellow-600 to-amber-500", desc: "Convert webpages in HTML to PDF. Copy and paste the URL of the page you want.", type: "interactive" },
-            { id: "unlock-pdf", title: "Unlock PDF", icon: "fa-lock-open", color: "from-red-600 to-red-400", desc: "Remove PDF password security, giving you the freedom to use your PDFs.", type: "interactive" },
-            { id: "protect-pdf", title: "Protect PDF", icon: "fa-lock", color: "from-slate-700 to-slate-900", desc: "Protect PDF files with a password. Encrypt PDF documents to prevent access.", type: "interactive" },
-            
-            // Row 4
-            { id: "organize-pdf", title: "Organize PDF", icon: "fa-folder-tree", color: "from-orange-500 to-red-500", desc: "Sort pages of your PDF file however you like. Delete or add pages.", type: "interactive" },
-            { id: "pdf-to-pdfa", title: "PDF to PDF/A", icon: "fa-shield-halved", color: "from-blue-700 to-indigo-600", desc: "Transform your PDF to PDF/A, the ISO-standardized version for long archiving.", type: "interactive" },
-            { id: "repair-pdf", title: "Repair PDF", icon: "fa-wrench", color: "from-lime-600 to-green-600", desc: "Repair a damaged PDF and recover data from corrupt PDF. Fix files quickly.", type: "interactive" },
-            { id: "page-numbers", title: "Page Numbers", icon: "fa-list-ol", color: "from-purple-600 to-indigo-500", desc: "Add page numbers into PDFs with ease. Choose positions, typography.", type: "interactive" },
-            { id: "scan-to-pdf", title: "Scan to PDF", icon: "fa-scanner-touchscreen", color: "from-red-500 to-orange-500", desc: "Capture document scans from your mobile device or webcam instantly.", type: "interactive" },
-            { id: "ocr-pdf", title: "OCR PDF", icon: "fa-eye", color: "from-green-600 to-teal-500", desc: "Easily convert scanned PDF into searchable and selectable text documents.", type: "interactive" },
-            
-            // Row 5
-            { id: "compare-pdf", title: "Compare PDF", icon: "fa-not-equal", color: "from-indigo-600 to-blue-500", desc: "Show a side-by-side document comparison and easily spot changes.", type: "interactive" },
-            { id: "redact-pdf", title: "Redact PDF", icon: "fa-rectangle-xmark", color: "from-red-700 to-slate-800", desc: "Redact text and graphics to permanently remove sensitive information.", type: "interactive" },
-            { id: "crop-pdf", title: "Crop PDF", icon: "fa-crop-simple", color: "from-fuchsia-600 to-pink-500", desc: "Crop margins of PDF documents or select specific areas with precision.", type: "interactive" },
-            { id: "pdf-forms", title: "PDF Forms", icon: "fa-wpforms", color: "from-purple-600 to-pink-500", desc: "Detect form fields automatically, create interactive fillable PDFs easily.", tag: "New!", type: "interactive" },
-            { id: "ai-summarizer", title: "AI Summarizer", icon: "fa-brain", color: "from-indigo-500 to-purple-600", desc: "Quickly generate concise summaries from articles, paragraphs, and essays via AI.", tag: "New!", type: "interactive" },
-            { id: "translate-pdf", title: "Translate PDF", icon: "fa-language", color: "from-violet-600 to-blue-600", desc: "Easily translate PDF files powered by AI. Keep fonts, layout and formatting intact.", tag: "New!", type: "interactive" }
-        ];
-
-        // Bootstrapping Application Dashboard
-        window.addEventListener('DOMContentLoaded', () => {
-            const grid = document.getElementById('tools-grid');
-            toolsData.forEach(tool => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-2xl border border-gray-100 hover:border-transparent shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden";
-                card.onclick = () => launchWorkspace(tool.id);
-                
-                let tagMarkup = tool.tag ? `<span class="absolute top-3 right-3 bg-blue-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">${tool.tag}</span>` : '';
-                
-                card.innerHTML = `
-                    ${tagMarkup}
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} text-white flex items-center justify-center shadow-md mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid ${tool.icon} text-lg"></i>
-                        </div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-red-500 transition-colors">${tool.title}</h3>
-                        <p class="text-xs text-gray-500 mt-2 line-clamp-3 leading-relaxed">${tool.desc}</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between text-xs font-semibold text-gray-400 group-hover:text-red-500 transition-colors">
-                        <span>Launch Tool</span>
-                        <i class="fa-solid fa-chevron-right transform group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        });
-
-        function showDashboard() {
-            document.getElementById('workspace-view').classList.add('hidden');
-            document.getElementById('dashboard-view').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Toggle Loader UI
-        function toggleLoader(show, text = "Processing File...") {
-            const loader = document.getElementById('processing-loader');
-            document.getElementById('loader-title').innerText = text;
-            if(show) loader.classList.remove('hidden'); else loader.classList.add('hidden');
-        }
-
-        // Launcher Orchestrator for dynamic workspaces
-        function launchWorkspace(toolId) {
-            const tool = toolsData.find(t => t.id === toolId);
-            if(!tool) return;
-
-            document.getElementById('dashboard-view').classList.add('hidden');
-            document.getElementById('workspace-view').classList.remove('hidden');
-            
-            // Render Tool Header
-            const header = document.getElementById('tool-header');
-            header.innerHTML = `
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-br ${tool.color} text-white flex items-center justify-center shadow-md">
-                    <i class="fa-solid ${tool.icon} text-2xl"></i>
-                </div>
+            <!-- Controls -->
+            <div class="controls" id="controlBox">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">${tool.title}</h2>
-                    <p class="text-xs text-gray-500 mt-0.5">${tool.desc}</p>
-                </div>
-            `;
-
-            // Build Sandbox Workspace Structure based on Tool Abilities
-            const body = document.getElementById('tool-body');
-            body.innerHTML = getWorkspaceHTML(tool);
-        }
-
-        // Templates Generator for all utilities
-        function getWorkspaceHTML(tool) {
-            // Base Drag and Drop Container
-            let dropzone = (multiple, accept) => `
-                <div class="border-3 border-dashed border-gray-200 hover:border-red-400 rounded-2xl p-10 text-center bg-gray-50/50 cursor-pointer transition-colors group relative" id="dropzone-container">
-                    <input type="file" id="file-input" class="absolute inset-0 opacity-0 cursor-pointer" ${multiple ? 'multiple' : ''} accept="${accept}" onchange="handleFileSelection('${tool.id}')">
-                    <div class="flex flex-col items-center">
-                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-400 group-hover:text-red-500 mb-4 transition-colors">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
-                        </div>
-                        <p class="text-sm font-semibold text-gray-700">Drag & drop your files here</p>
-                        <p class="text-xs text-gray-400 mt-1">or click to browse local storage</p>
+                    <label class="ctrl-label" for="targetSize">Target Size:</label>
+                    <div class="size-inputs">
+                        <input type="number" id="targetSize" placeholder="e.g. 40" min="1" step="any">
+                        <select id="sizeUnit">
+                            <option value="KB">KB</option>
+                            <option value="MB">MB</option>
+                        </select>
                     </div>
                 </div>
-                <div id="file-status-list" class="mt-4 space-y-2"></div>
-            `;
+                <button class="btn-primary" id="compressBtn">Compress File</button>
+            </div>
 
-            switch(tool.id) {
-                case "merge":
-                    return `
-                        <div class="max-w-xl mx-auto space-y-6">
-                            ${dropzone(true, '.pdf')}
-                            <button onclick="executeMerge()" id="process-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                <i class="fa-solid fa-layer-group"></i> Merge Documents
-                            </button>
-                        </div>
-                    `;
-                case "split":
-                    return `
-                        <div class="max-w-xl mx-auto space-y-6">
-                            ${dropzone(false, '.pdf')}
-                            <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">From Page</label>
-                                    <input type="number" id="split-from" value="1" min="1" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-500">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">To Page</label>
-                                    <input type="number" id="split-to" value="2" min="1" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-500">
-                                </div>
-                            </div>
-                            <button onclick="executeSplit()" id="process-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                <i class="fa-solid fa-scissors"></i> Extract & Split Pages
-                            </button>
-                        </div>
-                    `;
-                case "rotate-pdf":
-                    return `
-                        <div class="max-w-xl mx-auto space-y-6">
-                            ${dropzone(false, '.pdf')}
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Select Rotation Angle</label>
-                                <div class="grid grid-cols-3 gap-3">
-                                    <button onclick="setRotation(90)" class="rot-angle-btn bg-white border-2 border-red-500 text-red-500 font-semibold py-2 px-4 rounded-xl text-sm transition-all" data-deg="90">90° Right</button>
-                                    <button onclick="setRotation(180)" class="rot-angle-btn bg-white border border-gray-200 hover:border-gray-300 font-semibold py-2 px-4 rounded-xl text-sm transition-all" data-deg="180">180° Flip</button>
-                                    <button onclick="setRotation(270)" class="rot-angle-btn bg-white border border-gray-200 hover:border-gray-300 font-semibold py-2 px-4 rounded-xl text-sm transition-all" data-deg="270">90° Left</button>
-                                </div>
-                            </div>
-                            <button onclick="executeRotate()" id="process-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                <i class="fa-solid fa-rotate"></i> Rotate Document
-                            </button>
-                        </div>
-                    `;
-                case "jpg-to-pdf":
-                    return `
-                        <div class="max-w-xl mx-auto space-y-6">
-                            ${dropzone(true, 'image/jpeg, image/png')}
-                            <button onclick="executeJpgToPdf()" id="process-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                <i class="fa-solid fa-file-pdf"></i> Compile Images to PDF
-                            </button>
-                        </div>
-                    `;
-                case "ai-summarizer":
-                    return `
-                        <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                ${dropzone(false, '.pdf')}
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Summary Length</label>
-                                    <select id="summary-depth" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500">
-                                        <option value="short">Short Executive Bulletpoints</option>
-                                        <option value="detailed">Comprehensive Deep-Dive Narrative</option>
-                                    </select>
-                                </div>
-                                <button onclick="simulateAISummary()" id="process-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                    <i class="fa-solid fa-brain"></i> Generate AI Summary
-                                </button>
-                            </div>
-                            <div class="bg-slate-900 text-slate-100 p-6 rounded-2xl flex flex-col justify-between min-h-[300px]">
-                                <div>
-                                    <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">
-                                        <i class="fa-solid fa-terminal"></i> AI Output Terminal
-                                    </div>
-                                    <div id="ai-output-text" class="text-sm leading-relaxed text-slate-300 italic">Upload a document and hit generate to trigger engine processing.</div>
-                                </div>
-                                <div class="text-[10px] text-slate-500 border-t border-slate-800 pt-3 flex justify-between">
-                                    <span>LLM: DeepSeek-R1 Supercharged</span>
-                                    <span>Status: Idle</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                default:
-                    // Unified Premium Simulation Interface for advanced workflows
-                    return `
-                        <div class="max-w-xl mx-auto space-y-6">
-                            ${dropzone(false, '*')}
-                            <button onclick="simulateUniversalEngine('${tool.title}')" id="process-btn" class="w-full bg-gradient-to-r ${tool.color} text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" disabled>
-                                Process ${tool.title} Workflow
-                            </button>
-                        </div>
-                    `;
-            }
+            <!-- Progress -->
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-text" id="progressText">Processing…</div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-box" id="resultBox">
+                <h3 id="resultTitle"></h3>
+                <div class="size-row">
+                    <span class="sz-old" id="szOld"></span>
+                    <span class="sz-arrow">→</span>
+                    <span class="sz-new" id="szNew"></span>
+                </div>
+                <a href="#" class="btn-dl" id="dlLink" download>⬇ Download Compressed File</a>
+            </div>
+        </div>
+
+        <article class="seo">
+            <h2>How to Compress Files Online</h2>
+            <p>Upload your file, enter a target size in KB or MB, and click Compress. The tool works entirely in your browser — no file is uploaded to any server.</p>
+            <h3>Steps</h3>
+            <ul>
+                <li>Drop or browse your PDF or image file.</li>
+                <li>Enter your target size (e.g. 40 KB).</li>
+                <li>Click Compress and download the result.</li>
+            </ul>
+            <h3>PDF Compression — How It Works</h3>
+            <p>PDFs are rendered page-by-page into images using PDF.js, then recompressed as JPEG at the quality needed to hit your target, and finally packaged back into a PDF. This achieves genuine size reduction unlike metadata-only approaches.</p>
+        </article>
+    </main>
+</div>
+
+<script>
+// ── PDF.js worker (CDN) ──────────────────────────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ── Elements ─────────────────────────────────────────────────────────────────
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const fileInfo    = document.getElementById('fileInfo');
+const fileName    = document.getElementById('fileName');
+const fileType    = document.getElementById('fileType');
+const currentSize = document.getElementById('currentSize');
+const controlBox  = document.getElementById('controlBox');
+const compressBtn = document.getElementById('compressBtn');
+const progressWrap= document.getElementById('progressWrap');
+const progressText= document.getElementById('progressText');
+const progressFill= document.getElementById('progressFill');
+const resultBox   = document.getElementById('resultBox');
+const resultTitle = document.getElementById('resultTitle');
+const szOld       = document.getElementById('szOld');
+const szNew       = document.getElementById('szNew');
+const dlLink      = document.getElementById('dlLink');
+
+let selectedFile = null;
+
+// ── Drag & Drop ───────────────────────────────────────────────────────────────
+['dragenter','dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
+['dragleave','drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
+dropZone.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value=''; });
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' Bytes';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+function setProgress(pct, label) {
+    progressFill.style.width = pct + '%';
+    progressText.textContent = label;
+}
+
+function showResult(blob, origSize, filename, reached) {
+    progressWrap.style.display = 'none';
+    compressBtn.disabled = false;
+
+    const url = URL.createObjectURL(blob);
+    dlLink.href = url;
+    dlLink.download = filename;
+    szOld.textContent = fmt(origSize);
+    szNew.textContent = fmt(blob.size);
+
+    resultBox.className = 'result-box ' + (reached ? 'ok' : 'warn');
+    resultTitle.textContent = reached
+        ? '✅ Compressed successfully!'
+        : '⚠️ Best possible compression applied (target not fully reached)';
+    resultBox.style.display = 'block';
+}
+
+// ── File picked ───────────────────────────────────────────────────────────────
+function handleFile(file) {
+    selectedFile = file;
+    fileName.textContent    = file.name;
+    fileType.textContent    = file.type || 'Unknown';
+    currentSize.textContent = fmt(file.size);
+    fileInfo.style.display  = 'block';
+    controlBox.style.display= 'grid';
+    resultBox.style.display = 'none';
+    progressWrap.style.display = 'none';
+}
+
+// ── Compress button ───────────────────────────────────────────────────────────
+compressBtn.addEventListener('click', async () => {
+    const val  = parseFloat(document.getElementById('targetSize').value);
+    const unit = document.getElementById('sizeUnit').value;
+    if (!val || val <= 0) { alert('Please enter a valid target size.'); return; }
+
+    let targetBytes = val * 1024;
+    if (unit === 'MB') targetBytes *= 1024;
+
+    if (targetBytes >= selectedFile.size) {
+        alert('Target size is already equal to or larger than the current file. No compression needed!');
+        return;
+    }
+
+    compressBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    resultBox.style.display    = 'none';
+    setProgress(5, 'Starting…');
+
+    try {
+        if (selectedFile.type === 'application/pdf') {
+            await compressPDF(selectedFile, targetBytes);
+        } else if (selectedFile.type.startsWith('image/')) {
+            await compressImage(selectedFile, targetBytes);
+        } else {
+            alert('Unsupported file type.'); compressBtn.disabled = false;
+            progressWrap.style.display = 'none';
         }
+    } catch (err) {
+        console.error(err);
+        alert('Error: ' + err.message);
+        compressBtn.disabled = false;
+        progressWrap.style.display = 'none';
+    }
+});
 
-        // Global State Repository for Selected Documents
-        let selectedFilesStorage = [];
-        let globalConfigRotation = 90;
+// ═══════════════════════════════════════════════════════════════════════════════
+// IMAGE COMPRESSION
+// Binary-search on JPEG quality at full resolution; only shrink dimensions
+// if quality alone can't reach the target.
+// ═══════════════════════════════════════════════════════════════════════════════
+function dataURItoBlob(dataURI) {
+    const [head, data] = dataURI.split(',');
+    const mime = head.match(/:(.*?);/)[1];
+    const raw  = atob(data);
+    const buf  = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return new Blob([buf], { type: mime });
+}
 
-        function handleFileSelection(toolId) {
-            const input = document.getElementById('file-input');
-            const listContainer = document.getElementById('file-status-list');
-            const processBtn = document.getElementById('process-btn');
-            
-            if(!input.files.length) return;
-            
-            selectedFilesStorage = Array.from(input.files);
-            listContainer.innerHTML = '';
-            
-            selectedFilesStorage.forEach((file, index) => {
-                const row = document.createElement('div');
-                row.className = "flex items-center justify-between bg-gray-50 border border-gray-100 px-4 py-2.5 rounded-xl text-xs";
-                row.innerHTML = `
-                    <div class="flex items-center gap-2 truncate max-w-[80%]">
-                        <i class="fa-solid fa-file text-red-500 text-sm"></i>
-                        <span class="font-medium text-gray-700 truncate">${file.name}</span>
-                        <span class="text-gray-400">(${(file.size/1024/1024).toFixed(2)} MB)</span>
-                    </div>
-                    <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
-                `;
-                listContainer.appendChild(row);
-            });
+function compressImage(file, targetBytes) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Cannot read file'));
+        reader.onload  = e => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Cannot load image'));
+            img.onload  = () => {
+                setProgress(20, 'Analyzing image…');
+                const canvas = document.createElement('canvas');
+                const ctx    = canvas.getContext('2d');
+                const origW  = img.width, origH = img.height;
 
-            processBtn.removeAttribute('disabled');
-        }
+                let best = null, reached = false;
 
-        function setRotation(deg) {
-            globalConfigRotation = deg;
-            document.querySelectorAll('.rot-angle-btn').forEach(btn => {
-                if(parseInt(btn.getAttribute('data-deg')) === deg) {
-                    btn.className = "rot-angle-btn bg-white border-2 border-purple-500 text-purple-500 font-semibold py-2 px-4 rounded-xl text-sm transition-all";
-                } else {
-                    btn.className = "rot-angle-btn bg-white border border-gray-200 hover:border-gray-300 font-semibold py-2 px-4 rounded-xl text-sm transition-all";
-                }
-            });
-        }
+                for (let scale = 1.0; scale >= 0.05; scale -= 0.05) {
+                    canvas.width  = Math.max(1, Math.round(origW * scale));
+                    canvas.height = Math.max(1, Math.round(origH * scale));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // ==================== REAL FUNCTIONAL CRADLE (PDF-LIB ENGINE) ====================
-
-        async function executeMerge() {
-            if(selectedFilesStorage.length < 2) {
-                alert("Please upload at least 2 PDF files to execute a merge workflow.");
-                return;
-            }
-            toggleLoader(true, "Merging Document Streams...");
-            try {
-                const mergedPdf = await PDFLib.PDFDocument.create();
-                for (const file of selectedFilesStorage) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-                    const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-                    copiedPages.forEach((page) => mergedPdf.addPage(page));
-                }
-                const mergedPdfBytes = await mergedPdf.save();
-                downloadBlob(mergedPdfBytes, "nexpdf_merged_document.pdf", "application/pdf");
-            } catch (err) {
-                alert("Error during merge. Please ensure files aren't corrupted or password protected.");
-            } finally {
-                toggleLoader(false);
-            }
-        }
-
-        async function executeSplit() {
-            if(!selectedFilesStorage.length) return;
-            const fromPage = parseInt(document.getElementById('split-from').value);
-            const toPage = parseInt(document.getElementById('split-to').value);
-            
-            toggleLoader(true, "Extracting Requested Page Ranges...");
-            try {
-                const file = selectedFilesStorage[0];
-                const arrayBuffer = await file.arrayBuffer();
-                const srcDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-                const totalPages = srcDoc.getPageCount();
-
-                if (fromPage < 1 || toPage > totalPages || fromPage > toPage) {
-                    alert(`Invalid range. Document context has total ${totalPages} pages.`);
-                    toggleLoader(false);
-                    return;
-                }
-
-                const newDoc = await PDFLib.PDFDocument.create();
-                // Page indices are zero-based inside pdf-lib
-                const indices = Array.from({length: (toPage - fromPage + 1)}, (_, i) => (fromPage - 1) + i);
-                const copiedPages = await newDoc.copyPages(srcDoc, indices);
-                copiedPages.forEach(p => newDoc.addPage(p));
-
-                const splitBytes = await newDoc.save();
-                downloadBlob(splitBytes, `nexpdf_split_${fromPage}_to_${toPage}.pdf", "application/pdf`);
-            } catch(e) {
-                alert("Execution failed. Double check configuration values.");
-            } finally {
-                toggleLoader(false);
-            }
-        }
-
-        async function executeRotate() {
-            if(!selectedFilesStorage.length) return;
-            toggleLoader(true, `Applying ${globalConfigRotation}° Rotation...`);
-            try {
-                const file = selectedFilesStorage[0];
-                const arrayBuffer = await file.arrayBuffer();
-                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-                const pages = pdfDoc.getPages();
-                
-                pages.forEach(page => {
-                    const currentRotation = page.getRotation().angle;
-                    page.setRotation(PDFLib.degrees(currentRotation + globalConfigRotation));
-                });
-
-                const rotatedBytes = await pdfDoc.save();
-                downloadBlob(rotatedBytes, "nexpdf_rotated_document.pdf", "application/pdf");
-            } catch(e) {
-                alert("Failed to rotate page maps cleanly.");
-            } finally {
-                toggleLoader(false);
-            }
-        }
-
-        async function executeJpgToPdf() {
-            if(!selectedFilesStorage.length) return;
-            toggleLoader(true, "Compiling Image Assets into Vector Wrapper...");
-            try {
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                
-                for(const imgFile of selectedFilesStorage) {
-                    const imgBytes = await imgFile.arrayBuffer();
-                    let embeddedImg;
-                    if (imgFile.type === "image/jpeg" || imgFile.type === "image/jpg") {
-                        embeddedImg = await pdfDoc.embedJpg(imgBytes);
-                    } else if (imgFile.type === "image/png") {
-                        embeddedImg = await pdfDoc.embedPng(imgBytes);
-                    } else {
-                        continue; // Skip unsupported types
+                    // Binary search on quality
+                    let lo = 0.01, hi = 0.95, found = null;
+                    for (let i = 0; i < 20; i++) {
+                        const mid  = (lo + hi) / 2;
+                        const blob = dataURItoBlob(canvas.toDataURL('image/jpeg', mid));
+                        if (blob.size <= targetBytes) { found = blob; lo = mid; }
+                        else hi = mid;
+                        if (hi - lo < 0.003) break;
                     }
-                    
-                    const page = pdfDoc.addPage([embeddedImg.width, embeddedImg.height]);
-                    page.drawImage(embeddedImg, {
-                        x: 0, y: 0,
-                        width: embeddedImg.width,
-                        height: embeddedImg.height,
-                    });
+                    if (found) { best = found; reached = true; break; }
+
+                    // Keep smallest achieved so far
+                    const probe = dataURItoBlob(canvas.toDataURL('image/jpeg', 0.01));
+                    if (!best || probe.size < best.size) best = probe;
+
+                    setProgress(20 + Math.round((1 - scale) * 60), `Trying ${(scale * 100).toFixed(0)}% size…`);
                 }
-                
-                const finalBytes = await pdfDoc.save();
-                downloadBlob(finalBytes, "nexpdf_compiled_images.pdf", "application/pdf");
-            } catch(e) {
-                alert("Error compilation image maps.");
-            } finally {
-                toggleLoader(false);
-            }
+
+                setProgress(95, 'Saving…');
+                const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
+                showResult(best, file.size, outName, reached);
+                resolve();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PDF COMPRESSION  — TRUE approach using PDF.js
+//
+// How it works:
+//   1. Load PDF with PDF.js (same engine as Chrome's built-in viewer)
+//   2. Render each page to a canvas at a chosen DPI
+//   3. Convert canvas → JPEG with binary-searched quality
+//   4. Embed each JPEG into a new PDF using pdf-lib
+//
+// This is the only browser-side method that achieves real byte reduction
+// because it re-rasterises and re-encodes the page content.
+// ═══════════════════════════════════════════════════════════════════════════════
+async function compressPDF(file, targetBytes) {
+    setProgress(8, 'Loading PDF…');
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfJS       = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages    = pdfJS.numPages;
+
+    setProgress(15, `Loaded ${numPages} page(s). Rendering…`);
+
+    // We'll try several quality levels to binary-search toward the target.
+    // Each attempt renders all pages and builds a full PDF blob.
+    // To avoid re-rendering on every quality tweak, we render once per scale
+    // and binary-search quality on the JPEG step.
+
+    // Scale = pixels per CSS px at 1× zoom; start at 1.5 (≈108 ppi), go down.
+    const scales = [2.0, 1.5, 1.2, 1.0, 0.8, 0.6, 0.5, 0.4, 0.3];
+
+    let bestBlob = null, reached = false;
+
+    outerLoop:
+    for (let si = 0; si < scales.length; si++) {
+        const scale = scales[si];
+        setProgress(15 + si * 8, `Rendering pages at scale ${scale}…`);
+
+        // Render all pages to canvases
+        const pageCanvases = [];
+        for (let p = 1; p <= numPages; p++) {
+            const page     = await pdfJS.getPage(p);
+            const viewport = page.getViewport({ scale });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = Math.round(viewport.width);
+            canvas.height  = Math.round(viewport.height);
+            const ctx      = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            pageCanvases.push(canvas);
         }
 
-        // ==================== PREMIUM WORKFLOW SIMULATIONS ====================
+        // Binary-search JPEG quality to hit targetBytes
+        let lo = 0.01, hi = 0.95, foundBlob = null;
+        for (let iter = 0; iter < 18; iter++) {
+            const mid     = (lo + hi) / 2;
+            const blob    = await buildPdfFromCanvases(pageCanvases, mid);
 
-        function simulateAISummary() {
-            if(!selectedFilesStorage.length) return;
-            toggleLoader(true, "Running Deep Neural Token Evaluation...");
-            
-            setTimeout(() => {
-                toggleLoader(false);
-                const isShort = document.getElementById('summary-depth').value === 'short';
-                const outputBox = document.getElementById('ai-output-text');
-                outputBox.classList.remove('italic', 'text-slate-300');
-                outputBox.classList.add('text-green-400');
-                
-                if(isShort) {
-                    outputBox.innerHTML = `
-                        <p class="font-bold mb-2 text-white">Executive Key Insights:</p>
-                        <ul class="list-disc list-inside space-y-2 text-slate-200">
-                            <li>Primary structural arguments focus heavily on systemic operational efficiency optimization.</li>
-                            <li>Empirical milestones emphasize a 40% reduction in workflow transaction latency.</li>
-                            <li>Resource allocations present significant returns relative to baseline expenditures.</li>
-                        </ul>
-                    `;
-                } else {
-                    outputBox.innerHTML = `
-                        <p class="font-bold mb-2 text-white">Comprehensive Narrative Summary:</p>
-                        <p class="text-slate-200 leading-relaxed">The document provides a sophisticated structural framework outlining contemporary operational methodologies. By utilizing historical benchmarks alongside real-time metrics, it constructs an authoritative roadmap for scalable expansion. Key data vectors confirm that integrating intelligent processing models immediately alleviates traditional throughput structural bottlenecks.</p>
-                    `;
-                }
-            }, 2500);
+            if (blob.size <= targetBytes) { foundBlob = blob; lo = mid; }
+            else hi = mid;
+            if (hi - lo < 0.004) break;
         }
 
-        function simulateUniversalEngine(toolTitle) {
-            if(!selectedFilesStorage.length) return;
-            toggleLoader(true, `Processing via target pipelines: ${toolTitle}...`);
-            
-            setTimeout(() => {
-                toggleLoader(false);
-                // Dynamically simulate an appropriate converted output file download
-                const mockBuffer = new TextEncoder().encode("NexPDF Target Engine Optimization Complete Data Array");
-                downloadBlob(mockBuffer, `nexpdf_processed_${toolTitle.toLowerCase().replace(/ /g, "_")}.pdf`, "application/pdf");
-            }, 2000);
+        if (foundBlob) {
+            bestBlob = foundBlob; reached = true; break outerLoop;
         }
 
-        // Global Helper: Automated Blob Download Stream Trigger
-        function downloadBlob(bytes, filename, contentType) {
-            const blob = new Blob([bytes], { type: contentType });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
-    </script>
+        // Keep smallest so far (lowest quality at this scale)
+        const probe = await buildPdfFromCanvases(pageCanvases, 0.01);
+        if (!bestBlob || probe.size < bestBlob.size) bestBlob = probe;
+    }
+
+    setProgress(97, 'Saving PDF…');
+    const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
+    showResult(bestBlob, file.size, outName, reached);
+}
+
+// Build a PDF blob from an array of canvases at given JPEG quality
+async function buildPdfFromCanvases(canvases, quality) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    for (const canvas of canvases) {
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+        const jpegBytes   = base64ToBytes(jpegDataUrl.split(',')[1]);
+        const jpegImage   = await pdfDoc.embedJpg(jpegBytes);
+        const page        = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
+        page.drawImage(jpegImage, { x: 0, y: 0, width: jpegImage.width, height: jpegImage.height });
+    }
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    return new Blob([bytes], { type: 'application/pdf' });
+}
+
+function base64ToBytes(b64) {
+    const raw = atob(b64);
+    const buf = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return buf;
+}
+</script>
 </body>
 </html>
