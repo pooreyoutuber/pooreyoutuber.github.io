@@ -174,6 +174,7 @@
             font-weight: 500;
             text-align: center;
             display: none;
+            color: var(--primary);
         }
 
         .download-area {
@@ -202,7 +203,6 @@
             opacity: 0.9;
         }
 
-        /* Description Content Style */
         .seo-content {
             background: var(--card-bg);
             border-radius: 16px;
@@ -389,7 +389,6 @@
                 return;
             }
 
-            // Convert target size to bytes
             let targetBytes = targetSizeVal * 1024;
             if (unit === 'MB') targetBytes *= 1024;
 
@@ -417,7 +416,7 @@
             }
         });
 
-        // Smart Local Image Compression
+        // Fixed & Cleaned Local Image Compression
         function compressImage(file, targetBytes) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -429,9 +428,8 @@
                     let width = img.width;
                     let height = img.height;
 
-                    // Calculate basic scale factor based on ratio
                     let ratio = Math.sqrt(targetBytes / file.size);
-                    if (ratio > 0.9) ratio = 0.9; // force slight reduction
+                    if (ratio > 0.9) ratio = 0.9;
 
                     canvas.width = width * ratio;
                     canvas.height = height * ratio;
@@ -439,14 +437,12 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    // Stepwise quality tuning loop
                     let quality = 0.85;
                     let dataUrl = canvas.toDataURL('image/jpeg', quality);
                     let resultBlob = dataURItoBlob(dataUrl);
 
-                    // If still bigger, safely reduce quality recursively
                     while (resultBlob.size > targetBytes && quality > 0.1) {
-                        quality -= 0.1;
+                        quality -= 0.05;
                         dataUrl = canvas.toDataURL('image/jpeg', quality);
                         resultBlob = dataURItoBlob(dataUrl);
                     }
@@ -456,12 +452,11 @@
             };
         }
 
-        // Smart PDF Size Optimization using PDF-Lib metadata pruning
+        // FIXED: Corrected PdfLib to PDFLib capitalized reference 
         async function compressPDF(file, targetBytes) {
             const fileArrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await PdfLib.PDFDocument.load(fileArrayBuffer);
+            const pdfDoc = await PDFLib.PDFDocument.load(fileArrayBuffer);
             
-            // Prune unneeded heavy structural metadata tree branches to save overhead space
             pdfDoc.setTitle('');
             pdfDoc.setAuthor('');
             pdfDoc.setSubject('');
