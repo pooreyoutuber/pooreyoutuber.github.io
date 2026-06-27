@@ -1,237 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Tool Website</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <style>
-        /* CSS for Search Bar and Layout */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        .search-container {
-            margin: 20px text-align: center;
-            display: flex;
-            justify-content: center;
-        }
-        #searchBar {
-            width: 60%;
-            padding: 12px 20px;
-            font-size: 16px;
-            border: 2px solid #ccc;
-            border-radius: 25px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        #searchBar:focus {
-            border-color: #007bff;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .tools-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .tool {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            width: 280px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .tool:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        .tool h3 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .tool a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        .tool a:hover {
-            background-color: #0056b3;
-        }
-        #noResults {
-            display: none;
-            text-align: center;
-            font-size: 18px;
-            color: #777;
-            margin-top: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Crop Tool Free Online – Crop PDF Pages Without Login | PooreYoutuber</title>
+<meta name="description" content="Free online PDF crop tool. Upload your PDF, draw your crop area with your mouse, zoom in/out, apply to one page or all pages, and download the cropped PDF instantly. No login, no upload to server — 100% browser-based and private.">
+<meta name="keywords" content="pdf crop tool free, crop pdf online, pdf cropper no login, crop pdf pages browser, free pdf crop tool 2026, pdf crop download, online pdf editor crop, pdf page cropper free, crop pdf without software, browser pdf crop tool">
+<meta name="author" content="PooreYoutuber">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#3b82f6">
 
-        /* Naya CSS Custom Logos ke Size ko Control Karne Ke Liye */
-        .custom-tool-logo {
-            width: 65px;
-            height: 65px;
-            object-fit: contain;
-            margin: 12px 0;
-            transition: transform 0.2s ease;
-        }
-        .tool:hover .custom-tool-logo {
-            transform: scale(1.1);
-        }
-    </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZPMC525FGT');</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- pdf-lib for output -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<style>
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b22;
+  --card:     #1c2230;
+  --border:   #2d3748;
+  --accent:   #3b82f6;
+  --accent2:  #60a5fa;
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --text:     #e2e8f0;
+  --muted:    #8b9ab0;
+  --radius:   12px;
+  --radius-sm:8px;
+  --crop-color: rgba(59,130,246,0.5);
+  --crop-border:#3b82f6;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:20px 14px 60px;}
+.container{max-width:1300px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;padding:28px 20px 20px;position:relative;}
+.brand-btn{position:absolute;top:22px;right:0;background:rgba(59,130,246,.1);color:var(--accent2);border:1px solid rgba(59,130,246,.25);padding:6px 15px;border-radius:30px;font-size:.75rem;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.5px;transition:all .3s;}
+.brand-btn:hover{background:var(--accent);color:#fff;border-color:transparent;}
+.header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--accent2);font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
+.header h1{font-size:2rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#fff 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.header p{color:var(--muted);font-size:.94rem;max-width:540px;margin:0 auto;line-height:1.65;}
+
+/* UPLOAD ZONE */
+.upload-zone{background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);padding:48px 24px;text-align:center;cursor:pointer;transition:all .3s;margin:20px 0;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(59,130,246,.04);}
+.upload-zone .upload-icon{font-size:3rem;margin-bottom:14px;opacity:.7;}
+.upload-zone h3{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+.upload-zone p{color:var(--muted);font-size:.87rem;}
+.upload-zone input{display:none;}
+.btn-upload{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;border:none;padding:11px 26px;border-radius:var(--radius-sm);font-size:.92rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-upload:hover{background:#2563eb;transform:translateY(-1px);}
+
+/* MAIN EDITOR LAYOUT */
+.editor-layout{display:grid;grid-template-columns:1fr 280px;gap:16px;margin-top:16px;}
+@media(max-width:900px){.editor-layout{grid-template-columns:1fr;}}
+
+/* CANVAS AREA */
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative;}
+.canvas-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tb-btn{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border);padding:7px 14px;border-radius:var(--radius-sm);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tb-btn:hover{background:rgba(59,130,246,.15);border-color:var(--accent);color:var(--accent2);}
+.tb-btn.active{background:rgba(59,130,246,.2);border-color:var(--accent);color:var(--accent2);}
+.tb-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
+.zoom-display{color:var(--muted);font-size:.82rem;font-weight:600;min-width:46px;text-align:center;}
+.page-info{color:var(--muted);font-size:.82rem;font-weight:600;margin-left:auto;}
+
+.canvas-scroll{overflow:auto;max-height:72vh;display:flex;justify-content:center;align-items:flex-start;padding:18px;background:repeating-conic-gradient(#1a2030 0% 25%,#161b22 0% 50%) 0 0/24px 24px;}
+#pdfCanvas{display:block;box-shadow:0 4px 32px rgba(0,0,0,.7);cursor:crosshair;position:relative;}
+.canvas-container{position:relative;display:inline-block;flex-shrink:0;}
+#cropOverlay{position:absolute;top:0;left:0;pointer-events:none;}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:14px;}
+.sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.sidebar-card h3{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.sidebar-card h3 span{font-size:1rem;}
+
+.crop-info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.crop-info-label{font-size:.78rem;color:var(--muted);}
+.crop-info-val{font-size:.82rem;font-weight:700;color:var(--accent2);font-variant-numeric:tabular-nums;}
+
+.toggle-row{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px;}
+.toggle-btn{flex:1;padding:9px 6px;font-size:.8rem;font-weight:700;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:center;}
+.toggle-btn.active{background:var(--accent);color:#fff;}
+
+.btn-crop-apply{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;margin-top:4px;}
+.btn-crop-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,.35);}
+.btn-crop-apply:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.btn-download{width:100%;padding:12px;background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.btn-download:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(34,197,94,.35);}
+.btn-download:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.btn-reset{width:100%;padding:9px;background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-reset:hover{background:rgba(239,68,68,.1);}
+
+/* page thumbnails */
+.thumb-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;}
+.thumb-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:all .2s;}
+.thumb-item:hover{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.2);}
+.thumb-item.active{background:rgba(59,130,246,.12);border-color:var(--accent);}
+.thumb-num{font-size:.78rem;font-weight:700;color:var(--muted);min-width:22px;}
+.thumb-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.thumb-bar-fill{height:100%;background:var(--accent);border-radius:3px;}
+.thumb-cropped{font-size:.7rem;color:var(--green);font-weight:700;}
+
+/* status bar */
+.status-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.status-dot.yellow{background:#f59e0b;}
+.status-dot.blue{background:var(--accent);animation:blink .8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* progress */
+.progress-wrap{display:none;margin-top:8px;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0%;}
+
+/* hidden */
+#editorSection{display:none;}
+
+/* AD */
+.ad-wrap{margin:16px 0;width:100%;}
+
+/* DESCRIPTION */
+.desc-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-top:20px;}
+.desc-panel .badge{background:rgba(59,130,246,.08);color:var(--accent2);font-size:.72rem;font-weight:800;padding:4px 14px;border-radius:20px;border:1px solid rgba(59,130,246,.18);text-transform:uppercase;letter-spacing:.5px;display:inline-block;margin-bottom:16px;}
+.desc-panel h2{font-size:1.4rem;font-weight:800;margin-bottom:12px;color:var(--text);}
+.desc-panel p{color:var(--muted);font-size:.94rem;line-height:1.75;margin-bottom:14px;}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;}
+.step-c{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;}
+.step-n{font-size:1.9rem;font-weight:900;color:var(--accent);opacity:.25;line-height:1;margin-bottom:8px;}
+.step-c h4{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:5px;}
+.step-c p{font-size:.82rem;color:var(--muted);margin:0;line-height:1.5;}
+.feat-list{list-style:none;margin:14px 0;}
+.feat-list li{display:flex;gap:9px;align-items:flex-start;margin-bottom:11px;font-size:.9rem;color:var(--muted);line-height:1.55;}
+.feat-list li .ck{color:var(--green);flex-shrink:0;margin-top:1px;}
+.feat-list li strong{color:var(--text);}
+.disc-box{background:rgba(59,130,246,.03);border:1px solid rgba(59,130,246,.12);border-radius:var(--radius-sm);padding:16px 20px;margin-top:20px;color:#4a6a9a;font-size:.84rem;line-height:1.65;}
+.disc-box strong{color:#6a9acd;}
+
+footer{text-align:center;margin-top:36px;font-size:.79rem;color:#2d3f5c;letter-spacing:.3px;}
+</style>
 </head>
 <body>
+<div class="container">
 
-    <header>
-        <h1>Welcome to Multi-Tool Website</h1>
-        <p>Find all the essential tools in one place</p>
-    </header>
+  <!-- HEADER -->
+  <div class="header">
+    <a href="https://pooreyoutuber.github.io" class="brand-btn">🏠 PooreYoutuber</a>
+    <div class="header-badge">✂️ Free PDF Tool 2026</div>
+    <h1>PDF Crop Tool</h1>
+    <p>Upload your PDF, draw a crop area with your mouse, apply to one page or all pages, then download — all in your browser. Zero uploads to any server.</p>
+  </div>
 
-    <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search for tools... (e.g., PDF, YouTube, Password)">
+  <!-- Ad top -->
+  <div class="ad-wrap">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+
+  <!-- UPLOAD ZONE -->
+  <div id="uploadSection">
+    <div class="upload-zone" id="dropZone">
+      <div class="upload-icon">📄</div>
+      <h3>Drop your PDF here or click to upload</h3>
+      <p>Supports any PDF · Processed locally in your browser · No server upload · No login required</p>
+      <label class="btn-upload">
+        Choose PDF File
+        <input type="file" id="fileInput" accept="application/pdf">
+      </label>
     </div>
+  </div>
 
-    <div class="container">
-        <div class="tools-grid" id="toolsGrid">
-            
-            <div class="tool">
-                <h3>1. Image to PDF</h3>
-                <img src="icons/image-to-pdf.png" alt="Image to PDF" class="custom-tool-logo">
-                <a href="image-to-pdf.html">Open Tool</a>
-            </div>
+  <!-- EDITOR -->
+  <div id="editorSection">
 
-            <div class="tool">
-                <h3>2. Merge PDF</h3>
-                <img src="icons/merge-pdf.png" alt="Merge PDF" class="custom-tool-logo">
-                <a href="merge-pdf.html">Open Tool</a>
-            </div>
+    <!-- MAIN LAYOUT -->
+    <div class="editor-layout">
 
-            <div class="tool">
-                <h3>3. Split PDF</h3>
-                <img src="icons/split-pdf.png" alt="Split PDF" class="custom-tool-logo">
-                <a href="split-pdf.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>4. Compress PDF</h3>
-                <img src="icons/compress-pdf.png" alt="Compress PDF" class="custom-tool-logo">
-                <a href="compress-pdf.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>5. PDF to Word</h3>
-                <img src="icons/pdf-to-word.png" alt="PDF to Word" class="custom-tool-logo">
-                <a href="pdf-to-word.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>6. YouTube Thumbnail Downloader</h3>
-                <img src="icons/youtube-thumbnail.png" alt="YouTube Thumbnail" class="custom-tool-logo">
-                <a href="youtube-thumbnail-downloader.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>7. YouTube Description Generator</h3>
-                <img src="icons/youtube-description.png" alt="YouTube Description" class="custom-tool-logo">
-                <a href="youtube-description-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>8. YouTube Tag Extractor</h3>
-                <a href="youtube-tag-extractor.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>9. YouTube Title Generator</h3>
-                <a href="youtube-title-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>10. YouTube Channel Analytics (Mock)</h3>
-                <a href="youtube-channel-analytics.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>11. Website Embed Code Generator</h3>
-                <a href="website-embed-code-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>12. WordPress Theme Detector</h3>
-                <a href="wordpress-theme-detector.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>13. Website Status Checker</h3>
-                <a href="website-status-checker.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>14. Instagram Hashtag Generator</h3>
-                <img src="icons/instagram-hashtag.png" alt="Instagram Hashtag" class="custom-tool-logo">
-                <a href="instagram-hashtag-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>15. Password Generator</h3>
-                <a href="password-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>16. Text to Speech</h3>
-                <a href="text-to-speech.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>17. Speech to Text</h3>
-                <a href="speech-to-text.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>18. QR Code Generator</h3>
-                <a href="qr-code-generator.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>19. URL Shortener</h3>
-                <img src="icons/url-shortener.png" alt="URL Shortener" class="custom-tool-logo">
-                <a href="url-shortener.html">Open Tool</a>
-            </div>
-
-            <div class="tool">
-                <h3>20. Image Resizer & Compressor</h3>
-                <a href="image-resizer-compressor.html">Open Tool</a>
-            </div>
-
+      <!-- CANVAS AREA -->
+      <div class="canvas-wrap">
+        <div class="canvas-toolbar">
+          <button class="tb-btn" id="btnZoomOut" title="Zoom Out">− Zoom</button>
+          <span class="zoom-display" id="zoomDisplay">100%</span>
+          <button class="tb-btn" id="btnZoomIn" title="Zoom In">+ Zoom</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" id="btnPrevPage">◀ Prev</button>
+          <button class="tb-btn" id="btnNextPage">Next ▶</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" id="btnClearCrop">Clear Selection</button>
+          <span class="page-info" id="pageInfo">Page 1 / 1</span>
         </div>
-        <div id="noResults">No tools found matching your search.</div>
+        <div class="canvas-scroll" id="canvasScroll">
+          <div class="canvas-container" id="canvasContainer">
+            <canvas id="pdfCanvas"></canvas>
+            <canvas id="cropOverlay"></canvas>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Ready — click and drag on the PDF to select your crop area</span>
+        </div>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+
+        <!-- Crop info -->
+        <div class="sidebar-card">
+          <h3><span>✂️</span> Crop Selection</h3>
+          <div class="crop-info-row"><span class="crop-info-label">X</span><span class="crop-info-val" id="infoX">—</span></div>
+          <div class="crop-info-row"><span class="crop-info-label">Y</span><span class="crop-info-val" id="infoY">—</span></div>
+          <div class="crop-info-row"><span class="crop-info-label">Width</span><span class="crop-info-val" id="infoW">—</span></div>
+          <div class="crop-info-row"><span class="crop-info-label">Height</span><span class="crop-info-val" id="infoH">—</span></div>
+
+          <p style="font-size:.78rem;color:var(--muted);margin:10px 0 8px;">Apply crop to:</p>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="btnCurrentPage">Current Page</button>
+            <button class="toggle-btn" id="btnAllPages">All Pages</button>
+          </div>
+
+          <button class="btn-crop-apply" id="btnApplyCrop" disabled>Apply Crop</button>
+          <div class="progress-wrap" id="progressWrap2" style="margin-top:8px;">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill2"></div></div>
+          </div>
+        </div>
+
+        <!-- Download -->
+        <div class="sidebar-card">
+          <h3><span>⬇️</span> Download</h3>
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">Apply your crop first, then download the final PDF.</p>
+          <button class="btn-download" id="btnDownload" disabled>Download Cropped PDF</button>
+        </div>
+
+        <!-- Pages -->
+        <div class="sidebar-card">
+          <h3><span>📑</span> Pages</h3>
+          <div class="thumb-list" id="thumbList"></div>
+        </div>
+
+        <!-- Reset -->
+        <div class="sidebar-card">
+          <button class="btn-reset" id="btnReset">✕ Upload a Different PDF</button>
+        </div>
+
+      </div>
     </div>
 
-    <script src="index.js"></script>
+    <!-- Ad mid -->
+    <div class="ad-wrap">
+      <ins class="adsbygoogle" style="display:block;text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-7020422718957281" data-ad-slot="2751888085"></ins>
+      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+
+  </div><!-- /editorSection -->
+
+  <!-- DESCRIPTION -->
+  <div class="desc-panel">
+    <span class="badge">How It Works</span>
+    <h2>Free Online PDF Crop Tool — No Login, No Server, 100% Private</h2>
+
+    <p>The <strong>PDF Crop Tool</strong> lets you trim any area of your PDF document directly inside your web browser — no software to install, no account to create, and your file never leaves your device. Using this tool is as simple as uploading your PDF, drawing a rectangle over the area you want to keep, and clicking download. Within seconds, you have a clean, professionally cropped PDF ready to save or share.</p>
+
+    <p>Whether you need to remove unwanted margins from a scanned document, trim the header or footer from a payment receipt, cut out a specific section of a contract for review, or clean up a multi-page report before sending it to a client — this tool handles it instantly and completely free.</p>
+
+    <h2 style="font-size:1.15rem;margin:20px 0 10px;">📖 How to Use — Step by Step</h2>
+    <div class="steps-grid">
+      <div class="step-c"><div class="step-n">01</div><h4>Upload Your PDF</h4><p>Click "Choose PDF File" or drag and drop your PDF onto the upload area. The file is loaded instantly in your browser — nothing is sent to any server.</p></div>
+      <div class="step-c"><div class="step-n">02</div><h4>Navigate Pages</h4><p>Use the Previous / Next buttons in the toolbar to browse through all pages of your PDF. Click any page in the sidebar panel to jump to it instantly.</p></div>
+      <div class="step-c"><div class="step-n">03</div><h4>Draw Your Crop Area</h4><p>Click and drag directly on the PDF canvas to draw your crop selection rectangle. You can see the exact pixel coordinates of your selection in the sidebar.</p></div>
+      <div class="step-c"><div class="step-n">04</div><h4>Zoom If Needed</h4><p>Use the + Zoom and − Zoom buttons to get a closer look at your PDF before drawing your selection. Perfect for documents with small text or fine details.</p></div>
+      <div class="step-c"><div class="step-n">05</div><h4>Apply to One or All Pages</h4><p>Choose whether to apply your crop selection to only the current page, or to all pages in the document at once using the toggle buttons in the sidebar.</p></div>
+      <div class="step-c"><div class="step-n">06</div><h4>Download Your PDF</h4><p>Click "Apply Crop" then "Download Cropped PDF" to save your trimmed document. The final file downloads directly to your device in standard PDF format.</p></div>
+    </div>
+
+    <h2 style="font-size:1.12rem;margin:20px 0 10px;">🔒 Why This Tool Is Safe & Private</h2>
+    <ul class="feat-list">
+      <li><span class="ck">✅</span><div><strong>100% Browser-Based Processing:</strong> Your PDF is processed entirely within your own web browser using JavaScript. The file is never uploaded to any external server, cloud service, or third-party system.</div></li>
+      <li><span class="ck">✅</span><div><strong>No Login or Account Required:</strong> Open the page and start cropping immediately. There are no accounts, no email addresses, no passwords, and no personal data collected at any point.</div></li>
+      <li><span class="ck">✅</span><div><strong>Works With Any PDF:</strong> Receipts, invoices, legal documents, academic papers, scanned pages, government forms — this tool handles all standard PDF files regardless of their source or content.</div></li>
+      <li><span class="ck">✅</span><div><strong>Precise Visual Selection:</strong> Draw your crop rectangle visually on the rendered PDF preview with your mouse. What you see selected is exactly what you get in the cropped output.</div></li>
+      <li><span class="ck">✅</span><div><strong>Zoom Controls for Accuracy:</strong> Zoom into any area of the document before making your selection to ensure pixel-accurate cropping even on documents with dense or small content.</div></li>
+      <li><span class="ck">✅</span><div><strong>Apply to One Page or All Pages:</strong> Crop just a single page you need, or apply the same crop rectangle to every page in the document simultaneously — your choice with one click.</div></li>
+      <li><span class="ck">✅</span><div><strong>Instant Download in PDF Format:</strong> The cropped output downloads directly as a valid PDF file — no format conversion, no compression artifacts, no quality loss.</div></li>
+    </ul>
+
+    <div class="disc-box">
+      <strong>Please Note:</strong> This PDF Crop Tool is built entirely for personal productivity, document editing, and educational purposes. It operates 100% within your browser — no files are uploaded, stored, or shared with any server or third party. You are solely responsible for the documents you process using this tool. The tool does not access, modify, or store any personal data. Use entirely at your own discretion. Happy editing! ✂️
+    </div>
+  </div>
+
+  <!-- Ad bottom -->
+  <div class="ad-wrap">
+    <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="3405888966"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+
+</div><!-- /container -->
+
+<footer>© 2026 PooreYoutuber · Free Online Tools · PDF Crop Tool</footer>
+
+<script>
+// ── Setup PDF.js worker ──
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ── State ──
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
+let zoomLevel = 1.0;
+let cropRect = null;        // {x, y, w, h} in canvas pixels
+let cropApplyMode = 'current'; // 'current' | 'all'
+let pageCrops = {};         // pageNum -> {x,y,w,h} in PDF points
+let modifiedPdfBytes = null;
+let originalFileBytes = null;
+let isDrawing = false;
+let dragStart = {x:0,y:0};
+let renderTask = null;
+
+// ── Elements ──
+const fileInput       = document.getElementById('fileInput');
+const dropZone        = document.getElementById('dropZone');
+const uploadSection   = document.getElementById('uploadSection');
+const editorSection   = document.getElementById('editorSection');
+const canvas          = document.getElementById('pdfCanvas');
+const ctx             = canvas.getContext('2d');
+const overlay         = document.getElementById('cropOverlay');
+const octx            = overlay.getContext('2d');
+const canvasContainer = document.getElementById('canvasContainer');
+const pageInfoEl      = document.getElementById('pageInfo');
+const zoomDisplay     = document.getElementById('zoomDisplay');
+const statusDot       = document.getElementById('statusDot');
+const statusText      = document.getElementById('statusText');
+const thumbList       = document.getElementById('thumbList');
+const btnApplyCrop    = document.getElementById('btnApplyCrop');
+const btnDownload     = document.getElementById('btnDownload');
+const infoX=document.getElementById('infoX');
+const infoY=document.getElementById('infoY');
+const infoW=document.getElementById('infoW');
+const infoH=document.getElementById('infoH');
+const progressFill2   = document.getElementById('progressFill2');
+const progressWrap2   = document.getElementById('progressWrap2');
+
+// ── Drag & Drop upload ──
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{
+  e.preventDefault();dropZone.classList.remove('dragover');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type==='application/pdf') loadPDF(f);
+});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0]) loadPDF(fileInput.files[0]);});
+dropZone.addEventListener('click',()=>fileInput.click());
+
+// ── Load PDF ──
+async function loadPDF(file){
+  setStatus('blue','Loading PDF…');
+  const buffer = await file.arrayBuffer();
+  originalFileBytes = buffer.slice(0);
+  pdfDoc = await pdfjsLib.getDocument({data: buffer}).promise;
+  totalPages = pdfDoc.numPages;
+  pageCrops = {};
+  currentPage = 1;
+  cropRect = null;
+  modifiedPdfBytes = null;
+  btnDownload.disabled = true;
+
+  uploadSection.style.display = 'none';
+  editorSection.style.display = 'block';
+
+  buildThumbList();
+  await renderPage(currentPage);
+  setStatus('green','PDF loaded — draw a crop selection on the preview');
+}
+
+// ── Render page ──
+async function renderPage(num){
+  if(renderTask) try{ renderTask.cancel(); }catch(e){}
+  setStatus('blue','Rendering page…');
+  const page = await pdfDoc.getPage(num);
+  const viewport = page.getViewport({scale: zoomLevel});
+  canvas.width  = viewport.width;
+  canvas.height = viewport.height;
+  overlay.width = viewport.width;
+  overlay.height= viewport.height;
+  canvasContainer.style.width  = viewport.width+'px';
+  canvasContainer.style.height = viewport.height+'px';
+
+  renderTask = page.render({canvasContext:ctx, viewport});
+  await renderTask.promise;
+  renderTask = null;
+
+  pageInfoEl.textContent = `Page ${num} / ${totalPages}`;
+  zoomDisplay.textContent = Math.round(zoomLevel*100)+'%';
+  cropRect = null;
+  drawCropOverlay();
+  updateCropInfo();
+  updateThumbList();
+  setStatus('green','Page '+ num +' ready — drag to select crop area');
+}
+
+// ── Thumb list ──
+function buildThumbList(){
+  thumbList.innerHTML='';
+  for(let i=1;i<=totalPages;i++){
+    const item = document.createElement('div');
+    item.className='thumb-item'+(i===currentPage?' active':'');
+    item.dataset.page=i;
+    item.innerHTML=`
+      <span class="thumb-num">${i}</span>
+      <div class="thumb-bar"><div class="thumb-bar-fill" style="width:${Math.random()*60+30}%"></div></div>
+      ${pageCrops[i]?'<span class="thumb-cropped">✓ Cropped</span>':''}
+    `;
+    item.addEventListener('click',()=>goToPage(i));
+    thumbList.appendChild(item);
+  }
+}
+function updateThumbList(){
+  const items = thumbList.querySelectorAll('.thumb-item');
+  items.forEach(item=>{
+    const p=parseInt(item.dataset.page);
+    item.classList.toggle('active', p===currentPage);
+    const badge = item.querySelector('.thumb-cropped');
+    if(pageCrops[p]&&!badge){
+      const s=document.createElement('span');s.className='thumb-cropped';s.textContent='✓ Cropped';
+      item.appendChild(s);
+    }
+  });
+}
+
+// ── Navigation ──
+async function goToPage(n){
+  if(n<1||n>totalPages) return;
+  currentPage=n;
+  await renderPage(n);
+}
+document.getElementById('btnPrevPage').addEventListener('click',()=>goToPage(currentPage-1));
+document.getElementById('btnNextPage').addEventListener('click',()=>goToPage(currentPage+1));
+
+// ── Zoom ──
+document.getElementById('btnZoomIn').addEventListener('click',async()=>{
+  if(zoomLevel>=4) return;
+  zoomLevel=Math.min(4,parseFloat((zoomLevel+0.25).toFixed(2)));
+  await renderPage(currentPage);
+});
+document.getElementById('btnZoomOut').addEventListener('click',async()=>{
+  if(zoomLevel<=0.25) return;
+  zoomLevel=Math.max(0.25,parseFloat((zoomLevel-0.25).toFixed(2)));
+  await renderPage(currentPage);
+});
+
+// ── Crop mode toggle ──
+document.getElementById('btnCurrentPage').addEventListener('click',function(){
+  cropApplyMode='current';
+  this.classList.add('active');
+  document.getElementById('btnAllPages').classList.remove('active');
+});
+document.getElementById('btnAllPages').addEventListener('click',function(){
+  cropApplyMode='all';
+  this.classList.add('active');
+  document.getElementById('btnCurrentPage').classList.remove('active');
+});
+
+// ── Mouse crop drawing ──
+function getCanvasPos(e){
+  const rect = overlay.getBoundingClientRect();
+  const scaleX = overlay.width / rect.width;
+  const scaleY = overlay.height / rect.height;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top)  * scaleY
+  };
+}
+
+overlay.addEventListener('mousedown', e=>{
+  if(!pdfDoc) return;
+  isDrawing=true;
+  dragStart = getCanvasPos(e);
+  cropRect=null;
+  overlay.style.cursor='crosshair';
+});
+overlay.addEventListener('mousemove', e=>{
+  if(!isDrawing) return;
+  const cur = getCanvasPos(e);
+  cropRect={
+    x: Math.min(dragStart.x, cur.x),
+    y: Math.min(dragStart.y, cur.y),
+    w: Math.abs(cur.x - dragStart.x),
+    h: Math.abs(cur.y - dragStart.y)
+  };
+  drawCropOverlay();
+  updateCropInfo();
+});
+overlay.addEventListener('mouseup', e=>{
+  if(!isDrawing) return;
+  isDrawing=false;
+  overlay.style.cursor='crosshair';
+  if(cropRect && cropRect.w>10 && cropRect.h>10){
+    btnApplyCrop.disabled=false;
+    setStatus('green','Crop selection ready — choose page scope and click Apply Crop');
+  } else {
+    cropRect=null;
+    drawCropOverlay();
+    updateCropInfo();
+    btnApplyCrop.disabled=true;
+  }
+});
+overlay.addEventListener('mouseleave', e=>{
+  if(isDrawing){
+    isDrawing=false;
+    if(cropRect && cropRect.w>10 && cropRect.h>10) btnApplyCrop.disabled=false;
+  }
+});
+
+// Touch support
+overlay.addEventListener('touchstart',e=>{e.preventDefault();overlay.dispatchEvent(new MouseEvent('mousedown',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
+overlay.addEventListener('touchmove',e=>{e.preventDefault();overlay.dispatchEvent(new MouseEvent('mousemove',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
+overlay.addEventListener('touchend',e=>{e.preventDefault();overlay.dispatchEvent(new MouseEvent('mouseup',{}));},{passive:false});
+
+function drawCropOverlay(){
+  octx.clearRect(0,0,overlay.width,overlay.height);
+  if(!cropRect) return;
+  // darken outside
+  octx.fillStyle='rgba(0,0,0,0.45)';
+  octx.fillRect(0,0,overlay.width,overlay.height);
+  // clear inside
+  octx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+  // border
+  octx.strokeStyle='#3b82f6';
+  octx.lineWidth=2;
+  octx.setLineDash([6,4]);
+  octx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+  octx.setLineDash([]);
+  // corner handles
+  const handles=[[cropRect.x,cropRect.y],[cropRect.x+cropRect.w,cropRect.y],[cropRect.x,cropRect.y+cropRect.h],[cropRect.x+cropRect.w,cropRect.y+cropRect.h]];
+  handles.forEach(([hx,hy])=>{
+    octx.fillStyle='#fff';
+    octx.fillRect(hx-5,hy-5,10,10);
+    octx.strokeStyle='#3b82f6';
+    octx.lineWidth=2;
+    octx.strokeRect(hx-5,hy-5,10,10);
+  });
+}
+
+function updateCropInfo(){
+  if(!cropRect){infoX.textContent=infoY.textContent=infoW.textContent=infoH.textContent='—';return;}
+  infoX.textContent=Math.round(cropRect.x)+'px';
+  infoY.textContent=Math.round(cropRect.y)+'px';
+  infoW.textContent=Math.round(cropRect.w)+'px';
+  infoH.textContent=Math.round(cropRect.h)+'px';
+}
+
+document.getElementById('btnClearCrop').addEventListener('click',()=>{
+  cropRect=null;drawCropOverlay();updateCropInfo();btnApplyCrop.disabled=true;
+  setStatus('green','Selection cleared — draw a new crop area');
+});
+
+// ── Apply Crop (uses pdf-lib) ──
+btnApplyCrop.addEventListener('click', async()=>{
+  if(!cropRect||!pdfDoc) return;
+  setStatus('blue','Applying crop…');
+  progressWrap2.style.display='block';
+  progressFill2.style.width='10%';
+  btnApplyCrop.disabled=true;
+
+  try{
+    // Convert canvas pixels → PDF points
+    const page = await pdfDoc.getPage(currentPage);
+    const viewport = page.getViewport({scale:zoomLevel});
+    const pdfPage  = await pdfDoc.getPage(currentPage);
+    const baseVP   = pdfPage.getViewport({scale:1});
+    const scaleX   = baseVP.width  / viewport.width;
+    const scaleY   = baseVP.height / viewport.height;
+
+    // PDF coordinate system: origin bottom-left
+    const pdfX  = cropRect.x * scaleX;
+    const pdfY  = baseVP.height - (cropRect.y + cropRect.h) * scaleY;
+    const pdfW  = cropRect.w  * scaleX;
+    const pdfH  = cropRect.h  * scaleY;
+
+    const cropBox = [pdfX, pdfY, pdfX+pdfW, pdfY+pdfH];
+
+    progressFill2.style.width='30%';
+
+    // Load original bytes into pdf-lib
+    const pdfLibDoc = await PDFLib.PDFDocument.load(originalFileBytes, {ignoreEncryption:true});
+    const pages = pdfLibDoc.getPages();
+
+    progressFill2.style.width='60%';
+
+    if(cropApplyMode==='all'){
+      pages.forEach(p=>{
+        p.setCropBox(cropBox[0],cropBox[1],cropBox[2]-cropBox[0],cropBox[3]-cropBox[1]);
+        pageCrops[pages.indexOf(p)+1]=cropBox;
+      });
+      for(let i=1;i<=totalPages;i++) pageCrops[i]=cropBox;
+    } else {
+      const pg = pages[currentPage-1];
+      pg.setCropBox(cropBox[0],cropBox[1],cropBox[2]-cropBox[0],cropBox[3]-cropBox[1]);
+      pageCrops[currentPage]=cropBox;
+    }
+
+    progressFill2.style.width='85%';
+
+    modifiedPdfBytes = await pdfLibDoc.save();
+    progressFill2.style.width='100%';
+
+    updateThumbList();
+    buildThumbList();
+    btnDownload.disabled=false;
+
+    setTimeout(()=>{progressWrap2.style.display='none';progressFill2.style.width='0%';},800);
+    setStatus('green', cropApplyMode==='all'
+      ? `Crop applied to all ${totalPages} pages — click Download to save`
+      : `Crop applied to page ${currentPage} — click Download to save`);
+
+  } catch(err){
+    console.error(err);
+    setStatus('yellow','Error applying crop — please try again');
+    progressWrap2.style.display='none';
+    btnApplyCrop.disabled=false;
+  }
+});
+
+// ── Download ──
+btnDownload.addEventListener('click',()=>{
+  if(!modifiedPdfBytes) return;
+  const blob = new Blob([modifiedPdfBytes],{type:'application/pdf'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='cropped-pdf.pdf'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  setStatus('green','PDF downloaded successfully!');
+});
+
+// ── Reset ──
+document.getElementById('btnReset').addEventListener('click',()=>{
+  editorSection.style.display='none';
+  uploadSection.style.display='block';
+  pdfDoc=null; currentPage=1; zoomLevel=1; cropRect=null;
+  modifiedPdfBytes=null; originalFileBytes=null; pageCrops={};
+  fileInput.value='';
+  btnApplyCrop.disabled=true; btnDownload.disabled=true;
+});
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown',e=>{
+  if(!pdfDoc) return;
+  if(e.key==='ArrowRight') goToPage(currentPage+1);
+  if(e.key==='ArrowLeft')  goToPage(currentPage-1);
+  if(e.key==='+') document.getElementById('btnZoomIn').click();
+  if(e.key==='-') document.getElementById('btnZoomOut').click();
+});
+
+function setStatus(type, msg){
+  statusDot.className='status-dot'+(type==='blue'?' blue':type==='yellow'?' yellow':'');
+  statusText.textContent=msg;
+}
+</script>
 </body>
 </html>
