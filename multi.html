@@ -558,6 +558,91 @@
             .catch(() => showError());
     }
 
+    function parseISO8601Duration(duration) {
+        const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+        const matches = duration.match(regex);
+        const hours = parseInt(matches[1]) || 0;
+        const minutes = parseInt(matches[2]) || 0;
+        const seconds = parseInt(matches[3]) || 0;
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    function calculateTotalWatchTime(videos) {
+        let totalWatchTimeHours = 0;
+        videos.forEach(video => {
+            const duration = video.contentDetails?.duration || 'PT0S';
+            const seconds = parseISO8601Duration(duration);
+            const views = parseInt(video.statistics?.viewCount || 0);
+            totalWatchTimeHours += (seconds * views) / 3600;
+        });
+        
+        if (totalWatchTimeHours >= 1000000) {
+            return (totalWatchTimeHours / 1000000).toFixed(1) + 'M Hours';
+        } else if (totalWatchTimeHours >= 1000) {
+            return (totalWatchTimeHours / 1000).toFixed(1) + 'K Hours';
+        } else {
+            return Math.floor(totalWatchTimeHours) + ' Hours';
+        }
+    }
+
+    function calculateDetailedEarnings(videos) {
+        let totalEarnings = 0;
+        let shortsCount = 0;
+        let longVideoCount = 0;
+        let regularCount = 0;
+        let shortEarnings = 0;
+        let longEarnings = 0;
+        let regularEarnings = 0;
+
+        videos.forEach(video => {
+            const views = parseInt(video.statistics?.viewCount || 0);
+            const duration = video.contentDetails?.duration || 'PT0S';
+            const seconds = parseISO8601Duration(duration);
+            
+            let cpm = 2.5;
+            let earnings = (views / 1000) * cpm;
+
+            if (seconds < 60) {
+                shortsCount++;
+                cpm = 0.25;
+                earnings = (views / 1000) * cpm;
+                shortEarnings += earnings;
+            } else if (seconds >= 300) {
+                longVideoCount++;
+                cpm = 4.0;
+                earnings = (views / 1000) * cpm;
+                longEarnings += earnings;
+            } else {
+                regularCount++;
+                regularEarnings += earnings;
+            }
+
+            totalEarnings += earnings;
+        });
+
+        return {
+            total: totalEarnings,
+            shorts: shortEarnings,
+            long: longEarnings,
+            regular: regularEarnings,
+            shortsCount: shortsCount,
+            longCount: longVideoCount,
+            regularCount: regularCount
+        };
+    }
+
+    function formatDuration(seconds) {
+        if (seconds < 60) return seconds + 's';
+        if (seconds < 3600) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        return `${hours}:${String(mins).padStart(2, '0')}`;
+    }
+
     function renderFullAuditDashboard(channel, searchItems) {
         const snippet = channel.snippet;
         const stats = channel.statistics;
@@ -572,7 +657,13 @@
         const totalSubs = parseInt(stats.subscriberCount) || 0;
         const totalVideos = parseInt(stats.videoCount) || 0;
 
-        const estimatedEarnings = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((totalViews / 1000) * 2.5);
+        // Calculate watch time
+        const totalWatchTime = calculateTotalWatchTime(searchItems);
+        
+        // Calculate detailed earnings
+        const earningsBreakdown = calculateDetailedEarnings(searchItems);
+        const estimatedEarnings = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(earningsBreakdown.total);
+        
         const channelValueNet = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((totalSubs * 0.15) + (totalViews * 0.004));
 
         const formattedViews = new Intl.NumberFormat('en-US').format(totalViews);
@@ -591,42 +682,84 @@
         }
 
         // Process data for highest and lowest performings
-        let topVideos = [...searchItems].slice(0, 10);
-        let lowVideos = [...searchItems].reverse().slice(0, 10);
+        let topVideos = [...searchItems].sort((a, b) => 
+            (parseInt(b.statistics?.viewCount || 0)) - (parseInt(a.statistics?.viewCount || 0))
+        ).slice(0, 10);
         
-        let topVideosHtml = topVideos.map(v => {
-            const vViews = parseInt(v.statistics?.viewCount || 0);
-            const formattedVideoViews = new Intl.NumberFormat('en-US').format(vViews);
-            const thumbUrl = v.snippet.thumbnails?.default?.url || 'https://via.placeholder.com/120x90?text=No+Image';
-            return `
-                <div class="video-item" style="display: flex; gap: 12px; align-items: center; justify-content: flex-start; text-align: left;">
-                    <img src="${thumbUrl}" alt="Thumbnail" style="width: 65px; height: auto; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                    <div style="flex: 1; min-width: 0;">
-                        <div class="video-title" title="${v.snippet.title}">${v.snippet.title}</div>
-                        <div style="font-size: 12px; color: var(--accent-green); font-weight: 700; margin-top: 2px;">📈 ${formattedVideoViews} views</div>
-                    </div>
-                    <span class="video-meta" style="color: var(--accent-green); font-size: 11px; white-space: nowrap; margin-left: 10px;">Top Node</span>
-                </div>
-            `;
-        }).join('') || '<div class="status-msg">No indexed assets discovered in public arrays.</div>';
+        let lowVideos = [...searchItems].sort((a, b) => 
+            (parseInt(a.statistics?.viewCount || 0)) - (parseInt(b.statistics?.viewCount || 0))
+        ).slice(0, 10);
 
-        let lowVideosHtml = lowVideos.map(v => {
-            const vViews = parseInt(v.statistics?.viewCount || 0);
-            const formattedVideoViews = new Intl.NumberFormat('en-US').format(vViews);
-            const thumbUrl = v.snippet.thumbnails?.default?.url || 'https://via.placeholder.com/120x90?text=No+Image';
-            return `
-                <div class="video-item" style="display: flex; gap: 12px; align-items: center; justify-content: flex-start; text-align: left;">
-                    <img src="${thumbUrl}" alt="Thumbnail" style="width: 65px; height: auto; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                    <div style="flex: 1; min-width: 0;">
-                        <div class="video-title" title="${v.snippet.title}">${v.snippet.title}</div>
-                        <div style="font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-top: 2px;">📉 ${formattedVideoViews} views</div>
+        // Top 10 Shorts (< 60 seconds)
+        let topShorts = [...searchItems]
+            .filter(v => {
+                const duration = v.contentDetails?.duration || 'PT0S';
+                const seconds = parseISO8601Duration(duration);
+                return seconds < 60;
+            })
+            .sort((a, b) => (parseInt(b.statistics?.viewCount || 0)) - (parseInt(a.statistics?.viewCount || 0)))
+            .slice(0, 10);
+
+        // Longest 10 Videos (> 300 seconds = 5 minutes)
+        let longestVideos = [...searchItems]
+            .filter(v => {
+                const duration = v.contentDetails?.duration || 'PT0S';
+                const seconds = parseISO8601Duration(duration);
+                return seconds >= 300;
+            })
+            .sort((a, b) => {
+                const aDuration = parseISO8601Duration(a.contentDetails?.duration || 'PT0S');
+                const bDuration = parseISO8601Duration(b.contentDetails?.duration || 'PT0S');
+                return bDuration - aDuration;
+            })
+            .slice(0, 10);
+
+        // Lowest 10 Shorts (< 60 seconds)
+        let lowestShorts = [...topShorts].reverse().slice(0, 10);
+        
+        const renderVideoList = (videos, showDuration = true) => {
+            return videos.map(v => {
+                const vViews = parseInt(v.statistics?.viewCount || 0);
+                const formattedVideoViews = new Intl.NumberFormat('en-US').format(vViews);
+                const thumbUrl = v.snippet.thumbnails?.default?.url || 'https://via.placeholder.com/120x90?text=No+Image';
+                
+                let durationHtml = '';
+                if (showDuration) {
+                    const durationSec = parseISO8601Duration(v.contentDetails?.duration || 'PT0S');
+                    const durationStr = formatDuration(durationSec);
+                    durationHtml = `<div style="font-size: 11px; color: var(--text-muted);">⏱️ ${durationStr}</div>`;
+                }
+
+                return `
+                    <div class="video-item" style="display: flex; gap: 12px; align-items: center; justify-content: flex-start; text-align: left;">
+                        <img src="${thumbUrl}" alt="Thumbnail" style="width: 65px; height: auto; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="video-title" title="${v.snippet.title}">${v.snippet.title}</div>
+                            <div style="font-size: 12px; color: var(--accent-green); font-weight: 700; margin-top: 2px;">📈 ${formattedVideoViews} views</div>
+                            ${durationHtml}
+                        </div>
                     </div>
-                    <span class="video-meta" style="color: var(--accent-blue); font-size: 11px; white-space: nowrap; margin-left: 10px;">Low Edge</span>
-                </div>
-            `;
-        }).join('') || '<div class="status-msg">No indexed low tail data found.</div>';
+                `;
+            }).join('') || '<div class="status-msg">No videos found in this category.</div>';
+        };
+        
+        let topVideosHtml = renderVideoList(topVideos);
+        let lowVideosHtml = renderVideoList(lowVideos);
+        let topShortsHtml = renderVideoList(topShorts);
+        let longestVideosHtml = renderVideoList(longestVideos);
+        let lowestShortsHtml = renderVideoList(lowestShorts);
 
         let dashboardHtml = `
+            <div class="related-tools-section" style="background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: var(--shadow);">
+                <h4 style="color: var(--accent-blue); font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px;">🔗 Explore More Tools (30+ Available)</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                    <a href="https://pooreyoutuber.github.io/" style="display: inline-block; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--accent-blue); text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-align: center;" onmouseover="this.style.background=this.style.color; this.style.color='white'; this.style.borderColor=this.style.borderColor;" onmouseout="this.style.background='var(--input-bg)'; this.style.color='var(--accent-blue)'; this.style.borderColor='var(--border-color)';">📱 Home Page</a>
+                    <a href="https://pooreyoutuber.github.io/multi-browser.html" style="display: inline-block; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--accent-blue); text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-align: center;">🌐 Multi-Browser</a>
+                    <a href="https://pooreyoutuber.github.io/multi-live.html" style="display: inline-block; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--accent-blue); text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-align: center;">🔴 Live Stream</a>
+                    <a href="https://pooreyoutuber.github.io/youtube-sine.html" style="display: inline-block; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--accent-blue); text-decoration: none; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-align: center;">📊 YT Sine</a>
+                </div>
+            </div>
+
             <div class="dashboard-grid">
                 
                 <div class="card">
@@ -650,7 +783,24 @@
                             <span style="color: var(--accent-gold);">${channelValueNet}</span>
                         </div>
                     </div>
-                    <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Calculated analytics leverage predictive RPM averages optimized against structural metrics.</p>
+                    <div style="background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">
+                        <p style="margin: 6px 0;"><strong style="color: var(--text-main);">💼 Earnings by Type:</strong></p>
+                        <p style="margin: 4px 0;">🎬 Long Videos: $${earningsBreakdown.long.toFixed(2)}</p>
+                        <p style="margin: 4px 0;">⚡ Shorts: $${earningsBreakdown.shorts.toFixed(2)}</p>
+                        <p style="margin: 4px 0;">📹 Regular Videos: $${earningsBreakdown.regular.toFixed(2)}</p>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 12px;">Calculated analytics leverage predictive RPM averages optimized against structural metrics.</p>
+                </div>
+
+                <div class="card">
+                    <h3>⏱️ Total Watch Time Analysis</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-box" style="border-color: var(--accent-blue); grid-column: 1 / -1;">
+                            <label style="color: var(--accent-blue);">Aggregate Watch Time</label>
+                            <span style="color: var(--accent-blue); font-size: 1.8rem;">${totalWatchTime}</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">Total hours consumed: Video Duration × Total Views</p>
                 </div>
 
                 <div class="card full-width">
@@ -685,6 +835,27 @@
                     <h3>📉 Lowest 10 Valuation Asset Edges</h3>
                     <div class="video-list">${lowVideosHtml}</div>
                 </div>
+
+                ${topShorts.length > 0 ? `
+                <div class="card">
+                    <h3>⚡ Top 10 Shorts (< 60 seconds)</h3>
+                    <div class="video-list">${topShortsHtml}</div>
+                </div>
+                ` : ''}
+
+                ${longestVideos.length > 0 ? `
+                <div class="card">
+                    <h3>🎬 Top 10 Longest Videos (> 5 minutes)</h3>
+                    <div class="video-list">${longestVideosHtml}</div>
+                </div>
+                ` : ''}
+
+                ${lowestShorts.length > 0 ? `
+                <div class="card">
+                    <h3>📉 Lowest 10 Shorts (by Views)</h3>
+                    <div class="video-list">${lowestShortsHtml}</div>
+                </div>
+                ` : ''}
 
             </div>
         `;
