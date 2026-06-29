@@ -1,517 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PDF Crop Tool – Free Online PDF Cropper | PooreYoutuber</title>
-<meta name="description" content="Free online PDF crop tool. Upload PDF, draw crop area with mouse, apply to current page or all pages, zoom in/out, then download cropped PDF. No login, 100% browser-based.">
-<meta name="keywords" content="pdf crop tool free, crop pdf online, pdf cropper no login, crop pdf pages browser, free pdf crop tool 2026, pdf page cropper free">
-<meta name="author" content="PooreYoutuber">
-<meta name="robots" content="index, follow">
-<meta name="theme-color" content="#2563eb">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & EEAT Meta Tags -->
+    <title>Tool Under Maintenance - Pooreyoutuber</title>
+    <meta name="description" content="This tool is currently undergoing scheduled maintenance and improvements. We apologize for the inconvenience. Explore our other free SEO and YouTube tools.">
+    <meta name="keywords" content="free youtube tools, seo tools, tool maintenance, pooreyoutuber, online web tools">
+    <meta name="robots" content="noindex, follow"> <!-- Maintenance page ko index hone se rokne ke liye, safe for SEO -->
+    <meta name="author" content="Pooreyoutuber">
+    
+    <!-- Open Graph (Facebook / WhatsApp Share) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Tool Under Scheduled Maintenance - Pooreyoutuber">
+    <meta property="og:description" content="We are upgrading this tool to provide you with a faster and more accurate experience. Check back soon!">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tool Under Maintenance - Pooreyoutuber">
+    <meta name="twitter:description" content="We are improving our system. In the meantime, try our other free digital tools.">
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZPMC525FGT');</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #ff0000; /* YouTube/Pooreyoutuber Red Theme */
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
 
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.topbar-left{display:flex;align-items:center;gap:10px;}
-.logo-icon{width:32px;height:32px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:900;}
-.logo-text{font-size:1rem;font-weight:700;color:#1a1a2e;}
-.logo-text span{color:#2563eb;}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.tb-tag{background:#eff6ff;color:#2563eb;font-size:.72rem;font-weight:700;padding:4px 11px;border-radius:20px;border:1px solid #bfdbfe;}
-.home-link{color:#64748b;font-size:.82rem;text-decoration:none;font-weight:600;}
-.home-link:hover{color:#2563eb;}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
 
-.main-wrap{max-width:1280px;margin:0 auto;padding:20px 16px 60px;}
-.ad-wrap{margin:16px 0;}
+        /* Animated Background Grid for Modern Look */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, rgba(255,0,0,0.03) 1px, transparent 1px),
+                        linear-gradient(180deg, rgba(255,0,0,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+        }
 
-/* UPLOAD */
-#uploadSection{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 160px);}
-.upload-card{background:#fff;border:2px dashed #cbd5e1;border-radius:16px;padding:60px 48px;text-align:center;cursor:pointer;transition:all .25s;max-width:520px;width:100%;}
-.upload-card:hover,.upload-card.drag{border-color:#2563eb;background:#eff6ff;}
-.up-icon{font-size:3.5rem;margin-bottom:16px;}
-.upload-card h2{font-size:1.35rem;font-weight:800;margin-bottom:8px;color:#0f172a;}
-.upload-card p{font-size:.9rem;color:#64748b;line-height:1.6;margin-bottom:24px;}
-.btn-choose{display:inline-block;background:#2563eb;color:#fff;padding:12px 32px;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
-.btn-choose:hover{background:#1d4ed8;}
-#fileInput{display:none;}
-.upload-note{display:flex;gap:18px;margin-top:20px;justify-content:center;flex-wrap:wrap;}
-.upload-note span{font-size:.78rem;color:#94a3b8;}
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
 
-/* EDITOR */
-#editorSection{display:none;}
-.editor-grid{display:grid;grid-template-columns:1fr 295px;gap:16px;align-items:start;}
-@media(max-width:900px){.editor-grid{grid-template-columns:1fr;}}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-/* viewer */
-.viewer-panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;}
-.viewer-toolbar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fafafa;flex-wrap:wrap;}
-.v-btn{background:#fff;border:1px solid #e2e8f0;color:#374151;padding:6px 13px;border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;}
-.v-btn:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff;}
-.v-btn:disabled{opacity:.4;cursor:not-allowed;}
-.v-btn.danger:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2;}
-.v-sep{width:1px;height:22px;background:#e2e8f0;flex-shrink:0;}
-.zoom-lbl{font-size:.8rem;font-weight:700;color:#64748b;min-width:42px;text-align:center;}
-.page-lbl{font-size:.8rem;color:#94a3b8;margin-left:auto;font-weight:600;}
+        .icon-wrapper {
+            margin-bottom: 25px;
+        }
 
-.viewer-body{overflow:auto;max-height:calc(100vh - 190px);background:#dde1e7;display:flex;justify-content:center;align-items:flex-start;padding:24px;min-height:400px;}
-.canvas-wrap{position:relative;display:inline-block;flex-shrink:0;box-shadow:0 4px 24px rgba(0,0,0,.18);}
-#pdfCanvas{display:block;background:#fff;}
-#selCanvas{position:absolute;top:0;left:0;cursor:crosshair;}
+        .maintenance-icon {
+            width: 80px;
+            height: 80px;
+            fill: var(--primary-color);
+            animation: pulse 2s infinite alternate;
+        }
 
-.viewer-footer{padding:9px 14px;border-top:1px solid #f1f5f9;font-size:.78rem;color:#94a3b8;display:flex;align-items:center;gap:8px;background:#fafafa;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;flex-shrink:0;}
-.status-dot.busy{background:#f59e0b;animation:pulse .8s ease-in-out infinite;}
-.status-dot.info{background:#2563eb;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,0,0,0.4)); }
+            100% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(255,0,0,0.8)); }
+        }
 
-/* sidebar */
-.sidebar{display:flex;flex-direction:column;gap:12px;}
-.s-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;}
-.s-card-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;margin-bottom:14px;}
+        h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
 
-.coord-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-.coord-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;}
-.coord-label{font-size:.68rem;color:#94a3b8;font-weight:700;text-transform:uppercase;}
-.coord-val{font-size:.92rem;font-weight:800;color:#1e40af;font-variant-numeric:tabular-nums;margin-top:2px;}
+        h1 span {
+            color: var(--primary-color);
+        }
 
-.scope-toggle{display:flex;background:#f1f5f9;border-radius:8px;padding:3px;gap:3px;margin-bottom:12px;}
-.scope-btn{flex:1;padding:8px 6px;font-size:.8rem;font-weight:700;background:transparent;border:none;border-radius:6px;cursor:pointer;color:#64748b;transition:all .18s;text-align:center;}
-.scope-btn.on{background:#fff;color:#1e40af;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
 
-.btn-apply{width:100%;padding:12px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:.92rem;font-weight:800;cursor:pointer;transition:all .2s;}
-.btn-apply:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,99,235,.3);}
-.btn-apply:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+        .content {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            text-align: justify;
+            margin-bottom: 30px;
+        }
 
-.btn-download{width:100%;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:.92rem;font-weight:800;cursor:pointer;transition:all .2s;margin-top:8px;}
-.btn-download:hover{background:#15803d;transform:translateY(-1px);box-shadow:0 4px 14px rgba(22,163,74,.3);}
-.btn-download:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+        .content p {
+            margin-bottom: 15px;
+        }
 
-.btn-clear-s{width:100%;padding:9px;background:transparent;color:#94a3b8;border:1px solid #e2e8f0;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;margin-top:6px;}
-.btn-clear-s:hover{color:#ef4444;border-color:#fca5a5;background:#fef2f2;}
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0000, #b30000);
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
 
-.prog-bar{height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin-top:8px;display:none;}
-.prog-fill{height:100%;background:#2563eb;border-radius:2px;transition:width .3s;width:0%;}
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+            background: linear-gradient(135deg, #cc0000, #800000);
+        }
 
-.page-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;}
-.page-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-size:.82rem;color:#374151;font-weight:600;}
-.page-item:hover{background:#eff6ff;border-color:#bfdbfe;}
-.page-item.cur{background:#eff6ff;border-color:#2563eb;color:#1e40af;}
-.page-num{min-width:20px;color:#94a3b8;font-size:.75rem;}
-.page-cropped{margin-left:auto;font-size:.68rem;color:#16a34a;font-weight:800;}
-.reset-link{display:block;text-align:center;font-size:.8rem;color:#94a3b8;cursor:pointer;padding:8px;border-radius:7px;transition:all .15s;border:1px solid transparent;}
-.reset-link:hover{color:#ef4444;background:#fef2f2;border-color:#fca5a5;}
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
 
-/* description */
-.desc-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:32px;margin-top:20px;}
-.desc-badge{display:inline-block;background:#eff6ff;color:#2563eb;font-size:.72rem;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;border:1px solid #bfdbfe;margin-bottom:14px;}
-.desc-wrap h2{font-size:1.35rem;font-weight:800;color:#0f172a;margin-bottom:12px;}
-.desc-wrap h3{font-size:1rem;font-weight:700;color:#1e293b;margin:20px 0 10px;}
-.desc-wrap p{font-size:.92rem;color:#475569;line-height:1.75;margin-bottom:13px;}
-.steps-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px;margin:16px 0;}
-.step-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:16px;}
-.step-n{font-size:1.7rem;font-weight:900;color:#2563eb;opacity:.2;line-height:1;margin-bottom:8px;}
-.step-box h4{font-size:.85rem;font-weight:700;color:#0f172a;margin-bottom:4px;}
-.step-box p{font-size:.8rem;color:#64748b;margin:0;line-height:1.5;}
-.feat-list{list-style:none;margin:12px 0;}
-.feat-list li{display:flex;gap:9px;align-items:flex-start;margin-bottom:10px;font-size:.88rem;color:#475569;line-height:1.55;}
-.feat-list li .ck{color:#16a34a;flex-shrink:0;margin-top:1px;}
-.feat-list li strong{color:#0f172a;}
-.disc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:15px 18px;margin-top:18px;font-size:.82rem;color:#94a3b8;line-height:1.65;}
-.disc strong{color:#64748b;}
-footer{text-align:center;margin-top:36px;font-size:.78rem;color:#cbd5e1;}
-</style>
+        footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.7rem; }
+            .content { font-size: 0.95rem; text-align: center; }
+            .container { padding: 30px 20px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="logo-icon">✂</div>
-    <div class="logo-text">PDF<span>Crop</span></div>
-  </div>
-  <div class="topbar-right">
-    <span class="tb-tag">Free · No Login</span>
-    <a href="https://pooreyoutuber.github.io" class="home-link">🏠 PooreYoutuber</a>
-  </div>
-</div>
-
-<div class="main-wrap">
-  <div class="ad-wrap">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
-  </div>
-
-  <!-- UPLOAD -->
-  <div id="uploadSection">
-    <div class="upload-card" id="dropZone">
-      <div class="up-icon">📄</div>
-      <h2>Upload your PDF to crop</h2>
-      <p>Click and drag on the PDF preview to select the area you want to keep.<br>Apply to one page or all pages, then download instantly.</p>
-      <label class="btn-choose">Choose PDF File<input type="file" id="fileInput" accept="application/pdf"></label>
-      <div class="upload-note">
-        <span>🔒 100% Private</span>
-        <span>🌐 Browser Only</span>
-        <span>⚡ No Login</span>
-        <span>📄 Any PDF</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- EDITOR -->
-  <div id="editorSection">
-    <div class="editor-grid">
-
-      <div class="viewer-panel">
-        <div class="viewer-toolbar">
-          <button class="v-btn" id="btnZoomOut">− Zoom</button>
-          <span class="zoom-lbl" id="zoomLbl">100%</span>
-          <button class="v-btn" id="btnZoomIn">+ Zoom</button>
-          <div class="v-sep"></div>
-          <button class="v-btn" id="btnPrev">◀ Prev</button>
-          <button class="v-btn" id="btnNext">Next ▶</button>
-          <div class="v-sep"></div>
-          <button class="v-btn danger" id="btnClearSel">Clear Selection</button>
-          <span class="page-lbl" id="pageLbl">1 / 1</span>
-        </div>
-        <div class="viewer-body">
-          <div class="canvas-wrap" id="canvasWrap">
-            <canvas id="pdfCanvas"></canvas>
-            <canvas id="selCanvas"></canvas>
-          </div>
-        </div>
-        <div class="viewer-footer">
-          <div class="status-dot" id="sDot"></div>
-          <span id="sTxt">Upload a PDF to begin</span>
-        </div>
-      </div>
-
-      <div class="sidebar">
-        <div class="s-card">
-          <div class="s-card-title">Crop Selection</div>
-          <div class="coord-grid">
-            <div class="coord-box"><div class="coord-label">X</div><div class="coord-val" id="cX">—</div></div>
-            <div class="coord-box"><div class="coord-label">Y</div><div class="coord-val" id="cY">—</div></div>
-            <div class="coord-box"><div class="coord-label">Width</div><div class="coord-val" id="cW">—</div></div>
-            <div class="coord-box"><div class="coord-label">Height</div><div class="coord-val" id="cH">—</div></div>
-          </div>
-          <div class="s-card-title" style="margin-bottom:8px;">Apply to</div>
-          <div class="scope-toggle">
-            <button class="scope-btn on" id="btnCur">Current Page</button>
-            <button class="scope-btn" id="btnAll">All Pages</button>
-          </div>
-          <button class="btn-apply" id="btnApply" disabled>✂️ Apply Crop</button>
-          <div class="prog-bar" id="prog"><div class="prog-fill" id="progFill"></div></div>
-          <button class="btn-clear-s" id="btnClearSel2">× Clear Selection</button>
+    <div class="container">
+        <!-- Maintenance Gear Icon -->
+        <div class="icon-wrapper">
+            <svg class="maintenance-icon" viewBox="0 0 24 24">
+                <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+            </svg>
         </div>
 
-        <div class="s-card">
-          <div class="s-card-title">Download</div>
-          <p style="font-size:.8rem;color:#94a3b8;margin-bottom:10px;">Apply crop first, then download your PDF.</p>
-          <button class="btn-download" id="btnDownload" disabled>⬇️ Download Cropped PDF</button>
+        <span class="status-badge">Under Maintenance</span>
+        
+        <h1>We are <span>Improving</span> This Tool!</h1>
+
+        <!-- ~400 Words High-Quality English Content with EEAT Optimization -->
+        <div class="content">
+            <p><strong>Dear User,</strong></p>
+            <p>Please accept our dynamic apologies for the temporary disruption. This particular tool is currently undergoing scheduled infrastructure upgrades, database optimizations, and core algorithm enhancements. At Pooreyoutuber, we strive to deliver highly accurate, lightning-fast, and deeply reliable digital utilities. To maintain our standard of quality, periodic updates are essential, and that is exactly what is happening behind the scenes right now.</p>
+            
+            <p>Our engineering team is actively working on integration patches to eliminate existing bugs, improve user interface responsiveness, and ensure maximum compliance with the latest web standards. We deeply care about your workflow and understand how valuable your time is. Encountering a maintenance screen can be frustrating, and we sincerely regret any inconvenience this short breakdown might cause to your ongoing projects or daily tasks.</p>
+            
+            <p>As a platform trusted by creators and digital marketers, our commitment to providing expert-level, authoritative tools remains our highest priority. This maintenance window ensures that when the tool comes back online, it will perform significantly better, offering deeper insights, extended features, and rock-solid stability. We appreciate your immense patience, cooperation, and continuous support as we refine our ecosystem to serve you better.</p>
+            
+            <p>The good news is that you don't have to wait to get your work done! While this specific system gets polished, the rest of our platform is fully operational and running at peak performance.</p>
         </div>
 
-        <div class="s-card">
-          <div class="s-card-title">Pages</div>
-          <div class="page-list" id="pageList"></div>
-        </div>
-
-        <div class="s-card" style="padding:12px;">
-          <div class="reset-link" id="btnReset">✕ Upload Different PDF</div>
-        </div>
-      </div>
-
+        <!-- Call to Action Link -->
+        <a href="https://pooreyoutuber.github.io/" class="btn">Explore Other FREE Tools</a>
     </div>
 
-    <div class="ad-wrap">
-      <ins class="adsbygoogle" style="display:block;text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-7020422718957281" data-ad-slot="2751888085"></ins>
-      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
-    </div>
-  </div>
+    <!-- EEAT & Brand Footer -->
+    <footer>
+        &copy; 2026 <a href="https://pooreyoutuber.github.io/">Pooreyoutuber</a> | All Rights Reserved.
+    </footer>
 
-  <!-- DESCRIPTION -->
-  <div class="desc-wrap">
-    <span class="desc-badge">Free PDF Tool 2026</span>
-    <h2>PDF Crop Tool — Trim Any PDF in Your Browser, No Login Required</h2>
-    <p>The <strong>PDF Crop Tool</strong> lets you visually select and remove unwanted areas from any PDF document — directly inside your web browser. Upload your file, draw a rectangle around the content you want to keep, and download a clean cropped PDF in seconds. Your file never leaves your device — everything runs locally with no server, no account, and no cost.</p>
-    <p>Ideal for trimming margins from scanned receipts, removing headers or footers from documents, cutting out a specific section from a multi-page report, or cleaning up any PDF before sharing or printing.</p>
-    <h3>📖 How to Use</h3>
-    <div class="steps-g">
-      <div class="step-box"><div class="step-n">1</div><h4>Upload PDF</h4><p>Click "Choose PDF File" or drag your file onto the upload area. Loads instantly in your browser.</p></div>
-      <div class="step-box"><div class="step-n">2</div><h4>Draw Crop Area</h4><p>Click and drag directly on the PDF preview to draw a blue selection box around the area you want to keep.</p></div>
-      <div class="step-box"><div class="step-n">3</div><h4>Zoom If Needed</h4><p>Use + / − buttons to zoom in for precision selection on documents with small or dense content.</p></div>
-      <div class="step-box"><div class="step-n">4</div><h4>Choose Pages</h4><p>Toggle "Current Page" or "All Pages" to apply your crop to just one page or the entire document at once.</p></div>
-      <div class="step-box"><div class="step-n">5</div><h4>Apply &amp; Download</h4><p>Click Apply Crop, then Download. Your trimmed PDF saves directly to your device in seconds.</p></div>
-    </div>
-    <h3>🔒 Why It's Safe &amp; Private</h3>
-    <ul class="feat-list">
-      <li><span class="ck">✅</span><div><strong>100% Browser-Based:</strong> Your PDF is processed entirely in your browser. Nothing is uploaded to any server or cloud service at any point.</div></li>
-      <li><span class="ck">✅</span><div><strong>No Login or Account:</strong> Open and use immediately — no email, no signup, no password of any kind required.</div></li>
-      <li><span class="ck">✅</span><div><strong>Visual Mouse Selection:</strong> Draw your crop rectangle visually on the PDF. What you select is exactly what you get in the cropped output.</div></li>
-      <li><span class="ck">✅</span><div><strong>Zoom Controls:</strong> Zoom from 25% to 400% for pixel-accurate selections on any document type.</div></li>
-      <li><span class="ck">✅</span><div><strong>One Page or All Pages:</strong> Apply your crop to a single page or every page in one click.</div></li>
-      <li><span class="ck">✅</span><div><strong>Standard PDF Output:</strong> Downloads as a clean, valid PDF — no format conversion or quality loss.</div></li>
-      <li><span class="ck">✅</span><div><strong>Works on Any PDF:</strong> Receipts, invoices, contracts, scanned pages, forms — any standard PDF is supported.</div></li>
-    </ul>
-    <div class="disc">
-      <strong>Please Note:</strong> This PDF Crop Tool operates entirely within your browser. No files are uploaded, stored, or shared with any server or third party. You are solely responsible for the documents you process. This tool does not collect or store any personal data. Use at your own discretion. Happy editing! ✂️
-    </div>
-  </div>
-
-  <div class="ad-wrap">
-    <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="3405888966"></ins>
-    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
-  </div>
-</div>
-
-<footer>© 2026 PooreYoutuber · Free Online Tools · PDF Crop Tool</footer>
-
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-let pdfDoc=null,pdfBytes=null,pageNum=1,totalPages=0,zoom=1.2;
-let selection=null,scope='current',croppedMap={},finalPdfBytes=null;
-let drawing=false,dragOrigin={x:0,y:0},renderTask=null;
-
-const fileInput=document.getElementById('fileInput');
-const dropZone=document.getElementById('dropZone');
-const uploadSec=document.getElementById('uploadSection');
-const editorSec=document.getElementById('editorSection');
-const pdfCanvas=document.getElementById('pdfCanvas');
-const pdfCtx=pdfCanvas.getContext('2d');
-const selCanvas=document.getElementById('selCanvas');
-const selCtx=selCanvas.getContext('2d');
-const canvasWrap=document.getElementById('canvasWrap');
-const zoomLbl=document.getElementById('zoomLbl');
-const pageLbl=document.getElementById('pageLbl');
-const sDot=document.getElementById('sDot');
-const sTxt=document.getElementById('sTxt');
-const pageListEl=document.getElementById('pageList');
-const btnApply=document.getElementById('btnApply');
-const btnDownload=document.getElementById('btnDownload');
-const prog=document.getElementById('prog');
-const progFill=document.getElementById('progFill');
-const cX=document.getElementById('cX'),cY=document.getElementById('cY');
-const cW=document.getElementById('cW'),cH=document.getElementById('cH');
-
-/* ── Upload ── */
-dropZone.addEventListener('click',()=>fileInput.click());
-dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')openFile(f);});
-fileInput.addEventListener('change',()=>{if(fileInput.files[0])openFile(fileInput.files[0]);});
-
-async function openFile(file){
-  setStatus('busy','Loading PDF…');
-  const buf=await file.arrayBuffer();
-  pdfBytes=buf.slice(0);
-  pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;
-  totalPages=pdfDoc.numPages;
-  pageNum=1;selection=null;croppedMap={};finalPdfBytes=null;
-  btnApply.disabled=true;btnDownload.disabled=true;
-  uploadSec.style.display='none';editorSec.style.display='block';
-  buildPageList();
-  await renderPage(pageNum);
-}
-
-/* ── Render ── */
-async function renderPage(n){
-  if(renderTask){try{renderTask.cancel();}catch(_){}renderTask=null;}
-  setStatus('busy','Rendering page '+n+'…');
-  const page=await pdfDoc.getPage(n);
-  const vp=page.getViewport({scale:zoom});
-  pdfCanvas.width=vp.width;pdfCanvas.height=vp.height;
-  selCanvas.width=vp.width;selCanvas.height=vp.height;
-  canvasWrap.style.width=vp.width+'px';canvasWrap.style.height=vp.height+'px';
-  renderTask=page.render({canvasContext:pdfCtx,viewport:vp});
-  await renderTask.promise;renderTask=null;
-  pageLbl.textContent=n+' / '+totalPages;
-  zoomLbl.textContent=Math.round(zoom*100)+'%';
-  selection=null;drawSel();updateCoords();btnApply.disabled=true;
-  refreshPageList();
-  setStatus('info','Click and drag on the PDF to draw crop area');
-}
-
-/* ── Mouse drawing ── */
-function getPos(e){
-  const r=selCanvas.getBoundingClientRect();
-  const sx=selCanvas.width/r.width,sy=selCanvas.height/r.height;
-  const cx=e.touches?e.touches[0].clientX:e.clientX;
-  const cy=e.touches?e.touches[0].clientY:e.clientY;
-  return{x:(cx-r.left)*sx,y:(cy-r.top)*sy};
-}
-selCanvas.addEventListener('mousedown',e=>{if(!pdfDoc)return;drawing=true;dragOrigin=getPos(e);selection=null;drawSel();});
-selCanvas.addEventListener('mousemove',e=>{
-  if(!drawing)return;
-  const p=getPos(e);
-  selection={x:Math.min(dragOrigin.x,p.x),y:Math.min(dragOrigin.y,p.y),w:Math.abs(p.x-dragOrigin.x),h:Math.abs(p.y-dragOrigin.y)};
-  drawSel();updateCoords();
-});
-selCanvas.addEventListener('mouseup',finishDraw);
-selCanvas.addEventListener('mouseleave',e=>{if(drawing)finishDraw(e);});
-selCanvas.addEventListener('touchstart',e=>{e.preventDefault();selCanvas.dispatchEvent(new MouseEvent('mousedown',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
-selCanvas.addEventListener('touchmove',e=>{e.preventDefault();selCanvas.dispatchEvent(new MouseEvent('mousemove',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
-selCanvas.addEventListener('touchend',e=>{e.preventDefault();selCanvas.dispatchEvent(new MouseEvent('mouseup',{}));},{passive:false});
-
-function finishDraw(){
-  drawing=false;
-  if(selection&&selection.w>8&&selection.h>8){btnApply.disabled=false;setStatus('info','Selection ready — click Apply Crop');}
-  else{selection=null;drawSel();updateCoords();btnApply.disabled=true;setStatus('info','Too small — drag a larger area');}
-}
-
-function drawSel(){
-  selCtx.clearRect(0,0,selCanvas.width,selCanvas.height);
-  if(!selection)return;
-  const{x,y,w,h}=selection;
-  selCtx.fillStyle='rgba(0,0,0,0.4)';
-  selCtx.fillRect(0,0,selCanvas.width,selCanvas.height);
-  selCtx.clearRect(x,y,w,h);
-  selCtx.strokeStyle='#2563eb';selCtx.lineWidth=2;selCtx.setLineDash([7,4]);
-  selCtx.strokeRect(x,y,w,h);selCtx.setLineDash([]);
-  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([cx,cy])=>{
-    selCtx.fillStyle='#fff';selCtx.fillRect(cx-5,cy-5,10,10);
-    selCtx.strokeStyle='#2563eb';selCtx.lineWidth=2;selCtx.strokeRect(cx-5,cy-5,10,10);
-  });
-  [[x+w/2,y],[x+w/2,y+h],[x,y+h/2],[x+w,y+h/2]].forEach(([cx,cy])=>{
-    selCtx.fillStyle='#2563eb';selCtx.beginPath();selCtx.arc(cx,cy,4,0,Math.PI*2);selCtx.fill();
-  });
-}
-
-function updateCoords(){
-  if(!selection){cX.textContent=cY.textContent=cW.textContent=cH.textContent='—';return;}
-  cX.textContent=Math.round(selection.x)+'px';cY.textContent=Math.round(selection.y)+'px';
-  cW.textContent=Math.round(selection.w)+'px';cH.textContent=Math.round(selection.h)+'px';
-}
-
-function clearSel(){selection=null;drawSel();updateCoords();btnApply.disabled=true;setStatus('info','Selection cleared — draw new area');}
-document.getElementById('btnClearSel').addEventListener('click',clearSel);
-document.getElementById('btnClearSel2').addEventListener('click',clearSel);
-
-/* ── Zoom ── */
-document.getElementById('btnZoomIn').addEventListener('click',async()=>{zoom=Math.min(4,parseFloat((zoom+0.25).toFixed(2)));await renderPage(pageNum);});
-document.getElementById('btnZoomOut').addEventListener('click',async()=>{zoom=Math.max(0.25,parseFloat((zoom-0.25).toFixed(2)));await renderPage(pageNum);});
-
-/* ── Nav ── */
-document.getElementById('btnPrev').addEventListener('click',()=>{if(pageNum>1){pageNum--;renderPage(pageNum);}});
-document.getElementById('btnNext').addEventListener('click',()=>{if(pageNum<totalPages){pageNum++;renderPage(pageNum);}});
-
-/* ── Scope ── */
-document.getElementById('btnCur').addEventListener('click',function(){scope='current';this.classList.add('on');document.getElementById('btnAll').classList.remove('on');});
-document.getElementById('btnAll').addEventListener('click',function(){scope='all';this.classList.add('on');document.getElementById('btnCur').classList.remove('on');});
-
-/* ── APPLY CROP (render → crop canvas → embed as image) ── */
-btnApply.addEventListener('click',async()=>{
-  if(!selection||!pdfDoc)return;
-  btnApply.disabled=true;prog.style.display='block';
-  setStatus('busy','Applying crop…');
-
-  try{
-    const pagesToCrop=scope==='all'?Array.from({length:totalPages},(_,i)=>i+1):[pageNum];
-    const{PDFDocument}=PDFLib;
-    const newDoc=await PDFDocument.create();
-    const srcDoc=await PDFDocument.load(pdfBytes);
-    const offC=document.createElement('canvas');
-    const offX=offC.getContext('2d');
-
-    for(let i=1;i<=totalPages;i++){
-      progFill.style.width=Math.round((i/totalPages)*88)+'%';
-      setStatus('busy','Processing page '+i+' of '+totalPages+'…');
-
-      if(pagesToCrop.includes(i)){
-        const pg=await pdfDoc.getPage(i);
-        const vp=pg.getViewport({scale:zoom});
-        offC.width=vp.width;offC.height=vp.height;
-        offX.fillStyle='#ffffff';offX.fillRect(0,0,offC.width,offC.height);
-        await pg.render({canvasContext:offX,viewport:vp}).promise;
-
-        const cx=Math.max(0,Math.round(selection.x));
-        const cy=Math.max(0,Math.round(selection.y));
-        const cw=Math.min(Math.round(selection.w),offC.width-cx);
-        const ch=Math.min(Math.round(selection.h),offC.height-cy);
-
-        const cc=document.createElement('canvas');cc.width=cw;cc.height=ch;
-        cc.getContext('2d').drawImage(offC,cx,cy,cw,ch,0,0,cw,ch);
-
-        const dataUrl=cc.toDataURL('image/jpeg',0.95);
-        const b64=dataUrl.split(',')[1];
-        const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-        const img=await newDoc.embedJpg(bytes);
-        const np=newDoc.addPage([cw,ch]);
-        np.drawImage(img,{x:0,y:0,width:cw,height:ch});
-        croppedMap[i]=true;
-      }else{
-        const[cp]=await newDoc.copyPages(srcDoc,[i-1]);
-        newDoc.addPage(cp);
-      }
-    }
-
-    progFill.style.width='100%';
-    finalPdfBytes=await newDoc.save();
-    btnDownload.disabled=false;
-    refreshPageList();
-    setStatus('info',scope==='all'?'Crop applied to all '+totalPages+' pages — ready to download':'Page '+pageNum+' cropped — ready to download');
-    setTimeout(()=>{prog.style.display='none';progFill.style.width='0%';},700);
-  }catch(err){
-    console.error(err);
-    setStatus('busy','Error — please try again');
-    btnApply.disabled=false;prog.style.display='none';
-  }
-});
-
-/* ── Download ── */
-btnDownload.addEventListener('click',()=>{
-  if(!finalPdfBytes)return;
-  const blob=new Blob([finalPdfBytes],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='cropped.pdf';a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),4000);
-  setStatus('info','PDF downloaded successfully!');
-});
-
-/* ── Page list ── */
-function buildPageList(){
-  pageListEl.innerHTML='';
-  for(let i=1;i<=totalPages;i++){
-    const d=document.createElement('div');
-    d.className='page-item'+(i===pageNum?' cur':'');
-    d.innerHTML='<span class="page-num">'+i+'</span> Page '+i+(croppedMap[i]?'<span class="page-cropped">✓ Cropped</span>':'');
-    d.addEventListener('click',()=>{pageNum=i;renderPage(i);});
-    pageListEl.appendChild(d);
-  }
-}
-function refreshPageList(){buildPageList();}
-
-/* ── Reset ── */
-document.getElementById('btnReset').addEventListener('click',()=>{
-  editorSec.style.display='none';uploadSec.style.display='flex';
-  pdfDoc=null;pdfBytes=null;pageNum=1;zoom=1.2;
-  selection=null;croppedMap={};finalPdfBytes=null;fileInput.value='';
-  btnApply.disabled=true;btnDownload.disabled=true;
-  selCtx.clearRect(0,0,selCanvas.width,selCanvas.height);
-  pdfCtx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);
-});
-
-/* ── Keyboard ── */
-document.addEventListener('keydown',e=>{
-  if(!pdfDoc)return;
-  if(e.key==='ArrowRight'&&pageNum<totalPages){pageNum++;renderPage(pageNum);}
-  if(e.key==='ArrowLeft'&&pageNum>1){pageNum--;renderPage(pageNum);}
-  if(e.key==='='||e.key==='+')document.getElementById('btnZoomIn').click();
-  if(e.key==='-')document.getElementById('btnZoomOut').click();
-  if(e.key==='Escape')clearSel();
-});
-
-function setStatus(type,msg){
-  sDot.className='status-dot'+(type==='busy'?' busy':type==='info'?' info':'');
-  sTxt.textContent=msg;
-}
-</script>
 </body>
 </html>
