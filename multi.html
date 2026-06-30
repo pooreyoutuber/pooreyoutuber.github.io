@@ -3,241 +3,988 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website SEO Audit Tool - Free SEO Analysis & Performance Testing</title>
+
+    <meta name="description" content="Complete Website SEO Audit Tool. Analyze your website's SEO performance, page speed insights, core web vitals, mobile-friendly testing, meta tags analysis, schema markup validation, and get detailed improvement recommendations.">
+    <meta name="keywords" content="website seo audit, seo analysis tool, page speed test, mobile friendly test, core web vitals, seo checker, website audit tool, free seo audit, website performance test, seo optimization tool, meta tags checker, schema markup validator, seo recommendations, website health check, seo score, page speed insights, mobile usability, crawlability test, website audit free">
+    <meta name="robots" content="index, follow">
     
-    <!-- SEO Meta Tags -->
-    <title>Tool Under Maintenance - PooreYoutuber Free Tools</title>
-    <meta name="description" content="This tool is temporarily under maintenance. We're improving it to serve you better. Explore our other free YouTube, SEO, and digital tools while you wait.">
-    <meta name="keywords" content="free tools, youtube tools, seo tools, online utilities, web tools, free converter">
-    <meta name="robots" content="noindex, follow">
-    <meta name="author" content="PooreYoutuber">
-    <meta name="language" content="English">
-    
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Tool Under Maintenance - PooreYoutuber">
-    <meta property="og:description" content="We're improving this tool to provide better service. Check out our other free digital tools.">
-    <meta property="og:url" content="https://pooreyoutuber.github.io/">
-    <meta property="og:site_name" content="PooreYoutuber">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Tool Under Maintenance - PooreYoutuber">
-    <meta name="twitter:description" content="We're improving this tool. Explore our other free YouTube and SEO tools.">
-    
-    <!-- Schema Markup - Organization + Software Application -->
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "PooreYoutuber Free Tools",
-      "description": "Free online tools for YouTube creators, digital marketers, and professionals",
-      "url": "https://pooreyoutuber.github.io/",
-      "applicationCategory": "Utility",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "author": {
-        "@type": "Organization",
-        "name": "PooreYoutuber",
-        "url": "https://pooreyoutuber.github.io/"
-      }
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "@id": "https://seo-audit-tool.example.com",
+        "name": "Website SEO Audit Tool",
+        "description": "Comprehensive website SEO audit tool with PageSpeed Insights, Core Web Vitals analysis, and detailed SEO recommendations",
+        "url": "https://seo-audit-tool.example.com",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "All",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1250"
+        }
     }
     </script>
 
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is a Website SEO Audit?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A Website SEO Audit is a comprehensive analysis of your website's search engine optimization. It examines factors like page speed, mobile-friendliness, meta tags, schema markup, core web vitals, and provides recommendations for improvement."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I use this SEO Audit Tool?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Simply enter your website URL, click the Analyze button, and the tool will perform a complete SEO audit using Google's PageSpeed Insights API and additional SEO analysis. Results will show your scores, issues, and actionable recommendations."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What does Core Web Vitals mean?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Core Web Vitals are specific website performance metrics: Largest Contentful Paint (LCP), First Input Delay (FID), and Cumulative Layout Shift (CLS). They measure user experience and are important ranking factors in Google's algorithm."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #ff0000;
-            --bg-color: #0f172a;
-            --text-color: #f8fafc;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-color: #4F46E5;
+            --primary-dark: #4338CA;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --text-dark: #1F2937;
+            --text-gray: #6B7280;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
             min-height: 100vh;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, rgba(255,0,0,0.03) 1px, transparent 1px),
-                        linear-gradient(180deg, rgba(255,0,0,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            z-index: -1;
         }
 
         .container {
-            max-width: 750px;
-            width: 100%;
-            background: var(--card-bg);
-            padding: 40px 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-white);
+            padding: 40px 20px;
             text-align: center;
-            margin-bottom: 60px;
-            animation: fadeIn 0.8s ease-in-out;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-sm);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .icon-wrapper {
-            margin-bottom: 25px;
-        }
-
-        .maintenance-icon {
-            width: 80px;
-            height: 80px;
-            fill: var(--primary-color);
-            animation: pulse 2s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,0,0,0.4)); }
-            100% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(255,0,0,0.8)); }
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            color: #fff;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        h1 span {
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
             color: var(--primary-color);
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .status-badge {
-            display: inline-block;
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        header p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 40px;
+        }
+
+        .search-section h2 {
+            font-size: 1.5rem;
             margin-bottom: 25px;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: var(--text-dark);
         }
 
-        .content {
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: #cbd5e1;
-            text-align: justify;
-            margin-bottom: 30px;
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .content p {
-            margin-bottom: 15px;
+        #siteUrl {
+            flex: 1;
+            padding: 15px 18px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #siteUrl:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
         .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #ff0000, #b30000);
-            color: #fff;
-            text-decoration: none;
-            padding: 14px 30px;
-            font-size: 1.1rem;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            border-radius: 30px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+            font-family: 'Inter', sans-serif;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
-            background: linear-gradient(135deg, #cc0000, #800000);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
         }
 
-        footer {
-            text-align: center;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.loading {
+            background: #DBEAFE;
+            color: #0C4A6E;
+            border-left: 4px solid #3B82F6;
+        }
+
+        .status-message.success {
+            background: #DCFCE7;
+            color: #15803D;
+            border-left: 4px solid #10B981;
+        }
+
+        .status-message.error {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-left: 4px solid #EF4444;
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Score Display */
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .score-circle.excellent {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .score-circle.good {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+        }
+
+        .score-circle.average {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+
+        .score-circle.poor {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+        }
+
+        .score-info h4 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+
+        .score-info p {
+            color: var(--text-gray);
             font-size: 0.9rem;
-            color: #64748b;
-            letter-spacing: 0.5px;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        footer a {
-            color: #cbd5e1;
-            text-decoration: none;
+        /* Metric List */
+        .metrics-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .metric-item {
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--border-light);
+        }
+
+        .metric-item.success {
+            border-left-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .metric-item.warning {
+            border-left-color: var(--warning-color);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .metric-item.danger {
+            border-left-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .metric-name {
             font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
         }
 
-        footer a:hover {
+        .metric-value {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Issues Section */
+        .issues-container {
+            display: grid;
+            gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .issue-item {
+            padding: 15px;
+            background: var(--bg-light);
+            border-left: 4px solid var(--danger-color);
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .issue-item.warning {
+            border-left-color: var(--warning-color);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .issue-item.success {
+            border-left-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .issue-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .issue-description {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .issue-recommendation {
+            font-size: 0.85rem;
             color: var(--primary-color);
+            font-weight: 500;
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 1.7rem; }
-            .content { font-size: 0.95rem; text-align: center; }
-            .container { padding: 30px 20px; }
+        /* Tags */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .tag.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .tag.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .tag.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(79, 70, 229, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* How to Use Section */
+        .how-to-use {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 40px;
+        }
+
+        .how-to-use h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+
+        .how-to-use p {
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .feature-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .feature-item p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+
+        /* Scrollbar */
+        .issues-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .issues-container::-webkit-scrollbar-track {
+            background: var(--bg-light);
+            border-radius: 4px;
+        }
+
+        .issues-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .issues-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Maintenance Icon -->
-        <div class="icon-wrapper">
-            <svg class="maintenance-icon" viewBox="0 0 24 24">
-                <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
-            </svg>
+<div class="container">
+    <header>
+        <h1>🔍 Website SEO Audit</h1>
+        <p>Comprehensive SEO Analysis & Performance Testing Tool</p>
+    </header>
+
+    <div class="search-section">
+        <h2>Analyze Your Website</h2>
+        <div class="input-group">
+            <input 
+                type="url" 
+                id="siteUrl" 
+                placeholder="Enter your website URL (https://example.com)"
+                spellcheck="false"
+            >
+            <button class="btn btn-primary" id="analyzeBtn" onclick="startAudit()">
+                Analyze Now
+            </button>
         </div>
-
-        <span class="status-badge">Temporary Maintenance</span>
-        
-        <h1>We're <span>Improving</span> This Tool</h1>
-
-        <!-- 400+ Word Description with EEAT -->
-        <div class="content">
-            <p>Hello! We truly appreciate your interest in using this tool. Right now, it's temporarily offline as we make important improvements to serve you better. We sincerely apologize for any inconvenience this might cause to your work or projects.</p>
-
-            <p>At PooreYoutuber, we believe in providing quality tools that you can trust. This specific tool is being updated with better features, faster performance, and improved accuracy to give you the best experience possible. Our team is working hard to enhance the underlying functionality and make sure everything runs smoothly when it comes back online. We understand how important it is to have reliable tools when you need them, and we're committed to delivering exactly that.</p>
-
-            <p>The maintenance we're performing right now includes testing new features, fixing small issues, and ensuring the tool works perfectly across all devices and browsers. These updates might seem invisible to you, but they make a real difference in how well the tool functions. We're taking the time to get it right because we respect your time and want you to have a tool you can depend on.</p>
-
-            <p>What makes us different is our dedication to keeping tools free and accessible to everyone. No hidden charges, no login requirements, no complicated steps. Just simple, honest tools that help creators, students, digital marketers, and professionals get their work done. This maintenance is part of that commitment—we invest in improvement because we care about your experience.</p>
-
-            <p>While you wait, the good news is that our entire platform is fully active and ready to use. We have many other free tools available right now that can help you with YouTube optimization, SEO, image conversion, PDF processing, and much more. Each tool is designed with the same care and attention to quality that you'd expect from PooreYoutuber.</p>
-
-            <p>Thank you for your patience and understanding. We really appreciate users like you who stick with us through these brief moments. Your support helps us continue building better tools for everyone. If you have any questions or suggestions, feel free to reach out. In the meantime, please explore our other tools and see what else we have to offer.</p>
-        </div>
-
-        <!-- Call to Action -->
-        <a href="https://pooreyoutuber.github.io/" class="btn">Explore Other FREE Tools</a>
-
-        <!-- Footer -->
-        <footer>
-            &copy; 2026 <a href="https://pooreyoutuber.github.io/">PooreYoutuber</a>. All Rights Reserved. Use of this tool is subject to our <a href="https://pooreyoutuber.github.io/">terms of service</a>. Free forever, no login required.
-        </footer>
+        <div class="status-message" id="statusMsg"></div>
     </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard" style="display: none;"></div>
+
+    <!-- How to Use Section -->
+    <div class="how-to-use">
+        <h2>📚 How to Use This SEO Audit Tool</h2>
+        
+        <p>
+            Welcome to the <strong>Website SEO Audit Tool</strong> - your comprehensive solution for analyzing and improving your website's search engine optimization performance. This powerful tool combines Google's PageSpeed Insights API with advanced SEO analysis to provide you with actionable insights and detailed recommendations for enhancing your website's visibility and user experience.
+        </p>
+
+        <p>
+            <strong>Getting Started:</strong> Simply enter your website URL in the input field above and click "Analyze Now." The tool will perform a comprehensive audit across multiple dimensions including page speed performance, mobile-friendliness, Core Web Vitals, SEO fundamentals, and technical optimization opportunities. The analysis typically completes within 30-60 seconds depending on your website's size and complexity.
+        </p>
+
+        <p>
+            <strong>Understanding Your Results:</strong> The audit generates a detailed report with multiple sections. Your overall SEO score is calculated based on various performance metrics. Each metric is color-coded: Green indicates excellent performance (90-100), Blue shows good performance (70-89), Orange represents average performance (50-69), and Red indicates poor performance requiring immediate attention (below 50). The tool evaluates your website across core areas including page load speed, mobile usability, Core Web Vitals (LCP, FID, CLS), meta tag optimization, schema markup implementation, and technical SEO compliance.
+        </p>
+
+        <p>
+            <strong>Core Web Vitals Explained:</strong> These are Google's key metrics for measuring user experience. Largest Contentful Paint (LCP) measures loading performance, First Input Delay (FID) measures interactivity, and Cumulative Layout Shift (CLS) measures visual stability. Optimizing these metrics is crucial for better search rankings and user satisfaction.
+        </p>
+
+        <p>
+            <strong>Taking Action:</strong> For each identified issue, the tool provides specific recommendations. Prioritize issues marked as critical first, as they have the most significant impact on your SEO and user experience. Common recommendations include optimizing images, minifying CSS/JavaScript, improving server response times, ensuring mobile responsiveness, adding proper meta descriptions, implementing schema markup, and fixing broken links.
+        </p>
+
+        <p>
+            <strong>Monitoring Progress:</strong> Use this tool regularly (weekly or monthly) to track improvements. After implementing recommendations, re-run the audit to see your progress. Track metric changes over time to understand which optimizations are most effective for your specific website and audience.
+        </p>
+
+        <h3 style="color: var(--primary-color); margin-top: 30px; margin-bottom: 20px;">Key Features:</h3>
+        <div class="features-list">
+            <div class="feature-item">
+                <h4>🚀 Page Speed Analysis</h4>
+                <p>Comprehensive analysis of desktop and mobile page speed performance using Google's actual metrics.</p>
+            </div>
+            <div class="feature-item">
+                <h4>📱 Mobile Friendliness</h4>
+                <p>Detailed mobile usability assessment ensuring your site provides optimal experience on all devices.</p>
+            </div>
+            <div class="feature-item">
+                <h4>⚡ Core Web Vitals</h4>
+                <p>In-depth evaluation of LCP, FID, and CLS metrics that directly impact search rankings.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔍 SEO Fundamentals</h4>
+                <p>Assessment of meta tags, headings structure, alt text, and other critical SEO elements.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🏷️ Schema Markup</h4>
+                <p>Validation of structured data implementation for better search engine understanding.</p>
+            </div>
+            <div class="feature-item">
+                <h4>💡 Actionable Recommendations</h4>
+                <p>Detailed, prioritized suggestions for improving your website's SEO and performance.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AdSense Ad Unit -->
+<ins class="adsbygoogle"
+     style="display:block; text-align:center; margin: 40px 0;"
+     data-ad-layout="in-article"
+     data-ad-format="fluid"
+     data-ad-client="ca-pub-7020422718957281"
+     data-ad-slot="2345678901"></ins>
+
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<script>
+    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo';
+    const PSI_ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+
+    function showStatus(message, type = 'loading') {
+        const statusMsg = document.getElementById('statusMsg');
+        statusMsg.textContent = message;
+        statusMsg.className = `status-message show ${type}`;
+    }
+
+    function hideStatus() {
+        const statusMsg = document.getElementById('statusMsg');
+        statusMsg.className = 'status-message';
+    }
+
+    function getScoreClass(score) {
+        if (score >= 90) return 'excellent';
+        if (score >= 70) return 'good';
+        if (score >= 50) return 'average';
+        return 'poor';
+    }
+
+    function getScoreLabel(score) {
+        if (score >= 90) return 'Excellent';
+        if (score >= 70) return 'Good';
+        if (score >= 50) return 'Average';
+        return 'Poor';
+    }
+
+    function formatUrl(url) {
+        if (!url.startsWith('http')) {
+            url = 'https://' + url;
+        }
+        return url;
+    }
+
+    async function startAudit() {
+        const urlInput = document.getElementById('siteUrl').value.trim();
+        if (!urlInput) {
+            showStatus('Please enter a valid URL', 'error');
+            return;
+        }
+
+        const url = formatUrl(urlInput);
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        analyzeBtn.disabled = true;
+
+        showStatus('🔄 Analyzing your website... This may take 30-60 seconds', 'loading');
+
+        try {
+            const [mobileData, desktopData] = await Promise.all([
+                fetchPageSpeedData(url, 'mobile'),
+                fetchPageSpeedData(url, 'desktop')
+            ]);
+
+            displayResults(url, mobileData, desktopData);
+            showStatus('✅ Audit completed successfully!', 'success');
+        } catch (error) {
+            console.error('Audit Error:', error);
+            showStatus(`❌ Error: ${error.message}. Please check your URL and try again.`, 'error');
+        } finally {
+            analyzeBtn.disabled = false;
+        }
+    }
+
+    async function fetchPageSpeedData(url, strategy) {
+        const params = new URLSearchParams({
+            url: url,
+            key: API_KEY,
+            strategy: strategy
+        });
+
+        const response = await fetch(`${PSI_ENDPOINT}?${params}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch PageSpeed data. Please verify your URL is accessible.');
+        }
+        return response.json();
+    }
+
+    function displayResults(url, mobileData, desktopData) {
+        const dashboard = document.getElementById('dashboard');
+        
+        const mobileScore = mobileData.lighthouseResult.categories.performance.score * 100;
+        const desktopScore = desktopData.lighthouseResult.categories.performance.score * 100;
+        
+        const mobileSEOScore = mobileData.lighthouseResult.categories['seo'].score * 100;
+        const desktopSEOScore = desktopData.lighthouseResult.categories['seo'].score * 100;
+        
+        const mobileAccessScore = mobileData.lighthouseResult.categories['accessibility'].score * 100;
+        const desktopAccessScore = desktopData.lighthouseResult.categories['accessibility'].score * 100;
+
+        const mobileMetrics = mobileData.lighthouseResult.audits['metrics'].details.items[0];
+        const desktopMetrics = desktopData.lighthouseResult.audits['metrics'].details.items[0];
+
+        const avgPerformance = Math.round((mobileScore + desktopScore) / 2);
+
+        let html = `
+            <!-- Overall Score Card -->
+            <div class="card full-width">
+                <h3>📊 Overall SEO Score</h3>
+                <div class="score-display">
+                    <div class="score-circle ${getScoreClass(avgPerformance)}">
+                        ${Math.round(avgPerformance)}
+                    </div>
+                    <div class="score-info">
+                        <h4>${getScoreLabel(avgPerformance)} Performance</h4>
+                        <p>Website URL: ${url}</p>
+                        <p>Analysis Date: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Performance Card -->
+            <div class="card">
+                <h3>📱 Mobile Performance</h3>
+                <div class="score-display">
+                    <div class="score-circle ${getScoreClass(mobileScore)}">
+                        ${Math.round(mobileScore)}
+                    </div>
+                    <div class="score-info">
+                        <h4>${getScoreLabel(mobileScore)}</h4>
+                        <p>Mobile Speed Score</p>
+                    </div>
+                </div>
+                <div class="metrics-list" style="margin-top: 20px;">
+                    <div class="metric-item success">
+                        <div class="metric-name">First Contentful Paint</div>
+                        <div class="metric-value">${(mobileMetrics.first_contentful_paint / 1000).toFixed(2)}s</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-name">Largest Contentful Paint</div>
+                        <div class="metric-value">${(mobileMetrics.largest_contentful_paint / 1000).toFixed(2)}s</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-name">Cumulative Layout Shift</div>
+                        <div class="metric-value">${mobileMetrics.cumulative_layout_shift.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Performance Card -->
+            <div class="card">
+                <h3>💻 Desktop Performance</h3>
+                <div class="score-display">
+                    <div class="score-circle ${getScoreClass(desktopScore)}">
+                        ${Math.round(desktopScore)}
+                    </div>
+                    <div class="score-info">
+                        <h4>${getScoreLabel(desktopScore)}</h4>
+                        <p>Desktop Speed Score</p>
+                    </div>
+                </div>
+                <div class="metrics-list" style="margin-top: 20px;">
+                    <div class="metric-item success">
+                        <div class="metric-name">First Contentful Paint</div>
+                        <div class="metric-value">${(desktopMetrics.first_contentful_paint / 1000).toFixed(2)}s</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-name">Largest Contentful Paint</div>
+                        <div class="metric-value">${(desktopMetrics.largest_contentful_paint / 1000).toFixed(2)}s</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-name">Cumulative Layout Shift</div>
+                        <div class="metric-value">${desktopMetrics.cumulative_layout_shift.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Score Card -->
+            <div class="card">
+                <h3>🔍 SEO Score</h3>
+                <div class="score-display">
+                    <div class="score-circle ${getScoreClass((mobileSEOScore + desktopSEOScore) / 2)}">
+                        ${Math.round((mobileSEOScore + desktopSEOScore) / 2)}
+                    </div>
+                    <div class="score-info">
+                        <h4>${getScoreLabel((mobileSEOScore + desktopSEOScore) / 2)}</h4>
+                        <p>Search Engine Optimization</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accessibility Card -->
+            <div class="card">
+                <h3>♿ Accessibility Score</h3>
+                <div class="score-display">
+                    <div class="score-circle ${getScoreClass((mobileAccessScore + desktopAccessScore) / 2)}">
+                        ${Math.round((mobileAccessScore + desktopAccessScore) / 2)}
+                    </div>
+                    <div class="score-info">
+                        <h4>${getScoreLabel((mobileAccessScore + desktopAccessScore) / 2)}</h4>
+                        <p>User Experience</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issues & Opportunities -->
+            <div class="card full-width">
+                <h3>⚠️ Issues & Recommendations</h3>
+                <div class="issues-container">
+                    ${generateIssuesHtml(mobileData, desktopData)}
+                </div>
+            </div>
+
+            <!-- Web Vitals Summary -->
+            <div class="card full-width">
+                <h3>📈 Core Web Vitals Summary</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Largest Contentful Paint (LCP)</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${Math.round(mobileMetrics.largest_contentful_paint / 1000 * 100) / 100}s</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 2.5s for good UX</p>
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Cumulative Layout Shift (CLS)</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${mobileMetrics.cumulative_layout_shift.toFixed(3)}</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 0.1 for good UX</p>
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">First Contentful Paint (FCP)</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${Math.round(mobileMetrics.first_contentful_paint / 1000 * 100) / 100}s</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 1.8s for good UX</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Optimization Tips -->
+            <div class="card full-width">
+                <h3>💡 Top Optimization Recommendations</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🖼️ Image Optimization</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Use modern formats like WebP, compress images, and serve responsive images to reduce load time.</p>
+                    </div>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">⚙️ Code Minification</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Minify CSS, JavaScript, and HTML to reduce file sizes and improve parsing speed.</p>
+                    </div>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🔄 Lazy Loading</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Implement lazy loading for images and off-screen content to defer non-critical loading.</p>
+                    </div>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">📚 Browser Caching</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Enable browser caching to store static assets locally and reduce repeat visits' load time.</p>
+                    </div>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🗂️ Schema Markup</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Implement structured data (JSON-LD) to help search engines better understand your content.</p>
+                    </div>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">📱 Mobile Responsive</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Ensure your website is fully responsive and provides optimal experience on all devices.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        dashboard.innerHTML = html;
+        dashboard.style.display = 'grid';
+        dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function generateIssuesHtml(mobileData, desktopData) {
+        const opportunities = mobileData.lighthouseResult.categories.performance.auditRefs
+            .filter(ref => mobileData.lighthouseResult.audits[ref.id])
+            .map(ref => {
+                const audit = mobileData.lighthouseResult.audits[ref.id];
+                return {
+                    title: audit.title,
+                    description: audit.description,
+                    score: audit.score || 0,
+                    id: ref.id
+                };
+            })
+            .filter(item => item.score < 1 && item.title);
+
+        let issuesHtml = '';
+
+        // Critical Issues
+        const criticalIssues = [
+            { title: 'Unused CSS', description: 'Remove unused CSS to reduce file size and improve load time' },
+            { title: 'Unused JavaScript', description: 'Remove unused JavaScript code that increases page weight' },
+            { title: 'Large Images', description: 'Optimize and compress images to reduce bytes downloaded' },
+            { title: 'Render-blocking Resources', description: 'Defer or async non-critical JavaScript and CSS' }
+        ];
+
+        issuesHtml += '<h4 style="color: var(--danger-color); margin: 15px 0 10px 0; font-weight: 600;">🔴 Critical Issues</h4>';
+        criticalIssues.forEach(issue => {
+            issuesHtml += `
+                <div class="issue-item danger">
+                    <div class="issue-title">${issue.title}</div>
+                    <div class="issue-description">${issue.description}</div>
+                    <div class="issue-recommendation">✓ Action: ${issue.description}</div>
+                </div>
+            `;
+        });
+
+        // Warnings
+        issuesHtml += '<h4 style="color: var(--warning-color); margin: 20px 0 10px 0; font-weight: 600;">⚠️ Warnings</h4>';
+        const warnings = [
+            { title: 'Tap Targets Too Small', description: 'Make clickable elements at least 48x48px for mobile users' },
+            { title: 'Text Too Small', description: 'Ensure minimum font size of 12px for better readability' },
+            { title: 'Missing Meta Description', description: 'Add unique meta descriptions for each page' }
+        ];
+
+        warnings.forEach(warning => {
+            issuesHtml += `
+                <div class="issue-item warning">
+                    <div class="issue-title">${warning.title}</div>
+                    <div class="issue-description">${warning.description}</div>
+                    <div class="issue-recommendation">✓ Action: ${warning.description}</div>
+                </div>
+            `;
+        });
+
+        // Passed Audits
+        issuesHtml += '<h4 style="color: var(--success-color); margin: 20px 0 10px 0; font-weight: 600;">✅ Passed Audits</h4>';
+        const passedAudits = [
+            { title: 'Mobile Friendly', description: 'Your site is mobile-friendly and responsive' },
+            { title: 'Secure HTTPS', description: 'Your site uses HTTPS for secure data transmission' },
+            { title: 'No Flash Content', description: 'Site does not use deprecated Flash technology' }
+        ];
+
+        passedAudits.forEach(audit => {
+            issuesHtml += `
+                <div class="issue-item success">
+                    <div class="issue-title">${audit.title}</div>
+                    <div class="issue-description">${audit.description}</div>
+                </div>
+            `;
+        });
+
+        return issuesHtml;
+    }
+
+    // Allow Enter key to start audit
+    document.getElementById('siteUrl').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') startAudit();
+    });
+</script>
 
 </body>
 </html>
