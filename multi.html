@@ -6,7 +6,7 @@
     <title>Website SEO Audit Tool - Free SEO Analysis & Performance Testing</title>
 
     <meta name="description" content="Complete Website SEO Audit Tool. Analyze your website's SEO performance, page speed insights, core web vitals, mobile-friendly testing, meta tags analysis, schema markup validation, and get detailed improvement recommendations.">
-    <meta name="keywords" content="website seo audit, seo analysis tool, page speed test, mobile friendly test, core web vitals, seo checker, website audit tool, free seo audit, website performance test, seo optimization tool, meta tags checker, schema markup validator, seo recommendations, website health check, seo score, page speed insights, mobile usability, crawlability test, website audit free">
+    <meta name="keywords" content="website seo audit, seo analysis tool, page speed test, mobile friendly test, core web vitals, seo checker, website audit tool, free seo audit, website performance test, seo optimization tool">
     <meta name="robots" content="index, follow">
     
     <!-- Google Analytics 4 -->
@@ -26,7 +26,6 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "@id": "https://seo-audit-tool.example.com",
         "name": "Website SEO Audit Tool",
         "description": "Comprehensive website SEO audit tool with PageSpeed Insights, Core Web Vitals analysis, and detailed SEO recommendations",
         "url": "https://seo-audit-tool.example.com",
@@ -117,7 +116,6 @@
             padding: 20px;
         }
 
-        /* Header */
         header {
             background: var(--bg-white);
             padding: 40px 20px;
@@ -146,7 +144,6 @@
             margin: 0 auto;
         }
 
-        /* Search Section */
         .search-section {
             background: var(--bg-white);
             padding: 40px;
@@ -183,6 +180,11 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
         .btn {
             padding: 15px 35px;
             border: none;
@@ -198,6 +200,7 @@
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: white;
             box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            flex: 1;
         }
 
         .btn-primary:hover {
@@ -205,8 +208,15 @@
             box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
+        .btn-demo {
+            background: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         }
 
         .btn:disabled {
@@ -214,7 +224,6 @@
             cursor: not-allowed;
         }
 
-        /* Status Messages */
         .status-message {
             padding: 15px;
             border-radius: 8px;
@@ -245,7 +254,6 @@
             border-left: 4px solid #EF4444;
         }
 
-        /* Dashboard Grid */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -279,7 +287,6 @@
             grid-column: 1 / -1;
         }
 
-        /* Score Display */
         .score-display {
             display: flex;
             align-items: center;
@@ -326,7 +333,6 @@
             font-size: 0.9rem;
         }
 
-        /* Metric List */
         .metrics-list {
             display: grid;
             gap: 15px;
@@ -365,7 +371,6 @@
             color: var(--text-gray);
         }
 
-        /* Issues Section */
         .issues-container {
             display: grid;
             gap: 15px;
@@ -409,53 +414,6 @@
             font-weight: 500;
         }
 
-        /* Tags */
-        .tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .tag {
-            padding: 6px 12px;
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .tag.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success-color);
-        }
-
-        .tag.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
-        }
-
-        .tag.danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(79, 70, 229, 0.2);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* How to Use Section */
         .how-to-use {
             background: var(--bg-white);
             padding: 40px;
@@ -504,7 +462,6 @@
             margin: 0;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             header h1 {
                 font-size: 2rem;
@@ -518,16 +475,19 @@
                 flex-direction: column;
             }
 
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-primary, .btn-demo {
+                width: 100%;
+            }
+
             .dashboard {
                 grid-template-columns: 1fr;
             }
-
-            .card {
-                padding: 20px;
-            }
         }
 
-        /* Scrollbar */
         .issues-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -564,17 +524,20 @@
                 placeholder="Enter your website URL (https://example.com)"
                 spellcheck="false"
             >
-            <button class="btn btn-primary" id="analyzeBtn" onclick="startAudit()">
-                Analyze Now
-            </button>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="analyzeBtn" onclick="startAudit()">
+                    Analyze Now
+                </button>
+                <button class="btn btn-demo" id="demoBtn" onclick="loadDemoResults()">
+                    View Demo
+                </button>
+            </div>
         </div>
         <div class="status-message" id="statusMsg"></div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboard" class="dashboard" style="display: none;"></div>
 
-    <!-- How to Use Section -->
     <div class="how-to-use">
         <h2>📚 How to Use This SEO Audit Tool</h2>
         
@@ -583,7 +546,7 @@
         </p>
 
         <p>
-            <strong>Getting Started:</strong> Simply enter your website URL in the input field above and click "Analyze Now." The tool will perform a comprehensive audit across multiple dimensions including page speed performance, mobile-friendliness, Core Web Vitals, SEO fundamentals, and technical optimization opportunities. The analysis typically completes within 30-60 seconds depending on your website's size and complexity.
+            <strong>Getting Started:</strong> Simply enter your website URL in the input field above and click "Analyze Now." The tool will perform a comprehensive audit across multiple dimensions including page speed performance, mobile-friendliness, Core Web Vitals, SEO fundamentals, and technical optimization opportunities. The analysis typically completes within 30-60 seconds depending on your website's size and complexity. For a quick preview of how the tool works, click the "View Demo" button to see sample results.
         </p>
 
         <p>
@@ -591,15 +554,15 @@
         </p>
 
         <p>
-            <strong>Core Web Vitals Explained:</strong> These are Google's key metrics for measuring user experience. Largest Contentful Paint (LCP) measures loading performance, First Input Delay (FID) measures interactivity, and Cumulative Layout Shift (CLS) measures visual stability. Optimizing these metrics is crucial for better search rankings and user satisfaction.
+            <strong>Core Web Vitals Explained:</strong> These are Google's key metrics for measuring user experience. Largest Contentful Paint (LCP) measures loading performance, First Input Delay (FID) measures interactivity, and Cumulative Layout Shift (CLS) measures visual stability. Optimizing these metrics is crucial for better search rankings and user satisfaction. LCP should be under 2.5 seconds, FID should be under 100 milliseconds, and CLS should be under 0.1.
         </p>
 
         <p>
-            <strong>Taking Action:</strong> For each identified issue, the tool provides specific recommendations. Prioritize issues marked as critical first, as they have the most significant impact on your SEO and user experience. Common recommendations include optimizing images, minifying CSS/JavaScript, improving server response times, ensuring mobile responsiveness, adding proper meta descriptions, implementing schema markup, and fixing broken links.
+            <strong>Taking Action:</strong> For each identified issue, the tool provides specific recommendations. Prioritize issues marked as critical first, as they have the most significant impact on your SEO and user experience. Common recommendations include optimizing images, minifying CSS/JavaScript, improving server response times, ensuring mobile responsiveness, adding proper meta descriptions, implementing schema markup, and fixing broken links. After implementing changes, re-run the audit to track improvements.
         </p>
 
         <p>
-            <strong>Monitoring Progress:</strong> Use this tool regularly (weekly or monthly) to track improvements. After implementing recommendations, re-run the audit to see your progress. Track metric changes over time to understand which optimizations are most effective for your specific website and audience.
+            <strong>Monitoring Progress:</strong> Use this tool regularly (weekly or monthly) to track improvements. After implementing recommendations, re-run the audit to see your progress. Track metric changes over time to understand which optimizations are most effective for your specific website and audience. Compare scores across desktop and mobile versions to identify platform-specific issues that need attention.
         </p>
 
         <h3 style="color: var(--primary-color); margin-top: 30px; margin-bottom: 20px;">Key Features:</h3>
@@ -632,7 +595,6 @@
     </div>
 </div>
 
-<!-- AdSense Ad Unit -->
 <ins class="adsbygoogle"
      style="display:block; text-align:center; margin: 40px 0;"
      data-ad-layout="in-article"
@@ -683,7 +645,7 @@
     async function startAudit() {
         const urlInput = document.getElementById('siteUrl').value.trim();
         if (!urlInput) {
-            showStatus('Please enter a valid URL', 'error');
+            showStatus('❌ Please enter a valid URL', 'error');
             return;
         }
 
@@ -703,7 +665,7 @@
             showStatus('✅ Audit completed successfully!', 'success');
         } catch (error) {
             console.error('Audit Error:', error);
-            showStatus(`❌ Error: ${error.message}. Please check your URL and try again.`, 'error');
+            showStatus(`❌ ${error.message}`, 'error');
         } finally {
             analyzeBtn.disabled = false;
         }
@@ -716,11 +678,36 @@
             strategy: strategy
         });
 
-        const response = await fetch(`${PSI_ENDPOINT}?${params}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch PageSpeed data. Please verify your URL is accessible.');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+        try {
+            const response = await fetch(`${PSI_ENDPOINT}?${params}`, {
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error('API rate limit exceeded. Please try again in a few moments.');
+                }
+                throw new Error(`API Error (${response.status}). Ensure your URL is publicly accessible.`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.lighthouseResult) {
+                throw new Error('Invalid API response. URL may not be accessible.');
+            }
+
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout. Please check your URL and try again.');
+            }
+            throw new Error(error.message || `Failed to analyze ${strategy} version`);
         }
-        return response.json();
     }
 
     function displayResults(url, mobileData, desktopData) {
@@ -741,7 +728,6 @@
         const avgPerformance = Math.round((mobileScore + desktopScore) / 2);
 
         let html = `
-            <!-- Overall Score Card -->
             <div class="card full-width">
                 <h3>📊 Overall SEO Score</h3>
                 <div class="score-display">
@@ -750,13 +736,12 @@
                     </div>
                     <div class="score-info">
                         <h4>${getScoreLabel(avgPerformance)} Performance</h4>
-                        <p>Website URL: ${url}</p>
-                        <p>Analysis Date: ${new Date().toLocaleDateString()}</p>
+                        <p>Website: ${url}</p>
+                        <p>Date: ${new Date().toLocaleDateString()}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Mobile Performance Card -->
             <div class="card">
                 <h3>📱 Mobile Performance</h3>
                 <div class="score-display">
@@ -779,12 +764,11 @@
                     </div>
                     <div class="metric-item">
                         <div class="metric-name">Cumulative Layout Shift</div>
-                        <div class="metric-value">${mobileMetrics.cumulative_layout_shift.toFixed(2)}</div>
+                        <div class="metric-value">${mobileMetrics.cumulative_layout_shift.toFixed(3)}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Desktop Performance Card -->
             <div class="card">
                 <h3>💻 Desktop Performance</h3>
                 <div class="score-display">
@@ -807,12 +791,11 @@
                     </div>
                     <div class="metric-item">
                         <div class="metric-name">Cumulative Layout Shift</div>
-                        <div class="metric-value">${desktopMetrics.cumulative_layout_shift.toFixed(2)}</div>
+                        <div class="metric-value">${desktopMetrics.cumulative_layout_shift.toFixed(3)}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- SEO Score Card -->
             <div class="card">
                 <h3>🔍 SEO Score</h3>
                 <div class="score-display">
@@ -821,12 +804,11 @@
                     </div>
                     <div class="score-info">
                         <h4>${getScoreLabel((mobileSEOScore + desktopSEOScore) / 2)}</h4>
-                        <p>Search Engine Optimization</p>
+                        <p>Search Optimization</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Accessibility Card -->
             <div class="card">
                 <h3>♿ Accessibility Score</h3>
                 <div class="score-display">
@@ -840,63 +822,60 @@
                 </div>
             </div>
 
-            <!-- Issues & Opportunities -->
             <div class="card full-width">
                 <h3>⚠️ Issues & Recommendations</h3>
                 <div class="issues-container">
-                    ${generateIssuesHtml(mobileData, desktopData)}
+                    ${generateIssuesHtml(mobileData)}
                 </div>
             </div>
 
-            <!-- Web Vitals Summary -->
             <div class="card full-width">
                 <h3>📈 Core Web Vitals Summary</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                     <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Largest Contentful Paint (LCP)</h4>
-                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${Math.round(mobileMetrics.largest_contentful_paint / 1000 * 100) / 100}s</p>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 2.5s for good UX</p>
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Largest Contentful Paint</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">${(mobileMetrics.largest_contentful_paint / 1000).toFixed(2)}s</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 2.5s</p>
                     </div>
                     <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Cumulative Layout Shift (CLS)</h4>
-                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${mobileMetrics.cumulative_layout_shift.toFixed(3)}</p>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 0.1 for good UX</p>
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">Cumulative Layout Shift</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">${mobileMetrics.cumulative_layout_shift.toFixed(3)}</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 0.1</p>
                     </div>
                     <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">First Contentful Paint (FCP)</h4>
-                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">${Math.round(mobileMetrics.first_contentful_paint / 1000 * 100) / 100}s</p>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 1.8s for good UX</p>
+                        <h4 style="color: var(--text-dark); margin-bottom: 10px;">First Contentful Paint</h4>
+                        <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">${(mobileMetrics.first_contentful_paint / 1000).toFixed(2)}s</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Target: < 1.8s</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Optimization Tips -->
             <div class="card full-width">
-                <h3>💡 Top Optimization Recommendations</h3>
+                <h3>💡 Top Optimization Tips</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🖼️ Image Optimization</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Use modern formats like WebP, compress images, and serve responsive images to reduce load time.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">🖼️ Image Optimization</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Use WebP format, compress images, serve responsive versions.</p>
                     </div>
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">⚙️ Code Minification</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Minify CSS, JavaScript, and HTML to reduce file sizes and improve parsing speed.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">⚙️ Code Minification</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Minify CSS, JavaScript, and HTML files.</p>
                     </div>
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🔄 Lazy Loading</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Implement lazy loading for images and off-screen content to defer non-critical loading.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">🔄 Lazy Loading</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Implement lazy loading for images and content.</p>
                     </div>
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">📚 Browser Caching</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Enable browser caching to store static assets locally and reduce repeat visits' load time.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">📚 Browser Caching</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Enable caching to reduce repeat visits load time.</p>
                     </div>
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">🗂️ Schema Markup</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Implement structured data (JSON-LD) to help search engines better understand your content.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">🗂️ Schema Markup</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Add JSON-LD structured data markup.</p>
                     </div>
-                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2);">
-                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">📱 Mobile Responsive</h4>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Ensure your website is fully responsive and provides optimal experience on all devices.</p>
+                    <div style="padding: 15px; background: rgba(79, 70, 229, 0.05); border-radius: 8px;">
+                        <h4 style="color: var(--primary-color);">📱 Mobile Responsive</h4>
+                        <p style="color: var(--text-gray); font-size: 0.9rem;">Ensure optimal mobile experience.</p>
                     </div>
                 </div>
             </div>
@@ -907,47 +886,30 @@
         dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function generateIssuesHtml(mobileData, desktopData) {
-        const opportunities = mobileData.lighthouseResult.categories.performance.auditRefs
-            .filter(ref => mobileData.lighthouseResult.audits[ref.id])
-            .map(ref => {
-                const audit = mobileData.lighthouseResult.audits[ref.id];
-                return {
-                    title: audit.title,
-                    description: audit.description,
-                    score: audit.score || 0,
-                    id: ref.id
-                };
-            })
-            .filter(item => item.score < 1 && item.title);
-
+    function generateIssuesHtml(mobileData) {
         let issuesHtml = '';
 
-        // Critical Issues
         const criticalIssues = [
-            { title: 'Unused CSS', description: 'Remove unused CSS to reduce file size and improve load time' },
-            { title: 'Unused JavaScript', description: 'Remove unused JavaScript code that increases page weight' },
-            { title: 'Large Images', description: 'Optimize and compress images to reduce bytes downloaded' },
-            { title: 'Render-blocking Resources', description: 'Defer or async non-critical JavaScript and CSS' }
+            { title: 'Unused CSS', description: 'Remove unused CSS rules to reduce file size' },
+            { title: 'Unused JavaScript', description: 'Defer or remove unused JavaScript code' },
+            { title: 'Large Images', description: 'Optimize images using modern formats' },
+            { title: 'Render-blocking Resources', description: 'Load resources asynchronously' }
         ];
 
-        issuesHtml += '<h4 style="color: var(--danger-color); margin: 15px 0 10px 0; font-weight: 600;">🔴 Critical Issues</h4>';
+        issuesHtml += '<h4 style="color: var(--danger-color); margin: 15px 0 10px 0;">🔴 Critical Issues</h4>';
         criticalIssues.forEach(issue => {
             issuesHtml += `
                 <div class="issue-item danger">
                     <div class="issue-title">${issue.title}</div>
                     <div class="issue-description">${issue.description}</div>
-                    <div class="issue-recommendation">✓ Action: ${issue.description}</div>
                 </div>
             `;
         });
 
-        // Warnings
-        issuesHtml += '<h4 style="color: var(--warning-color); margin: 20px 0 10px 0; font-weight: 600;">⚠️ Warnings</h4>';
+        issuesHtml += '<h4 style="color: var(--warning-color); margin: 20px 0 10px 0;">⚠️ Warnings</h4>';
         const warnings = [
-            { title: 'Tap Targets Too Small', description: 'Make clickable elements at least 48x48px for mobile users' },
-            { title: 'Text Too Small', description: 'Ensure minimum font size of 12px for better readability' },
-            { title: 'Missing Meta Description', description: 'Add unique meta descriptions for each page' }
+            { title: 'Tap Targets Too Small', description: 'Ensure buttons are at least 48x48px' },
+            { title: 'Missing Meta Description', description: 'Add unique descriptions for each page' }
         ];
 
         warnings.forEach(warning => {
@@ -955,17 +917,14 @@
                 <div class="issue-item warning">
                     <div class="issue-title">${warning.title}</div>
                     <div class="issue-description">${warning.description}</div>
-                    <div class="issue-recommendation">✓ Action: ${warning.description}</div>
                 </div>
             `;
         });
 
-        // Passed Audits
-        issuesHtml += '<h4 style="color: var(--success-color); margin: 20px 0 10px 0; font-weight: 600;">✅ Passed Audits</h4>';
+        issuesHtml += '<h4 style="color: var(--success-color); margin: 20px 0 10px 0;">✅ Passed Audits</h4>';
         const passedAudits = [
-            { title: 'Mobile Friendly', description: 'Your site is mobile-friendly and responsive' },
-            { title: 'Secure HTTPS', description: 'Your site uses HTTPS for secure data transmission' },
-            { title: 'No Flash Content', description: 'Site does not use deprecated Flash technology' }
+            { title: 'Mobile Friendly', description: 'Your site is responsive and mobile-optimized' },
+            { title: 'Secure HTTPS', description: 'Your site uses secure HTTPS protocol' }
         ];
 
         passedAudits.forEach(audit => {
@@ -980,7 +939,54 @@
         return issuesHtml;
     }
 
-    // Allow Enter key to start audit
+    function loadDemoResults() {
+        const demoUrl = 'https://example.com';
+        const demoMobileData = {
+            lighthouseResult: {
+                categories: {
+                    performance: { score: 0.85 },
+                    seo: { score: 0.92 },
+                    accessibility: { score: 0.88 }
+                },
+                audits: {
+                    metrics: {
+                        details: {
+                            items: [{
+                                first_contentful_paint: 1200,
+                                largest_contentful_paint: 2100,
+                                cumulative_layout_shift: 0.05
+                            }]
+                        }
+                    }
+                }
+            }
+        };
+
+        const demoDesktopData = {
+            lighthouseResult: {
+                categories: {
+                    performance: { score: 0.92 },
+                    seo: { score: 0.95 },
+                    accessibility: { score: 0.91 }
+                },
+                audits: {
+                    metrics: {
+                        details: {
+                            items: [{
+                                first_contentful_paint: 800,
+                                largest_contentful_paint: 1500,
+                                cumulative_layout_shift: 0.03
+                            }]
+                        }
+                    }
+                }
+            }
+        };
+
+        displayResults(demoUrl, demoMobileData, demoDesktopData);
+        showStatus('✅ Demo results loaded! This shows what a good website audit looks like.', 'success');
+    }
+
     document.getElementById('siteUrl').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') startAudit();
     });
