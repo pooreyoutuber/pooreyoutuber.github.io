@@ -555,13 +555,19 @@
             <div id="passwordForm" style="display: none;">
                 <div class="form-group">
                     <label for="password">Set Password *</label>
-                    <input type="password" id="password" placeholder="Enter a strong password" required>
+                    <div style="position: relative;">
+                        <input type="password" id="password" placeholder="Enter a strong password" required>
+                        <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
+                    </div>
                     <div class="password-match" id="strengthIndicator"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="repeatPassword">Repeat Password *</label>
-                    <input type="password" id="repeatPassword" placeholder="Confirm your password" required>
+                    <div style="position: relative;">
+                        <input type="password" id="repeatPassword" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye" id="toggleRepeatPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
+                    </div>
                     <div class="password-match" id="matchIndicator"></div>
                 </div>
                 
@@ -740,6 +746,36 @@
         
         let selectedFile = null;
         
+        // Eye Icon Toggle - Password
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = this;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Eye Icon Toggle - Repeat Password
+        document.getElementById('toggleRepeatPassword').addEventListener('click', function() {
+            const input = document.getElementById('repeatPassword');
+            const icon = this;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
         // Upload Area Click
         uploadArea.addEventListener('click', () => fileInput.click());
         
@@ -848,38 +884,57 @@
             protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encrypting...';
             
             try {
-                // Read file as data URL
+                // Read file as base64
                 const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const fileData = e.target.result;
+                reader.onload = (e) => {
+                    const base64Data = e.target.result;
                     
-                    // Encrypt the file data
-                    const encrypted = CryptoJS.AES.encrypt(fileData, password).toString();
-                    
-                    // Create protected file
-                    const protectedData = {
-                        encrypted: encrypted,
-                        originalName: selectedFile.name,
-                        originalType: selectedFile.type
+                    // Create JSON object with file info and encrypted data
+                    const fileData = {
+                        fileName: selectedFile.name,
+                        fileType: selectedFile.type,
+                        base64: base64Data,
+                        encrypted: true
                     };
                     
-                    // Create blob and download
-                    const blob = new Blob([JSON.stringify(protectedData)], { type: 'application/json' });
+                    // Encrypt using CryptoJS
+                    const encrypted = CryptoJS.AES.encrypt(
+                        JSON.stringify(fileData),
+                        password
+                    ).toString();
+                    
+                    // Create protected file with original extension
+                    const fileExtension = selectedFile.name.split('.').pop();
+                    const protectedFileName = selectedFile.name.replace(/\.[^/.]+$/, '') + '.protected.' + fileExtension;
+                    
+                    const protectedContent = {
+                        data: encrypted,
+                        v: 1
+                    };
+                    
+                    // Download the protected file
+                    const blob = new Blob([JSON.stringify(protectedContent)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = 'protected_' + selectedFile.name + '.encrypted';
+                    link.download = protectedFileName;
                     link.click();
                     URL.revokeObjectURL(url);
                     
                     successMessage.classList.add('show');
                     protectBtn.disabled = false;
                     protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
+                    
+                    // Auto-clear after 3 seconds
+                    setTimeout(() => {
+                        clearAll();
+                    }, 3000);
                 };
+                
                 reader.readAsDataURL(selectedFile);
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+                alert('An error occurred: ' + error.message);
                 protectBtn.disabled = false;
                 protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
             }
@@ -898,6 +953,8 @@
             successMessage.classList.remove('show');
             uploadArea.style.opacity = '1';
             uploadArea.style.pointerEvents = 'auto';
+            document.getElementById('togglePassword').className = 'fas fa-eye';
+            document.getElementById('toggleRepeatPassword').className = 'fas fa-eye';
         }
         
         // FAQ Toggle
