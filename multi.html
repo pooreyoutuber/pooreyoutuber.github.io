@@ -796,9 +796,24 @@
                 compressedSizeEl.textContent = '0 KB';
                 progressBar.classList.remove('show');
                 successMessage.classList.remove('show');
+                
+                // Enable button if target size is set
+                updateButtonState();
             };
             reader.readAsDataURL(file);
         }
+        
+        function updateButtonState() {
+            const targetSize = targetSizeInput.value;
+            if (selectedFile && targetSize && parseInt(targetSize) >= 10) {
+                compressBtn.disabled = false;
+            } else {
+                compressBtn.disabled = true;
+            }
+        }
+        
+        targetSizeInput.addEventListener('change', updateButtonState);
+        targetSizeInput.addEventListener('input', updateButtonState);
         
         compressBtn.addEventListener('click', () => {
             if (!selectedFile) {
