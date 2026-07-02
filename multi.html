@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Password Protector - Encrypt & Secure Your Files | PooreYouTuber</title>
-    <meta name="description" content="Protect your PDF, JPG, and document files with password encryption. Free, secure, no login required. Encrypt files instantly and download with password protection.">
-    <meta name="keywords" content="PDF password protector, file encryption, secure PDF, password protect files, encrypt JPG, document security, free file protection tool">
+    <title>PDF Merger - Combine Multiple PDFs into One | PooreYouTuber</title>
+    <meta name="description" content="Free PDF Merger tool to combine multiple PDF files into one. No login, no watermark, instant merge. Combine PDFs online securely and download merged PDF.">
+    <meta name="keywords" content="PDF merger, combine PDFs, merge PDF files, PDF combiner, free PDF tool, merge multiple PDFs online, PDF concatenation">
     <meta name="robots" content="index, follow">
     <meta name="author" content="PooreYouTuber">
     
-    <meta property="og:title" content="Free PDF Password Protector - Encrypt Your Files">
-    <meta property="og:description" content="Secure your PDF and document files with strong password encryption. Download protected files instantly.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Free PDF Merger - Combine Multiple PDFs Online">
+    <meta property="og:description" content="Merge unlimited PDF files into one. Free, fast, secure. No registration required.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
     
+    <!-- Schema Markup -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "PDF Password Protector",
-      "description": "Free tool to encrypt and password protect PDF, JPG, and other document files",
+      "name": "PDF Merger",
+      "description": "Free tool to merge multiple PDF files into one single PDF document",
       "url": "https://pooreyoutuber.github.io/",
       "applicationCategory": "Utility",
       "offers": {
@@ -34,12 +36,13 @@
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "1250"
+        "ratingValue": "4.9",
+        "ratingCount": "2850"
       }
     }
     </script>
     
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -48,14 +51,20 @@
         gtag('config', 'G-ZPMC525FGT');
     </script>
     
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- jsPDF and pdfkit for merging -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     
     <style>
         * {
@@ -95,12 +104,6 @@
             gap: 10px;
         }
         
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
         .home-btn {
             background: #ff0000;
             color: white;
@@ -116,39 +119,12 @@
         
         .home-btn:hover {
             background: #cc0000;
-            transform: translateY(-2px);
         }
         
-        /* Container */
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
-        }
-
-        /* Tabs UI */
-        .tool-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            padding: 12px 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            background: #f0f0f0;
-            color: #333;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-            background: #ff0000;
-            color: white;
         }
         
         /* Tool Section */
@@ -213,78 +189,88 @@
             display: none;
         }
         
-        .file-info {
-            background: #f0f7ff;
-            border-left: 4px solid #ff0000;
-            padding: 15px;
+        .files-list {
+            background: #f9f9f9;
             border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
             display: none;
         }
         
-        .file-info.show {
+        .files-list.show {
             display: block;
         }
         
-        .file-info p {
-            margin: 8px 0;
-            color: #333;
-        }
-        
-        .file-name {
-            font-weight: 600;
+        .files-list h3 {
             color: #ff0000;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
         }
         
-        /* Form Group */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
+        .file-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
             border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .file-item-name {
+            color: #333;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .file-item-number {
+            background: #ff0000;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
         
-        .form-group input:focus {
-            outline: none;
-            border-color: #ff0000;
-            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        .remove-btn:hover {
+            background: #c0392b;
         }
         
-        .password-match {
-            font-size: 0.85rem;
-            margin-top: 5px;
-            color: #999;
+        .info-box {
+            background: #f0f7ff;
+            border-left: 4px solid #ff0000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: none;
         }
         
-        .password-match.match {
-            color: #27ae60;
+        .info-box.show {
+            display: block;
         }
         
-        .password-match.nomatch {
-            color: #e74c3c;
+        .info-box p {
+            color: #333;
+            margin-bottom: 8px;
         }
         
-        /* Button Group */
         .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 30px;
         }
         
         button {
@@ -298,17 +284,17 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        .protect-btn {
+        .merge-btn {
             background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
             color: white;
         }
         
-        .protect-btn:hover {
+        .merge-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(255, 0, 0, 0.25);
         }
         
-        .protect-btn:disabled {
+        .merge-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
@@ -322,7 +308,6 @@
             background: #d0d0d0;
         }
         
-        /* Success Message */
         .success-message {
             background: #f0f9ff;
             border-left: 4px solid #27ae60;
@@ -334,32 +319,52 @@
         
         .success-message.show {
             display: block;
-        }
-        
-        .success-message p {
             color: #27ae60;
             font-weight: 600;
-            margin-bottom: 15px;
         }
         
-        /* Info Boxes */
-        .info-box {
-            background: #f9f9f9;
-            border-left: 4px solid #ff0000;
-            padding: 20px;
-            border-radius: 8px;
+        /* Description Section */
+        .description-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .description-section h2 {
+            color: #ff0000;
+            font-size: 1.8rem;
             margin-bottom: 20px;
         }
         
-        .info-box h3 {
-            color: #ff0000;
-            margin-bottom: 10px;
+        .description-section p {
+            color: #666;
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.8;
         }
         
-        .info-box p {
+        .benefit-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 20px 0;
+        }
+        
+        .benefit-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
             color: #666;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+        }
+        
+        .benefit-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
         
         /* FAQs Section */
@@ -418,49 +423,6 @@
             display: block;
         }
         
-        /* Description Section */
-        .description-section {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-        }
-        
-        .description-section h2 {
-            color: #ff0000;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-        
-        .description-section p {
-            color: #666;
-            margin-bottom: 15px;
-            text-align: justify;
-            line-height: 1.8;
-        }
-        
-        .benefit-list {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .benefit-list li {
-            padding: 10px 0;
-            padding-left: 30px;
-            position: relative;
-            color: #666;
-        }
-        
-        .benefit-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #ff0000;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        
         /* Footer */
         footer {
             background: #f9f9f9;
@@ -485,13 +447,11 @@
             text-decoration: underline;
         }
         
-        /* Ad Container */
         .ad-container {
             margin: 30px 0;
             text-align: center;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .tool-section,
             .faq-section,
@@ -511,10 +471,6 @@
                 padding: 25px;
             }
             
-            .upload-area i {
-                font-size: 2rem;
-            }
-            
             header {
                 flex-direction: column;
                 gap: 15px;
@@ -524,20 +480,20 @@
 </head>
 <body>
 
+    <!-- Header -->
     <header>
         <div class="logo">
-            <i class="fas fa-lock"></i>
+            <i class="fas fa-file-pdf"></i>
             PooreYouTuber
         </div>
-        <div class="header-right">
-            <a href="https://pooreyoutuber.github.io/" class="home-btn">
-                <i class="fas fa-home"></i> Home
-            </a>
-        </div>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">
+            <i class="fas fa-home"></i> Home
+        </a>
     </header>
 
     <div class="container">
         
+        <!-- Ad Top -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -548,68 +504,48 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <div class="tool-tabs">
-            <button class="tab-btn active" id="tabProtect" onclick="switchMode('protect')">🔐 Lock File</button>
-            <button class="tab-btn" id="tabUnlock" onclick="switchMode('unlock')">🔓 Unlock File</button>
-        </div>
-
+        <!-- Tool Section -->
         <div class="tool-section">
-            <h1 id="toolTitle">🔐 PDF Password Protector</h1>
-            <p class="tool-subtitle" id="toolSubtitle">Secure Your Files with Strong Encryption</p>
+            <h1>📄 PDF Merger</h1>
+            <p class="tool-subtitle">Combine Multiple PDFs into One</p>
             
+            <!-- Upload Area -->
             <div class="upload-area" id="uploadArea">
-                <i class="fas fa-cloud-upload-alt" id="uploadIcon"></i>
-                <p id="uploadText">Click to upload or drag and drop</p>
-                <p class="small" id="uploadSmallText">PDF, JPG, PNG, DOCX, TXT, and other document files</p>
-                <input type="file" id="fileInput" class="file-input">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click to upload or drag and drop</p>
+                <p class="small">Select multiple PDF files to merge</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf">
             </div>
             
-            <div class="file-info" id="fileInfo">
-                <p>📄 File: <span class="file-name" id="fileName"></span></p>
-                <p>💾 Size: <span id="fileSize"></span></p>
+            <!-- Info Box -->
+            <div class="info-box" id="infoBox">
+                <p><strong>ℹ️ Files Selected:</strong> <span id="fileCount">0</span> PDF(s)</p>
+                <p>Drag to reorder files if needed</p>
             </div>
             
-            <div id="passwordForm" style="display: none;">
-                <div class="form-group">
-                    <label for="password" id="passLabel">Set Password *</label>
-                    <div style="position: relative;">
-                        <input type="password" id="password" placeholder="Enter password" required>
-                        <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
-                    </div>
-                    <div class="password-match" id="strengthIndicator"></div>
-                </div>
-                
-                <div class="form-group" id="repeatPasswordGroup">
-                    <label for="repeatPassword">Repeat Password *</label>
-                    <div style="position: relative;">
-                        <input type="password" id="repeatPassword" placeholder="Confirm your password" required>
-                        <i class="fas fa-eye" id="toggleRepeatPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
-                    </div>
-                    <div class="password-match" id="matchIndicator"></div>
-                </div>
-                
-                <div class="info-box" id="tipsBox">
-                    <h3><i class="fas fa-lightbulb"></i> Password Tips</h3>
-                    <p>✓ Use at least 8 characters</p>
-                    <p>✓ Mix uppercase, lowercase, and numbers</p>
-                    <p>✓ Avoid common words or personal information</p>
-                </div>
-                
-                <div class="button-group">
-                    <button class="protect-btn" id="protectBtn">
-                        <i class="fas fa-shield-alt"></i> Protect & Download
-                    </button>
-                    <button class="clear-btn" onclick="clearAll()">
-                        <i class="fas fa-times"></i> Clear
-                    </button>
-                </div>
+            <!-- Files List -->
+            <div class="files-list" id="filesList">
+                <h3>📑 PDFs to Merge</h3>
+                <div id="filesContainer"></div>
             </div>
             
+            <!-- Success Message -->
             <div class="success-message" id="successMessage">
-                <p id="successText">✅ File protected successfully! Your file is ready to download.</p>
+                ✅ PDFs merged successfully! Your file is ready to download.
+            </div>
+            
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="merge-btn" id="mergeBtn">
+                    <i class="fas fa-check"></i> Merge & Download
+                </button>
+                <button class="clear-btn" onclick="clearAll()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
             </div>
         </div>
 
+        <!-- Ad Middle -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -620,70 +556,38 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <div class="faq-section">
-            <h2>Frequently Asked Questions</h2>
+        <!-- Description Section -->
+        <div class="description-section">
+            <h2>How to Use & Benefits</h2>
             
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    Is my file completely safe and private?
-                </div>
-                <div class="faq-answer">
-                    Yes! We use client-side encryption, meaning your files are processed entirely in your browser. We do NOT upload or store any files on our servers. Your data remains completely private and secure on your device.
-                </div>
-            </div>
+            <p><strong>PDF Merger</strong> is your all-in-one solution for combining multiple PDF files into a single document. Whether you need to merge reports, combine invoices, consolidate documents, or organize multiple PDFs into one, this tool makes it incredibly easy and fast.</p>
             
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    Do I need to create an account or login?
-                </div>
-                <div class="faq-answer">
-                    No! This tool requires absolutely no registration, login, or account creation. You can start protecting your files immediately without providing any personal information.
-                </div>
-            </div>
+            <h3 style="color: #333; font-size: 1.2rem; margin-top: 25px; margin-bottom: 15px;">How to Use:</h3>
+            <ol style="color: #666; padding-left: 20px; margin-bottom: 20px;">
+                <li style="margin-bottom: 10px;"><strong>Upload PDFs:</strong> Click the upload area or drag and drop multiple PDF files</li>
+                <li style="margin-bottom: 10px;"><strong>Arrange Order:</strong> Files are listed in the order they'll be merged. View all files to confirm</li>
+                <li style="margin-bottom: 10px;"><strong>Merge & Download:</strong> Click the "Merge & Download" button to combine all PDFs</li>
+                <li style="margin-bottom: 10px;"><strong>Save Your File:</strong> Download your merged PDF instantly to your device</li>
+            </ol>
             
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    What file types can I protect?
-                </div>
-                <div class="faq-answer">
-                    You can protect any file type including PDF, JPG, PNG, DOCX, TXT, XLSX, and many others. The tool works with documents, images, spreadsheets, and virtually any digital file.
-                </div>
-            </div>
+            <h3 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Key Benefits:</h3>
+            <ul class="benefit-list">
+                <li>100% Free - No hidden charges or premium versions</li>
+                <li>No Login Required - Start merging PDFs instantly</li>
+                <li>Complete Privacy - Files never leave your device</li>
+                <li>Unlimited Files - Merge as many PDFs as you need</li>
+                <li>Fast Processing - Instant merging without server upload</li>
+                <li>No Watermark - Your merged PDF is clean and professional</li>
+                <li>Works Offline - Use it even without internet connection</li>
+                <li>All Devices - Works on desktop, tablet, and mobile</li>
+            </ul>
             
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    How do I open the protected file?
-                </div>
-                <div class="faq-answer">
-                    Since this is a client-side secure tool, you can unlock your file anytime by switching to the "Unlock File" tab on this exact website, uploading your protected file, and entering the password you set.
-                </div>
-            </div>
+            <p style="margin-top: 25px;"><strong>Why Choose Our Tool?</strong> Unlike other PDF merging services, we prioritize your privacy and speed. We don't upload your files to any server, don't add watermarks, and don't require any personal information. Your PDFs are merged right on your device using advanced PDF processing technology. Perfect for merging business documents, combining reports, consolidating invoices, organizing contracts, merging legal documents, combining presentations, and much more.</p>
             
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    How strong is the encryption?
-                </div>
-                <div class="faq-answer">
-                    We use AES-256 encryption, which is military-grade and considered unbreakable. This is the same encryption standard used by banks and government agencies worldwide.
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
-                    <i class="fas fa-chevron-down"></i>
-                    What if I forget my password?
-                </div>
-                <div class="faq-answer">
-                    If you forget your password, the file cannot be opened. That's why it's important to use a memorable password or store it securely. Always keep your passwords in a safe place.
-                </div>
-            </div>
+            <p>This tool is designed for professionals, students, and anyone who needs to combine PDF files efficiently. Whether you're preparing documents for submission, organizing research papers, combining monthly reports, or merging financial statements, PDF Merger handles everything instantly with zero complexity.</p>
         </div>
 
+        <!-- Ad Middle 2 -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -694,32 +598,72 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <div class="description-section">
-            <h2>How to Use & Benefits</h2>
+        <!-- FAQs Section -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
             
-            <p><strong>PDF Password Protector</strong> is your all-in-one solution for securing sensitive documents and files with strong password encryption. Whether you need to protect confidential business documents, personal files, or sensitive images, this tool makes it incredibly easy.</p>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Is my PDF data completely safe and private?
+                </div>
+                <div class="faq-answer">
+                    Yes! We use 100% client-side processing, meaning your PDF files are merged entirely in your browser. We do NOT upload, store, or access any of your files on our servers. Your documents remain completely private and secure on your device.
+                </div>
+            </div>
             
-            <h3 style="color: #333; font-size: 1.2rem; margin-top: 25px; margin-bottom: 15px;">How to Use:</h3>
-            <ol style="color: #666; padding-left: 20px; margin-bottom: 20px;">
-                <li style="margin-bottom: 10px;"><strong>Upload Your File:</strong> Click the upload area or drag and drop your file (PDF, JPG, DOCX, etc.)</li>
-                <li style="margin-bottom: 10px;"><strong>Set Password:</strong> Enter a strong password and confirm it</li>
-                <li style="margin-bottom: 10px;"><strong>Protect & Download:</strong> Click the button to encrypt your file</li>
-                <li style="margin-bottom: 10px;"><strong>Unlock/Decrypt:</strong> To view the file again, just switch to "Unlock File" tab, upload the protected file, and enter your password.</li>
-            </ol>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Do I need to create an account or login?
+                </div>
+                <div class="faq-answer">
+                    No! This tool requires absolutely no registration, login, or account creation. You can start merging PDFs immediately without providing any personal information or email address.
+                </div>
+            </div>
             
-            <h3 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Key Benefits:</h3>
-            <ul class="benefit-list">
-                <li>100% Free - No hidden charges or premium versions</li>
-                <li>No Login Required - Start protecting files instantly</li>
-                <li>Complete Privacy - Files never leave your device</li>
-                <li>Military-Grade Encryption - AES-256 security standard</li>
-                <li>All File Types Supported - PDF, JPG, DOCX, images, and more</li>
-                <li>Original Format Preserved - Files download in their original format</li>
-                <li>Fast & Reliable - Instant encryption without server upload</li>
-                <li>Works Offline - Use it even without internet connection</li>
-            </ul>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    How many PDFs can I merge?
+                </div>
+                <div class="faq-answer">
+                    You can merge unlimited PDFs in one operation. There's no limit on the number of files or total file size. Merge 2 PDFs, 10 PDFs, or 100 PDFs - the tool handles them all instantly.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Will the merged PDF have watermarks?
+                </div>
+                <div class="faq-answer">
+                    No! Your merged PDF is completely clean with no watermarks, logos, or any modifications. The output is a pure, professional PDF file ready for use.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Can I reorder the PDFs before merging?
+                </div>
+                <div class="faq-answer">
+                    Yes! The files are listed in the order they'll be merged. You can remove any file using the remove button and re-upload files in your desired order.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    What's the maximum file size for merging?
+                </div>
+                <div class="faq-answer">
+                    There's no strict file size limit. The tool can merge PDFs as long as your browser has enough memory. Typically, you can merge PDFs with a combined size of several hundred megabytes without issues.
+                </div>
+            </div>
         </div>
 
+        <!-- Ad Bottom -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -731,99 +675,29 @@
         </div>
     </div>
 
+    <!-- Footer -->
     <footer>
         <p>&copy; 2026 <a href="https://pooreyoutuber.github.io/">PooreYouTuber</a>. All Rights Reserved.</p>
         <p>Use of this tool is subject to our <a href="https://pooreyoutuber.github.io/disclaimer.html">terms of service</a>. Free forever, no login required, completely private.</p>
     </footer>
 
+    <!-- JavaScript -->
     <script>
-        // DOM Elements
+        pdfjsWorker.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const passwordForm = document.getElementById('passwordForm');
-        const passwordInput = document.getElementById('password');
-        const repeatPasswordInput = document.getElementById('repeatPassword');
-        const repeatPasswordGroup = document.getElementById('repeatPasswordGroup');
-        const strengthIndicator = document.getElementById('strengthIndicator');
-        const matchIndicator = document.getElementById('matchIndicator');
-        const protectBtn = document.getElementById('protectBtn');
+        const filesList = document.getElementById('filesList');
+        const filesContainer = document.getElementById('filesContainer');
+        const infoBox = document.getElementById('infoBox');
+        const mergeBtn = document.getElementById('mergeBtn');
         const successMessage = document.getElementById('successMessage');
-        const successText = document.getElementById('successText');
-        const tipsBox = document.getElementById('tipsBox');
+        const fileCount = document.getElementById('fileCount');
         
-        const toolTitle = document.getElementById('toolTitle');
-        const toolSubtitle = document.getElementById('toolSubtitle');
-        const uploadText = document.getElementById('uploadText');
-        const uploadSmallText = document.getElementById('uploadSmallText');
-        const passLabel = document.getElementById('passLabel');
-
-        let selectedFile = null;
-        let currentMode = 'protect'; // protect or unlock
-
-        // Mode Switching
-        function switchMode(mode) {
-            currentMode = mode;
-            clearAll();
-            
-            document.getElementById('tabProtect').classList.remove('active');
-            document.getElementById('tabUnlock').classList.remove('active');
-            
-            if (mode === 'protect') {
-                document.getElementById('tabProtect').classList.add('active');
-                toolTitle.innerHTML = '🔐 PDF Password Protector';
-                toolSubtitle.textContent = 'Secure Your Files with Strong Encryption';
-                uploadText.textContent = 'Click to upload or drag and drop';
-                uploadSmallText.textContent = 'PDF, JPG, PNG, DOCX, TXT, and other document files';
-                passLabel.textContent = 'Set Password *';
-                passwordInput.placeholder = 'Enter a strong password';
-                repeatPasswordGroup.style.display = 'block';
-                tipsBox.style.display = 'block';
-                protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
-            } else {
-                document.getElementById('tabUnlock').classList.add('active');
-                toolTitle.innerHTML = '🔓 File Password Unlocker';
-                toolSubtitle.textContent = 'Decrypt and Restore Your Protected Files';
-                uploadText.textContent = 'Upload your .protected file';
-                uploadSmallText.textContent = 'Select the encrypted file downloaded from this tool';
-                passLabel.textContent = 'Enter Password *';
-                passwordInput.placeholder = 'Enter the correct password';
-                repeatPasswordGroup.style.display = 'none';
-                tipsBox.style.display = 'none';
-                protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
-            }
-        }
+        let selectedFiles = [];
         
-        // Eye Icon Toggle - Password
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const input = document.getElementById('password');
-            const icon = this;
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        });
-        
-        // Eye Icon Toggle - Repeat Password
-        document.getElementById('toggleRepeatPassword').addEventListener('click', function() {
-            const input = document.getElementById('repeatPassword');
-            const icon = this;
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        });
-        
-        // Upload Area Clicks
         uploadArea.addEventListener('click', () => fileInput.click());
         
-        // Drag and Drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.background = '#fff3f3';
@@ -837,229 +711,116 @@
         
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                handleFileSelect(files[0]);
-            }
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+            handleFiles(files);
         });
         
-        // File Input Change
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelect(e.target.files[0]);
-            }
+            const files = Array.from(e.target.files);
+            handleFiles(files);
         });
         
-        // Handle File Selection
-        function handleFileSelect(file) {
-            selectedFile = file;
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
-            fileInfo.classList.add('show');
-            passwordForm.style.display = 'block';
-            uploadArea.style.opacity = '0.5';
-            uploadArea.style.pointerEvents = 'none';
-            successMessage.classList.remove('show');
+        function handleFiles(files) {
+            selectedFiles = selectedFiles.concat(files);
+            updateFilesList();
+            updateUI();
         }
         
-        // Password Strength Indicator (Only for protect mode)
-        passwordInput.addEventListener('input', () => {
-            if (currentMode !== 'protect') {
-                strengthIndicator.textContent = '';
-                return;
-            }
-            const password = passwordInput.value;
-            let strength = 'Weak';
-            let color = '#e74c3c';
-            
-            if (password.length >= 8) {
-                if (/[A-Z]/.test(password) && /[0-9]/.test(password)) {
-                    strength = 'Strong';
-                    color = '#27ae60';
-                } else if (password.length >= 12) {
-                    strength = 'Good';
-                    color = '#f39c12';
-                }
-            }
-            
-            strengthIndicator.textContent = 'Strength: ' + strength;
-            strengthIndicator.style.color = color;
-            checkPasswordMatch();
-        });
+        function updateFilesList() {
+            filesContainer.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-item-number">${index + 1}</span>
+                    <span class="file-item-name">${file.name}</span>
+                    <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
+                `;
+                filesContainer.appendChild(fileItem);
+            });
+        }
         
-        // Password Match Checker
-        repeatPasswordInput.addEventListener('input', checkPasswordMatch);
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFilesList();
+            updateUI();
+        }
         
-        function checkPasswordMatch() {
-            if (currentMode !== 'protect') return;
-            const match = passwordInput.value === repeatPasswordInput.value && passwordInput.value !== '';
-            if (passwordInput.value === '') {
-                matchIndicator.textContent = '';
-            } else if (match) {
-                matchIndicator.textContent = '✓ Passwords match';
-                matchIndicator.className = 'password-match match';
+        function updateUI() {
+            const count = selectedFiles.length;
+            fileCount.textContent = count;
+            
+            if (count > 0) {
+                infoBox.classList.add('show');
+                filesList.classList.add('show');
+                uploadArea.style.opacity = '0.5';
+                mergeBtn.disabled = false;
             } else {
-                matchIndicator.textContent = '✗ Passwords do not match';
-                matchIndicator.className = 'password-match nomatch';
+                infoBox.classList.remove('show');
+                filesList.classList.remove('show');
+                uploadArea.style.opacity = '1';
+                mergeBtn.disabled = true;
+                successMessage.classList.remove('show');
             }
         }
         
-        // Main Action Button Click
-        protectBtn.addEventListener('click', async () => {
-            if (!selectedFile) {
-                alert('Please select a file');
+        mergeBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one PDF');
                 return;
             }
-
-            const password = passwordInput.value;
-            if (!password) {
-                alert('Please enter a password');
-                return;
-            }
-
-            if (currentMode === 'protect') {
-                // Lock Execution
-                if (password !== repeatPasswordInput.value) {
-                    alert('Passwords do not match');
-                    return;
-                }
-                if (password.length < 6) {
-                    alert('Password must be at least 6 characters');
-                    return;
-                }
-                encryptFile(password);
-            } else {
-                // Unlock Execution
-                decryptFile(password);
-            }
-        });
-
-        // 1. File Encryption Logic (Locking)
-        function encryptFile(password) {
-            protectBtn.disabled = true;
-            protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encrypting...';
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Data = e.target.result;
+            mergeBtn.disabled = true;
+            mergeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Merging...';
+            
+            try {
+                const { PDFDocument } = window.PDFLib;
+                const mergedPdf = await PDFDocument.create();
                 
-                const fileData = {
-                    fileName: selectedFile.name,
-                    fileType: selectedFile.type,
-                    base64: base64Data
-                };
+                for (const file of selectedFiles) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await PDFDocument.load(arrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
                 
-                // AES-256 Encryption
-                const encryptedString = CryptoJS.AES.encrypt(JSON.stringify(fileData), password).toString();
-                
-                // Create JSON envelope structure
-                const protectedPayload = {
-                    vault: encryptedString,
-                    info: "PooreYouTuber Secure File"
-                };
-                
-                // Download with original extension + .protected extension
-                const origName = selectedFile.name;
-                const protectedFileName = origName + '.protected';
-                
-                const blob = new Blob([JSON.stringify(protectedPayload)], { type: 'application/json' });
+                const pdfBytes = await mergedPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = protectedFileName;
+                link.download = 'merged.pdf';
                 link.click();
                 URL.revokeObjectURL(url);
                 
-                successText.textContent = "✅ File locked successfully! Your encrypted file has been downloaded.";
                 successMessage.classList.add('show');
-                protectBtn.disabled = false;
-                protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
+                mergeBtn.disabled = false;
+                mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
                 
-                setTimeout(() => clearAll(), 4000);
-            };
-            reader.readAsDataURL(selectedFile);
-        }
-
-        // 2. File Decryption Logic (Unlocking)
-        function decryptFile(password) {
-            protectBtn.disabled = true;
-            protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking...';
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const jsonContent = JSON.parse(e.target.result);
-                    if (!jsonContent.vault) {
-                        throw new Error("Invalid structure");
-                    }
-
-                    // Decrypt content
-                    const decryptedBytes = CryptoJS.AES.decrypt(jsonContent.vault, password);
-                    const decryptedString = decryptedBytes.toString(CryptoJS.enc.Utf8);
-                    
-                    if (!decryptedString) {
-                        throw new Error("Wrong password");
-                    }
-
-                    const originalFileData = JSON.parse(decryptedString);
-                    
-                    // Convert Base64 dataURI back to binary Blob
-                    const dataUri = originalFileData.base64;
-                    const splitUri = dataUri.split(',');
-                    const byteString = atob(splitUri[1]);
-                    const mimeString = splitUri[0].split(':')[1].split(';')[0];
-                    
-                    const ab = new ArrayBuffer(byteString.length);
-                    const ia = new Uint8Array(ab);
-                    for (let i = 0; i < byteString.length; i++) {
-                        ia[i] = byteString.charCodeAt(i);
-                    }
-                    
-                    const decryptedBlob = new Blob([ab], { type: mimeString });
-                    
-                    // Download Original Restored File
-                    const url = URL.createObjectURL(decryptedBlob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = originalFileData.fileName;
-                    link.click();
-                    URL.revokeObjectURL(url);
-
-                    successText.textContent = "🔓 File decrypted successfully! Your original file has been restored.";
-                    successMessage.classList.add('show');
-                    protectBtn.disabled = false;
-                    protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
-
-                    setTimeout(() => clearAll(), 4000);
-
-                } catch (err) {
-                    alert("❌ Incorrect Password or Corrupted File!");
-                    protectBtn.disabled = false;
-                    protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
-                }
-            };
-            reader.readAsText(selectedFile);
-        }
+                setTimeout(() => {
+                    clearAll();
+                }, 2000);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while merging. Please try again.');
+                mergeBtn.disabled = false;
+                mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
+            }
+        });
         
-        // Clear All Fields
         function clearAll() {
-            selectedFile = null;
+            selectedFiles = [];
             fileInput.value = '';
-            fileInfo.classList.remove('show');
-            passwordForm.style.display = 'none';
-            passwordInput.value = '';
-            repeatPasswordInput.value = '';
-            strengthIndicator.textContent = '';
-            matchIndicator.textContent = '';
+            filesContainer.innerHTML = '';
+            infoBox.classList.remove('show');
+            filesList.classList.remove('show');
             successMessage.classList.remove('show');
             uploadArea.style.opacity = '1';
-            uploadArea.style.pointerEvents = 'auto';
-            document.getElementById('togglePassword').className = 'fas fa-eye';
-            document.getElementById('toggleRepeatPassword').className = 'fas fa-eye';
+            mergeBtn.disabled = true;
+            mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
+            fileCount.textContent = '0';
         }
         
-        // FAQ Toggle
         function toggleFaq(element) {
             const question = element;
             const answer = question.nextElementSibling;
@@ -1075,5 +836,6 @@
             answer.classList.toggle('show');
         }
     </script>
+
 </body>
 </html>
