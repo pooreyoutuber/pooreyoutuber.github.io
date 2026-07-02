@@ -9,13 +9,11 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="PooreYouTuber">
     
-    <!-- Open Graph -->
     <meta property="og:title" content="Free PDF Password Protector - Encrypt Your Files">
     <meta property="og:description" content="Secure your PDF and document files with strong password encryption. Download protected files instantly.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
     
-    <!-- Schema Markup -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -42,7 +40,6 @@
     }
     </script>
     
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -51,16 +48,13 @@
         gtag('config', 'G-ZPMC525FGT');
     </script>
     
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CryptoJS for password encryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
@@ -130,6 +124,31 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
+        }
+
+        /* Tabs UI */
+        .tool-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: #333;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #ff0000;
+            color: white;
         }
         
         /* Tool Section */
@@ -505,7 +524,6 @@
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <div class="logo">
             <i class="fas fa-lock"></i>
@@ -518,10 +536,8 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="container">
         
-        <!-- Ad Top -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -532,37 +548,38 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- Tool Section -->
+        <div class="tool-tabs">
+            <button class="tab-btn active" id="tabProtect" onclick="switchMode('protect')">🔐 Lock File</button>
+            <button class="tab-btn" id="tabUnlock" onclick="switchMode('unlock')">🔓 Unlock File</button>
+        </div>
+
         <div class="tool-section">
-            <h1>🔐 PDF Password Protector</h1>
-            <p class="tool-subtitle">Secure Your Files with Strong Encryption</p>
+            <h1 id="toolTitle">🔐 PDF Password Protector</h1>
+            <p class="tool-subtitle" id="toolSubtitle">Secure Your Files with Strong Encryption</p>
             
-            <!-- File Upload -->
             <div class="upload-area" id="uploadArea">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Click to upload or drag and drop</p>
-                <p class="small">PDF, JPG, PNG, DOCX, TXT, and other document files</p>
+                <i class="fas fa-cloud-upload-alt" id="uploadIcon"></i>
+                <p id="uploadText">Click to upload or drag and drop</p>
+                <p class="small" id="uploadSmallText">PDF, JPG, PNG, DOCX, TXT, and other document files</p>
                 <input type="file" id="fileInput" class="file-input">
             </div>
             
-            <!-- File Info -->
             <div class="file-info" id="fileInfo">
                 <p>📄 File: <span class="file-name" id="fileName"></span></p>
                 <p>💾 Size: <span id="fileSize"></span></p>
             </div>
             
-            <!-- Password Form -->
             <div id="passwordForm" style="display: none;">
                 <div class="form-group">
-                    <label for="password">Set Password *</label>
+                    <label for="password" id="passLabel">Set Password *</label>
                     <div style="position: relative;">
-                        <input type="password" id="password" placeholder="Enter a strong password" required>
+                        <input type="password" id="password" placeholder="Enter password" required>
                         <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
                     </div>
                     <div class="password-match" id="strengthIndicator"></div>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" id="repeatPasswordGroup">
                     <label for="repeatPassword">Repeat Password *</label>
                     <div style="position: relative;">
                         <input type="password" id="repeatPassword" placeholder="Confirm your password" required>
@@ -571,7 +588,7 @@
                     <div class="password-match" id="matchIndicator"></div>
                 </div>
                 
-                <div class="info-box">
+                <div class="info-box" id="tipsBox">
                     <h3><i class="fas fa-lightbulb"></i> Password Tips</h3>
                     <p>✓ Use at least 8 characters</p>
                     <p>✓ Mix uppercase, lowercase, and numbers</p>
@@ -588,13 +605,11 @@
                 </div>
             </div>
             
-            <!-- Success Message -->
             <div class="success-message" id="successMessage">
-                <p>✅ File protected successfully! Your file is ready to download.</p>
+                <p id="successText">✅ File protected successfully! Your file is ready to download.</p>
             </div>
         </div>
 
-        <!-- Ad Middle -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -605,7 +620,6 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- FAQs Section -->
         <div class="faq-section">
             <h2>Frequently Asked Questions</h2>
             
@@ -642,10 +656,10 @@
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    Will my file be converted or modified?
+                    How do I open the protected file?
                 </div>
                 <div class="faq-answer">
-                    No. Your original file format is preserved. If you upload a PDF, you'll download a password-protected PDF. If you upload a JPG, you'll get a password-protected JPG in the same format.
+                    Since this is a client-side secure tool, you can unlock your file anytime by switching to the "Unlock File" tab on this exact website, uploading your protected file, and entering the password you set.
                 </div>
             </div>
             
@@ -670,7 +684,6 @@
             </div>
         </div>
 
-        <!-- Ad Middle 2 -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -681,7 +694,6 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- Description Section -->
         <div class="description-section">
             <h2>How to Use & Benefits</h2>
             
@@ -692,7 +704,7 @@
                 <li style="margin-bottom: 10px;"><strong>Upload Your File:</strong> Click the upload area or drag and drop your file (PDF, JPG, DOCX, etc.)</li>
                 <li style="margin-bottom: 10px;"><strong>Set Password:</strong> Enter a strong password and confirm it</li>
                 <li style="margin-bottom: 10px;"><strong>Protect & Download:</strong> Click the button to encrypt your file</li>
-                <li style="margin-bottom: 10px;"><strong>Share Securely:</strong> Send the protected file to anyone. They'll need your password to open it</li>
+                <li style="margin-bottom: 10px;"><strong>Unlock/Decrypt:</strong> To view the file again, just switch to "Unlock File" tab, upload the protected file, and enter your password.</li>
             </ol>
             
             <h3 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Key Benefits:</h3>
@@ -706,13 +718,8 @@
                 <li>Fast & Reliable - Instant encryption without server upload</li>
                 <li>Works Offline - Use it even without internet connection</li>
             </ul>
-            
-            <p style="margin-top: 25px;"><strong>Why Choose Our Tool?</strong> Unlike other online file encryption services, we prioritize your privacy and security above everything. We don't collect your files, don't track your activity, and don't require any personal information. Your files are encrypted right on your device using the same security standards trusted by major institutions worldwide.</p>
-            
-            <p>Perfect for protecting confidential business documents, personal files, sensitive images, financial records, medical documents, legal contracts, and any other files you want to keep secure. Share your protected files without worrying about unauthorized access.</p>
         </div>
 
-        <!-- Ad Bottom -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -724,27 +731,68 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2026 <a href="https://pooreyoutuber.github.io/">PooreYouTuber</a>. All Rights Reserved.</p>
         <p>Use of this tool is subject to our <a href="https://pooreyoutuber.github.io/disclaimer.html">terms of service</a>. Free forever, no login required, completely private.</p>
     </footer>
 
-    <!-- JavaScript -->
     <script>
-        // File Upload Handler
+        // DOM Elements
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
         const passwordForm = document.getElementById('passwordForm');
         const passwordInput = document.getElementById('password');
         const repeatPasswordInput = document.getElementById('repeatPassword');
+        const repeatPasswordGroup = document.getElementById('repeatPasswordGroup');
         const strengthIndicator = document.getElementById('strengthIndicator');
         const matchIndicator = document.getElementById('matchIndicator');
         const protectBtn = document.getElementById('protectBtn');
         const successMessage = document.getElementById('successMessage');
+        const successText = document.getElementById('successText');
+        const tipsBox = document.getElementById('tipsBox');
         
+        const toolTitle = document.getElementById('toolTitle');
+        const toolSubtitle = document.getElementById('toolSubtitle');
+        const uploadText = document.getElementById('uploadText');
+        const uploadSmallText = document.getElementById('uploadSmallText');
+        const passLabel = document.getElementById('passLabel');
+
         let selectedFile = null;
+        let currentMode = 'protect'; // protect or unlock
+
+        // Mode Switching
+        function switchMode(mode) {
+            currentMode = mode;
+            clearAll();
+            
+            document.getElementById('tabProtect').classList.remove('active');
+            document.getElementById('tabUnlock').classList.remove('active');
+            
+            if (mode === 'protect') {
+                document.getElementById('tabProtect').classList.add('active');
+                toolTitle.innerHTML = '🔐 PDF Password Protector';
+                toolSubtitle.textContent = 'Secure Your Files with Strong Encryption';
+                uploadText.textContent = 'Click to upload or drag and drop';
+                uploadSmallText.textContent = 'PDF, JPG, PNG, DOCX, TXT, and other document files';
+                passLabel.textContent = 'Set Password *';
+                passwordInput.placeholder = 'Enter a strong password';
+                repeatPasswordGroup.style.display = 'block';
+                tipsBox.style.display = 'block';
+                protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
+            } else {
+                document.getElementById('tabUnlock').classList.add('active');
+                toolTitle.innerHTML = '🔓 File Password Unlocker';
+                toolSubtitle.textContent = 'Decrypt and Restore Your Protected Files';
+                uploadText.textContent = 'Upload your .protected file';
+                uploadSmallText.textContent = 'Select the encrypted file downloaded from this tool';
+                passLabel.textContent = 'Enter Password *';
+                passwordInput.placeholder = 'Enter the correct password';
+                repeatPasswordGroup.style.display = 'none';
+                tipsBox.style.display = 'none';
+                protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
+            }
+        }
         
         // Eye Icon Toggle - Password
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -752,12 +800,10 @@
             const icon = this;
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.className = 'fas fa-eye-slash';
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.className = 'fas fa-eye';
             }
         });
         
@@ -767,16 +813,14 @@
             const icon = this;
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.className = 'fas fa-eye-slash';
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.className = 'fas fa-eye';
             }
         });
         
-        // Upload Area Click
+        // Upload Area Clicks
         uploadArea.addEventListener('click', () => fileInput.click());
         
         // Drag and Drop
@@ -819,8 +863,12 @@
             successMessage.classList.remove('show');
         }
         
-        // Password Strength Indicator
+        // Password Strength Indicator (Only for protect mode)
         passwordInput.addEventListener('input', () => {
+            if (currentMode !== 'protect') {
+                strengthIndicator.textContent = '';
+                return;
+            }
             const password = passwordInput.value;
             let strength = 'Weak';
             let color = '#e74c3c';
@@ -837,8 +885,6 @@
             
             strengthIndicator.textContent = 'Strength: ' + strength;
             strengthIndicator.style.color = color;
-            
-            // Check match
             checkPasswordMatch();
         });
         
@@ -846,101 +892,157 @@
         repeatPasswordInput.addEventListener('input', checkPasswordMatch);
         
         function checkPasswordMatch() {
+            if (currentMode !== 'protect') return;
             const match = passwordInput.value === repeatPasswordInput.value && passwordInput.value !== '';
             if (passwordInput.value === '') {
                 matchIndicator.textContent = '';
             } else if (match) {
                 matchIndicator.textContent = '✓ Passwords match';
-                matchIndicator.classList.add('match');
-                matchIndicator.classList.remove('nomatch');
+                matchIndicator.className = 'password-match match';
             } else {
                 matchIndicator.textContent = '✗ Passwords do not match';
-                matchIndicator.classList.add('nomatch');
-                matchIndicator.classList.remove('match');
+                matchIndicator.className = 'password-match nomatch';
             }
         }
         
-        // Protect Button Click
+        // Main Action Button Click
         protectBtn.addEventListener('click', async () => {
-            const password = passwordInput.value;
-            const repeatPassword = repeatPasswordInput.value;
-            
             if (!selectedFile) {
                 alert('Please select a file');
                 return;
             }
-            
-            if (password !== repeatPassword) {
-                alert('Passwords do not match');
+
+            const password = passwordInput.value;
+            if (!password) {
+                alert('Please enter a password');
                 return;
             }
-            
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
+
+            if (currentMode === 'protect') {
+                // Lock Execution
+                if (password !== repeatPasswordInput.value) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return;
+                }
+                encryptFile(password);
+            } else {
+                // Unlock Execution
+                decryptFile(password);
             }
-            
+        });
+
+        // 1. File Encryption Logic (Locking)
+        function encryptFile(password) {
             protectBtn.disabled = true;
             protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encrypting...';
             
-            try {
-                // Read file as base64
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const base64Data = e.target.result;
-                    
-                    // Create JSON object with file info and encrypted data
-                    const fileData = {
-                        fileName: selectedFile.name,
-                        fileType: selectedFile.type,
-                        base64: base64Data,
-                        encrypted: true
-                    };
-                    
-                    // Encrypt using CryptoJS
-                    const encrypted = CryptoJS.AES.encrypt(
-                        JSON.stringify(fileData),
-                        password
-                    ).toString();
-                    
-                    // Create protected file with original extension
-                    const fileExtension = selectedFile.name.split('.').pop();
-                    const protectedFileName = selectedFile.name.replace(/\.[^/.]+$/, '') + '.protected.' + fileExtension;
-                    
-                    const protectedContent = {
-                        data: encrypted,
-                        v: 1
-                    };
-                    
-                    // Download the protected file
-                    const blob = new Blob([JSON.stringify(protectedContent)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = protectedFileName;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    
-                    successMessage.classList.add('show');
-                    protectBtn.disabled = false;
-                    protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
-                    
-                    // Auto-clear after 3 seconds
-                    setTimeout(() => {
-                        clearAll();
-                    }, 3000);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                
+                const fileData = {
+                    fileName: selectedFile.name,
+                    fileType: selectedFile.type,
+                    base64: base64Data
                 };
                 
-                reader.readAsDataURL(selectedFile);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred: ' + error.message);
+                // AES-256 Encryption
+                const encryptedString = CryptoJS.AES.encrypt(JSON.stringify(fileData), password).toString();
+                
+                // Create JSON envelope structure
+                const protectedPayload = {
+                    vault: encryptedString,
+                    info: "PooreYouTuber Secure File"
+                };
+                
+                // Download with original extension + .protected extension
+                const origName = selectedFile.name;
+                const protectedFileName = origName + '.protected';
+                
+                const blob = new Blob([JSON.stringify(protectedPayload)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = protectedFileName;
+                link.click();
+                URL.revokeObjectURL(url);
+                
+                successText.textContent = "✅ File locked successfully! Your encrypted file has been downloaded.";
+                successMessage.classList.add('show');
                 protectBtn.disabled = false;
                 protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
-            }
-        });
+                
+                setTimeout(() => clearAll(), 4000);
+            };
+            reader.readAsDataURL(selectedFile);
+        }
+
+        // 2. File Decryption Logic (Unlocking)
+        function decryptFile(password) {
+            protectBtn.disabled = true;
+            protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonContent = JSON.parse(e.target.result);
+                    if (!jsonContent.vault) {
+                        throw new Error("Invalid structure");
+                    }
+
+                    // Decrypt content
+                    const decryptedBytes = CryptoJS.AES.decrypt(jsonContent.vault, password);
+                    const decryptedString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!decryptedString) {
+                        throw new Error("Wrong password");
+                    }
+
+                    const originalFileData = JSON.parse(decryptedString);
+                    
+                    // Convert Base64 dataURI back to binary Blob
+                    const dataUri = originalFileData.base64;
+                    const splitUri = dataUri.split(',');
+                    const byteString = atob(splitUri[1]);
+                    const mimeString = splitUri[0].split(':')[1].split(';')[0];
+                    
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    
+                    const decryptedBlob = new Blob([ab], { type: mimeString });
+                    
+                    // Download Original Restored File
+                    const url = URL.createObjectURL(decryptedBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = originalFileData.fileName;
+                    link.click();
+                    URL.revokeObjectURL(url);
+
+                    successText.textContent = "🔓 File decrypted successfully! Your original file has been restored.";
+                    successMessage.classList.add('show');
+                    protectBtn.disabled = false;
+                    protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
+
+                    setTimeout(() => clearAll(), 4000);
+
+                } catch (err) {
+                    alert("❌ Incorrect Password or Corrupted File!");
+                    protectBtn.disabled = false;
+                    protectBtn.innerHTML = '<i class="fas fa-unlock"></i> Unlock & Download';
+                }
+            };
+            reader.readAsText(selectedFile);
+        }
         
-        // Clear All
+        // Clear All Fields
         function clearAll() {
             selectedFile = null;
             fileInput.value = '';
@@ -962,7 +1064,6 @@
             const question = element;
             const answer = question.nextElementSibling;
             
-            // Close other FAQs
             document.querySelectorAll('.faq-answer').forEach(a => {
                 if (a !== answer) {
                     a.classList.remove('show');
@@ -970,11 +1071,9 @@
                 }
             });
             
-            // Toggle current
             question.classList.toggle('active');
             answer.classList.toggle('show');
         }
     </script>
-
 </body>
 </html>
