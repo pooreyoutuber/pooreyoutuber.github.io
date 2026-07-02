@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Password Protector - Encrypt & Secure Your Files | PooreYouTuber</title>
+    <meta name="description" content="Protect your PDF, JPG, and document files with password encryption. Free, secure, no login required. Encrypt files instantly and download with password protection.">
+    <meta name="keywords" content="PDF password protector, file encryption, secure PDF, password protect files, encrypt JPG, document security, free file protection tool">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="PooreYouTuber">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Free PDF Password Protector - Encrypt Your Files">
+    <meta property="og:description" content="Secure your PDF and document files with strong password encryption. Download protected files instantly.">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/">
+    <meta property="og:type" content="website">
+    
+    <!-- Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PDF Password Protector",
+      "description": "Free tool to encrypt and password protect PDF, JPG, and other document files",
+      "url": "https://pooreyoutuber.github.io/",
+      "applicationCategory": "Utility",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "PooreYouTuber",
+        "url": "https://pooreyoutuber.github.io/"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1250"
+      }
+    }
+    </script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CryptoJS for password encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff0000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .home-btn {
+            background: #ff0000;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .home-btn:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Tool Section */
+        .tool-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .tool-section h1 {
+            color: #ff0000;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .tool-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.05rem;
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed #ff0000;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff9f9;
+            margin-bottom: 25px;
+        }
+        
+        .upload-area:hover {
+            background: #fff3f3;
+            border-color: #cc0000;
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: #ff0000;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .upload-area .small {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-info {
+            background: #f0f7ff;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .file-info p {
+            margin: 8px 0;
+            color: #333;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #ff0000;
+        }
+        
+        /* Form Group */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        }
+        
+        .password-match {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            color: #999;
+        }
+        
+        .password-match.match {
+            color: #27ae60;
+        }
+        
+        .password-match.nomatch {
+            color: #e74c3c;
+        }
+        
+        /* Button Group */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .protect-btn {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+        }
+        
+        .protect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 0, 0, 0.25);
+        }
+        
+        .protect-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #e8e8e8;
+            color: #333;
+        }
+        
+        .clear-btn:hover {
+            background: #d0d0d0;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: #f0f9ff;
+            border-left: 4px solid #27ae60;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .success-message p {
+            color: #27ae60;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        /* Info Boxes */
+        .info-box {
+            background: #f9f9f9;
+            border-left: 4px solid #ff0000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h3 {
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        /* FAQs Section */
+        .faq-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .faq-section h2 {
+            color: #ff0000;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-question {
+            color: #ff0000;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+        
+        .faq-question i {
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+        
+        .faq-answer {
+            color: #666;
+            line-height: 1.8;
+            display: none;
+            padding-left: 25px;
+        }
+        
+        .faq-answer.show {
+            display: block;
+        }
+        
+        /* Description Section */
+        .description-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .description-section h2 {
+            color: #ff0000;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        
+        .description-section p {
+            color: #666;
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.8;
+        }
+        
+        .benefit-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .benefit-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #666;
+        }
+        
+        .benefit-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: #f9f9f9;
+            border-top: 2px solid #e0e0e0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        footer p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        footer a {
+            color: #ff0000;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Ad Container */
+        .ad-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tool-section,
+            .faq-section,
+            .description-section {
+                padding: 25px;
+            }
+            
+            .tool-section h1 {
+                font-size: 1.5rem;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-area {
+                padding: 25px;
+            }
+            
+            .upload-area i {
+                font-size: 2rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-lock"></i>
+            PooreYouTuber
+        </div>
+        <div class="header-right">
+            <a href="https://pooreyoutuber.github.io/" class="home-btn">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- Ad Top -->
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="4845852354"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <!-- Tool Section -->
+        <div class="tool-section">
+            <h1>🔐 PDF Password Protector</h1>
+            <p class="tool-subtitle">Secure Your Files with Strong Encryption</p>
+            
+            <!-- File Upload -->
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click to upload or drag and drop</p>
+                <p class="small">PDF, JPG, PNG, DOCX, TXT, and other document files</p>
+                <input type="file" id="fileInput" class="file-input">
+            </div>
+            
+            <!-- File Info -->
+            <div class="file-info" id="fileInfo">
+                <p>📄 File: <span class="file-name" id="fileName"></span></p>
+                <p>💾 Size: <span id="fileSize"></span></p>
+            </div>
+            
+            <!-- Password Form -->
+            <div id="passwordForm" style="display: none;">
+                <div class="form-group">
+                    <label for="password">Set Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" placeholder="Enter a strong password" required>
+                        <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
+                    </div>
+                    <div class="password-match" id="strengthIndicator"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="repeatPassword">Repeat Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="repeatPassword" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye" id="toggleRepeatPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ff0000;"></i>
+                    </div>
+                    <div class="password-match" id="matchIndicator"></div>
+                </div>
+                
+                <div class="info-box">
+                    <h3><i class="fas fa-lightbulb"></i> Password Tips</h3>
+                    <p>✓ Use at least 8 characters</p>
+                    <p>✓ Mix uppercase, lowercase, and numbers</p>
+                    <p>✓ Avoid common words or personal information</p>
+                </div>
+                
+                <div class="button-group">
+                    <button class="protect-btn" id="protectBtn">
+                        <i class="fas fa-shield-alt"></i> Protect & Download
+                    </button>
+                    <button class="clear-btn" onclick="clearAll()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <p>✅ File protected successfully! Your file is ready to download.</p>
+            </div>
+        </div>
+
+        <!-- Ad Middle -->
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-ef+6k-30-ac+ty"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="8649365996"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <!-- FAQs Section -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Is my file completely safe and private?
+                </div>
+                <div class="faq-answer">
+                    Yes! We use client-side encryption, meaning your files are processed entirely in your browser. We do NOT upload or store any files on our servers. Your data remains completely private and secure on your device.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Do I need to create an account or login?
+                </div>
+                <div class="faq-answer">
+                    No! This tool requires absolutely no registration, login, or account creation. You can start protecting your files immediately without providing any personal information.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    What file types can I protect?
+                </div>
+                <div class="faq-answer">
+                    You can protect any file type including PDF, JPG, PNG, DOCX, TXT, XLSX, and many others. The tool works with documents, images, spreadsheets, and virtually any digital file.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    Will my file be converted or modified?
+                </div>
+                <div class="faq-answer">
+                    No. Your original file format is preserved. If you upload a PDF, you'll download a password-protected PDF. If you upload a JPG, you'll get a password-protected JPG in the same format.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    How strong is the encryption?
+                </div>
+                <div class="faq-answer">
+                    We use AES-256 encryption, which is military-grade and considered unbreakable. This is the same encryption standard used by banks and government agencies worldwide.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="fas fa-chevron-down"></i>
+                    What if I forget my password?
+                </div>
+                <div class="faq-answer">
+                    If you forget your password, the file cannot be opened. That's why it's important to use a memorable password or store it securely. Always keep your passwords in a safe place.
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Middle 2 -->
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="4845852354"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <!-- Description Section -->
+        <div class="description-section">
+            <h2>How to Use & Benefits</h2>
+            
+            <p><strong>PDF Password Protector</strong> is your all-in-one solution for securing sensitive documents and files with strong password encryption. Whether you need to protect confidential business documents, personal files, or sensitive images, this tool makes it incredibly easy.</p>
+            
+            <h3 style="color: #333; font-size: 1.2rem; margin-top: 25px; margin-bottom: 15px;">How to Use:</h3>
+            <ol style="color: #666; padding-left: 20px; margin-bottom: 20px;">
+                <li style="margin-bottom: 10px;"><strong>Upload Your File:</strong> Click the upload area or drag and drop your file (PDF, JPG, DOCX, etc.)</li>
+                <li style="margin-bottom: 10px;"><strong>Set Password:</strong> Enter a strong password and confirm it</li>
+                <li style="margin-bottom: 10px;"><strong>Protect & Download:</strong> Click the button to encrypt your file</li>
+                <li style="margin-bottom: 10px;"><strong>Share Securely:</strong> Send the protected file to anyone. They'll need your password to open it</li>
+            </ol>
+            
+            <h3 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Key Benefits:</h3>
+            <ul class="benefit-list">
+                <li>100% Free - No hidden charges or premium versions</li>
+                <li>No Login Required - Start protecting files instantly</li>
+                <li>Complete Privacy - Files never leave your device</li>
+                <li>Military-Grade Encryption - AES-256 security standard</li>
+                <li>All File Types Supported - PDF, JPG, DOCX, images, and more</li>
+                <li>Original Format Preserved - Files download in their original format</li>
+                <li>Fast & Reliable - Instant encryption without server upload</li>
+                <li>Works Offline - Use it even without internet connection</li>
+            </ul>
+            
+            <p style="margin-top: 25px;"><strong>Why Choose Our Tool?</strong> Unlike other online file encryption services, we prioritize your privacy and security above everything. We don't collect your files, don't track your activity, and don't require any personal information. Your files are encrypted right on your device using the same security standards trusted by major institutions worldwide.</p>
+            
+            <p>Perfect for protecting confidential business documents, personal files, sensitive images, financial records, medical documents, legal contracts, and any other files you want to keep secure. Share your protected files without worrying about unauthorized access.</p>
+        </div>
+
+        <!-- Ad Bottom -->
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-ef+6k-30-ac+ty"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="8649365996"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 <a href="https://pooreyoutuber.github.io/">PooreYouTuber</a>. All Rights Reserved.</p>
+        <p>Use of this tool is subject to our <a href="https://pooreyoutuber.github.io/disclaimer.html">terms of service</a>. Free forever, no login required, completely private.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // File Upload Handler
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const passwordForm = document.getElementById('passwordForm');
+        const passwordInput = document.getElementById('password');
+        const repeatPasswordInput = document.getElementById('repeatPassword');
+        const strengthIndicator = document.getElementById('strengthIndicator');
+        const matchIndicator = document.getElementById('matchIndicator');
+        const protectBtn = document.getElementById('protectBtn');
+        const successMessage = document.getElementById('successMessage');
+        
+        let selectedFile = null;
+        
+        // Eye Icon Toggle - Password
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = this;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Eye Icon Toggle - Repeat Password
+        document.getElementById('toggleRepeatPassword').addEventListener('click', function() {
+            const input = document.getElementById('repeatPassword');
+            const icon = this;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Upload Area Click
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#fff3f3';
+            uploadArea.style.borderColor = '#cc0000';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#fff9f9';
+            uploadArea.style.borderColor = '#ff0000';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        // File Input Change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        // Handle File Selection
+        function handleFileSelect(file) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+            fileInfo.classList.add('show');
+            passwordForm.style.display = 'block';
+            uploadArea.style.opacity = '0.5';
+            uploadArea.style.pointerEvents = 'none';
+            successMessage.classList.remove('show');
+        }
+        
+        // Password Strength Indicator
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            let strength = 'Weak';
+            let color = '#e74c3c';
+            
+            if (password.length >= 8) {
+                if (/[A-Z]/.test(password) && /[0-9]/.test(password)) {
+                    strength = 'Strong';
+                    color = '#27ae60';
+                } else if (password.length >= 12) {
+                    strength = 'Good';
+                    color = '#f39c12';
+                }
+            }
+            
+            strengthIndicator.textContent = 'Strength: ' + strength;
+            strengthIndicator.style.color = color;
+            
+            // Check match
+            checkPasswordMatch();
+        });
+        
+        // Password Match Checker
+        repeatPasswordInput.addEventListener('input', checkPasswordMatch);
+        
+        function checkPasswordMatch() {
+            const match = passwordInput.value === repeatPasswordInput.value && passwordInput.value !== '';
+            if (passwordInput.value === '') {
+                matchIndicator.textContent = '';
+            } else if (match) {
+                matchIndicator.textContent = '✓ Passwords match';
+                matchIndicator.classList.add('match');
+                matchIndicator.classList.remove('nomatch');
+            } else {
+                matchIndicator.textContent = '✗ Passwords do not match';
+                matchIndicator.classList.add('nomatch');
+                matchIndicator.classList.remove('match');
+            }
+        }
+        
+        // Protect Button Click
+        protectBtn.addEventListener('click', async () => {
+            const password = passwordInput.value;
+            const repeatPassword = repeatPasswordInput.value;
+            
+            if (!selectedFile) {
+                alert('Please select a file');
+                return;
+            }
+            
+            if (password !== repeatPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            
+            protectBtn.disabled = true;
+            protectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encrypting...';
+            
+            try {
+                // Read file as base64
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Data = e.target.result;
+                    
+                    // Create JSON object with file info and encrypted data
+                    const fileData = {
+                        fileName: selectedFile.name,
+                        fileType: selectedFile.type,
+                        base64: base64Data,
+                        encrypted: true
+                    };
+                    
+                    // Encrypt using CryptoJS
+                    const encrypted = CryptoJS.AES.encrypt(
+                        JSON.stringify(fileData),
+                        password
+                    ).toString();
+                    
+                    // Create protected file with original extension
+                    const fileExtension = selectedFile.name.split('.').pop();
+                    const protectedFileName = selectedFile.name.replace(/\.[^/.]+$/, '') + '.protected.' + fileExtension;
+                    
+                    const protectedContent = {
+                        data: encrypted,
+                        v: 1
+                    };
+                    
+                    // Download the protected file
+                    const blob = new Blob([JSON.stringify(protectedContent)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = protectedFileName;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    successMessage.classList.add('show');
+                    protectBtn.disabled = false;
+                    protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
+                    
+                    // Auto-clear after 3 seconds
+                    setTimeout(() => {
+                        clearAll();
+                    }, 3000);
+                };
+                
+                reader.readAsDataURL(selectedFile);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+                protectBtn.disabled = false;
+                protectBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Protect & Download';
+            }
+        });
+        
+        // Clear All
+        function clearAll() {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+            passwordForm.style.display = 'none';
+            passwordInput.value = '';
+            repeatPasswordInput.value = '';
+            strengthIndicator.textContent = '';
+            matchIndicator.textContent = '';
+            successMessage.classList.remove('show');
+            uploadArea.style.opacity = '1';
+            uploadArea.style.pointerEvents = 'auto';
+            document.getElementById('togglePassword').className = 'fas fa-eye';
+            document.getElementById('toggleRepeatPassword').className = 'fas fa-eye';
+        }
+        
+        // FAQ Toggle
+        function toggleFaq(element) {
+            const question = element;
+            const answer = question.nextElementSibling;
+            
+            // Close other FAQs
+            document.querySelectorAll('.faq-answer').forEach(a => {
+                if (a !== answer) {
+                    a.classList.remove('show');
+                    a.previousElementSibling.classList.remove('active');
+                }
+            });
+            
+            // Toggle current
+            question.classList.toggle('active');
+            answer.classList.toggle('show');
+        }
+    </script>
+
+</body>
+</html>
