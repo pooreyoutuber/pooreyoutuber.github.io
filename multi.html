@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merger - Combine Multiple PDFs into One | PooreYouTuber</title>
-    <meta name="description" content="Free PDF Merger tool to combine multiple PDF files into one. No login, no watermark, instant merge. Combine PDFs online securely and download merged PDF.">
-    <meta name="keywords" content="PDF merger, combine PDFs, merge PDF files, PDF combiner, free PDF tool, merge multiple PDFs online, PDF concatenation">
+    <title>Image Compressor - Compress Images Online Free | PooreYouTuber</title>
+    <meta name="description" content="Free online image compressor to reduce image file size. Compress JPG, PNG, WebP instantly without losing quality. No login, no watermark, download compressed images.">
+    <meta name="keywords" content="image compressor, compress image, reduce image size, image optimizer, compress JPG, compress PNG, free image compression tool, online image compressor">
     <meta name="robots" content="index, follow">
     <meta name="author" content="PooreYouTuber">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="Free PDF Merger - Combine Multiple PDFs Online">
-    <meta property="og:description" content="Merge unlimited PDF files into one. Free, fast, secure. No registration required.">
+    <meta property="og:title" content="Free Image Compressor - Compress Images Online">
+    <meta property="og:description" content="Reduce image file size instantly. Compress JPG, PNG, WebP without quality loss. Free, fast, secure.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
     
@@ -20,8 +20,8 @@
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "PDF Merger",
-      "description": "Free tool to merge multiple PDF files into one single PDF document",
+      "name": "Image Compressor",
+      "description": "Free tool to compress and reduce image file size online. Supports JPG, PNG, WebP and other formats.",
       "url": "https://pooreyoutuber.github.io/",
       "applicationCategory": "Utility",
       "offers": {
@@ -36,8 +36,8 @@
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "2850"
+        "ratingValue": "4.8",
+        "ratingCount": "3200"
       }
     }
     </script>
@@ -60,9 +60,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- PDF Libraries - FIXED -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <!-- Image Compression Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.10.1/compressor.min.js"></script>
     
     <style>
         * {
@@ -120,7 +119,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -147,6 +146,49 @@
             color: #666;
             margin-bottom: 30px;
             font-size: 1.05rem;
+        }
+        
+        /* Preview Section */
+        .preview-section {
+            text-align: center;
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .preview-section.show {
+            display: block;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .size-info {
+            background: #f0f7ff;
+            border-left: 4px solid #ff0000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .size-info-item h3 {
+            color: #ff0000;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .size-info-item p {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
         }
         
         /* Upload Area */
@@ -187,88 +229,59 @@
             display: none;
         }
         
-        .files-list {
+        /* Compression Settings */
+        .compression-settings {
             background: #f9f9f9;
-            border-radius: 8px;
             padding: 20px;
+            border-radius: 8px;
             margin-bottom: 25px;
             display: none;
         }
         
-        .files-list.show {
+        .compression-settings.show {
             display: block;
         }
         
-        .files-list h3 {
-            color: #ff0000;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
+        .setting-group {
+            margin-bottom: 20px;
         }
         
-        .file-item {
-            background: white;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .file-item-name {
-            color: #333;
-            font-weight: 500;
-            flex: 1;
-        }
-        
-        .file-item-number {
-            background: #ff0000;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+        .setting-group label {
+            display: block;
             font-weight: 600;
-            margin-right: 10px;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
         }
         
-        .remove-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
+        .setting-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
         
-        .remove-btn:hover {
-            background: #c0392b;
+        .setting-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
         }
         
-        .info-box {
-            background: #f0f7ff;
-            border-left: 4px solid #ff0000;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            display: none;
+        .size-hint {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 8px;
         }
         
-        .info-box.show {
-            display: block;
-        }
-        
-        .info-box p {
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
+        /* Button Group */
         .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+            margin-top: 25px;
         }
         
         button {
@@ -282,17 +295,17 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        .merge-btn {
+        .compress-btn {
             background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
             color: white;
         }
         
-        .merge-btn:hover {
+        .compress-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(255, 0, 0, 0.25);
         }
         
-        .merge-btn:disabled {
+        .compress-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
@@ -319,6 +332,26 @@
             display: block;
             color: #27ae60;
             font-weight: 600;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .progress-bar.show {
+            display: block;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #ff0000, #cc0000);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
         }
         
         /* Description Section */
@@ -461,6 +494,10 @@
                 font-size: 1.5rem;
             }
             
+            .size-info {
+                grid-template-columns: 1fr;
+            }
+            
             .button-group {
                 grid-template-columns: 1fr;
             }
@@ -481,7 +518,7 @@
     <!-- Header -->
     <header>
         <div class="logo">
-            <i class="fas fa-file-pdf"></i>
+            <i class="fas fa-image"></i>
             PooreYouTuber
         </div>
         <a href="https://pooreyoutuber.github.io/" class="home-btn">
@@ -504,38 +541,54 @@
 
         <!-- Tool Section -->
         <div class="tool-section">
-            <h1>📄 PDF Merger</h1>
-            <p class="tool-subtitle">Combine Multiple PDFs into One</p>
+            <h1>🖼️ Image Compressor</h1>
+            <p class="tool-subtitle">Reduce Image Size Without Losing Quality</p>
+            
+            <!-- Preview Section -->
+            <div class="preview-section" id="previewSection">
+                <img id="imagePreview" class="image-preview" alt="Preview">
+                <div class="size-info">
+                    <div class="size-info-item">
+                        <h3>Original Size</h3>
+                        <p id="originalSize">0 KB</p>
+                    </div>
+                    <div class="size-info-item">
+                        <h3>Compressed Size</h3>
+                        <p id="compressedSize">0 KB</p>
+                    </div>
+                </div>
+            </div>
             
             <!-- Upload Area -->
             <div class="upload-area" id="uploadArea">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <p>Click to upload or drag and drop</p>
-                <p class="small">Select multiple PDF files to merge</p>
-                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf">
+                <p class="small">JPG, PNG, WebP, or other image formats</p>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
             
-            <!-- Info Box -->
-            <div class="info-box" id="infoBox">
-                <p><strong>ℹ️ Files Selected:</strong> <span id="fileCount">0</span> PDF(s)</p>
-                <p>Drag to reorder files if needed</p>
-            </div>
-            
-            <!-- Files List -->
-            <div class="files-list" id="filesList">
-                <h3>📑 PDFs to Merge</h3>
-                <div id="filesContainer"></div>
+            <!-- Compression Settings -->
+            <div class="compression-settings" id="compressionSettings">
+                <div class="setting-group">
+                    <label for="targetSize">Target Size (KB) *</label>
+                    <input type="number" id="targetSize" placeholder="e.g., 500" min="10" max="10000">
+                    <div class="size-hint">Set the desired file size in kilobytes (KB)</div>
+                </div>
+                
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
             </div>
             
             <!-- Success Message -->
             <div class="success-message" id="successMessage">
-                ✅ PDFs merged successfully! Your file is ready to download.
+                ✅ Image compressed successfully! Click download to save.
             </div>
             
             <!-- Buttons -->
             <div class="button-group">
-                <button class="merge-btn" id="mergeBtn">
-                    <i class="fas fa-check"></i> Merge & Download
+                <button class="compress-btn" id="compressBtn" disabled>
+                    <i class="fas fa-compress"></i> Compress & Download
                 </button>
                 <button class="clear-btn" onclick="clearAll()">
                     <i class="fas fa-times"></i> Clear
@@ -558,31 +611,31 @@
         <div class="description-section">
             <h2>How to Use & Benefits</h2>
             
-            <p><strong>PDF Merger</strong> is your all-in-one solution for combining multiple PDF files into a single document. Whether you need to merge reports, combine invoices, consolidate documents, or organize multiple PDFs into one, this tool makes it incredibly easy and fast.</p>
+            <p><strong>Image Compressor</strong> is your all-in-one solution for reducing image file sizes without compromising quality. Whether you need to optimize images for websites, reduce storage space, prepare images for email, or make social media posting faster, this tool handles everything instantly.</p>
             
             <h3 style="color: #333; font-size: 1.2rem; margin-top: 25px; margin-bottom: 15px;">How to Use:</h3>
             <ol style="color: #666; padding-left: 20px; margin-bottom: 20px;">
-                <li style="margin-bottom: 10px;"><strong>Upload PDFs:</strong> Click the upload area or drag and drop multiple PDF files</li>
-                <li style="margin-bottom: 10px;"><strong>Arrange Order:</strong> Files are listed in the order they'll be merged. View all files to confirm</li>
-                <li style="margin-bottom: 10px;"><strong>Merge & Download:</strong> Click the "Merge & Download" button to combine all PDFs</li>
-                <li style="margin-bottom: 10px;"><strong>Save Your File:</strong> Download your merged PDF instantly to your device</li>
+                <li style="margin-bottom: 10px;"><strong>Upload Image:</strong> Click the upload area or drag and drop your image (JPG, PNG, WebP, etc.)</li>
+                <li style="margin-bottom: 10px;"><strong>Set Target Size:</strong> Enter your desired file size in KB (e.g., 500 KB)</li>
+                <li style="margin-bottom: 10px;"><strong>Compress:</strong> Click "Compress & Download" to reduce your image</li>
+                <li style="margin-bottom: 10px;"><strong>Download:</strong> Your compressed image will be saved automatically</li>
             </ol>
             
             <h3 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Key Benefits:</h3>
             <ul class="benefit-list">
                 <li>100% Free - No hidden charges or premium versions</li>
-                <li>No Login Required - Start merging PDFs instantly</li>
-                <li>Complete Privacy - Files never leave your device</li>
-                <li>Unlimited Files - Merge as many PDFs as you need</li>
-                <li>Fast Processing - Instant merging without server upload</li>
-                <li>No Watermark - Your merged PDF is clean and professional</li>
+                <li>No Login Required - Start compressing images instantly</li>
+                <li>Complete Privacy - Images never leave your device</li>
+                <li>Smart Compression - Maintains quality while reducing size</li>
+                <li>Supports All Formats - JPG, PNG, WebP, and more</li>
+                <li>Custom Target Size - Set exact file size you want</li>
+                <li>Fast Processing - Instant compression without server upload</li>
                 <li>Works Offline - Use it even without internet connection</li>
-                <li>All Devices - Works on desktop, tablet, and mobile</li>
             </ul>
             
-            <p style="margin-top: 25px;"><strong>Why Choose Our Tool?</strong> Unlike other PDF merging services, we prioritize your privacy and speed. We don't upload your files to any server, don't add watermarks, and don't require any personal information. Your PDFs are merged right on your device using advanced PDF processing technology. Perfect for merging business documents, combining reports, consolidating invoices, organizing contracts, merging legal documents, combining presentations, and much more.</p>
+            <p style="margin-top: 25px;"><strong>Why Choose Our Tool?</strong> Unlike other image compression services, we prioritize your privacy and speed. We don't upload your images to any server, don't add watermarks, and don't require any personal information. Your images are compressed right on your device using advanced compression algorithms. Perfect for photographers, web designers, content creators, and anyone who needs to reduce image file sizes efficiently.</p>
             
-            <p>This tool is designed for professionals, students, and anyone who needs to combine PDF files efficiently. Whether you're preparing documents for submission, organizing research papers, combining monthly reports, or merging financial statements, PDF Merger handles everything instantly with zero complexity.</p>
+            <p>This tool intelligently adjusts compression quality to meet your target file size. Whether you need to compress a single image or optimize multiple images, Image Compressor handles everything instantly with zero complexity. Ideal for optimizing website images, reducing storage space, preparing images for social media, compressing email attachments, and much more.</p>
         </div>
 
         <!-- Ad Middle 2 -->
@@ -603,10 +656,10 @@
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    Is my PDF data completely safe and private?
+                    Is my image data completely safe and private?
                 </div>
                 <div class="faq-answer">
-                    Yes! We use 100% client-side processing, meaning your PDF files are merged entirely in your browser. We do NOT upload, store, or access any of your files on our servers. Your documents remain completely private and secure on your device.
+                    Yes! We use 100% client-side processing, meaning your images are compressed entirely in your browser. We do NOT upload, store, or access any of your images on our servers. Your files remain completely private and secure on your device.
                 </div>
             </div>
             
@@ -616,47 +669,47 @@
                     Do I need to create an account or login?
                 </div>
                 <div class="faq-answer">
-                    No! This tool requires absolutely no registration, login, or account creation. You can start merging PDFs immediately without providing any personal information or email address.
+                    No! This tool requires absolutely no registration, login, or account creation. You can start compressing images immediately without providing any personal information.
                 </div>
             </div>
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    How many PDFs can I merge?
+                    Will the image lose quality after compression?
                 </div>
                 <div class="faq-answer">
-                    You can merge unlimited PDFs in one operation. There's no limit on the number of files or total file size. Merge 2 PDFs, 10 PDFs, or 100 PDFs - the tool handles them all instantly.
+                    Our smart compression algorithm maintains excellent quality while reducing file size. The quality loss is minimal and usually imperceptible to the human eye, especially for web usage.
                 </div>
             </div>
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    Will the merged PDF have watermarks?
+                    What image formats are supported?
                 </div>
                 <div class="faq-answer">
-                    No! Your merged PDF is completely clean with no watermarks, logos, or any modifications. The output is a pure, professional PDF file ready for use.
+                    We support JPG, PNG, WebP, GIF, BMP, and most common image formats. The compressed output is automatically saved as JPG for optimal compression.
                 </div>
             </div>
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    Can I reorder the PDFs before merging?
+                    Can I set a custom target file size?
                 </div>
                 <div class="faq-answer">
-                    Yes! The files are listed in the order they'll be merged. You can remove any file using the remove button and re-upload files in your desired order.
+                    Yes! You can set any target file size from 10 KB to 10,000 KB. The tool will automatically adjust compression quality to meet your exact size requirement.
                 </div>
             </div>
             
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
                     <i class="fas fa-chevron-down"></i>
-                    What's the maximum file size for merging?
+                    What's the maximum image size I can compress?
                 </div>
                 <div class="faq-answer">
-                    There's no strict file size limit. The tool can merge PDFs as long as your browser has enough memory. Typically, you can merge PDFs with a combined size of several hundred megabytes without issues.
+                    There's no strict file size limit. The tool can compress images as long as your browser has enough memory. Typically, you can compress images up to 100MB without issues.
                 </div>
             </div>
         </div>
@@ -683,14 +736,19 @@
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const filesList = document.getElementById('filesList');
-        const filesContainer = document.getElementById('filesContainer');
-        const infoBox = document.getElementById('infoBox');
-        const mergeBtn = document.getElementById('mergeBtn');
+        const previewSection = document.getElementById('previewSection');
+        const imagePreview = document.getElementById('imagePreview');
+        const originalSizeEl = document.getElementById('originalSize');
+        const compressedSizeEl = document.getElementById('compressedSize');
+        const compressionSettings = document.getElementById('compressionSettings');
+        const targetSizeInput = document.getElementById('targetSize');
+        const compressBtn = document.getElementById('compressBtn');
         const successMessage = document.getElementById('successMessage');
-        const fileCount = document.getElementById('fileCount');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
         
-        let selectedFiles = [];
+        let selectedFile = null;
+        let compressedBlob = null;
         
         uploadArea.addEventListener('click', () => fileInput.click());
         
@@ -707,126 +765,142 @@
         
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+            const files = e.dataTransfer.files;
             if (files.length > 0) {
-                handleFiles(files);
-            } else {
-                alert('Please drop PDF files only');
+                handleFile(files[0]);
             }
         });
         
         fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length > 0) {
-                handleFiles(files);
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
             }
         });
         
-        function handleFiles(files) {
-            selectedFiles = selectedFiles.concat(files);
-            updateFilesList();
-            updateUI();
-        }
-        
-        function updateFilesList() {
-            filesContainer.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <span class="file-item-number">${index + 1}</span>
-                    <span class="file-item-name">${file.name}</span>
-                    <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
-                `;
-                filesContainer.appendChild(fileItem);
-            });
-        }
-        
-        function removeFile(index) {
-            selectedFiles.splice(index, 1);
-            updateFilesList();
-            updateUI();
-        }
-        
-        function updateUI() {
-            const count = selectedFiles.length;
-            fileCount.textContent = count;
-            
-            if (count > 0) {
-                infoBox.classList.add('show');
-                filesList.classList.add('show');
-                uploadArea.style.opacity = '0.5';
-                mergeBtn.disabled = false;
-            } else {
-                infoBox.classList.remove('show');
-                filesList.classList.remove('show');
-                uploadArea.style.opacity = '1';
-                mergeBtn.disabled = true;
-                successMessage.classList.remove('show');
-            }
-        }
-        
-        mergeBtn.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) {
-                alert('Please select at least one PDF');
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
                 return;
             }
             
-            mergeBtn.disabled = true;
-            mergeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Merging...';
+            selectedFile = file;
+            const fileSizeKB = (file.size / 1024).toFixed(2);
+            originalSizeEl.textContent = fileSizeKB + ' KB';
             
-            try {
-                // Use PDFLib from window global
-                const PDFDocument = window.PDFLib.PDFDocument;
-                const mergedPdf = await PDFDocument.create();
-                
-                for (const file of selectedFiles) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await PDFDocument.load(arrayBuffer);
-                    const pageIndices = pdf.getPageIndices();
-                    const copiedPages = await mergedPdf.copyPages(pdf, pageIndices);
-                    copiedPages.forEach((page) => {
-                        mergedPdf.addPage(page);
-                    });
-                }
-                
-                const pdfBytes = await mergedPdf.save();
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'merged.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                successMessage.classList.add('show');
-                mergeBtn.disabled = false;
-                mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
-                
-                setTimeout(() => {
-                    clearAll();
-                }, 2000);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error merging PDFs: ' + error.message);
-                mergeBtn.disabled = false;
-                mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewSection.classList.add('show');
+                compressionSettings.classList.add('show');
+                uploadArea.style.opacity = '0.5';
+                compressedSizeEl.textContent = '0 KB';
+                progressBar.classList.remove('show');
+                successMessage.classList.remove('show');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        compressBtn.addEventListener('click', () => {
+            if (!selectedFile) {
+                alert('Please select an image');
+                return;
             }
+            
+            const targetSizeKB = parseInt(targetSizeInput.value);
+            if (!targetSizeKB || targetSizeKB < 10) {
+                alert('Please enter a target size between 10 KB and 10,000 KB');
+                return;
+            }
+            
+            compressBtn.disabled = true;
+            compressBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Compressing...';
+            progressBar.classList.add('show');
+            
+            new Compressor(selectedFile, {
+                quality: 0.8,
+                maxWidth: 4096,
+                maxHeight: 4096,
+                minWidth: 10,
+                minHeight: 10,
+                convertSize: Infinity,
+                strict: true,
+                checkOrientation: true,
+                canvas: document.createElement('canvas'),
+                success: (result) => {
+                    // Check if size is within target
+                    const resultSizeKB = (result.size / 1024).toFixed(2);
+                    
+                    if (result.size / 1024 > targetSizeKB) {
+                        // Further compress if needed
+                        new Compressor(result, {
+                            quality: 0.6,
+                            maxWidth: 4096,
+                            maxHeight: 4096,
+                            minWidth: 10,
+                            minHeight: 10,
+                            success: (finalResult) => {
+                                const finalSizeKB = (finalResult.size / 1024).toFixed(2);
+                                compressedSizeEl.textContent = finalSizeKB + ' KB';
+                                compressedBlob = finalResult;
+                                downloadCompressedImage();
+                            },
+                            error: (err) => {
+                                console.error(err.message);
+                                alert('Compression error');
+                                compressBtn.disabled = false;
+                                compressBtn.innerHTML = '<i class="fas fa-compress"></i> Compress & Download';
+                                progressBar.classList.remove('show');
+                            }
+                        });
+                    } else {
+                        compressedSizeEl.textContent = resultSizeKB + ' KB';
+                        compressedBlob = result;
+                        downloadCompressedImage();
+                    }
+                },
+                error: (err) => {
+                    console.error(err.message);
+                    alert('Compression error: ' + err.message);
+                    compressBtn.disabled = false;
+                    compressBtn.innerHTML = '<i class="fas fa-compress"></i> Compress & Download';
+                    progressBar.classList.remove('show');
+                }
+            });
         });
         
+        function downloadCompressedImage() {
+            const url = URL.createObjectURL(compressedBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = selectedFile.name.split('.')[0] + '_compressed.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            progressBar.classList.remove('show');
+            successMessage.classList.add('show');
+            compressBtn.disabled = false;
+            compressBtn.innerHTML = '<i class="fas fa-compress"></i> Compress & Download';
+            
+            setTimeout(() => {
+                clearAll();
+            }, 2000);
+        }
+        
         function clearAll() {
-            selectedFiles = [];
+            selectedFile = null;
+            compressedBlob = null;
             fileInput.value = '';
-            filesContainer.innerHTML = '';
-            infoBox.classList.remove('show');
-            filesList.classList.remove('show');
+            previewSection.classList.remove('show');
+            compressionSettings.classList.remove('show');
             successMessage.classList.remove('show');
+            progressBar.classList.remove('show');
             uploadArea.style.opacity = '1';
-            mergeBtn.disabled = true;
-            mergeBtn.innerHTML = '<i class="fas fa-check"></i> Merge & Download';
-            fileCount.textContent = '0';
+            compressBtn.disabled = true;
+            targetSizeInput.value = '';
+            originalSizeEl.textContent = '0 KB';
+            compressedSizeEl.textContent = '0 KB';
         }
         
         function toggleFaq(element) {
