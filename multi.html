@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X Card Preview Generator Tool | Free SEO Validator</title>
-    <meta name="description" content="Free online X (Twitter) Card Preview tool. Validate your website's meta tags, test your open graph images, and optimize for X/Twitter social sharing instantly.">
+    <title>X Card Mockup Generator & Preview Designer | Free SEO Studio</title>
+    <meta name="description" content="Design, preview, and generate beautiful X (Twitter) social cards instantly. Test large summary images, metadata, and optimize post aesthetics for X feeds.">
     <meta name="robots" content="index, follow">
-    <!-- Google Fonts for Modern X-like Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +19,7 @@
             --muted-text: #71767b;
             --x-blue: #1d9bf0;
             --x-blue-hover: #1a8cd8;
-            --card-bg: #16181c;
+            --card-border: #2f3336;
         }
 
         * {
@@ -38,20 +37,20 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-top: 20px;
+            margin-bottom: 35px;
+            padding-top: 10px;
         }
 
         header h1 {
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
 
@@ -61,155 +60,239 @@
 
         header p {
             color: var(--muted-text);
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
-        /* Tool Logic Interface */
-        .tool-wrapper {
+        /* Split Workspace Layout */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 850px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Column: Designer Settings Controls */
+        .designer-panel {
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 40px;
+            height: fit-content;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
         .input-group {
-            margin-bottom: 24px;
+            margin-bottom: 18px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            color: #ccc;
         }
 
-        .input-row {
-            display: flex;
-            gap: 12px;
-        }
-
-        input[type="url"], input[type="text"] {
-            flex: 1;
+        input[type="text"], select, textarea {
+            width: 100%;
             background-color: #000000;
             border: 1px solid var(--border-color);
-            border-radius: 9999px;
-            padding: 12px 20px;
+            border-radius: 8px;
+            padding: 10px 14px;
             color: var(--text-color);
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
             transition: border-color 0.2s;
         }
 
-        input:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--x-blue);
         }
 
-        .btn-primary {
-            background-color: var(--x-blue);
-            color: white;
-            border: none;
-            border-radius: 9999px;
-            padding: 12px 28px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        .row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
-        .btn-primary:hover {
-            background-color: var(--x-blue-hover);
+        /* Right Column: Live Mockup Feed Canvas */
+        .preview-panel {
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        /* Optional Mockup Data Fields Toggle */
-        .advanced-toggle {
-            color: var(--x-blue);
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .manual-fields {
-            display: none;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px dashed var(--border-color);
-        }
-
-        /* Live Preview Board */
-        .preview-heading {
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-            color: var(--muted-text);
-            text-transform: uppercase;
-            font-weight: 600;
+        .preview-sticky-heading {
             font-size: 0.85rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            color: var(--muted-text);
+            font-weight: 700;
         }
 
-        .x-card-container {
+        /* X Post Feed Wrapper UI Setup */
+        .x-post-wrapper {
+            background-color: #000000;
             border: 1px solid var(--border-color);
             border-radius: 16px;
+            padding: 16px;
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .x-post-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .x-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #333;
+            background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100');
+            background-size: cover;
+        }
+
+        .x-user-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.95rem;
+        }
+
+        .x-profile-name {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .x-verified-badge {
+            color: var(--x-blue);
+            font-size: 0.9rem;
+        }
+
+        .x-handle {
+            color: var(--muted-text);
+            font-size: 0.85rem;
+        }
+
+        .x-post-body-text {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+        }
+
+        /* Interactive Dynamic Mockup Cards Architecture */
+        .x-card-link-container {
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
             overflow: hidden;
-            background-color: var(--bg-color);
-            max-width: 504px; /* Exact dimensions of X large cards */
-            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            background-color: #000000;
             transition: background-color 0.2s;
         }
 
-        .x-card-container:hover {
+        .x-card-link-container:hover {
             background-color: rgba(255, 255, 255, 0.03);
         }
 
-        .x-card-image-box {
+        /* Layout Variation 1: Summary Large Image */
+        .x-card-link-container.large-image-mode {
+            flex-direction: column;
+        }
+        .x-card-link-container.large-image-mode .media-box {
             width: 100%;
-            aspect-ratio: 1.91 / 1; /* Standard X Card Ratio */
-            background-color: #202225;
+            aspect-ratio: 1.91 / 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .x-card-link-container.large-image-mode .text-box {
+            padding: 12px;
+        }
+
+        /* Layout Variation 2: Standard Summary Card (Horizontal Small Thumb) */
+        .x-card-link-container.standard-mode {
+            flex-direction: row-reverse;
+            max-height: 130px;
+        }
+        .x-card-link-container.standard-mode .media-box {
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
+            border-left: 1px solid var(--border-color);
+        }
+        .x-card-link-container.standard-mode .text-box {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0; /* Enables truncation strings rules natively */
+        }
+
+        .media-box {
+            background-color: #191b1f;
             overflow: hidden;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid var(--border-color);
-            position: relative;
         }
 
-        .x-card-image-box img {
+        .media-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .image-placeholder-text {
-            color: var(--muted-text);
-            font-size: 0.9rem;
+        .img-err-placeholder {
             position: absolute;
+            color: var(--muted-text);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 10px;
         }
 
-        .x-card-text-box {
-            padding: 12px;
-            font-size: 0.95rem;
-        }
-
-        .x-card-domain {
+        .text-box .card-domain-display {
             color: var(--muted-text);
             font-size: 0.85rem;
-            margin-bottom: 2px;
             text-transform: lowercase;
-        }
-
-        .x-card-title {
-            font-weight: 400;
-            color: var(--text-color);
+            margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 2px;
         }
 
-        .x-card-description {
+        .text-box .card-title-display {
+            font-weight: 400;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .text-box .card-desc-display {
             color: var(--muted-text);
             font-size: 0.9rem;
             display: -webkit-box;
@@ -219,98 +302,110 @@
             text-overflow: ellipsis;
         }
 
-        /* EEAT & Rich Content Section */
-        .content-section {
-            margin-top: 60px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 40px;
+        /* Post Action Interaction Bar */
+        .x-action-bar {
+            display: flex;
+            justify-content: space-between;
+            max-width: 420px;
+            margin-top: 12px;
+            color: var(--muted-text);
+            font-size: 0.85rem;
+            padding-left: 2px;
+        }
+        .action-item span {
+            margin-right: 15px;
         }
 
-        .eeat-author-badge {
+        /* Documentation & Editorial SEO Sections */
+        .rich-editorial {
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 35px;
+        }
+
+        .eeat-identity-card {
             display: flex;
             align-items: center;
             gap: 12px;
-            background: #16181c;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
+            background: var(--surface-color);
             border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 30px;
         }
 
-        .author-avatar {
-            width: 40px;
-            height: 40px;
+        .badge-icon {
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: var(--x-blue);
+            background-color: var(--x-blue);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 700;
             color: #fff;
         }
 
-        .content-section h2 {
-            font-size: 1.8rem;
-            margin-top: 30px;
-            margin-bottom: 15px;
+        .rich-editorial h2 {
+            font-size: 1.6rem;
+            margin: 25px 0 12px 0;
             color: #fff;
         }
 
-        .content-section p {
+        .rich-editorial p {
             color: #ccc;
-            margin-bottom: 18px;
-            font-size: 1.05rem;
+            margin-bottom: 15px;
+            font-size: 1rem;
         }
 
-        .content-section ul {
+        .rich-editorial ol, .rich-editorial ul {
             margin-left: 20px;
             margin-bottom: 20px;
             color: #ccc;
         }
 
-        .content-section li {
-            margin-bottom: 8px;
+        .rich-editorial li {
+            margin-bottom: 6px;
         }
 
-        /* FAQ Accordion Styling */
-        .faq-container {
-            margin-top: 40px;
+        /* FAQ Framework Setup */
+        .faq-block {
+            margin-top: 30px;
         }
 
-        .faq-item {
+        .faq-row {
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 0;
+            padding: 14px 0;
         }
 
-        .faq-question {
+        .faq-head {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             cursor: pointer;
-            color: var(--text-color);
             display: flex;
             justify-content: space-between;
         }
 
-        .faq-answer {
-            margin-top: 10px;
-            color: #ccc;
+        .faq-body {
+            margin-top: 8px;
+            color: #b0b3b8;
             display: none;
+            font-size: 0.95rem;
         }
 
-        /* Footer */
         footer {
-            margin-top: 80px;
+            margin-top: 70px;
             border-top: 1px solid var(--border-color);
-            padding: 30px 0;
+            padding: 25px 0;
             text-align: center;
             color: var(--muted-text);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         footer a {
             color: var(--x-blue);
             text-decoration: none;
-            margin: 0 10px;
+            margin: 0 8px;
         }
 
         footer a:hover {
@@ -321,185 +416,231 @@
 <body>
 
 <div class="container">
-    
-    <!-- Header Area -->
+
     <header>
-        <h1>X <span>Card Preview</span> Tool</h1>
-        <p>Analyze, validate, and optimize your website metadata for social sharing links</p>
+        <h1>X <span>Card Mockup</span> Studio</h1>
+        <p>Design, preview, and validate social graph cards & feed layouts configurations</p>
     </header>
 
-    <!-- Interactive Tool Interface -->
-    <main class="tool-wrapper">
-        <div class="input-group">
-            <label for="urlInput">Test Website Meta Tags Link</label>
-            <div class="input-row">
-                <input type="url" id="urlInput" placeholder="https://yourwebsite.com/blog-post" value="https://example.com/epic-digital-guide">
-                <button class="btn-primary" onclick="updateMockupCard()">Generate Preview</button>
-            </div>
-        </div>
-
-        <span class="advanced-toggle" onclick="toggleAdvanced()">+ Edit Mockup Data Manually (Simulate Metadata)</span>
+    <!-- Split Engine Workspace Layout -->
+    <div class="workspace">
         
-        <div class="manual-fields" id="manualFields">
+        <!-- Left Column Dashboard Panel -->
+        <aside class="designer-panel">
+            <div class="panel-title">Designer Settings Configuration</div>
+            
             <div class="input-group">
-                <label>Mock Title</label>
-                <input type="text" id="mockTitle" value="Mastering SEO in 2026: The Definitive Framework" oninput="liveUpdate()">
+                <label for="cardType">X Card Display Template Format</label>
+                <select id="cardType" onchange="syncLayoutConfiguration()">
+                    <option value="large-image-mode">Summary Card with Large Image (Default)</option>
+                    <option value="standard-mode">Standard Summary Card (Small Thumbnail)</option>
+                </select>
             </div>
-            <div class="input-group">
-                <label>Mock Description</label>
-                <input type="text" id="mockDesc" value="Discover the advanced algorithmic shift patterns and why programmatic technical optimization sets the structural gold standard for content indexation." oninput="liveUpdate()">
-            </div>
-            <div class="input-group">
-                <label>Mock Image URL</label>
-                <input type="text" id="mockImg" value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800" oninput="liveUpdate()">
-            </div>
-        </div>
 
-        <!-- The Live Card Output Block -->
-        <p class="preview-heading">X (Twitter) Feed Mockup Output</p>
-        <div class="x-card-container">
-            <div class="x-card-image-box">
-                <span class="image-placeholder-text" id="placeholderText">No Image Loaded</span>
-                <img id="cardImage" src="" alt="Social Card Preview Image" style="display:none;">
+            <div class="input-group">
+                <label for="postText">Author Post Status Body Text</label>
+                <textarea id="postText" rows="2" oninput="renderMockupData()">Check out our comprehensive roadmap manual detailing next-generation technical web systems schemas. 👇</textarea>
             </div>
-            <div class="x-card-text-box">
-                <div class="x-card-domain" id="cardDomain">example.com</div>
-                <div class="x-card-title" id="cardTitle">Loading metadata parameters...</div>
-                <div class="x-card-description" id="cardDesc">Please key in or hit generate to verify the meta layout parameters schema attributes.</div>
-            </div>
-        </div>
-    </main>
 
-    <!-- Comprehensive Rich Editorial & E-E-A-T Signal Context Section -->
-    <section class="content-section">
+            <div class="input-group">
+                <label for="metaTitle">Social Graph Title Attribute (`twitter:title`)</label>
+                <input type="text" id="metaTitle" value="Architecting Web Node Systems in 2026 | Engineering Guide" oninput="renderMockupData()">
+            </div>
+
+            <div class="input-group">
+                <label for="metaDesc">Summary Description Payload (`twitter:description`)</label>
+                <input type="text" id="metaDesc" value="Dive deep into the structured deployment architectures, data layer optimizations, and programmatic configuration patterns governing edge computing infrastructures." oninput="renderMockupData()">
+            </div>
+
+            <div class="input-group">
+                <label for="metaImg">Resource Image Absolute URL (`twitter:image`)</label>
+                <input type="text" id="metaImg" value="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800" oninput="renderMockupData()">
+            </div>
+
+            <div class="input-group">
+                <label for="targetUrl">Target Redirection Landing URL</label>
+                <input type="text" id="targetUrl" value="https://infrastructure.pooreyoutuber.org/systems-node" oninput="renderMockupData()">
+            </div>
+
+            <div class="row-grid">
+                <div class="input-group">
+                    <label for="profileName">Profile Display Name</label>
+                    <input type="text" id="profileName" value="PooreYoutuber Technical" oninput="renderMockupData()">
+                </div>
+                <div class="input-group">
+                    <label for="profileHandle">Account Handle</label>
+                    <input type="text" id="profileHandle" value="@PooreYoutuber" oninput="renderMockupData()">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Column Live Mockup Canvas Area -->
+        <main class="preview-panel">
+            <div class="preview-sticky-heading">Live Stream Workspace Output Preview</div>
+            
+            <!-- Real-time X Post Layout Container -->
+            <div class="x-post-wrapper">
+                <div class="x-post-header">
+                    <div class="x-avatar"></div>
+                    <div class="x-user-info">
+                        <span class="x-profile-name" id="viewProfileName">PooreYoutuber Technical <span class="x-verified-badge">✓</span></span>
+                        <span class="x-handle" id="viewProfileHandle">@PooreYoutuber · Just now</span>
+                    </div>
+                </div>
+
+                <div class="x-post-body-text" id="viewPostText">Status loading...</div>
+
+                <!-- Clickable Mockup Card Component Anchor Link Box -->
+                <div class="x-card-link-container large-image-mode" id="mockCardComponent">
+                    <div class="media-box">
+                        <span class="img-err-placeholder" id="errLabel">No Layout Image Loaded</span>
+                        <img id="viewImg" src="" alt="Social Card Asset View" style="display:none;">
+                    </div>
+                    <div class="text-box">
+                        <div class="card-domain-display" id="viewDomain">domain.com</div>
+                        <div class="card-title-display" id="viewTitle">Title Parameter Loading...</div>
+                        <div class="card-desc-display" id="viewDesc">Description strings validation window text block asset layout parameter indicator...</div>
+                    </div>
+                </div>
+
+                <!-- Simulation Feed Analytics Decoration Footer Metrics Bar -->
+                <div class="x-action-bar">
+                    <div class="action-item">💬 <span>18</span></div>
+                    <div class="action-item">🔁 <span>142</span></div>
+                    <div class="action-item">❤️ <span>894</span></div>
+                    <div class="action-item">📊 <span>24K</span></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Editorial Knowledge Base Content Base & E-E-A-T Signal Core Sections -->
+    <section class="rich-editorial">
         
-        <!-- E-E-A-T Author Entity Verification Element -->
-        <div class="eeat-author-badge">
-            <div class="author-avatar">PY</div>
+        <div class="eeat-identity-card">
+            <div class="badge-icon">PY</div>
             <div>
-                <strong>Content Verified by PooreYoutuber Team</strong><br>
-                <small>SEO Systems Analysts & Technical Web Infrastructure Publishers</small>
+                <strong>Systems Design Integrity Validated by PooreYoutuber Network</strong><br>
+                <small>Structural Meta Architecture Optimization & Digital Deployment Systems Analysis</small>
             </div>
         </div>
 
-        <h2>Comprehensive Guide to X (Twitter) Card Optimization</h2>
-        <p>When broadcasting hyperlinks across modern microblogging networks like X (formerly recognized as Twitter), user engagement ratios rely heavily on graphic structural design. A simple bare link receives up to 70% fewer organic clicks compared to links wrapped within an explicit metadata enclosure container called an X Card. This utility functions as a real-time virtual environment debugger, evaluating how crawl elements extract, process, and map structured attributes onto feeds.</p>
+        <h2>How to Use the X Card Mockup Preview Designer Studio</h2>
+        <p>Designing modern clickable open graph cards requires precise monitoring of text lengths and media scaling boundaries. This unified laboratory tool solves that challenge by providing an environment to test your configurations before applying changes to your site's codebase. Follow this technical roadmap:</p>
+        <ol>
+            <li><strong>Select Display Template Format:</strong> Choose between the high-engagement 'Summary Card with Large Image' or the compact 'Standard Summary Card'.</li>
+            <li><strong>Input Meta Configuration Attributes:</strong> Populate the fields with your title, description strings, and target landing URL.</li>
+            <li><strong>Load Assets & Fine-Tune Layouts:</strong> Use high-resolution asset links to confirm that your images are correctly centered and display without pixelation.</li>
+        </ol>
 
-        <h2>How to Use This X Card Preview Tool Effectively</h2>
-        <p>Optimizing social metadata through our cloud validator interface takes less than a minute. Follow these simple steps to ensure perfect rendering:</p>
-        <ul>
-            <li><strong>Input Target Domain:</strong> Paste your absolute path address configuration (including the `https://` secure schema network layer) straight into the centralized URL anchor field.</li>
-            <li><strong>Inject Synthetic Parameters (Optional):</strong> Expand the manual dashboard toggles to override variables locally. This helps you stress-test layouts before pushing development updates to production systems.</li>
-            <li><strong>Analyze Visual Layout Assets:</strong> Evaluate truncation breaks in headers and descriptions, and verify that the graphic viewport retains its proper aspect ratio without awkward clipping.</li>
-        </ul>
+        <h2>Maximizing Technical SEO Benefits via Social Graph Architecture</h2>
+        <p>While social meta tags aren't direct ranking signals for search engines, they drastically improve CTR and referral traffic. Well-optimized tags prevent platforms like X from pulling random navigation elements or unformatted body snippets from your site. This structured presentation builds brand authority and signals to search engine crawlers that your page content is well-organized, which helps with indexing and discoverability.</p>
 
-        <h2>Why Social Metadata Architecture and Cards Matter for SEO</h2>
-        <p>While algorithmic crawler indexes do not treat social graph tags as primary search engine ranking score multipliers, their indirect impact on authority signals is undeniable. Rich social cards drive higher click-through rates (CTR) and user engagement, which translates into increased site traffic. This traffic spike sends strong behavioral cues across geographic indexing grids, boosting organic reach, page authority metrics, and search engine positioning.</p>
-        <p>Furthermore, standardizing Open Graph variables prevents platform algorithms from pulling random decorative assets or unrelated text blocks from your navigation headers, preserving your brand's professional presentation.</p>
-
-        <!-- FAQ Microdata Anchor -->
-        <h2>Frequently Asked Questions (FAQs)</h2>
-        <div class="faq-container">
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">What is the ideal image size dimension specification for X Cards? <span>+</span></div>
-                <div class="faq-answer">For Summary Large Image formats, deploy layout graphics styled exactly to 1200 x 630 spatial pixels preserving a perfect 1.91:1 scale footprint. Files must stay under 5 megabytes across supported extensions (JPG, PNG, WebP).</div>
+        <!-- Dynamic Structural FAQ Accordion Component -->
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-block">
+            <div class="faq-row">
+                <div class="faq-head" onclick="toggleFaqAccordion(this)">What separates Large Image Cards from Standard Summary Cards? <span>+</span></div>
+                <div class="faq-body">Large Image Cards feature a prominent 1.91:1 banner designed to maximize clicks, making them perfect for blogs and landing pages. Standard Summary Cards use a compact layout with a small square thumbnail, which is ideal for text-heavy content or dashboard notifications.</div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">Why is my updated website thumbnail image not showing up on X? <span>+</span></div>
-                <div class="faq-answer">X caches metadata servers globally to save bandwidth. If you modify your meta tags, you must force clear old server footprints by running your live URL through verification engines like this validator to re-trigger internal crawler hooks.</div>
+            <div class="faq-row">
+                <div class="faq-head" onclick="toggleFaqAccordion(this)">How do I deploy these generated configurations on my live website? <span>+</span></div>
+                <div class="faq-body">Copy the generated metadata configurations and place them inside the <code>&lt;head&gt;</code> container tag of your target HTML template. Most modern CMS platforms also offer specific SEO slots to handle these attributes.</div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">What is the key structural difference between Open Graph tags and Twitter Cards? <span>+</span></div>
-                <div class="faq-answer">Open Graph architecture targets Meta networks (Facebook, Instagram, LinkedIn), whereas specific `twitter:card` schemas customize layout presentation inside the X micro-ecosystem. Fortunately, if X tags are missing, X will gracefully fall back to default Open Graph tags.</div>
+            <div class="faq-row">
+                <div class="faq-head" onclick="toggleFaqAccordion(this)">Why is X still displaying outdated images for my shared links? <span>+</span></div>
+                <div class="faq-body">X caches metadata servers globally to optimize bandwidth. When you modify your meta tags, you must run the live URL through a validation engine to force clear the cache and re-trigger internal crawlers.</div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">How long can card header labels and description copy be before getting truncated? <span>+</span></div>
-                <div class="faq-answer">Keep card titles under 70 characters long, and limit summary descriptions to a maximum of 200 characters to prevent layout clipping across mobile app views.</div>
+            <div class="faq-row">
+                <div class="faq-head" onclick="toggleFaqAccordion(this)">What are the ideal resolution dimensions for social graph card assets? <span>+</span></div>
+                <div class="faq-body">For large banner configurations, use an image resolution of 1200 x 630 pixels. For standard layouts, a 1:1 square image at 600 x 600 pixels works best. Keep file sizes under 5MB for optimal performance.</div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">Can I embed dynamic functional audio/video playback runtimes into cards? <span>+</span></div>
-                <div class="faq-answer">Native media elements require secure Player Card properties. For most editorial, e-commerce, and content channels, standardizing Summary Large Image cards is the safest choice for maximizing conversions.</div>
+            <div class="faq-row">
+                <div class="faq-head" onclick="toggleFaqAccordion(this)">Can missing X card declarations damage my organic keyword positions? <span>+</span></div>
+                <div class="faq-body">Not directly, but missing tags can lower click-through rates and reduce user engagement. These poor performance metrics can indirectly hurt your site's domain authority and search visibility over time.</div>
             </div>
         </div>
-
     </section>
 
-    <!-- Universal Compliance Footer Element -->
+    <!-- Footer System Compliance Platform Notice -->
     <footer>
-        <p>&copy; 2026 PooreYoutuber Platforms Network. All rights reserved globally.</p>
-        <p style="margin-top: 10px;">
-            <a href="#">Privacy Policy</a> | 
-            <a href="#">Terms of Service</a> | 
-            <a href="#">Technical Documentation</a> | 
-            <a href="#">Contact Support Infrastructure</a>
+        <p>&copy; 2026 PooreYoutuber Platforms Network. All rights engineering systems preserved globally.</p>
+        <p style="margin-top: 8px; font-size: 0.8rem;">
+            <a href="#">Privacy Framework</a> | 
+            <a href="#">Terms of Deployment</a> | 
+            <a href="#">API Specifications</a> | 
+            <a href="#">Support Channels</a>
         </p>
     </footer>
 
 </div>
 
 <script>
-    // Toggle manual override control system
-    function toggleAdvanced() {
-        const fields = document.getElementById('manualFields');
-        if(fields.style.display === 'block') {
-            fields.style.display = 'none';
-        } else {
-            fields.style.display = 'block';
-        }
+    // Handles toggling between Large Banner and Small Thumb layouts
+    function syncLayoutConfiguration() {
+        const typeSelector = document.getElementById('cardType').value;
+        const targetCard = document.getElementById('mockCardComponent');
+        
+        targetCard.className = "x-card-link-container " + typeSelector;
     }
 
-    // Process simulation logic tracking
-    function updateMockupCard() {
-        const rawUrl = document.getElementById('urlInput').value || "https://example.com";
-        
+    // Live render values into UI components
+    function renderMockupData() {
+        const postText = document.getElementById('postText').value;
+        const titleVal = document.getElementById('metaTitle').value;
+        const descVal = document.getElementById('metaDesc').value;
+        const imgVal = document.getElementById('metaImg').value;
+        const urlVal = document.getElementById('targetUrl').value;
+        const pName = document.getElementById('profileName').value;
+        const pHandle = document.getElementById('profileHandle').value;
+
+        // Populate text blocks
+        document.getElementById('viewPostText').innerText = postText || "";
+        document.getElementById('viewTitle').innerText = titleVal || "Untitled Asset Link";
+        document.getElementById('viewDesc').innerText = descVal || "No summary description text strings provided.";
+        document.getElementById('viewProfileName').innerHTML = pName + ' <span class="x-verified-badge">✓</span>';
+        document.getElementById('viewProfileHandle').innerText = pHandle + " · Just now";
+
+        // Parse hostname domain strings safely
         try {
-            const parsedUrl = new URL(rawUrl);
-            document.getElementById('cardDomain').innerText = parsedUrl.hostname;
-        } catch(e) {
-            document.getElementById('cardDomain').innerText = "invalid-domain.com";
+            const urlEngine = new URL(urlVal.startsWith('http') ? urlVal : 'https://' + urlVal);
+            document.getElementById('viewDomain').innerText = urlEngine.hostname;
+        } catch(err) {
+            document.getElementById('viewDomain').innerText = "domain.com";
         }
-        
-        liveUpdate();
-    }
 
-    // Sync input variables instantly onto the visual preview DOM elements
-    function liveUpdate() {
-        const titleVal = document.getElementById('mockTitle').value;
-        const descVal = document.getElementById('mockDesc').value;
-        const imgVal = document.getElementById('mockImg').value;
-        
-        document.getElementById('cardTitle').innerText = titleVal || "No Title Defined";
-        document.getElementById('cardDesc').innerText = descVal || "No description parameter provided.";
-        
-        const cardImg = document.getElementById('cardImage');
-        const placeholder = document.getElementById('placeholderText');
-        
+        // Image state handling
+        const imgNode = document.getElementById('viewImg');
+        const errLabel = document.getElementById('errLabel');
+
         if(imgVal.trim() !== "") {
-            cardImg.src = imgVal;
-            cardImg.style.display = "block";
-            placeholder.style.display = "none";
+            imgNode.src = imgVal;
+            imgNode.style.display = "block";
+            errLabel.style.display = "none";
         } else {
-            cardImg.style.display = "none";
-            placeholder.style.display = "block";
+            imgNode.style.display = "none";
+            errLabel.style.display = "block";
         }
     }
 
-    // Simple FAQ Accordion Toggle Interaction logic
-    function toggleFaq(element) {
-        const answer = element.nextElementSibling;
-        const indicator = element.querySelector('span');
-        if(answer.style.display === 'block') {
-            answer.style.display = 'none';
-            indicator.innerText = '+';
+    // Toggle FAQ Accordion sections
+    function toggleFaqAccordion(element) {
+        const bodyBlock = element.nextElementSibling;
+        const triggerIndicator = element.querySelector('span');
+
+        if(bodyBlock.style.display === "block") {
+            bodyBlock.style.display = "none";
+            triggerIndicator.innerText = "+";
         } else {
-            answer.style.display = 'block';
-            indicator.innerText = '−';
+            bodyBlock.style.display = "block";
+            triggerIndicator.innerText = "−";
         }
     }
 
-    
+    // Initialize application interface
     window.onload = function() {
-        updateMockupCard();
+        syncLayoutConfiguration();
+        renderMockupData();
     };
 </script>
 
