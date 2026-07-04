@@ -348,7 +348,7 @@
             <img id="thumbnail" src="" alt="Extracted thumbnail preview">
             <div class="res-badge" id="resBadge"></div>
             <br>
-            <a id="downloadLink" class="btn-download" href="#" download="thumbnail.jpg" target="_blank" rel="noopener">Download This Thumbnail</a>
+            <a id="downloadLink" class="btn-download" href="#" onclick="downloadCurrentImage(); return false;">Download This Thumbnail</a>
         </div>
 
         <!-- Ad Unit 1 (auto, responsive) — repeated near results, per placement plan -->
@@ -496,17 +496,64 @@
         el.className = 'status-msg' + (type ? (' ' + type) : '');
     }
 
+    let currentImageUrl = null;
+
     function showResult(imageUrl, label) {
         const imgNode = document.getElementById('thumbnail');
-        const linkNode = document.getElementById('downloadLink');
         const outSection = document.getElementById('output');
         const badge = document.getElementById('resBadge');
 
+        currentImageUrl = imageUrl;
         imgNode.src = imageUrl;
-        linkNode.href = imageUrl;
         badge.textContent = label || '';
         outSection.style.display = 'block';
         outSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Cross-origin images can't be downloaded with a plain <a download>
+    // link — the browser just opens them instead. Fetching the bytes as a
+    // blob and downloading the blob works around that restriction.
+    async function downloadCurrentImage() {
+        if (!currentImageUrl) return;
+        const linkNode = document.getElementById('downloadLink');
+        const originalLabel = linkNode.textContent;
+        linkNode.textContent = 'Preparing download...';
+
+        async function fetchAsBlob(url) {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('fetch failed');
+            return res.blob();
+        }
+
+        try {
+            let blob;
+            try {
+                // Try a direct fetch first (works when the image host sends
+                // permissive CORS headers, e.g. img.youtube.com).
+                blob = await fetchAsBlob(currentImageUrl);
+            } catch (e) {
+                // Fall back to the CORS relay for hosts that block direct
+                // cross-origin fetches.
+                blob = await fetchAsBlob('https://api.allorigins.win/raw?url=' + encodeURIComponent(currentImageUrl));
+            }
+
+            const objectUrl = URL.createObjectURL(blob);
+            const ext = (blob.type && blob.type.split('/')[1]) ? blob.type.split('/')[1].replace('jpeg', 'jpg') : 'jpg';
+            const tempLink = document.createElement('a');
+            tempLink.href = objectUrl;
+            tempLink.download = `thumbnail.${ext}`;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            URL.revokeObjectURL(objectUrl);
+        } catch (e) {
+            // Last resort: open the image in a new tab so the user can
+            // right-click and save it manually.
+            window.open(currentImageUrl, '_blank', 'noopener');
+            setStatus('Direct download blocked by the image host — opened it in a new tab, right-click it and choose "Save image as".', 'error');
+        } finally {
+            linkNode.textContent = originalLabel;
+        }
     }
 
     // Tries YouTube thumbnail resolutions from best to worst, since not
