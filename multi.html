@@ -3,41 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Video Thumbnail Downloader | HD & 4K Cover Exporter</title>
-    <meta name="description" content="Download high-resolution thumbnails and cover art from YouTube, Instagram, and Facebook instantly. Optimize your CTR for Finance, Insurance, and Crypto campaigns.">
-    <meta name="keywords" content="YouTube thumbnail downloader, Instagram cover saver, Facebook video image grabber, high-res thumbnail download, 4K thumbnail downloader, maxresdefault downloader, personal loans thumbnail, car insurance marketing, crypto staking graphics">
-    
+    <title>Video Thumbnail Downloader | Free HD & 4K Cover Image Extractor</title>
+    <meta name="description" content="Download high-resolution thumbnails from YouTube instantly, plus best-effort cover extraction for Instagram and Facebook public posts. Free, fast, no signup, no watermark.">
+    <meta name="keywords" content="YouTube thumbnail downloader, download YouTube thumbnail HD, maxresdefault downloader, Instagram thumbnail saver, Facebook video thumbnail grabber, 4K thumbnail downloader, free thumbnail extractor">
+    <link rel="canonical" href="https://pooreyoutuber.github.io/youtube-thumbnail.html">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Video Thumbnail Downloader | Free HD & 4K Cover Image Extractor">
+    <meta property="og:description" content="Grab high-resolution video thumbnails from YouTube in one click. Free, fast, and works in your browser — no software required.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/youtube-thumbnail.html">
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- JSON-LD Structured Data Schema -->
-    <script type="application/ld-json">
+    <!-- JSON-LD Structured Data: WebApplication -->
+    <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "@id": "https://pooreyoutuber.github.io/youtube-thumbnail.html",
-      "name": "Universal Video Thumbnail Downloader Pro",
-      "url": "https://pooreyoutuber.github.io",
+      "name": "Video Thumbnail Downloader",
+      "url": "https://pooreyoutuber.github.io/youtube-thumbnail.html",
       "applicationCategory": "UtilitiesApplication",
-      "operatingSystem": "All",
-      "browserRequirements": "Requires HTML5 compliant web browser with JavaScript enabled.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "description": "An advanced web framework to extract maximum resolution cover graphics from YouTube, Instagram, and Facebook videos. Ideal for digital media managers running high-CPC ad verticals."
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern browser with JavaScript enabled.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "A free browser-based tool to download high-resolution thumbnail images from YouTube videos, with best-effort cover extraction for public Instagram and Facebook video posts.",
+      "author": { "@type": "Organization", "name": "PoorEYoutuber Tools" }
     }
     </script>
 
-    <!-- Google Tag Manager & AdSense Placeholders -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
+    <!-- JSON-LD Structured Data: FAQPage (for SEO rich results) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is this thumbnail downloader really free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The tool is completely free, runs in your browser, and does not require an account or software installation." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the maximum resolution I can download for YouTube?",
+          "acceptedAnswer": { "@type": "Answer", "text": "For most YouTube videos you can download the maxresdefault image at 1280x720. If a video was never uploaded with an HD thumbnail, the tool automatically falls back to the next best available resolution." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does this work for Instagram and Facebook videos?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It works on a best-effort basis for public posts only. Private accounts, login-gated content, and Stories cannot be read because the platforms restrict that data to their own apps." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you store the videos or links I paste?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. The URL you paste is processed in your browser session only and is not saved on our servers." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use the downloaded thumbnail commercially?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The thumbnail image belongs to the original video's creator or platform. Only reuse it if you own the content or have permission, since copyright still applies." }
+        }
+      ]
+    }
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
     <style>
         :root {
@@ -65,12 +94,7 @@
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
             background: var(--bg-gradient);
@@ -117,17 +141,20 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .header-zone p {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            font-size: 1rem;
-        }
+        .header-zone p { color: var(--text-muted); margin-bottom: 30px; font-size: 1rem; }
 
-        .input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
+        .platform-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .platform-tag {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
         }
+        .platform-tag.ok { color: var(--accent-green); border-color: var(--accent-green); }
+
+        .input-group { display: flex; gap: 12px; margin-bottom: 10px; }
 
         input[type="text"] {
             flex: 1;
@@ -156,14 +183,24 @@
             font-weight: 700;
             cursor: pointer;
             transition: background 0.2s ease;
+            white-space: nowrap;
         }
 
-        button.btn-fetch:hover {
-            background: var(--primary-hover);
+        button.btn-fetch:hover { background: var(--primary-hover); }
+        button.btn-fetch:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .status-msg {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            min-height: 20px;
+            font-weight: 600;
         }
+        .status-msg.error { color: #e53e3e; }
+        .status-msg.info { color: var(--accent-blue); }
+        .status-msg.success { color: var(--accent-green); }
 
         .result-section {
-            margin-top: 30px;
+            margin-top: 10px;
             padding-top: 30px;
             border-top: 2px dashed var(--border-color);
             display: none;
@@ -176,7 +213,16 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+            background: rgba(0,0,0,0.03);
+        }
+
+        .res-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
         }
 
         .btn-download {
@@ -190,117 +236,59 @@
             font-weight: 700;
             margin-bottom: 20px;
             transition: opacity 0.2s;
+            text-align: center;
         }
 
-        .btn-download:hover {
-            opacity: 0.9;
-        }
+        .btn-download:hover { opacity: 0.9; }
 
-        .donation-box {
-            background: rgba(56, 161, 105, 0.08);
-            border: 2px dashed var(--accent-green);
-            padding: 20px;
-            border-radius: 16px;
-            margin-top: 20px;
-        }
-
-        .donation-box p {
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .donate-btn {
-            display: inline-block;
-            background: var(--accent-green);
-            color: white !important;
-            padding: 10px 24px;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 700;
-        }
-
-        /* SEO Articles & High CPC Ad Grid */
-        .seo-content {
-            text-align: left;
-            margin-top: 20px;
-        }
-
-        .seo-content h2, .seo-content h3 {
-            color: var(--text-main);
-            margin: 25px 0 12px 0;
-        }
-
-        .seo-content p, .seo-content ul {
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-        }
-
-        .seo-content ul {
-            padding-left: 20px;
-        }
-
-        .cpc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .cpc-card {
-            background: rgba(66, 153, 225, 0.05);
+        .about-box {
+            background: rgba(66, 153, 225, 0.06);
             border: 1px solid var(--border-color);
-            padding: 24px;
+            padding: 20px 24px;
             border-radius: 16px;
-        }
-
-        .cpc-card h4 {
-            color: var(--accent-blue);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        /* Accordion FAQs */
-        .faq-section {
-            margin-top: 40px;
-            text-align: left;
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px 0;
-            cursor: pointer;
-        }
-
-        .faq-question {
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            margin-top: 10px;
             color: var(--text-muted);
-            margin-top: 8px;
+            font-size: 0.92rem;
             line-height: 1.6;
         }
 
-        .ad-container {
-            margin: 20px 0;
+        .seo-content { text-align: left; margin-top: 20px; }
+        .seo-content h2, .seo-content h3 { color: var(--text-main); margin: 25px 0 12px 0; }
+        .seo-content p, .seo-content ul { color: var(--text-muted); line-height: 1.7; margin-bottom: 15px; font-size: 0.95rem; }
+        .seo-content ul { padding-left: 20px; }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .trust-card {
+            background: rgba(56, 161, 105, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+        }
+        .trust-card h4 { color: var(--accent-green); margin-bottom: 8px; font-size: 1rem; }
+        .trust-card p { margin-bottom: 0; font-size: 0.88rem; }
+
+        .faq-section { margin-top: 40px; text-align: left; }
+        .faq-item { border-bottom: 1px solid var(--border-color); padding: 15px 0; cursor: pointer; }
+        .faq-question { font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+
+        footer.site-footer {
+            max-width: 850px;
             width: 100%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            padding: 10px 20px 30px;
         }
 
         @media (max-width: 600px) {
-            .input-group {
-                flex-direction: column;
-            }
-            .container {
-                padding: 20px;
-            }
+            .input-group { flex-direction: column; }
+            .container { padding: 20px; }
         }
     </style>
 </head>
@@ -309,172 +297,240 @@
     <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
 
     <div class="container">
-        <!-- Top Ad Space -->
-        <div class="ad-container">
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="1886848226" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
         <div class="header-zone">
-            <h1>Universal Video Thumbnail Downloader</h1>
-            <p>Extract maximum resolution cover artwork from YouTube, Instagram, and Facebook video assets instantly.</p>
+            <h1>Video Thumbnail Downloader</h1>
+            <p>Paste a video link to instantly preview and download its cover image in the highest resolution available.</p>
+            <div class="platform-tags">
+                <span class="platform-tag ok">✓ YouTube — full HD support</span>
+                <span class="platform-tag">Instagram — public posts only</span>
+                <span class="platform-tag">Facebook — public posts only</span>
+            </div>
         </div>
 
         <div class="input-group">
-            <input type="text" id="videoURL" placeholder="Paste Video URL (YouTube, Instagram, or Facebook)...">
-            <button class="btn-fetch" onclick="getThumbnail()">Extract Media</button>
+            <input type="text" id="videoURL" placeholder="Paste a YouTube, Instagram, or Facebook video URL...">
+            <button class="btn-fetch" id="fetchBtn" onclick="getThumbnail()">Extract Thumbnail</button>
         </div>
-
-        <!-- In-Content Fluid Ad -->
-        <div class="ad-container">
-            <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-7020422718957281" data-ad-slot="5761524374"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
+        <div class="status-msg" id="statusMsg"></div>
 
         <!-- Dynamic Output Display Area -->
         <div id="output" class="result-section">
-            <img id="thumbnail" src="" alt="Extracted Graphic Framework Preview">
-            <a id="downloadLink" class="btn-download" href="#" download="Media_Asset_Cover.jpg">Download Ultra High-Res Target</a>
-            
-            <div class="donation-box">
-                <p>Enjoyed our professional asset extractor utilities? Consider supporting our platform metrics!</p>
-                <a href="https://ldl1.com/link?z=10620818&var={SOURCE_ID}&ymid={CLICK_ID}" target="_blank" class="donate-btn">☕ Support Project Infrastructure</a>
-            </div>
+            <img id="thumbnail" src="" alt="Extracted video thumbnail preview">
+            <div class="res-badge" id="resBadge"></div>
+            <br>
+            <a id="downloadLink" class="btn-download" href="#" download="thumbnail.jpg" target="_blank" rel="noopener">Download This Thumbnail</a>
         </div>
 
-        <!-- Rich SEO Content Block & Strategic High CPC Keyword Matrix -->
+        <!-- Rich SEO / EEAT Content Block -->
         <div class="seo-content" id="explanation-section">
-            <h2>Comprehensive Manual: Optimizing Digital Video CTR Assets</h2>
-            <p>In modern asset distribution pipelines across YouTube, Instagram, and Meta Ecosystem structures, video graphics hold the highest operational priority. A visual container directly correlates with your raw Click-Through Rate (CTR). Relying on automated native frames often defaults to compressed variations. This multi-browser client utility safely targets remote storage structures to resolve uncompressed content layers down to 1280x720 pixels (maxresdefault) configurations.</p>
-            
-            <h3>How to Utilize the Multi-Platform Cover Extractor</h3>
-            <p>Operating this utility requires zero localized components or application binaries. Follow this deployment process:</p>
+            <h2>How This Thumbnail Downloader Works</h2>
+            <p>This tool reads the public metadata a video platform already exposes for its own preview cards, then shows you the largest version so you can save it directly. No account, browser extension, or paid subscription is required. Everything runs client-side in your browser tab.</p>
+
+            <h3>Step-by-step</h3>
             <ul>
-                <li><strong>Step 1:</strong> Locate the contextual source link from your targeted video page inside your active tracking app or web node.</li>
-                <li><strong>Step 2:</strong> Supply the clear link string into our primary inputs array container located above.</li>
-                <li><strong>Step 3:</strong> Execute the programmatic extraction process via the confirmation action matrix button.</li>
-                <li><strong>Step 4:</strong> Review your visual scaling boundaries inside the dynamic rendering sandboxed container before finalizing local system exports.</li>
+                <li><strong>Step 1:</strong> Copy the video's URL from your browser's address bar or the app's share menu.</li>
+                <li><strong>Step 2:</strong> Paste the link into the input box above.</li>
+                <li><strong>Step 3:</strong> Click "Extract Thumbnail" and wait a moment while the tool checks available resolutions.</li>
+                <li><strong>Step 4:</strong> Preview the image, then click "Download This Thumbnail" to save it to your device.</li>
             </ul>
 
-            <h3>Strategic High-Value Marketing Verticals (High CPC Monetization)</h3>
-            <p>Creators tailoring visual configurations towards high-revenue commercial display spaces can leverage these high-value industry archetypes to accelerate structural yield optimizations:</p>
+            <h3>Platform support, honestly explained</h3>
+            <p><strong>YouTube</strong> is fully supported: the tool checks the maxresdefault (1280x720), then automatically steps down through sddefault, hqdefault, and mqdefault if a higher resolution was never generated for that video, so you always get the best version that actually exists.</p>
+            <p><strong>Instagram and Facebook</strong> only expose thumbnail data for public posts, and both platforms actively restrict automated access to protect user privacy. This tool will attempt to read the public preview image for public, non-login-gated posts, but private accounts, age-restricted videos, and Stories cannot be retrieved — that is a platform-level restriction, not a bug.</p>
 
-            <div class="cpc-grid">
-                <div class="cpc-card">
-                    <h4>💰 Finance & Top Tier Personal Loans</h4>
-                    <p>Building high-converting digital hooks around lines of credit, consolidation programs, and tailored personal loans requires meticulous visual clarity. Clean layout structures foster strong community authority and drive higher lead generation ratios.</p>
+            <div class="trust-grid">
+                <div class="trust-card">
+                    <h4>🔒 Privacy-respecting</h4>
+                    <p>Your pasted link is processed only for this session. Nothing is logged to a server-side database.</p>
                 </div>
-                <div class="cpc-card">
-                    <h4>🚗 Commercial Automobile & Car Insurance</h4>
-                    <p>When running complex acquisition networks targeting competitive markets like regional car insurance policies, tracking precise presentation elements ensures higher competitive visibility and optimized programmatic bids.</p>
+                <div class="trust-card">
+                    <h4>⚡ No installation</h4>
+                    <p>Works entirely in the browser tab you already have open — desktop or mobile.</p>
                 </div>
-                <div class="cpc-card">
-                    <h4>⚖️ Civil Litigation & Mesothelioma Legal Counsel</h4>
-                    <p>High-stakes specialized litigation sectors, specifically mesothelioma legal claims, rely heavily on authoritative, clean layouts to build deep user trust and maintain exceptional legal awareness standards.</p>
+                <div class="trust-card">
+                    <h4>📐 Best available quality</h4>
+                    <p>Automatically falls back to the next-best resolution instead of failing outright.</p>
                 </div>
-                <div class="cpc-card">
-                    <h4>₿ High Yield Crypto Staking & DeFi Infrastructure</h4>
-                    <p>Architecting instructional visual assets for decentralized finance layers and premium crypto staking structures demands ultra-precise technical presentation values to boost cross-platform engagement matrices.</p>
+                <div class="trust-card">
+                    <h4>©️ Copyright-aware</h4>
+                    <p>We remind users that thumbnails belong to their original creators and platforms.</p>
                 </div>
             </div>
         </div>
 
-        <!-- SEO FAQ Schema Accordion Framework -->
+        <!-- FAQ Accordion -->
         <div class="faq-section">
             <h2>Frequently Asked Questions</h2>
-            
+
             <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Can I extract imagery from Instagram and Facebook assets? <span>▼</span></div>
-                <div class="faq-answer">Yes. This multi-browser platform logic handles specialized content parameters across YouTube, Meta, and Instagram networks to identify accessible high-resolution graphic placeholders seamlessly.</div>
-            </div>
-            
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">What is the baseline structural threshold of the processed files? <span>▼</span></div>
-                <div class="faq-answer">For YouTube sources, our API pathways prioritize maxresdefault.jpg variations (1280x720 standard HD blueprint), ensuring uncompressed quality for cross-platform redistribution workflows.</div>
+                <div class="faq-question">Is this thumbnail downloader really free? <span>▼</span></div>
+                <div class="faq-answer">Yes. It's free to use, requires no sign-up, and has no daily limit.</div>
             </div>
 
             <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">How do specialized asset layouts impact ad-revenue channels? <span>▼</span></div>
-                <div class="faq-answer">In high-tier commercial keywords networks (such as premium personal loans and specialized corporate insurance channels), verified graphic systems dramatically lower customer acquisition costs.</div>
+                <div class="faq-question">What is the maximum resolution I can download for YouTube? <span>▼</span></div>
+                <div class="faq-answer">Most videos support maxresdefault at 1280x720. Older or lower-quality uploads may only have sddefault or hqdefault available, in which case the tool automatically shows the best one that exists.</div>
             </div>
 
             <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Does using this utility track personalized identification footprints? <span>▼</span></div>
-                <div class="faq-answer">No. This data resolution software compiles targets strictly within client-side browser memory pipelines, maintaining standard web privacy safeguards.</div>
+                <div class="faq-question">Does this work for Instagram and Facebook videos? <span>▼</span></div>
+                <div class="faq-answer">Only for public posts. Private accounts, login-gated content, and Stories can't be read because the platforms intentionally block that access outside their own apps.</div>
             </div>
-        </div>
 
-        <!-- Bottom Native Recommendation Ad Placeholder -->
-        <div class="ad-container">
-            <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4321439874"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">Do you store the videos or links I paste? <span>▼</span></div>
+                <div class="faq-answer">No. The link is used only in your current browser session and is never saved to a server-side database.</div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">Can I use the downloaded thumbnail commercially? <span>▼</span></div>
+                <div class="faq-answer">The image still belongs to its original creator or platform. Only reuse it if you own the content or have explicit permission — copyright law still applies.</div>
+            </div>
         </div>
     </div>
 
+    <footer class="site-footer">
+        Built for creators and marketers who need quick access to public video cover art. Always respect the original creator's copyright before reusing a downloaded image.
+    </footer>
+
 <script>
     function extractMediaParameters(url) {
-        let result = { platform: null, id: null };
-        
-        // YouTube Filtering Patterns
+        // YouTube
         const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([0-9A-Za-z_-]{11})/;
         const ytMatch = url.match(ytRegex);
-        if (ytMatch) {
-            return { platform: 'youtube', id: ytMatch[1] };
-        }
+        if (ytMatch) return { platform: 'youtube', id: ytMatch[1], pageUrl: url };
 
-        // Instagram Filtering Patterns
+        // Instagram
         if (url.includes('instagram.com')) {
             const instaRegex = /\/(p|reel|tv)\/([A-Za-z0-9_-]+)/;
             const instaMatch = url.match(instaRegex);
-            if (instaMatch) {
-                return { platform: 'instagram', id: instaMatch[2] };
-            }
+            if (instaMatch) return { platform: 'instagram', id: instaMatch[2], pageUrl: url };
         }
 
-        // Facebook Filtering Patterns
+        // Facebook
         if (url.includes('facebook.com') || url.includes('fb.watch')) {
-            const fbRegex = /(?:videos\/|v=|src=v\/|watch\/\?v=)([0-9]+)/;
-            const fbMatch = url.match(fbRegex);
-            if (fbMatch) {
-                return { platform: 'facebook', id: fbMatch[1] };
-            }
+            return { platform: 'facebook', id: null, pageUrl: url };
         }
 
-        return result;
+        return { platform: null, id: null, pageUrl: null };
+    }
+
+    function setStatus(msg, type) {
+        const el = document.getElementById('statusMsg');
+        el.textContent = msg || '';
+        el.className = 'status-msg' + (type ? (' ' + type) : '');
+    }
+
+    function showResult(imageUrl, label) {
+        const imgNode = document.getElementById('thumbnail');
+        const linkNode = document.getElementById('downloadLink');
+        const outSection = document.getElementById('output');
+        const badge = document.getElementById('resBadge');
+
+        imgNode.src = imageUrl;
+        linkNode.href = imageUrl;
+        badge.textContent = label || '';
+        outSection.style.display = 'block';
+        outSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Tries YouTube thumbnail resolutions from best to worst, since not
+    // every video has an HD (maxresdefault) image generated for it.
+    function tryYoutubeResolutions(videoId) {
+        const candidates = [
+            { file: 'maxresdefault.jpg', label: 'HD 1280x720' },
+            { file: 'sddefault.jpg', label: 'SD 640x480' },
+            { file: 'hqdefault.jpg', label: 'HQ 480x360' },
+            { file: 'mqdefault.jpg', label: 'MQ 320x180' },
+            { file: 'default.jpg', label: 'Default 120x90' }
+        ];
+
+        let i = 0;
+        function attempt() {
+            if (i >= candidates.length) {
+                setStatus('Could not find a thumbnail for that video ID.', 'error');
+                document.getElementById('fetchBtn').disabled = false;
+                return;
+            }
+            const candidate = candidates[i];
+            const testImg = new Image();
+            const url = `https://img.youtube.com/vi/${videoId}/${candidate.file}`;
+            testImg.onload = function () {
+                // YouTube serves a small 120x90 grey placeholder for missing
+                // maxres images — treat that as a miss and step down.
+                if (candidate.file === 'maxresdefault.jpg' && testImg.naturalWidth === 120) {
+                    i++;
+                    attempt();
+                    return;
+                }
+                setStatus('Thumbnail found.', 'success');
+                document.getElementById('fetchBtn').disabled = false;
+                showResult(url, candidate.label);
+            };
+            testImg.onerror = function () {
+                i++;
+                attempt();
+            };
+            testImg.src = url;
+        }
+        attempt();
+    }
+
+    // Best-effort og:image extraction for public Instagram/Facebook posts,
+    // read through a public read-only CORS relay since browsers block
+    // direct cross-origin page reads.
+    async function tryOgImageExtraction(pageUrl, platformLabel) {
+        try {
+            const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(pageUrl);
+            const res = await fetch(proxied);
+            if (!res.ok) throw new Error('network');
+            const html = await res.text();
+            const match =
+                html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+                html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+
+            if (match && match[1]) {
+                setStatus(`Cover image found for this public ${platformLabel} post.`, 'success');
+                showResult(match[1], 'Preview image');
+            } else {
+                setStatus(`No public cover image found. This ${platformLabel} post may be private, age-restricted, or a Story.`, 'error');
+            }
+        } catch (e) {
+            setStatus(`Could not reach this ${platformLabel} post. It may be private or the relay is temporarily unavailable.`, 'error');
+        } finally {
+            document.getElementById('fetchBtn').disabled = false;
+        }
     }
 
     function getThumbnail() {
-        const urlStr = document.getElementById("videoURL").value.trim();
-        const targetEntity = extractMediaParameters(urlStr);
-        const imgNode = document.getElementById("thumbnail");
-        const linkNode = document.getElementById("downloadLink");
-        const outSection = document.getElementById("output");
+        const urlStr = document.getElementById('videoURL').value.trim();
+        const btn = document.getElementById('fetchBtn');
+        document.getElementById('output').style.display = 'none';
 
-        if (!targetEntity.platform || !targetEntity.id) {
-            alert("Error: Please provide a valid URL structural sequence matching YouTube, Instagram, or Facebook protocols.");
+        if (!urlStr) {
+            setStatus('Please paste a video URL first.', 'error');
             return;
         }
 
-        let resolveURL = "";
+        const target = extractMediaParameters(urlStr);
 
-        switch(targetEntity.platform) {
-            case 'youtube':
-                resolveURL = `https://img.youtube.com/vi/${targetEntity.id}/maxresdefault.jpg`;
-                break;
-            case 'instagram':
-                // Fallback rendering standard public preview endpoint layout
-                resolveURL = `https://images.weserv.nl/?url=instagram.com/p/${targetEntity.id}/media/?size=l`;
-                break;
-            case 'facebook':
-                // Graph parsing layout for default systemic endpoints
-                resolveURL = `https://graph.facebook.com/${targetEntity.id}/picture?type=large`;
-                break;
+        if (!target.platform) {
+            setStatus('That link doesn\'t look like a YouTube, Instagram, or Facebook video URL.', 'error');
+            return;
         }
 
-        imgNode.src = resolveURL;
-        linkNode.href = resolveURL;
-        outSection.style.display = "block";
-        outSection.scrollIntoView({ behavior: 'smooth' });
+        btn.disabled = true;
+
+        if (target.platform === 'youtube') {
+            setStatus('Checking available resolutions...', 'info');
+            tryYoutubeResolutions(target.id);
+        } else if (target.platform === 'instagram') {
+            setStatus('Looking up public post data...', 'info');
+            tryOgImageExtraction(target.pageUrl, 'Instagram');
+        } else if (target.platform === 'facebook') {
+            setStatus('Looking up public post data...', 'info');
+            tryOgImageExtraction(target.pageUrl, 'Facebook');
+        }
     }
 
     function toggleFaq(element) {
@@ -491,14 +547,10 @@
 
     function toggleTheme() {
         document.body.classList.toggle('dark-mode');
-        const activeMode = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-        localStorage.setItem('theme', activeMode);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
+    document.getElementById('videoURL').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') getThumbnail();
     });
 </script>
 </body>
