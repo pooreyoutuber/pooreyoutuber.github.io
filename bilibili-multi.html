@@ -25,27 +25,33 @@
     <meta property="twitter:title" content="Bilibili Multi-Viewer Tool | Cross-Platform Video Grid Tester">
     <meta property="twitter:description" content="Free online Bilibili Multi Viewer tool. Watch multiple Bilibili videos simultaneously in a responsive layout.">
     <meta property="twitter:image" content="https://pooreyoutuber.github.io/banner.jpg"> <script type="application/ld+json">
+
+    <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Bilibili Multi-Viewer Tool",
-      "url": "https://pooreyoutuber.github.io/",
-      "description": "A lightweight web-based utility for rendering multiple concurrent Bilibili video streams in a unified dashboard grid.",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "author": {
-        "@type": "Organization",
-        "name": "BiliHelper",
-        "url": "https://pooreyoutuber.github.io/"
-      }
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://pooreyoutuber.github.io/bilibili-multi-viewer.html#webapp",
+          "name": "Bilibili Multi-Viewer & Grid Layout Browser",
+          "url": "https://pooreyoutuber.github.io/bilibili-multi-viewer.html",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires HTML5 compatible browser with JavaScript enabled.",
+          "author": {
+            "@type": "Person",
+            "name": "PooreYoutuber"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "A free web-based Bilibili Multi-Panel viewer that allows creators to open, preview, and analyze multiple Bilibili streams or videos simultaneously in a side-by-side responsive grid layout."
+        }
+      ]
     }
     </script>
-   
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
@@ -54,448 +60,921 @@
         gtag('js', new Date());
         gtag('config', 'G-ZPMC525FGT');
     </script>
-   
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-  
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* YouTube Premium Dark Cyber Aesthetic Design */
         :root {
-            --yt-red: #ff0000;
-            --yt-dark-red: #c00000;
-            --yt-glow: rgba(255, 0, 0, 0.25);
-            --bg-body: #0f0f12;
-            --bg-nav: #16161c;
-            --bg-card: #1a1a22;
-            --text-main: #f1f1f5;
-            --text-muted: #94a3b8;
-            --border-color: #2e2e38;
-            --input-bg: #22222a;
-            --radius: 12px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+            --bg:           #0f111a;
+            --panel:        #161925;
+            --card:         #1f2335;
+            --border:       #272d42;
+            --border-light: #38415c;
+            --bili-blue:    #00aeec;
+            --bili-pink:    #f25d8e;
+            --bili-glow:    rgba(242, 93, 142, 0.18);
+            --bili-faint:   rgba(242, 93, 142, 0.06);
+            --text:         #f0f2f7;
+            --muted:        #a2aabf;
+            --radius:       14px;
+            --radius-sm:    9px;
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-body);
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--text);
+            padding: 28px 16px 56px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
         }
 
-        /* Header Style */
-        .navbar {
-            background: var(--bg-nav);
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        .container { width: 100%; max-width: 1200px; }
+
+        /* ─── HEADER PANEL ─── */
+        .tool-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px 30px 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
         }
 
-        .logo {
+        /* Top Bilibili theme bar */
+        .tool-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--bili-blue) 0%, var(--bili-pink) 100%);
+        }
+
+        /* Subtle pink glow background */
+        .tool-panel::after {
+            content: '';
+            position: absolute;
+            top: -60px; left: 50%;
+            transform: translateX(-50%);
+            width: 500px; height: 200px;
+            background: radial-gradient(ellipse, var(--bili-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .tool-panel > * { position: relative; z-index: 1; }
+
+        /* Home button */
+        .home-brand-btn {
+            position: absolute;
+            top: 14px; right: 18px;
+            background: rgba(0, 174, 236, 0.08);
+            color: var(--bili-blue);
+            border: 1px solid rgba(0, 174, 236, 0.22);
+            padding: 6px 16px;
+            font-size: 0.77rem;
+            font-weight: 700;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            z-index: 20;
+        }
+
+        .home-brand-btn:hover {
+            background: var(--bili-blue);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 0 16px rgba(0, 174, 236, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Logo Pill */
+        .logo-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bili-faint);
+            border: 1px solid rgba(242, 93, 142, 0.2);
+            padding: 6px 16px 6px 10px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--bili-pink);
+            letter-spacing: 0.3px;
+        }
+
+        .logo-pill .b-icon {
+            width: 22px; height: 22px;
+            background: var(--bili-pink);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .tool-panel h1 {
+            font-size: 2.15rem;
+            font-weight: 900;
+            letter-spacing: -0.6px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--bili-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.96rem;
+            line-height: 1.65;
+            max-width: 620px;
+            margin: 0 auto 30px;
+        }
+
+        /* ─── FORM ─── */
+        .form-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 880px;
+            margin: 0 auto 10px;
+        }
+
+        .input-url {
+            flex: 1;
+            min-width: 290px;
+            padding: 14px 18px;
+            background: #0b0c13;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            color: var(--text);
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-url::placeholder { color: #505978; }
+
+        .input-url:focus {
+            border-color: var(--bili-pink);
+            box-shadow: 0 0 0 3px var(--bili-glow);
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .input-count {
+            width: 78px;
+            padding: 14px 8px;
+            background: #0b0c13;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            color: var(--text);
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-count:focus {
+            border-color: var(--bili-pink);
+            box-shadow: 0 0 0 3px var(--bili-glow);
+        }
+
+        .layout-select {
+            padding: 14px 12px;
+            background: #0b0c13;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+            min-width: 135px;
+            transition: all 0.3s;
+        }
+
+        .layout-select:focus {
+            border-color: var(--bili-pink);
+            box-shadow: 0 0 0 3px var(--bili-glow);
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, var(--bili-blue) 0%, var(--bili-pink) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px 30px;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px var(--bili-glow);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(242, 93, 142, 0.35);
+        }
+
+        .btn-launch:active { transform: translateY(0); }
+
+        .btn-clear {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border-light);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            border-color: #505978;
+        }
+
+        .input-hint {
+            color: #505978;
+            font-size: 0.79rem;
+            margin-top: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        /* ─── VIDEO GRID (16:9 Standard Layout for Bilibili) ─── */
+        .video-grid {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 26px;
+            width: 100%;
+        }
+
+        .video-grid.cols-auto  { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .video-grid.cols-1     { grid-template-columns: 1fr; max-width: 800px; margin: 0 auto 26px; }
+        .video-grid.cols-2     { grid-template-columns: repeat(2, 1fr); }
+        .video-grid.cols-3     { grid-template-columns: repeat(3, 1fr); }
+        .video-grid.cols-4     { grid-template-columns: repeat(4, 1fr); }
+        .video-grid.cols-5     { grid-template-columns: repeat(5, 1fr); }
+
+        @media (max-width: 960px) {
+            .video-grid.cols-4, .video-grid.cols-5, .video-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .video-grid.cols-2, .video-grid.cols-3, .video-grid.cols-4, .video-grid.cols-5 { grid-template-columns: 1fr; }
+        }
+
+        .video-box {
+            background: #000;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            position: relative;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .video-box:hover {
+            border-color: var(--bili-pink);
+            box-shadow: 0 4px 28px var(--bili-glow);
+        }
+
+        .video-box iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
+        .video-box-label {
+            position: absolute;
+            top: 8px; left: 8px;
+            background: linear-gradient(135deg, var(--bili-blue) 0%, var(--bili-pink) 100%);
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            z-index: 10;
+            letter-spacing: 0.4px;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            border: 1px dashed var(--border-light);
+            border-radius: var(--radius);
+            margin-bottom: 26px;
+            gap: 14px;
+            color: var(--muted);
+            width: 100%;
+        }
+
+        .empty-state .icon { font-size: 3.2rem; opacity: 0.45; }
+        .empty-state p { font-size: 0.94rem; text-align: center; max-width: 400px; line-height: 1.65; }
+
+        /* ─── CONTENT PANEL ─── */
+        .content-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.5);
+            margin-bottom: 26px;
+        }
+
+        .badge {
+            background: rgba(242, 93, 142, 0.08);
+            color: var(--bili-pink);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 5px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 18px;
+            border: 1px solid rgba(242, 93, 142, 0.18);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .content-panel h2 {
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            line-height: 1.3;
+        }
+
+        .content-panel p {
+            color: var(--muted);
+            font-size: 0.96rem;
+            line-height: 1.75;
+            margin-bottom: 16px;
+        }
+
+        /* Steps */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+            margin: 22px 0;
+        }
+
+        .step-card {
+            background: var(--card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+        }
+
+        .step-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--bili-pink);
+            opacity: 0.25;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .step-card h4 {
+            font-size: 0.93rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .step-card p {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        /* Tip Box */
+        .tip-box {
+            background: var(--bili-faint);
+            border: 1px dashed rgba(242, 93, 142, 0.22);
+            border-radius: var(--radius-sm);
+            padding: 22px;
+            margin: 24px 0;
+        }
+
+        .tip-box h3 {
+            color: var(--bili-pink);
+            font-size: 1rem;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 800;
-            font-size: 22px;
-            color: var(--text-main);
-            text-decoration: none;
-            letter-spacing: -0.5px;
         }
 
-        .logo span {
-            color: var(--yt-red);
-            text-shadow: 0 0 10px var(--yt-glow);
-        }
+        .feature-list { list-style: none; }
 
-        .nav-links a {
-            background: var(--input-bg);
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            background: var(--yt-red);
-            border-color: var(--yt-red);
-            box-shadow: 0 0 15px var(--yt-glow);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        /* Input Dashboard */
-        .control-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 40px 25px;
-            border-radius: var(--radius);
-            text-align: center;
-            box-shadow: var(--shadow);
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .control-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--yt-red), #ff5555);
-        }
-
-        .control-panel h1 {
-            font-size: 32px;
-            font-weight: 800;
+        .feature-list li {
             margin-bottom: 12px;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-        }
-
-        .control-panel p {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            font-size: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            max-width: 750px;
-            margin: 0 auto;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            padding: 16px 20px;
-            border-radius: 8px;
-            color: var(--text-main);
-            outline: none;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--yt-red);
-            background: #1c1c24;
-            box-shadow: 0 0 15px var(--yt-glow);
-        }
-
-        .btn-add {
-            background: var(--yt-red);
-            color: #FFFFFF;
-            border: none;
-            padding: 16px 35px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
-        }
-
-        .btn-add:hover {
-            background: var(--yt-dark-red);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
-        }
-
-        .counter {
-            margin-top: 20px;
-            font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Videos Grid */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 25px;
-        }
-
-        .video-slot {
-            background: #000000;
-            border-radius: var(--radius);
-            overflow: hidden;
-            aspect-ratio: 16/10;
-            border: 1px solid var(--border-color);
+            font-size: 0.94rem;
+            color: var(--muted);
+            line-height: 1.6;
+            padding-left: 22px;
             position: relative;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
         }
 
-        .video-slot:hover {
-            transform: translateY(-6px);
-            border-color: var(--yt-red);
-            box-shadow: 0 12px 24px rgba(255, 0, 0, 0.15);
-        }
+        .feature-list li strong { color: var(--text); }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .btn-remove {
+        .feature-list li::before {
+            content: "📺";
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(15, 15, 18, 0.85);
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            width: 34px;
-            height: 34px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 10;
+            left: 0; top: 1px;
+            font-size: 0.75rem;
+        }
+
+        /* Check list */
+        .check-list { list-style: none; padding: 0; margin: 20px 0; }
+
+        .check-list li {
+            margin-bottom: 13px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.94rem;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .check-list li .ck { color: var(--bili-pink); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+        .check-list li strong { color: var(--text); }
+
+        /* Section Title */
+        .section-title {
+            color: var(--bili-pink);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 28px 0 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(4px);
+            gap: 8px;
         }
 
-        .btn-remove:hover {
-            background: var(--yt-red);
-            color: white;
-            border-color: var(--yt-red);
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 0 10px var(--yt-glow);
+        /* CPC Grid */
+        .cpc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+            gap: 13px;
+            margin-bottom: 26px;
         }
 
-        /* SEO Description Section */
-        .seo-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 40px;
-            border-radius: var(--radius);
-            margin-top: 60px;
-            box-shadow: var(--shadow);
-            line-height: 1.75;
+        .cpc-block {
+            background: var(--card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            transition: border-color 0.3s, transform 0.2s;
         }
 
-        .seo-section h2 {
-            color: var(--text-main);
-            margin-top: 0;
-            margin-bottom: 22px;
-            font-size: 24px;
+        .cpc-block:hover {
+            border-color: var(--bili-pink);
+            transform: translateY(-2px);
+        }
+
+        .cpc-block h3 {
+            font-size: 0.93rem;
             font-weight: 700;
-            border-left: 4px solid var(--yt-red);
-            padding-left: 15px;
-            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 8px;
         }
 
-        .seo-section p {
-            color: var(--text-muted);
-            font-size: 15px;
-            margin-bottom: 18px;
+        .cpc-block p {
+            font-size: 0.86rem;
+            color: var(--muted);
+            line-height: 1.55;
+            margin: 0;
         }
 
-        .seo-section strong {
-            color: #ffffff;
-            font-weight: 600;
+        /* Crossroads */
+        .crossroads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 26px;
         }
 
+        .crossroads-card {
+            background: rgba(255,255,255,0.015);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .crossroads-card:hover {
+            border-color: var(--bili-pink);
+            background: var(--bili-faint);
+            transform: translateY(-2px);
+        }
+
+        .card-tag {
+            font-size: 0.69rem;
+            text-transform: uppercase;
+            color: var(--bili-pink);
+            font-weight: 700;
+            letter-spacing: 0.6px;
+        }
+
+        .card-headline {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-desc {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 26px 0;
+        }
+
+        /* Disclaimer */
+        .disclaimer-box {
+            background: rgba(242, 93, 142, 0.03);
+            border: 1px solid rgba(242, 93, 142, 0.12);
+            border-radius: var(--radius-sm);
+            padding: 18px 22px;
+            margin-top: 22px;
+            color: #af6b83;
+            font-size: 0.86rem;
+            line-height: 1.7;
+        }
+
+        .disclaimer-box strong { color: #d67699; }
+
+        /* Ad Container */
+        .ad-container { margin: 18px 0; width: 100%; }
+
+        /* Footer */
         footer {
-            margin-top: 80px;
-            padding: 35px;
             text-align: center;
-            border-top: 1px solid var(--border-color);
-            background: var(--bg-nav);
-            color: var(--text-muted);
-            font-size: 14px;
-            letter-spacing: 0.5px;
+            margin-top: 40px;
+            font-size: 0.81rem;
+            color: #4b526d;
+            letter-spacing: 0.3px;
         }
 
-        @media (max-width: 768px) {
-            .video-grid { grid-template-columns: 1fr; }
-            .input-group { flex-direction: column; }
-            .btn-add { width: 100%; }
-            .control-panel h1 { font-size: 26px; }
+        /* Responsive */
+        @media (max-width: 720px) {
+            .tool-panel { padding: 30px 18px 26px; }
+            .tool-panel h1 { font-size: 1.6rem; }
+            .content-panel { padding: 24px 18px; }
+            .form-row { flex-direction: column; }
+            .home-brand-btn { font-size: 0.7rem; padding: 5px 10px; }
         }
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <a href="https://pooreyoutuber.github.io/" class="logo">
-    📺 Bili<span>Viewer</span>
-</a>
+<div class="container">
 
-<a href="https://pooreyoutuber.github.io/">Home</a>
-        </div>
-    </header>
+    <div class="tool-panel">
+        <a href="https://pooreyoutuber.github.io" target="_self" class="home-brand-btn">🏠 PooreYoutuber</a>
 
-    <div class="container">
-
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-        <!-- bilibili display -->
-        <ins class="adsbygoogle"
-             style="display:block; margin-bottom: 20px;"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="3782971522"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-        
-        <!-- Input Dashboard -->
-        <div class="control-panel">
-            <h1>Bilibili Multi-Viewer & Grid Booster</h1>
-            <p>Enter your Bilibili video URL or BV ID to load multiple stream slots concurrently.</p>
-            
-            <div class="input-group">
-                <input type="text" id="videoUrl" placeholder="Paste link e.g., https://www.bilibili.com/video/BV1xx411c7xyz or just BVid">
-                <button class="btn-add" onclick="addBiliVideo()">Launch Stream</button>
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div class="logo-pill">
+                <div class="b-icon">B</div>
+                Bilibili Engine 2026
             </div>
-            <p id="counter" class="counter">Active Tabs: 0 / 12</p>
         </div>
 
-        <!-- Video Slots Matrix Grid -->
-        <div class="video-grid" id="videoGrid"></div>
+        <h1>Bilibili Multi-Viewer & Grid Browser</h1>
+        <p class="subtitle">Paste any Bilibili Video URL or BV/av ID, choose your slot count, and instantly compile a fully integrated responsive side-by-side stream grid in one unified window.</p>
 
-        <!-- ADS 2: Bilibili Display Ad (2nd Time) -->
-        <div style="margin-top: 30px; margin-bottom: 30px;">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-            <!-- bilibili display -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="3782971522"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+        <div class="form-row">
+            <input type="text" id="biliUrl" class="input-url" placeholder="e.g. https://www.bilibili.com/video/BV1GJ411x7h7/ or raw ID: BV1GJ411x7h7">
         </div>
-
-        <!-- ADS 3: Fluid Ad (1st Time) -->
-        <div style="margin-bottom: 30px;">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-format="fluid"
-                 data-ad-layout-key="-ef+6k-30-ac+ty"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="5438538822"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
-        
-        <!-- SEO Article Content -->
-        <div class="seo-section">
-            <h2>Maximize Video Traffic with the Ultimate Bilibili Multi-Viewer Tool</h2>
-            <p>Welcome to the premier browser-based utility built for independent media creators, digital analytical teams, and cross-platform publishers utilizing the <strong>Bilibili video hosting engine</strong>. In modern online video marketing, securing initial engagement momentum and testing cross-device performance profiles safely are crucial phases for triggering algorithmic content push distribution.</p>
-            
-            <p>Our <strong>Bilibili Multi-Viewer Framework</strong> allows users to paste standard browser watch links or localized alphanumeric parameters (BV identifiers) to spin up standalone responsive preview frames instantly side by side. By employing clean, natively adapted platform sandbox components, this framework arranges multiple vertical or standard horizontal video sequences inside a singular dashboard container layout. Content teams can accurately observe playback rendering latency, interface stability, synchronous frame scaling, and caption alignment metrics across multiple concurrent sessions simultaneously.</p>
-
-            <!-- ADS 4: In-Article Ad (1st Time) -->
-            <div style="margin-top: 20px; margin-bottom: 20px;">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-                <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-layout="in-article"
-                     data-ad-format="fluid"
-                     data-ad-client="ca-pub-7020422718957281"
-                     data-ad-slot="2812375484"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+        <div class="form-row">
+            <div class="controls-group">
+                <input type="number" id="slotCount" class="input-count" value="4" min="1" max="20" title="Number of panels to open">
+                <select id="layoutSelect" class="layout-select">
+                    <option value="auto">Auto Layout</option>
+                    <option value="cols-1">1 Column</option>
+                    <option value="cols-2">2 Columns</option>
+                    <option value="cols-3">3 Columns</option>
+                    <option value="cols-4">4 Columns</option>
+                    <option value="cols-5">5 Columns</option>
+                </select>
+                <button onclick="launchBilibili()" class="btn-launch">▶ Launch Workspace</button>
+                <button onclick="clearBilibili()" class="btn-clear">✕ Clear All</button>
             </div>
-            
-            <p><strong>Strategic Growth Engineering:</strong> Unlike legacy browser-heavy application tools that quickly overload desktop processors, our customized framework runs a light script utilizing structural layout optimization to render clear, lightweight platform embeds. This localized client-side architecture safeguards user operational parameters, provides modular deletion controls, and ensures a sleek experience while maintaining an aesthetic matching the iconic Bilibili content universe. Perfect for running targeted playback loop simulations, managing content validation flows, and checking layout responses seamlessly.</p>
-            
-            <p>Whether you write educational analyses, compile gaming walkthrough clips, or operate localized high-traffic agency assets, integrating this multi-view portal into your publishing workflow simplifies technical evaluation pipelines dramatically. Try it today completely free to optimize your delivery architecture instantly!</p>
         </div>
-
+        <p class="input-hint">Supports full video URLs, live links, or direct BV codes &nbsp;·&nbsp; Set capacity up to 20 slots</p>
     </div>
 
-    <footer>
-        <p>&copy; 2026 BiliViewer System. Built for Content Optimization. All Rights Reserved.</p>
-    </footer>
+    <div class="ad-container">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
-    <script>
-        let streamCount = 0;
-        const maxStreams = 12;
+    <div id="videoGridContainer" class="video-grid cols-auto">
+        <div class="empty-state">
+            <div class="icon">📺</div>
+            <p>Your Bilibili video slots will compile here synchronously. Input a proper link above and trigger <strong>Launch Workspace</strong> to start rendering.</p>
+        </div>
+    </div>
 
-        function extractBiliID(url) {
-            url = url.trim();
-            const bvRegex = /(BV[a-zA-Z0-9]{10})/i;
-            const match = url.match(bvRegex);
-            return (match && match[1]) ? match[1] : null;
+    <div class="ad-container">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-7020422718957281" data-ad-slot="2751888085"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="content-panel">
+        <span class="badge">Bilibili Web Suite 2026</span>
+        <h2>Bilibili Multi-Viewer — Next-Gen Parallel Workspace For Media Creators & Animators</h2>
+
+        <p>The <strong>Bilibili Multi-Viewer Tool</strong> is a completely custom-coded, browser-independent optimization studio designed specifically for digital content creators, media researchers, and streaming managers operating on the Bilibili video platform. It provides a multi-panel grid system that lets you load, preview, and audit numerous video layers simultaneously. By eliminating the friction of handling multiple high-RAM browser tabs, this utility streamlines your auditing process within a secure, sandboxed environment.</p>
+
+        <p>As one of the world's most vibrant platforms for ACG (Anime, Comic, Games) content, tech product reviews, and creative vlogging, Bilibili relies heavily on precise playback metrics, dynamic timing, and structural retention. For marketing managers and creators, keeping track of parallel visual streams is crucial for performance audits. Our multi-panel interface acts as a full-scale digital workbench, letting you cross-compare visual frames, text overlays, sound syncing, and overall rendering speeds seamlessly.</p>
+
+        <h2 style="margin-top:28px; font-size:1.28rem;">📖 How to Use the Bilibili Multi-Panel Grid Tool</h2>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <h4>Grab the Link / ID</h4>
+                <p>Visit Bilibili and copy the full URL of the targeted video or live link, or extract its direct unique BV code (e.g., BV1GJ411x7h7).</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <h4>Insert Content ID</h4>
+                <p>Paste the copied video link or raw alphanumerical code into the top address input field within our custom control center.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <h4>Set Grid Count</h4>
+                <p>Define the number of active video boxes you want to launch simultaneously (inputting any parameter between 1 and a maximum of 20 slots).</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">04</div>
+                <h4>Choose Architecture</h4>
+                <p>Select your column layout from the selection dropdown (Auto, 1, 2, 3, 4, or 5 columns) to perfectly match your hardware display properties.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">05</div>
+                <h4>Initialize Launch</h4>
+                <p>Click the **Launch Workspace** button to instantly compile and run all designated media layers across secure inline boxes simultaneously.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">06</div>
+                <h4>Clear & Re-evaluate</h4>
+                <p>When you are ready to evaluate a new video or change the column structure, click the **Clear All** button to completely refresh the grid.</p>
+            </div>
+        </div>
+
+        <div class="tip-box">
+            <h3>💡 Pro Tips for Cross-Content Quality Auditing</h3>
+            <ul class="feature-list">
+                <li><strong>Simultaneous Layout Testing:</strong> Change your layout configurations from 2-column arrays up to 4-column styles to evaluate how your video text components and subtitles hold clarity across varied display dimensions.</li>
+                <li><strong>Benchmark Against Top Trends:</strong> Load your draft video side by side with high-performing trending uploads in your niche. Analyze edits, lighting styles, transitions, and audio pacing frame-by-frame.</li>
+                <li><strong>Streamlined Production Dashboards:</strong> Set up a custom monitor system using the multi-slot array to track different time markers within long-form animations or gameplay edits simultaneously.</li>
+                <li><strong>Zero Multi-Session Alert Risks:</strong> Our specialized application utilizes clean, standard public embed mechanisms. This allows you to inspect public assets securely without triggering multiple account authorization flags.</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-top:28px; font-size:1.22rem;">🎯 Key Technical Advantages of the Bilibili Grid Engine</h2>
+        <p>Success in high-tier multimedia spaces requires structured workflows. The Bilibili Multi-Viewer platform offers a highly functional, lightweight alternative to standard resource-heavy browsing environments.</p>
+
+        <ul class="check-list">
+            <li><span class="ck">✓</span><div><strong>100% Free with Zero Verification Hubs:</strong> Experience immediate system deployment with no hidden paywalls, activation keys, or mandatory signups.</div></li>
+            <li><span class="ck">✓</span><div><strong>Native 16:9 Cinematic Layout Scaling:</strong> Every slot is styled to match the standard widescreen proportions used for professional desktop and console uploads.</div></li>
+            <li><span class="ck">✓</span><div><strong>High-Performance Infrastructure:</strong> Built using clean, lightweight client-side scripts that prevent browser lockups even when loading up to 20 rendering instances.</div></li>
+            <li><span class="ck">✓</span><div><strong>Secure Encapsulated Environments:</strong> Every player iframe runs independently under strict browser security protocols, keeping your session secure.</div></li>
+        </ul>
+
+        <div class="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <hr class="divider">
+
+        <h3 class="section-title">📡 High-Value Creative Categories Leveraging Multi-Panel Suites</h3>
+        <div class="cpc-grid">
+            <div class="cpc-block">
+                <h3>💰 Tech & Software Engineering Insights</h3>
+                <p>Publishers covering **High Yield Web Hosting Solutions for Remote Development** run simultaneous grids to review technical charts and UI demos.</p>
+            </div>
+            <div class="cpc-block">
+                <h3>🚗 Automotive Insurance Appraisals</h3>
+                <p>Reviewers creating high-CPC video assets for **Affordable Commercial Auto Insurance Policies** check their display graphics across multiple layout scales.</p>
+            </div>
+            <div class="cpc-block">
+                <h3>⚖️ Educational Corporate Finance</h3>
+                <p>Financial tutors producing content around **Top Investment Management Services 2026** use the multi-panel grid to audit the clarity of their data tables.</p>
+            </div>
+            <div class="cpc-block">
+                <h3>🖥️ High-End Hardware Engineering</h3>
+                <p>Hardware channels reviewing premium setups use the parallel grid to check rendering speeds and frame details side by side.</p>
+            </div>
+            <div class="cpc-block">
+                <h3>🎮 Competitive Game Analytics</h3>
+                <p>Esports teams use multi-slot setups to break down matches, tracking multiple player perspectives at the exact same time.</p>
+            </div>
+            <div class="cpc-block">
+                <h3>🎨 Animation & Storyboard Sync</h3>
+                <p>Creative studios use side-by-side video blocks to compare color grading, frame timing, and drafts against final animation releases.</p>
+            </div>
+        </div>
+
+        <h3 class="section-title">🚀 Explore More Free Premium Tools</h3>
+        <div class="crossroads-grid">
+            <a href="https://pooreyoutuber.github.io/instaVelocity.html" target="_blank" class="crossroads-card">
+                <div class="card-tag">Tool #1</div>
+                <div class="card-headline">InstaVelocity Multi Viewer</div>
+                <div class="card-desc">Open and watch multiple Instagram Reels simultaneously in a responsive pink vertical grid layout.</div>
+            </a>
+            <a href="https://pooreyoutuber.github.io/tiktok-multi-brower.html" target="_blank" class="crossroads-card">
+                <div class="card-tag">Tool #2</div>
+                <div class="card-headline">TikTok Multi-Browser</div>
+                <div class="card-desc">Preview multiple vertical TikTok streams or short videos simultaneously in a custom workspace.</div>
+            </a>
+            <a href="https://pooreyoutuber.github.io/twitch-browser.html" target="_blank" class="crossroads-card">
+                <div class="card-tag">Tool #3</div>
+                <div class="card-headline">Twitch Multi Streamer</div>
+                <div class="card-desc">Open and monitor numerous Twitch live streams simultaneously in a customized purple layout.</div>
+            </a>
+            <a href="https://pooreyoutuber.github.io/Kick-browser.html" target="_blank" class="crossroads-card">
+                <div class="card-tag">Tool #4</div>
+                <div class="card-headline">Kick Multi-Browser</div>
+                <div class="card-desc">Load multiple Kick.com gaming live channels simultaneously with full neon green styling accents.</div>
+            </a>
+        </div>
+
+        <div class="disclaimer-box">
+            <strong>Please Note:</strong> This specialized simulation matrix is engineered strictly for fun, creative review, dashboard prototyping, and educational quality analysis. It does not generate synthetic traffic, fake views, automated user interaction logs, or artificial metric increases. Every user deploys this interface at their **own individual discretion** to analyze layout setups, video properties, and device presentation styles. The tool strictly formats public Bilibili players inside an organized grid display — nothing more. Happy creating! 📺
+        </div>
+
+        <div class="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="3405888966"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 PooreYoutuber &nbsp;·&nbsp; Free Creator Systems &nbsp;·&nbsp; Bilibili Multi-Panel Grid Tool
+</footer>
+
+<script>
+    function extractBilibiliId(url) {
+        url = url.trim();
+        if (!url) return null;
+
+        // Regular expression to match standard Bilibili BV codes (e.g., BV1GJ411x7h7 or shortcodes)
+        const bvRegex = /(BV[a-zA-Z0-9]{10})/i;
+        const bvMatch = url.match(bvRegex);
+        if (bvMatch && bvMatch[1]) {
+            return bvMatch[1];
         }
 
-        function addBiliVideo() {
-            const input = document.getElementById('videoUrl');
-            const grid = document.getElementById('videoGrid');
-            const bvid = extractBiliID(input.value);
+        // Regular expression to match older av numbers (e.g., av123456)
+        const avRegex = /(av\d+)/i;
+        const avMatch = url.match(avRegex);
+        if (avMatch && avMatch[1]) {
+            return avMatch[1];
+        }
 
-            if (!bvid) {
-                alert("Please input a valid Bilibili URL containing a valid BV ID!");
-                return;
+        // Check if raw alphanumeric string resembles a BV code directly
+        if (/^BV[a-zA-Z0-9]{10}$/i.test(url)) {
+            return url;
+        }
+
+        // Fallback check if it's a numeric value (treated as raw av ID)
+        if (/^\d+$/.test(url)) {
+            return 'av' + url;
+        }
+
+        return null;
+    }
+
+    function launchBilibili() {
+        const rawInput = document.getElementById('biliUrl').value.trim();
+        const count = Math.min(Math.max(parseInt(document.getElementById('slotCount').value) || 4, 1), 20);
+        const layout = document.getElementById('layoutSelect').value;
+        const grid = document.getElementById('videoGridContainer');
+
+        grid.innerHTML = '';
+
+        if (!rawInput) {
+            showEmpty(grid, 'Please paste a valid Bilibili video URL or standard BV ID to configure.');
+            return;
+        }
+
+        const videoId = extractBilibiliId(rawInput);
+        if (!videoId) {
+            showEmpty(grid, 'Failed to extract a valid Bilibili content ID. Please check the URL format and try again.');
+            return;
+        }
+
+        grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
+
+        for (let i = 0; i < count; i++) {
+            const box = document.createElement('div');
+            box.className = 'video-box';
+
+            const label = document.createElement('div');
+            label.className = 'video-box-label';
+            label.textContent = `#${i + 1} · Slot`;
+
+            // Clean, responsive Bilibili public embed structural URL setup
+            // Handles both 'bvid' parameters and traditional 'aid' variations
+            let embedSrc = '';
+            if (videoId.toLowerCase().startsWith('bv')) {
+                embedSrc = `https://player.bilibili.com/player.html?bvid=${videoId}&page=1&high_quality=1&as_wide=1&autoplay=0`;
+            } else {
+                const numericAid = videoId.replace('av', '');
+                embedSrc = `https://player.bilibili.com/player.html?aid=${numericAid}&page=1&high_quality=1&as_wide=1&autoplay=0`;
             }
 
-            if (streamCount >= maxStreams) {
-                alert("Maximum limit of 12 streams reached to prevent browser lagging!");
-                return;
-            }
+            const iframe = document.createElement('iframe');
+            iframe.src = embedSrc;
+            iframe.setAttribute('scrolling', 'no');
+            iframe.setAttribute('border', '0');
+            iframe.setAttribute('frameborder', 'no');
+            iframe.setAttribute('framespacing', '0');
+            iframe.allow = 'autoplay; encrypted-media; fullscreen';
+            iframe.setAttribute('allowfullscreen', 'true');
 
-            streamCount++;
-            document.getElementById('counter').innerText = `Active Tabs: ${streamCount} / 12`;
-
-            const slot = document.createElement('div');
-            slot.className = 'video-slot';
-            
-            slot.innerHTML = `
-                <button class="btn-remove" onclick="removeBiliVideo(this)">✕</button>
-                <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&autoplay=1&muted=1" 
-                        scrolling="no" 
-                        border="0" 
-                        frameborder="no" 
-                        framespacing="0" 
-                        allowfullscreen="true">
-                </iframe>
-            `;
-            
-            grid.appendChild(slot);
-            input.value = "";
+            box.appendChild(label);
+            box.appendChild(iframe);
+            grid.appendChild(box);
         }
 
-        function removeBiliVideo(btn) {
-            btn.parentElement.remove();
-            streamCount--;
-            document.getElementById('counter').innerText = `Active Tabs: ${streamCount} / 12`;
-        }
-    </script>
+        // Smooth viewport shift right to the compiled content grid area
+        setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    }
+
+    function clearBilibili() {
+        const grid = document.getElementById('videoGridContainer');
+        grid.className = 'video-grid cols-auto';
+        grid.innerHTML = '';
+        document.getElementById('biliUrl').value = '';
+        showEmpty(grid, 'Your Bilibili video slots will compile here synchronously. Input a proper link above and trigger Launch Workspace to start rendering.');
+    }
+
+    function showEmpty(container, msg) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">📺</div><p>${msg}</p></div>`;
+    }
+
+    document.getElementById('biliUrl').addEventListener('keydown', e => {
+        if (e.key === 'Enter') launchBilibili();
+    });
+</script>
 </body>
 </html>
