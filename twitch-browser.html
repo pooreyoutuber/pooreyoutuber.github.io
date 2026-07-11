@@ -698,6 +698,85 @@
             line-height: 1.45;
         }
 
+        /* ── MODERN ACCORDION FAQ SECTION ── */
+        .faq-section {
+            margin-top: 35px;
+            border-top: 1px solid var(--border);
+            padding-top: 30px;
+        }
+
+        .faq-title {
+            color: var(--text-main);
+            font-size: 1.55rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faq-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--accent);
+        }
+
+        .faq-question {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 18px 20px;
+            text-align: left;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .faq-icon {
+            color: var(--accent-light);
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            user-select: none;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), padding 0.3s ease;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            padding: 0 20px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Active classes handled by JS */
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+        .faq-item.active .faq-answer {
+            max-height: 1000px; /* high value for slide effect */
+            padding: 16px 20px 20px;
+            transition: max-height 0.3s cubic-bezier(1, 0, 1, 0), padding 0.3s ease;
+        }
         /* Disclaimer */
         .disclaimer-box {
             background: rgba(145, 71, 255, 0.04);
@@ -922,6 +1001,48 @@
             </a>
         </div>
 
+        <!-- ── VISIBLE FAQ SECTION ── -->
+        <div class="faq-section">
+            <h3 class="faq-title">❓ Frequently Asked Questions (FAQ)</h3>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What is the Twitch Multi-Browser Viewer?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        It is a free web-based tool that allows creators, streamers, and viewers to open and preview multiple Twitch live streams simultaneously in a responsive side-by-side grid layout directly in their browser.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Is this Twitch multi-viewer tool free to use?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, this Twitch Multi-Browser Viewer is completely free with no subscriptions, no paywalls, and no login required.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Does this tool generate fake views or artificial stats on Twitch?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        No. This tool does not generate artificial viewer counts, fake stats, or automated interactions. It is built purely for educational preview, layout evaluation, and stream quality checking purposes.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How do I use the Twitch Multi-Browser Viewer?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        Simply paste a Twitch channel URL or username into the input field, select how many viewer panels you want (1–20), set your preferred layout, and click 'Launch Streams'. Your streams will appear side by side instantly.
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- DISCLAIMER -->
         <div class="disclaimer-box">
             <strong>Please Note:</strong> This layout manager is built purely for fun, interactive design evaluation, and preview educational purposes. It does not generate artificial stats, fake earnings, automated background interactions, or synthetic views. Every creator utilizes this simulation workspace entirely at their <strong>own risk</strong> to study visual frame sync, stream layout alignment, and device rendering configurations. This tool simply shows whether your Twitch channel is live and how it appears to viewers — nothing more, nothing less. Happy creating! 🎮
@@ -942,6 +1063,11 @@
 </footer>
 
 <script>
+    // FAQ Toggle function
+    function toggleFaq(button) {
+        const item = button.parentElement;
+        item.classList.toggle('active');
+    }
     function extractChannel(input) {
         input = input.trim();
         if (!input) return null;
