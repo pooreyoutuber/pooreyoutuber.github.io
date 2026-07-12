@@ -382,108 +382,58 @@ Our goal is to provide practical online tools that anyone can use regardless of 
         Developed for Content Creators & Digital Marketers.</p>
     </footer>
 </div>
-  <script>
-   function generateViews() {
-        const url = document.getElementById('videoUrl').value.trim();
-        const count = document.getElementById('viewCount').value;
-        const grid = document.getElementById('videoGrid');
+ <script>
+   function generateViews() {
+        const url = document.getElementById('videoUrl').value.trim();
+        const count = document.getElementById('viewCount').value;
+        const grid = document.getElementById('videoGrid');
 
-        // 70% Social Traffic Sources
-        const socialPlatforms = [
-            "https://www.facebook.com",
-            "https://l.facebook.com/",
-            "https://www.instagram.com",
-            "https://t.co", // Twitter/X
-            "https://www.google.com",
-            "https://twitter.com"
-        ];
+        if (!url) {
+            alert("Please paste a valid URL first!");
+            return;
+        }
 
-        // 30% Other Traffic Sources
-        const otherPlatforms = [
-            "https://www.bing.com",
-            "https://duckduckgo.com",
-            "https://www.yahoo.com",
-            "https://m.facebook.com"
-        ];
+        grid.innerHTML = ''; 
 
-        if (!url) {
-            alert("Please paste a valid URL first!");
-            return;
-        }
+        let embedUrl = url;
 
-        grid.innerHTML = ''; 
-        grid.style.display = 'grid'; // Grid layout ensure karne ke liye
+        // Convert Instagram Links to Embed Format
+        // Convert Instagram Links to Embed Format
+        if (url.includes('instagram.com')) {
+            // Remove query strings and add /embed
+            embedUrl = url.split('?')[0];
+            if (!embedUrl.endsWith('/')) embedUrl += '/';
+            embedUrl += 'embed';
+        } 
+        // Convert Facebook Links to Embed Format
+        else if (url.includes('facebook.com')) {
+            embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0`;
+        }
 
-        let baseEmbedUrl = url;
+        for (let i = 0; i < count; i++) {
+            const card = document.createElement('div');
+            card.className = 'video-card';
 
-        // Convert Instagram Links to Embed Format
-        if (url.includes('instagram.com')) {
-            baseEmbedUrl = url.split('?')[0];
-            if (!baseEmbedUrl.endsWith('/')) baseEmbedUrl += '/';
-            baseEmbedUrl += 'embed';
-        } 
-        // Convert Facebook Links to Embed Format
-        else if (url.includes('facebook.com')) {
-        embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0`;
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
+            iframe.allowFullscreen = true;
 
-        }
-        }
+            card.appendChild(iframe);
+            grid.appendChild(card);
+        }
 
-        // Loop ke andar setTimeout lagaya hai taaki ek-ek karke delay se load ho (1500ms = 1.5s)
-        for (let i = 0; i < count; i++) {
-            setTimeout(() => {
-                const card = document.createElement('div');
-                card.className = 'video-card';
+        // Auto-scroll to results
+        window.scrollTo({
+            top: grid.offsetTop - 20,
+            behavior: 'smooth'
+        });
+    }
 
-                // 70/30 Traffic Split Logic
-                let randomRef;
-                let chance = Math.random() * 100;
-                
-                if (chance <= 70) {
-                    randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
-                } else {
-                    randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
-                }
-
-                // Random unique string har browser request ke liye
-                const cacheBuster = Math.random().toString(36).substring(7); 
-                const encodedRef = encodeURIComponent(randomRef);
-
-                // Final URL preparation jisme referrer aur cache buster parameters pass honge
-                let finalUrl = baseEmbedUrl;
-                if (finalUrl.includes('?')) {
-                    finalUrl += `&utm_source=${encodedRef}&cb=${cacheBuster}`;
-                } else {
-                    finalUrl += `?utm_source=${encodedRef}&cb=${cacheBuster}`;
-                }
-
-                const iframe = document.createElement('iframe');
-                iframe.src = finalUrl;
-                iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
-                iframe.allowFullscreen = true;
-                iframe.style.border = "none";
-                iframe.style.borderRadius = "12px";
-                iframe.width = "100%";
-                iframe.height = "100%";
-
-                card.appendChild(iframe);
-                grid.appendChild(card);
-            }, i * 1500); // Har video 1.5 second ke gap par screen par aayega
-        }
-
-        // Auto-scroll to results
-        window.scrollTo({
-            top: grid.offsetTop - 20,
-            behavior: 'smooth'
-        });
-    }
-
-    function clearGrid() {
-        document.getElementById('videoGrid').innerHTML = '';
-        document.getElementById('videoUrl').value = '';
-    }
+    function clearGrid() {
+        document.getElementById('videoGrid').innerHTML = '';
+        document.getElementById('videoUrl').value = '';
+    }
 </script>
-
-
 </body>
 </html>
