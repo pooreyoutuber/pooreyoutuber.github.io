@@ -325,52 +325,99 @@
           <p>&copy; 2025 YouTubeHelper. All Rights Reserved.</p>
     </footer>
   <script>
-    
-        let shortCount = 0;
-        const maxShorts = 20;
+    let shortCount = 0;
+    const maxShorts = 20;
 
-        function extractShortID(url) {
-            const regExp = /^.*(shorts\/|youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length == 11) ? match[2] : null;
+    function extractShortID(url) {
+        const regExp = /^.*(shorts\/|youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length == 11) ? match[2] : null;
+    }
+
+    function addShort() {
+        const input = document.getElementById('shortUrl');
+        const grid = document.getElementById('shortsGrid');
+        const videoId = extractShortID(input.value);
+
+        // 70% Social Traffic Sources
+        const socialPlatforms = [
+            "https://www.facebook.com",
+            "https://l.facebook.com/",
+            "https://www.instagram.com",
+            "https://t.co", // X (Twitter)
+            "https://www.google.com",
+            "https://twitter.com"
+        ];
+
+        // 30% Other Traffic Sources
+        const otherPlatforms = [
+            "https://www.youtube.com/feed/trending",
+            "https://m.youtube.com/",
+            "https://www.bing.com",
+            "https://www.youtube.com/results?search_query=shorts"
+        ];
+
+        if (!videoId) {
+            alert("Please enter a valid YouTube Shorts URL!");
+            return;
         }
 
-        function addShort() {
-            const input = document.getElementById('shortUrl');
-            const grid = document.getElementById('shortsGrid');
-            const videoId = extractShortID(input.value);
-
-            if (!videoId) {
-                alert("Please enter a valid YouTube Shorts URL!");
-                return;
-            }
-
-            if (shortCount >= maxShorts) {
-                alert("Maximum 20 Shorts reached!");
-                return;
-            }
-
-            shortCount++;
-            document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
-
-            const slot = document.createElement('div');
-            slot.className = 'short-slot';
-            slot.innerHTML = `
-                <button class="btn-remove" onclick="removeShort(this)">X</button>
-                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                </iframe>
-            `;
-            grid.appendChild(slot);
-            input.value = "";
+        if (shortCount >= maxShorts) {
+            alert("Maximum 20 Shorts reached!");
+            return;
         }
 
-        function removeShort(btn) {
-            btn.parentElement.remove();
-            shortCount--;
-            document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
+        shortCount++;
+        document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
+
+        // 70/30 Traffic Split Logic
+        let randomRef;
+        let chance = Math.random() * 100;
+        
+        if (chance <= 70) {
+            randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+        } else {
+            randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
         }
-    </script>
+
+        // Random Start Time aur Cache Buster generation
+        const randomStart = Math.floor(Math.random() * 10); // 0-10 seconds ka random start
+        const cacheBuster = Math.random().toString(36).substring(7); 
+        const encodedRef = encodeURIComponent(randomRef);
+
+        const slot = document.createElement('div');
+        slot.className = 'short-slot';
+        
+        // Iframe create karne ka proper and safe tarika taaki dynamic content breaks na ho
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${encodedRef}&cb=${cacheBuster}`;
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.style.border = "none";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+
+        // Remove button create karna
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-remove';
+        removeBtn.innerText = 'X';
+        removeBtn.onclick = function() {
+            removeShort(this);
+        };
+
+        // DOM elements ko slot ke andar append karna
+        slot.appendChild(removeBtn);
+        slot.appendChild(iframe);
+        grid.appendChild(slot);
+        
+        input.value = "";
+    }
+
+    function removeShort(btn) {
+        btn.parentElement.remove();
+        shortCount--;
+        document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
+    }
+</script>
 </body>
 </html>
