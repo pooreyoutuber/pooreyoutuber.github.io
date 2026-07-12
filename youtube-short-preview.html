@@ -224,9 +224,10 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
             
-            <div class="input-group">
+           <div class="input-group">
                 <input type="text" id="shortUrl" placeholder="https://youtube.com/shorts/abcd123...">
-                <button class="btn-add" onclick="addShort()">Add Short</button>
+                <input type="number" id="shortQty" min="1" max="20" value="5" placeholder="Qty">
+                <button class="btn-add" onclick="addShortsMulti()">Add Shorts</button>
             </div>
             <p id="counter" style="margin-top: 15px; font-size: 14px; color: #64748b; font-weight: 600;">Active Instances: 0 / 20</p>
         </div>
@@ -324,7 +325,7 @@
     </div>
           <p>&copy; 2025 YouTubeHelper. All Rights Reserved.</p>
     </footer>
-  <script>
+ <script>
     let shortCount = 0;
     const maxShorts = 20;
 
@@ -334,17 +335,33 @@
         return (match && match[2].length == 11) ? match[2] : null;
     }
 
-    function addShort() {
+    function addShortsMulti() {
         const input = document.getElementById('shortUrl');
+        const qtyInput = document.getElementById('shortQty');
         const grid = document.getElementById('shortsGrid');
+        
         const videoId = extractShortID(input.value);
+        let qty = parseInt(qtyInput.value) || 1;
+
+        if (!videoId) {
+            alert("Please enter a valid YouTube Shorts URL!");
+            return;
+        }
+
+        if (qty < 1) qty = 1;
+
+        // Check validation for max limits
+        if (shortCount + qty > maxShorts) {
+            alert(`Cannot add ${qty} instances. Maximum limit is 20, and you currently have ${shortCount} active.`);
+            return;
+        }
 
         // 70% Social Traffic Sources
         const socialPlatforms = [
             "https://www.facebook.com",
             "https://l.facebook.com/",
             "https://www.instagram.com",
-            "https://t.co", // X (Twitter)
+            "https://t.co", 
             "https://www.google.com",
             "https://twitter.com"
         ];
@@ -357,59 +374,47 @@
             "https://www.youtube.com/results?search_query=shorts"
         ];
 
-        if (!videoId) {
-            alert("Please enter a valid YouTube Shorts URL!");
-            return;
+        // Loop to generate multiple instances instantly
+        for (let i = 0; i < qty; i++) {
+            shortCount++;
+
+            let randomRef;
+            let chance = Math.random() * 100;
+            
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
+            const randomStart = Math.floor(Math.random() * 10); 
+            const cacheBuster = Math.random().toString(36).substring(7); 
+            const encodedRef = encodeURIComponent(randomRef);
+
+            const slot = document.createElement('div');
+            slot.className = 'short-slot';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${encodedRef}&cb=${cacheBuster}`;
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.width = "100%";
+            iframe.style.height = "100%";
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn-remove';
+            removeBtn.innerText = 'X';
+            removeBtn.onclick = function() {
+                removeShort(this);
+            };
+
+            slot.appendChild(removeBtn);
+            slot.appendChild(iframe);
+            grid.appendChild(slot);
         }
 
-        if (shortCount >= maxShorts) {
-            alert("Maximum 20 Shorts reached!");
-            return;
-        }
-
-        shortCount++;
         document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
-
-        // 70/30 Traffic Split Logic
-        let randomRef;
-        let chance = Math.random() * 100;
-        
-        if (chance <= 70) {
-            randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
-        } else {
-            randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
-        }
-
-        // Random Start Time aur Cache Buster generation
-        const randomStart = Math.floor(Math.random() * 10); // 0-10 seconds ka random start
-        const cacheBuster = Math.random().toString(36).substring(7); 
-        const encodedRef = encodeURIComponent(randomRef);
-
-        const slot = document.createElement('div');
-        slot.className = 'short-slot';
-        
-        // Iframe create karne ka proper and safe tarika taaki dynamic content breaks na ho
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${encodedRef}&cb=${cacheBuster}`;
-        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-        iframe.setAttribute('allowfullscreen', 'true');
-        iframe.style.border = "none";
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-
-        // Remove button create karna
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn-remove';
-        removeBtn.innerText = 'X';
-        removeBtn.onclick = function() {
-            removeShort(this);
-        };
-
-        // DOM elements ko slot ke andar append karna
-        slot.appendChild(removeBtn);
-        slot.appendChild(iframe);
-        grid.appendChild(slot);
-        
         input.value = "";
     }
 
