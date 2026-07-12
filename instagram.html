@@ -382,13 +382,29 @@ Our goal is to provide practical online tools that anyone can use regardless of 
         Developed for Content Creators & Digital Marketers.</p>
     </footer>
 </div>
-  
-
-<script>
+  <script>
    function generateViews() {
         const url = document.getElementById('videoUrl').value.trim();
         const count = document.getElementById('viewCount').value;
         const grid = document.getElementById('videoGrid');
+
+        // 70% Social Traffic Sources
+        const socialPlatforms = [
+            "https://www.facebook.com",
+            "https://l.facebook.com/",
+            "https://www.instagram.com",
+            "https://t.co", // Twitter/X
+            "https://www.google.com",
+            "https://twitter.com"
+        ];
+
+        // 30% Other Traffic Sources
+        const otherPlatforms = [
+            "https://www.bing.com",
+            "https://duckduckgo.com",
+            "https://www.yahoo.com",
+            "https://m.facebook.com"
+        ];
 
         if (!url) {
             alert("Please paste a valid URL first!");
@@ -396,33 +412,61 @@ Our goal is to provide practical online tools that anyone can use regardless of 
         }
 
         grid.innerHTML = ''; 
+        grid.style.display = 'grid'; // Grid layout ensure karne ke liye
 
-        let embedUrl = url;
+        let baseEmbedUrl = url;
 
-        // Convert Instagram Links to Embed Format
         // Convert Instagram Links to Embed Format
         if (url.includes('instagram.com')) {
-            // Remove query strings and add /embed
-            embedUrl = url.split('?')[0];
-            if (!embedUrl.endsWith('/')) embedUrl += '/';
-            embedUrl += 'embed';
+            baseEmbedUrl = url.split('?')[0];
+            if (!baseEmbedUrl.endsWith('/')) baseEmbedUrl += '/';
+            baseEmbedUrl += 'embed';
         } 
         // Convert Facebook Links to Embed Format
         else if (url.includes('facebook.com')) {
-            embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0`;
+            baseEmbedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0`;
         }
 
+        // Loop ke andar setTimeout lagaya hai taaki ek-ek karke delay se load ho (1500ms = 1.5s)
         for (let i = 0; i < count; i++) {
-            const card = document.createElement('div');
-            card.className = 'video-card';
+            setTimeout(() => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
 
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
-            iframe.allowFullscreen = true;
+                // 70/30 Traffic Split Logic
+                let randomRef;
+                let chance = Math.random() * 100;
+                
+                if (chance <= 70) {
+                    randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+                } else {
+                    randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+                }
 
-            card.appendChild(iframe);
-            grid.appendChild(card);
+                // Random unique string har browser request ke liye
+                const cacheBuster = Math.random().toString(36).substring(7); 
+                const encodedRef = encodeURIComponent(randomRef);
+
+                // Final URL preparation jisme referrer aur cache buster parameters pass honge
+                let finalUrl = baseEmbedUrl;
+                if (finalUrl.includes('?')) {
+                    finalUrl += `&utm_source=${encodedRef}&cb=${cacheBuster}`;
+                } else {
+                    finalUrl += `?utm_source=${encodedRef}&cb=${cacheBuster}`;
+                }
+
+                const iframe = document.createElement('iframe');
+                iframe.src = finalUrl;
+                iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
+                iframe.allowFullscreen = true;
+                iframe.style.border = "none";
+                iframe.style.borderRadius = "12px";
+                iframe.width = "100%";
+                iframe.height = "100%";
+
+                card.appendChild(iframe);
+                grid.appendChild(card);
+            }, i * 1500); // Har video 1.5 second ke gap par screen par aayega
         }
 
         // Auto-scroll to results
@@ -437,5 +481,7 @@ Our goal is to provide practical online tools that anyone can use regardless of 
         document.getElementById('videoUrl').value = '';
     }
 </script>
+
+
 </body>
 </html>
