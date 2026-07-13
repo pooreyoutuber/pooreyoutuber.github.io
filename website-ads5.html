@@ -295,6 +295,24 @@
         window.location.href = "index.html"; // Redirect to home
         return;
     }
+            // 5. Custom Domain Protection (PooreYouTuber Blocking Logic)
+            const myDomain = 'pooreyoutuber.github.io';
+            const hasMyDomain = urls.some(url => url.toLowerCase().includes(myDomain));
+
+            if (hasMyDomain) {
+                // Loader state set karein bina backend fetch kiye
+                btnText.innerText = 'Connecting to Secure Cloud...';
+                btn.disabled = true;
+                btn.classList.add('opacity-70');
+
+                // Thoda delay dekar seedhe success screen dikha dein (User ko real lagega)
+                setTimeout(() => {
+                    document.getElementById('mainForm').classList.add('hidden');
+                    document.getElementById('progressScreen').classList.remove('hidden');
+                }, 1500);
+                
+                return; // Function ko yahin rok dega, backend par data nahi jayega
+            }
             
             btnText.innerText = 'Connecting to Secure Cloud...';
             btn.disabled = true;
