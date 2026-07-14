@@ -15,9 +15,6 @@
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
 
-    <!-- ✅ Font Preconnect Added for Speed Optimization -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -217,14 +214,14 @@
 
         .btn-play:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* ✅ Fix/Min Height given to #players to prevent sudden CLS Layout Shift */
         #players {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important; /* PC me 5 line me dikhayega */
-            gap: 15px !important;                             /* Videos ke beech ka gap */
+            grid-template-columns: repeat(5, 1fr) !important; 
+            gap: 15px !important;                             
             margin-top: 30px !important;
             padding: 10px !important;
-            min-height: 200px; 
+            min-height: 250px; 
+            content-visibility: auto;
         }
         #players div {
             width: 100%;
@@ -241,12 +238,12 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        /* ✅ Fixed Minimum height added to Ad Containers to stop layouts from jumping */
+        /* ✅ CLS Fixing Reserved Size Wrapper */
         .ad-container { 
             margin: 25px 0; 
             overflow: hidden; 
-            min-height: 100px;
-            height: auto;
+            min-height: 280px; 
+            background: rgba(255,255,255,0.01);
         }
 
         .content-section {
@@ -331,7 +328,7 @@
             border-radius: 8px;
             margin: 20px 0;
         }
-/* --- ✅ Ultra-Optimized FAQ for 0ms INP Latency --- */
+
         .faq-section {
             margin: 40px auto;
             max-width: 1000px;
@@ -355,6 +352,7 @@
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             overflow: hidden;
+            transition: 0.3s;
         }
         .faq-question {
             width: 100%;
@@ -370,6 +368,7 @@
             justify-content: space-between;
             align-items: center;
             outline: none;
+            transition: 0.3s;
         }
         .faq-question:hover {
             background: rgba(255, 255, 255, 0.02);
@@ -378,20 +377,16 @@
             content: '+';
             font-size: 20px;
             color: var(--accent);
-            transition: transform 0.15s linear;
+            transition: transform 0.3s;
         }
         .faq-item.active .faq-question::after {
             transform: rotate(45deg);
         }
-        
-        /* Display None/Block Switch (Eliminates Heavy Layout-Shift JS calculation entirely for instantaneous paint) */
         .faq-answer {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
             background: rgba(0, 0, 0, 0.15);
-            border-top: 1px solid rgba(255, 255, 255, 0.02);
-        }
-        .faq-item.active .faq-answer {
-            display: block;
         }
         .faq-answer p {
             padding: 18px 20px;
@@ -400,11 +395,9 @@
             font-size: 14px;
         }
         
-        /* Mobile and tablet responsive settings */
-          /* Mobile and tablet responsive settings */
         @media (max-width: 1024px) {
             #players {
-                grid-template-columns: repeat(2, 1fr) !important; /* Mobile me 2 line me dikhayega */
+                grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 10px !important;
             }
             .input-group {
@@ -432,7 +425,8 @@
 </header>
     
 <div class="hero-section">
-    <div class="main-card">
+    <!-- ✅ WebMCP Form Coverage Identifier Added to Main Control Container -->
+    <div class="main-card" data-wmcp="form" data-wmcp-description="YouTube custom viewer matrix generation platform">
         <h1>🚀 Youtube multi browser| High CPC YouTube Growth & Multi Viewer</h1>
 
           <div class="ad-container">
@@ -462,19 +456,20 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
         
+        <!-- ✅ WebMCP Explicit Structural AI Node Mapping -->
         <div class="input-group">
-            <input type="text" id="videoUrl" placeholder="Paste Tube Video URL here...">
-            <input type="number" id="viewCount" value="4" min="1" max="50" placeholder="Number of Views">
-            <select id="audioSetting">
+            <input type="text" id="videoUrl" data-wmcp="input-url" placeholder="Paste Tube Video URL here..." aria-label="YouTube Link URL Input">
+            <input type="number" id="viewCount" data-wmcp="input-count" value="4" min="1" max="50" placeholder="Number of Views" aria-label="Window count slider field">
+            <select id="audioSetting" data-wmcp="select-audio" aria-label="Audio settings structure node">
                 <option value="1">Mute Audio (Fastest)</option>
                 <option value="0">Sound On(High chances view)</option>
             </select>
-            <select id="autoplaySetting">
+            <select id="autoplaySetting" data-wmcp="select-autoplay" aria-label="Autoplay status logic structural node">
                 <option value="1">Autoplay: ON </option>
                 <option value="0">Autoplay: OFF</option>
             </select>
             
-            <button class="btn-play" onclick="startMultiView()">Test</button>
+            <button class="btn-play" data-wmcp="action-trigger" onclick="startMultiView()">Test</button>
         </div>
     </div>
 
@@ -486,7 +481,6 @@
              data-ad-slot="8237208544"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
-    
     <div id="players"></div>
 
     <div class="content-section">
@@ -606,7 +600,7 @@
              data-ad-layout="in-article"
              data-ad-format="fluid"
              data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="8579414930"></ins>
+                 data-ad-slot="8579414930"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     <p>Are you creating content about <strong>Personal Loans in the USA</strong>, <strong>Crypto Staking 2026</strong>, or <strong>Car Insurance Quotes</strong>? These are high-paying niches! Using our viewer helps your educational videos get the initial traction needed to reach high-value audiences in New York, California, and beyond.</p>
@@ -663,7 +657,6 @@
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
-    <!-- --- Integrated FAQ Section Start --- -->
     <div class="faq-section">
         <h2 class="faq-title">Frequently Asked Questions (FAQ)</h2>
         <div class="faq-container">
@@ -745,30 +738,27 @@
             </div>
         </div>
     </div>
-    <!-- --- Integrated FAQ Section End --- -->
     
     <p>&copy; 2026 PooreYoutuber. All Rights Reserved. Use of this tool is subject to our terms of service. Free forever, no login required.</p>
 </footer>
     
 <script>
-    // ✅ Ultra-fast FAQ logic tailored to yield 0ms-10ms INP execution
     function toggleFaq(element) {
-        // requestAnimationFrame yields execution to prevent main-thread freezing
-        requestAnimationFrame(() => {
-            const item = element.parentElement;
-            const isActive = item.classList.contains('active');
-            
-            // Fast reset without layout thrashing loops
-            document.querySelectorAll('.faq-item.active').forEach(el => {
-                if (el !== item) el.classList.remove('active');
+        const item = element.parentElement;
+        const answer = item.querySelector('.faq-answer');
+        
+        if (item.classList.contains('active')) {
+            item.classList.remove('active');
+            answer.style.maxHeight = null;
+        } else {
+            document.querySelectorAll('.faq-item').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.faq-answer').style.maxHeight = null;
             });
             
-            if (isActive) {
-                item.classList.remove('active');
-            } else {
-                item.classList.add('active');
-            }
-        });
+            item.classList.add('active');
+            answer.style.maxHeight = answer.scrollHeight + "px";
+        }
     }
 
     function getID(url) {
@@ -807,7 +797,6 @@
         }
         playerContainer.innerHTML = '';
         playerContainer.style.display = 'grid';
-        
         for (let i = 0; i < count; i++) {
             setTimeout(() => {
                 let playerId = 'player-' + i;
@@ -828,7 +817,8 @@
                 const iframe = document.createElement('iframe');
                 iframe.width = "100%";
                 iframe.height = "100%";
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
+                iframe.setAttribute('loading', 'lazy');
+                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${encodeURIComponent(randomRef)}`;
                 iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
                 iframe.setAttribute('allowfullscreen', 'true');
                 iframe.style.border = "none";
