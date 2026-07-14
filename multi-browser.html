@@ -15,7 +15,11 @@
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+     <!-- Optimized Fonts Loading to prevent Render-blocking -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
 
     <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -247,12 +251,15 @@
     margin-top: 30px !important;
     padding: 10px !important;
         }
+        
+        /* Fixed space reservation to reduce CLS */
         #players div {
             width: 100%;
             aspect-ratio: 16/9;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #1e293b; 
         }
         iframe {
             width: 100%;
@@ -264,6 +271,16 @@
 
         .ad-container { margin: 25px 0; overflow: hidden; }
 
+        /* Fixed Min-Height for Ads to completely fix CLS */
+        .ad-container { 
+            margin: 25px 0; 
+            overflow: hidden; 
+            min-height: 280px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
         .content-section {
             text-align: left;
             max-width: 1000px;
