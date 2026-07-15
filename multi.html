@@ -132,7 +132,7 @@
     margin:0 0 36px;
   }
 
-  /* Scan form — signature element */
+  /* Scan form */
   .scan-panel{
     border:1px solid var(--paper-line);
     background:#fff;
@@ -193,7 +193,7 @@
     min-height:16px;
   }
 
-  /* signal meter */
+  /* Signal meter */
   .meter{
     margin-top:22px;
     display:flex;
@@ -224,52 +224,113 @@
     100%{left:100%;}
   }
 
-  .result-box{
-    margin-top:22px;
-    padding:16px 18px;
+  /* New Fake Blur Preview System */
+  .fake-preview-container{
+    margin-top:28px;
     border:1px solid var(--paper-line);
-    border-left:3px solid var(--cyan);
+    border-radius:16px;
     background:#fff;
-    border-radius:8px;
-    font-size:0.92rem;
-    line-height:1.55;
-    display:none;
-  }
-  .result-box.show{display:block;}
-  .result-box a.open-report{
-    display:inline-block;
-    margin-top:10px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:0.85rem;
-    color:var(--cyan);
-    text-decoration:none;
-    border-bottom:1px solid var(--cyan);
-  }
-
-  .frame-wrap{
-    margin-top:22px;
-    border:1px solid var(--paper-line);
-    border-radius:12px;
     overflow:hidden;
-    background:#fff;
+    position:relative;
     display:none;
+    box-shadow:0 10px 30px rgba(22,33,62,0.05);
   }
-  .frame-wrap.show{display:block;}
-  .frame-wrap .frame-head{
-    padding:10px 14px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:0.75rem;
-    color:var(--muted);
+  .fake-preview-container.show{
+    display:block;
+  }
+  .preview-header{
+    padding:12px 20px;
+    background:#fff;
     border-bottom:1px solid var(--paper-line);
     display:flex;
     justify-content:space-between;
     align-items:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem;
+    color:var(--muted);
   }
-  .frame-wrap iframe{
-    width:100%;
-    height:560px;
-    border:0;
-    display:block;
+  .preview-dots {
+    display:flex;
+    gap:6px;
+  }
+  .preview-dots span {
+    width:8px; height:8px; border-radius:50%; background:var(--paper-line);
+  }
+  
+  /* Mock UI Content that gets Blurred */
+  .mock-report-body{
+    padding:32px;
+    filter:blur(6px);
+    opacity:0.35;
+    pointer-events:none;
+    user-select:none;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+  }
+  .mock-circles{
+    display:flex;
+    justify-content:space-around;
+    margin-bottom:10px;
+  }
+  .mock-circle-item{
+    width:80px; height:80px; border-radius:50%; border:8px solid var(--cyan);
+  }
+  .mock-line{
+    height:14px; background:var(--ink); border-radius:4px; width:100%;
+  }
+  .mock-line.short{ width:60%; }
+  .mock-line.medium{ width:85%; }
+
+  /* Overlay card that prompts action */
+  .preview-overlay{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(245, 246, 242, 0.15);
+    padding:20px;
+  }
+  .cta-card{
+    background:#fff;
+    border:1px solid var(--ink);
+    border-radius:12px;
+    padding:24px 32px;
+    text-align:center;
+    max-width:420px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.08);
+  }
+  .cta-card h3{
+    margin:0 0 8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.3rem;
+    color:var(--ink);
+  }
+  .cta-card p{
+    margin:0 0 20px;
+    font-size:0.9rem;
+    color:var(--muted);
+    line-height:1.5;
+  }
+  .action-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--cyan);
+    color:#fff;
+    text-decoration:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    padding:12px 24px;
+    border-radius:8px;
+    transition:background .2s, transform .1s;
+  }
+  .action-btn:hover{
+    background:var(--ink);
+  }
+  .action-btn:active{
+    transform:scale(0.97);
   }
 
   /* Disclaimer */
@@ -308,6 +369,7 @@
     .scan-btn{padding:14px; width:100%;}
     .scan-prompt{flex-direction:column; align-items:flex-start; padding:12px 14px;}
     #url-input{width:100%; padding:6px 0;}
+    .cta-card{padding:20px;}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -350,18 +412,37 @@
     <span>routing to PageSpeed Insights</span>
   </div>
 
-  <div class="result-box" id="result-box">
-    Your audit is ready on Google PageSpeed Insights.
-    <br>
-    <a class="open-report" id="open-report" href="#" target="_blank" rel="noopener noreferrer">Open full report →</a>
-  </div>
-
-  <div class="frame-wrap" id="frame-wrap">
-    <div class="frame-head">
-      <span>pagespeed.web.dev</span>
-      <span id="frame-status">loading…</span>
+  <!-- Advance Fake Blur Preview Container -->
+  <div class="fake-preview-container" id="preview-box">
+    <div class="preview-header">
+      <div class="preview-dots"><span></span><span></span><span></span></div>
+      <span id="preview-target-url">pagespeed.web.dev</span>
+      <span>PooreYoutuber Secure Bridge</span>
     </div>
-    <iframe id="report-frame" title="PageSpeed Insights report" loading="lazy"></iframe>
+    
+    <!-- This body is blurred out to give look of real analytics page generated -->
+    <div class="mock-report-body">
+      <div class="mock-circles">
+        <div class="mock-circle-item"></div>
+        <div class="mock-circle-item" style="border-color: var(--amber);"></div>
+        <div class="mock-circle-item"></div>
+        <div class="mock-circle-item" style="border-color: var(--good);"></div>
+      </div>
+      <div class="mock-line"></div>
+      <div class="mock-line medium"></div>
+      <div class="mock-line short"></div>
+    </div>
+
+    <!-- Active interactive popup layer -->
+    <div class="preview-overlay">
+      <div class="cta-card">
+        <h3>Your Audit Report is Ready!</h3>
+        <p>We have successfully initialized the secure tunnel to Google PageSpeed Insights engine for your website analysis.</p>
+        <a class="action-btn" id="redirect-link" href="#" target="_blank" rel="noopener noreferrer">
+          Open Full Report Live →
+        </a>
+      </div>
+    </div>
   </div>
 
   <section class="disclaimer">
@@ -387,11 +468,9 @@
   const input = document.getElementById('url-input');
   const errorMsg = document.getElementById('error-msg');
   const meter = document.getElementById('meter');
-  const resultBox = document.getElementById('result-box');
-  const openReport = document.getElementById('open-report');
-  const frameWrap = document.getElementById('frame-wrap');
-  const reportFrame = document.getElementById('report-frame');
-  const frameStatus = document.getElementById('frame-status');
+  const previewBox = document.getElementById('preview-box');
+  const previewTargetUrl = document.getElementById('preview-target-url');
+  const redirectLink = document.getElementById('redirect-link');
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -413,8 +492,7 @@
   form.addEventListener('submit', function(e){
     e.preventDefault();
     errorMsg.textContent = '';
-    resultBox.classList.remove('show');
-    frameWrap.classList.remove('show');
+    previewBox.classList.remove('show');
 
     const target = normalizeUrl(input.value);
     if(!target){
@@ -424,23 +502,17 @@
 
     meter.style.display = 'flex';
 
+    // Constructing exact direct PageSpeed insights report URL
     const pagespeedUrl = 'https://pagespeed.web.dev/analysis?url=' + encodeURIComponent(target) + '&form_factor=mobile';
 
     setTimeout(function(){
       meter.style.display = 'none';
 
-      openReport.href = pagespeedUrl;
-      resultBox.classList.add('show');
-
-      frameStatus.textContent = 'attempting embed…';
-      reportFrame.src = pagespeedUrl;
-      frameWrap.classList.add('show');
-
-      // PageSpeed Insights may block embedding via frame headers.
-      // If it fails to signal load quickly, we just leave the direct link as the primary path.
-      setTimeout(function(){
-        frameStatus.textContent = 'if this stays blank, use "Open full report" above';
-      }, 3500);
+      // Setting data on our custom premium blur component
+      previewTargetUrl.textContent = new URL(target).hostname;
+      redirectLink.href = pagespeedUrl;
+      
+      previewBox.classList.add('show');
     }, 1600);
   });
 </script>
