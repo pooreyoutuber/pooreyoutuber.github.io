@@ -354,8 +354,7 @@
     margin: 20px 0;
         }
 
-        /* --- New FAQ Custom Styling --- */
-        .faq-section {
+       .faq-section {
             margin: 40px auto;
             max-width: 1000px;
             padding: 0 20px;
@@ -407,7 +406,6 @@
         }
         .faq-item.active .faq-question::after {
             transform: rotate(45deg);
-            content: '+';
         }
         .faq-answer {
             max-height: 0;
@@ -416,12 +414,11 @@
             background: rgba(0, 0, 0, 0.15);
         }
         .faq-answer p {
-            padding: 0 20px 18px 20px;
+            padding: 18px 20px;
             margin: 0;
             color: var(--text-light);
             font-size: 14px;
         }
-        
         /* 2. Yeh Mobile aur tablet ke liye hai (Screen choti hote hi 2 Videos ek line me) */
 @media (max-width: 1024px) {
     #players {
@@ -461,6 +458,7 @@
     
 <div class="hero-section">
     <div class="main-card">
+         <div class="main-card" data-wmcp="form" data-wmcp-description="YouTube custom viewer matrix generation platform">
         <h1>🚀 Youtube multi browser| High CPC YouTube Growth & Multi Viewer</h1>
 
           <div class="ad-container">
@@ -490,16 +488,17 @@
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
         
+        <!-- ✅ WebMCP Explicit Structural AI Node Mapping -->
         <div class="input-group">
-            <input type="text" id="videoUrl" placeholder="Paste Tube Video URL here...">
-            <input type="number" id="viewCount" value="4" min="1" max="50" placeholder="Number of Views">
-            <select id="audioSetting">
+            <input type="text" id="videoUrl" data-wmcp="input-url" placeholder="Paste Tube Video URL here..." aria-label="YouTube Link URL Input">
+            <input type="number" id="viewCount" data-wmcp="input-count" value="4" min="1" max="50" placeholder="Number of Views" aria-label="Window count slider field">
+            <select id="audioSetting" data-wmcp="select-audio" aria-label="Audio settings structure node">
                 <option value="1">Mute Audio (Fastest)</option>
                 <option value="0">Sound On(High chances view)</option>
             </select>
-             <select id="autoplaySetting">
-    <option value="1">Autoplay: ON </option>
-    <option value="0">Autoplay: OFF</option>
+            <select id="autoplaySetting" data-wmcp="select-autoplay" aria-label="Autoplay status logic structural node">
+                <option value="1">Autoplay: ON </option>
+                <option value="0">Autoplay: OFF</option>
              </select>
             
             <button class="btn-play" onclick="startMultiView()">Test</button>
@@ -767,23 +766,19 @@
 </footer>
     
 <script>
-    // FAQ Toggle JavaScript Logic
-    function toggleFaq(element) {
+     function toggleFaq(element) {
         const item = element.parentElement;
         const answer = item.querySelector('.faq-answer');
         
-        // Agar active hai to close karein
         if (item.classList.contains('active')) {
             item.classList.remove('active');
             answer.style.maxHeight = null;
         } else {
-            // Doosre saare open FAQs ko close karne ke liye
             document.querySelectorAll('.faq-item').forEach(el => {
                 el.classList.remove('active');
                 el.querySelector('.faq-answer').style.maxHeight = null;
             });
             
-            // Current wale ko open karein
             item.classList.add('active');
             answer.style.maxHeight = answer.scrollHeight + "px";
         }
