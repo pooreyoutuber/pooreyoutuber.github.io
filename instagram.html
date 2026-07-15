@@ -102,7 +102,7 @@
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
     <style>
-              :root {
+         :root {
             --primary: #ff3e6c; /* Instagram-ish Pink */
             --secondary: #4267B2; /* FB Blue */
             --bg: #f8fafc;
@@ -234,155 +234,252 @@
             padding: 25px;
             border-radius: 18px;
             border-left: 5px solid var(--primary);
+            margin-bottom: 20px;
         }
 
         .info-box h3 { margin-top: 0; color: var(--primary); }
+
+        /* FAQ Accordion Styling */
+        .faq-container {
+            max-width: 900px;
+            margin: 50px auto 20px auto;
+            text-align: left;
+        }
+
+        .faq-title {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .faq-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary);
+        }
+
+        .faq-question {
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            background: #ffffff;
+        }
+
+        .faq-question::after {
+            content: '＋';
+            font-size: 1.2rem;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+            font-weight: 800;
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '－';
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            padding: 0 25px;
+            color: #475569;
+            font-size: 0.95rem;
+            background: #fafafa;
+            border-top: 0 solid #edf2f7;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 18px 25px;
+            border-top: 1px solid #edf2f7;
+        }
 
         @media (max-width: 768px) {
             .info-section { grid-template-columns: 1fr; }
             h1 { font-size: 1.8rem; }
             .video-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .faq-question { font-size: 1rem; padding: 15px 20px; }
         }
     </style>
 </head>
 <body>
-
-   
-    <div class="hero-card">
-        <h1>🚀 Multi-Viewer Tool for Instagram Reels</h1>
-        <div class="ad-container">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="fluid"
-             data-ad-layout-key="-fb+5w+4e-db+86"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="1382845951"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-        
-        <p class="subtitle">Boost your Reels and Video Engagement. Free, Secure, and Instant.</p>
-
-        
-        <div class="ad-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="4709131305"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-        
-        <div class="input-group">
-            <input type="text" id="videoUrl" placeholder="Paste Instagram Reel or Facebook Video Link here...">
-            <input type="number" id="viewCount" value="8" min="1" max="30" style="width: 80px;">
-            <button class="btn btn-main" onclick="generateViews()">Generate Views</button>
-            <button class="btn btn-clear" onclick="clearGrid()">Clear</button>
-        </div>
-        </div>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">Note: For the best results, use a desktop browser or "Desktop Site" mode on mobile.</p>
-    </div>
-
-    
-    <div id="videoGrid" class="video-grid"></div>
-
-</div>
-            <h3>📈 How to use for Viral Growth?</h3>
-            <p>1. Copy your <strong>Instagram Reel</strong> or <strong>Facebook Video</strong> link.<br>
-            2. Paste it in the input box above and select the number of screens.<br>
-            3. Click "Generate" and let the videos load.<br>
-            4. Ensure your volume is on low to count as an active view session.</p>
-
-    <div class="ad-container">
+    <div class="container">
+        <div class="hero-card">
+            <h1>🚀 Multi-Viewer Tool for Instagram Reels</h1>
+            <div class="ad-container">
                 <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-layout="in-article"
+                     style="display:block"
                      data-ad-format="fluid"
+                     data-ad-layout-key="-fb+5w+4e-db+86"
                      data-ad-client="ca-pub-7020422718957281"
-                     data-ad-slot="2099435360"></ins>
+                     data-ad-slot="1382845951"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
-    
-        </div>
-     <p>
-ViralReel Multi-Viewer is a free, secure, and browser-based content preview tool designed for creators, marketers, publishers, and social media managers who want a simple way to view Instagram Reels and Facebook videos across multiple screens at the same time. The tool works directly inside your web browser, which means there is no software to install, no extensions to download, and no account registration required. Simply paste a supported video link, choose the number of preview windows, and start testing instantly.
-
-This utility is built to help users review content presentation, check responsive layouts, monitor embed behavior, and preview how videos appear across different viewing environments. Whether you are optimizing content for mobile devices, desktop computers, tablets, smart TVs, or large displays, the tool provides a convenient way to analyze visual consistency and user experience from a single interface.
-
-ViralReel Multi-Viewer is fully compatible with modern browsers and works smoothly on PCs, laptops, Android devices, iPhones, tablets, and many smart TV browsers. Because everything runs client-side inside your browser, your workflow remains fast, private, and easy to access from anywhere.
-
-As part of the PooreYoutuber platform, this tool follows the same philosophy as all other utilities available on the website: simple, useful, accessible, and completely free. PooreYoutuber offers a growing collection of creator-focused tools that help users improve productivity, test content, manage workflows, and save valuable time without paying subscription fees.
-
-Our goal is to provide practical online tools that anyone can use regardless of technical experience. Whether you are a beginner creator, a business owner, a digital marketer, or an experienced content professional, ViralReel Multi-Viewer offers a reliable and user-friendly solution for reviewing and testing video content across multiple screens with speed, convenience, and complete browser-based accessibility.
-     </p>
-    <p>Our platform eliminates complex local configurations, delivering an instant-access responsive testing tool that runs entirely client-side. Here is how our specialized web utilities support your production standard:</p>
-
-<ul style="list-style: none; padding-left: 0; margin: 20px 0;">
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>100% Free to Use:</strong> Access the complete layout testing configuration toolkit without subscription tiers, paywalls, or hidden operational restrictions.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>No Registration Required:</strong> Prioritize your digital workflow efficiency. Start video preview testing instantly with zero account creations, email sign-ups, or profile verifications.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Universal Cross-Device Fluidity:</strong> Evaluate layout adjustments smoothly across desktop monitors, laptops, smartphones, and tablets using fluid, responsive viewport simulations.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Purely Browser-Based Engine:</strong> Maintain local device performance. The utility executes natively inside your web browser via standard iframe hooks, requiring no software downloads or plug-ins.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Rapid Multi-Screen Video Previewing:</strong> Render multiple synchronized media streams simultaneously within a clean grid to check element alignment, safe-zone borders, and player scaling properties.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Optimized for Shorts & Long-Form Video:</strong> Inspect both portrait-oriented mobile formats and classic widescreen layouts to ensure uniform user experience across global streaming interfaces.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Intuitive User Interface Architecture:</strong> Enjoy a clean, distraction-free interface thoughtfully optimized for both individual digital creators and professional media editors.</li>
-    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Lightweight, High-Performance Build:</strong> Designed with clean frontend execution layers to ensure fast initial page loads and smooth frame playback, even during intensive multi-window testing sessions.</li>
-</ul>
-
-<p>PooreYoutuber combines accessibility, simplicity, and performance to help creators test video layouts, preview content across multiple screens, and streamline their content workflow. Whether you create long-form videos, Shorts, live streams, or social media content, our tools are designed to provide a fast, secure, and user-friendly experience for creators of all skill levels.</p>
-
-    
-        <div class="info-box" style="border-left-color: var(--secondary);">
-            <h3>💡 Why use Multi-Viewer?</h3>
+            
+            <p class="subtitle">Boost your Reels and Video Engagement. Free, Secure, and Instant.</p>
 
             <div class="ad-container">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="fluid"
-             data-ad-layout-key="-fb+5w+4e-db+86"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="1382845951"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-7020422718957281"
+                     data-ad-slot="4709131305"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
             
-            <p>Our tool helps trigger the social media algorithm by simulating multiple unique watch sessions. This can help push your content to the <strong>Explore Page</strong> or <strong>Reels Feed</strong> faster. 
-            <br><em>*Note: View counts may take 24-48 hours to update in your official insights.</em></p>
+            <div class="input-group">
+                <input type="text" id="videoUrl" placeholder="Paste Instagram Reel or Facebook Video Link here...">
+                <input type="number" id="viewCount" value="8" min="1" max="30" style="width: 80px;">
+                <button class="btn btn-main" onclick="generateViews()">Generate Views</button>
+                <button class="btn btn-clear" onclick="clearGrid()">Clear</button>
+            </div>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">Note: For the best results, use a desktop browser or "Desktop Site" mode on mobile.</p>
         </div>
-    </div>
 
+        <div id="videoGrid" class="video-grid"></div>
 
-    <div class="info-box" style="margin-top: 30px; border-left: 5px solid #10b981;">
-        <h3>💰 Monetization & Finance Tips</h3>
-        <p>Are you creating content about <strong>Personal Loans in the USA</strong>, <strong>Crypto Staking 2026</strong>, or <strong>Car Insurance Quotes</strong>? These are high-paying niches! Using our viewer helps your educational videos get the initial traction needed to reach high-value audiences in New York, California, and beyond.</p>
-    </div>
- 
-    </div>
+        <div class="info-section">
+            <div>
+                <h3>📈 How to use for Viral Growth?</h3>
+                <p>1. Copy your <strong>Instagram Reel</strong> or <strong>Facebook Video</strong> link.<br>
+                2. Paste it in the input box above and select the number of screens.<br>
+                3. Click "Generate" and let the videos load.<br>
+                4. Ensure your volume is on low to count as an active view session.</p>
+            </div>
+            
+            <div>
+                <div class="info-box" style="border-left-color: var(--secondary);">
+                    <h3>💡 Why use Multi-Viewer?</h3>
+                    <p>Our tool helps trigger the social media algorithm by simulating multiple unique watch sessions. This can help push your content to the <strong>Explore Page</strong> or <strong>Reels Feed</strong> faster. 
+                    <br><em>*Note: View counts may take 24-48 hours to update in your official insights.</em></p>
+                </div>
+            </div>
+        </div>
 
-    <div class="ad-container">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="autorelaxed"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="5488016035"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-    
-    <footer style="text-align: center; padding: 40px 0; color: #94a3b8; font-size: 14px;">
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block; text-align:center;"
+                 data-ad-layout="in-article"
+                 data-ad-format="fluid"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="2099435360"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        
+        <p>
+            ViralReel Multi-Viewer is a free, secure, and browser-based content preview tool designed for creators, marketers, publishers, and social media managers who want a simple way to view Instagram Reels and Facebook videos across multiple screens at the same time. The tool works directly inside your web browser, which means there is no software to install, no extensions to download, and no account registration required. Simply paste a supported video link, choose the number of preview windows, and start testing instantly.
+        </p>
+        
+        <p>Our platform eliminates complex local configurations, delivering an instant-access responsive testing tool that runs entirely client-side. Here is how our specialized web utilities support your production standard:</p>
+
+        <ul style="list-style: none; padding-left: 0; margin: 20px 0;">
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>100% Free to Use:</strong> Access the complete layout testing configuration toolkit without subscription tiers, paywalls, or hidden operational restrictions.</li>
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>No Registration Required:</strong> Prioritize your digital workflow efficiency. Start video preview testing instantly with zero account creations, email sign-ups, or profile verifications.</li>
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Universal Cross-Device Fluidity:</strong> Evaluate layout adjustments smoothly across desktop monitors, laptops, smartphones, and tablets using fluid, responsive viewport simulations.</li>
+            <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;"><span>✅</span> <strong>Purely Browser-Based Engine:</strong> Maintain local device performance. The utility executes natively inside your web browser via standard iframe hooks, requiring no software downloads or plug-ins.</li>
+        </ul>
+
+        <div class="info-box" style="margin-top: 30px; border-left: 5px solid #10b981;">
+            <h3>💰 Monetization & Finance Tips</h3>
+            <p>Are you creating content about <strong>Personal Loans in the USA</strong>, <strong>Crypto Staking 2026</strong>, or <strong>Car Insurance Quotes</strong>? These are high-paying niches! Using our viewer helps your educational videos get the initial traction needed to reach high-value audiences in New York, California, and beyond.</p>
+        </div>
+
+        <div class="faq-container">
+            <h2 class="faq-title">Frequently Asked Questions (FAQ)</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">What is ViralReel Multi-Viewer?</div>
+                <div class="faq-answer">
+                    ViralReel Multi-Viewer is a powerful browser-based simulation utility that enables creators and digital marketers to preview and play Instagram Reels or Facebook videos across multiple embedded screens concurrently.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">How does this multi-screen tool work?</div>
+                <div class="faq-answer">
+                    The tool uses the official, secure embed protocols provided by social media platforms. It securely loads your targeted video into dynamic, optimized responsive display layouts directly on the user interface.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">Can this tool genuinely boost or increase organic views?</div>
+                <div class="faq-answer">
+                    This utility simulates multiple unique active web playback sessions. While it is heavily utilized for visual layout verification, it helps trigger social media engagement signals. However, dynamic metrics ultimately depend on platform algorithms.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">Is there any usage fee or system registration required?</div>
+                <div class="faq-answer">
+                    No, the tool is 100% free with absolutely no hidden charges, operational paywalls, email sign-ups, or software installation required. It runs completely client-side.
+                </div>
+            </div>
+        </div>
 
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
+                 data-ad-format="autorelaxed"
                  data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="4709131305"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
+                 data-ad-slot="5488016035"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
         
-        <p>&copy; 2026 Pooreyoutuber Tools. All Rights Reserved. <br>
-        Developed for Content Creators & Digital Marketers.</p>
-    </footer>
-</div>
+        <footer style="text-align: center; padding: 40px 0; color: #94a3b8; font-size: 14px;">
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-7020422718957281"
+                     data-ad-slot="4709131305"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+            
+            <p>&copy; 2026 Pooreyoutuber Tools. All Rights Reserved. <br>
+            Developed for Content Creators & Digital Marketers.</p>
+        </footer>
+    </div>
  <script>
+     // FAQ Accordion Functionality
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            
+            // Check if current item is already active
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all open FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.faq-answer').style.maxHeight = null;
+            });
+            
+            // If the clicked one wasn't active, open it
+            if (!isActive) {
+                faqItem.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + "px";
+            }
+        }
    function generateViews() {
         const url = document.getElementById('videoUrl').value.trim();
         const count = document.getElementById('viewCount').value;
