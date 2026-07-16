@@ -258,6 +258,76 @@
             color: var(--accent);
         }
 
+        /* Accordion FAQ Styling */
+        .faq-section {
+            margin-top: 50px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: left;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-weight: 700;
+            border-left: 4px solid var(--fb-blue);
+            padding-left: 15px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 15px 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--primary);
+            padding: 10px 0;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover {
+            color: var(--fb-blue);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .faq-answer p {
+            margin: 10px 0 5px 0;
+        }
+
+        .faq-icon {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+            color: var(--fb-blue);
+        }
+        
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .input-wrapper { flex-direction: column; }
@@ -396,7 +466,63 @@ Built with simplicity and performance in mind, Facebook Video Multi Viewer runs 
         </ul>
         <p><i>Note: For the best results in competitive markets like <b>Forex Trading</b> or <b>Health Insurance</b>, we recommend using a stable internet connection and clearing your browser cache regularly.</i></p>
     </div>
+ <!-- Collapsible Accordion FAQ Section -->
+    <div class="faq-section">
+        <h2 class="faq-title">Frequently Asked Questions (FAQ)</h2>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What is Facebook Video Multi Viewer?</span>
+                <span class="faq-icon">＋</span>
+            </div>
+            <div class="faq-answer">
+                <p>Facebook Video Multi Viewer is a browser-based tool that allows users to preview Facebook videos and reels in multiple embedded screens simultaneously.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Is this tool free to use?</span>
+                <span class="faq-icon">＋</span>
+            </div>
+            <div class="faq-answer">
+                <p>Yes, the tool is completely free and works directly in your web browser without installation.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Can I test Facebook reels on different screen layouts?</span>
+                <span class="faq-icon">＋</span>
+            </div>
+            <div class="faq-answer">
+                <p>Yes, the tool helps preview Facebook videos and reels across multiple embedded screens for layout and playback testing.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Does this tool require registration?</span>
+                <span class="faq-icon">＋</span>
+            </div>
+            <div class="faq-answer">
+                <p>No registration or account creation is required to use the tool.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Does this tool increase Facebook views?</span>
+                <span class="faq-icon">＋</span>
+            </div>
+            <div class="faq-answer">
+                <p>No. This tool is intended for video preview and layout testing purposes only.</p>
+            </div>
+        </div>
+    </div>
+
 </div>
+    
 <ins class="adsbygoogle"
          style="display:block"
          data-ad-format="autorelaxed"
@@ -441,6 +567,26 @@ Built with simplicity and performance in mind, Facebook Video Multi Viewer runs 
         // Scroll to players
         grid.scrollIntoView({ behavior: 'smooth' });
     }
+    // FAQ Accordion JavaScript Logic
+    document.querySelectorAll('.faq-question').forEach(item => {
+        item.addEventListener('click', () => {
+            const parent = item.parentElement;
+            const answer = item.nextElementSibling;
+            
+            if (parent.classList.contains('active')) {
+                parent.classList.remove('active');
+                answer.style.max-height = null;
+            } else {
+                document.querySelectorAll('.faq-item').forEach(child => {
+                    child.classList.remove('active');
+                    child.querySelector('.faq-answer').style.max-height = null;
+                });
+                
+                parent.classList.add('active');
+                answer.style.max-height = answer.scrollHeight + "px";
+            }
+        });
+    });
 </script>
 
 </body>
