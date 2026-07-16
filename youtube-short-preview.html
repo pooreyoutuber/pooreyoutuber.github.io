@@ -438,7 +438,8 @@
             <p><strong>Seamless User Experience:</strong> To use this tool, simply copy the URL of any TubeStart Short. Our intelligent URL parser handles various formats.</p>
 
              <!-- Collapsible Accordion FAQ Section with Schema-aligned Questions -->
-    <div class="faq-section">
+              <!-- Collapsible Accordion FAQ Section with Schema-aligned Questions -->
+            <div class="faq-section">
                 <h2 class="faq-title">Frequently Asked Questions (FAQ)</h2>
                 
                 <div class="faq-item">
@@ -492,6 +493,7 @@
                 </div>
             </div>
         </div>
+
 </div>
     
               <footer style="padding: 40px 20px; text-align: center; border-top: 1px solid #e2e8f0; background: white;">
@@ -506,8 +508,6 @@
         </div>
                   
             <p><strong>Secure, Private, and Efficient:</strong> At YouTubeHelper, we believe in the "Privacy First" philosophy. This tool operates entirely on your local machine.</p>
-        </div>
-    </div>
           <p>&copy; 2025 YouTubeHelper. All Rights Reserved.</p>
     </footer>
  <script>
@@ -611,26 +611,26 @@
     }
 
     // FAQ Accordion JavaScript ab bilkul clean aur functional hai
-    document.querySelectorAll('.faq-question').forEach(item => {
-        item.addEventListener('click', () => {
-            const parent = item.parentElement;
-            const answer = item.nextElementSibling;
-            
-            if (parent.classList.contains('active')) {
-                parent.classList.remove('active');
-                answer.style.max-height = null;
-            } else {
-                // Pehle se open baki FAQs ko band karne ke liye
-                document.querySelectorAll('.faq-item').forEach(child => {
-                    child.classList.remove('active');
-                    child.querySelector('.faq-answer').style.max-height = null;
-                });
+    // FAQ Accordion JavaScript
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', () => {
+                const parent = item.parentElement;
+                const answer = item.nextElementSibling;
                 
-                parent.classList.add('active');
-                answer.style.max-height = answer.scrollHeight + "px";
-            }
+                if (parent.classList.contains('active')) {
+                    parent.classList.remove('active');
+                    answer.style.max-height = null;
+                } else {
+                    document.querySelectorAll('.faq-item').forEach(child => {
+                        child.classList.remove('active');
+                        child.querySelector('.faq-answer').style.max-height = null;
+                    });
+                    
+                    parent.classList.add('active');
+                    answer.style.max-height = answer.scrollHeight + "px";
+                }
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
