@@ -611,26 +611,32 @@
     }
 
     // FAQ Accordion JavaScript ab bilkul clean aur functional hai
-    // FAQ Accordion JavaScript
-        document.querySelectorAll('.faq-question').forEach(item => {
-            item.addEventListener('click', () => {
-                const parent = item.parentElement;
-                const answer = item.nextElementSibling;
-                
-                if (parent.classList.contains('active')) {
-                    parent.classList.remove('active');
-                    answer.style.max-height = null;
-                } else {
-                    document.querySelectorAll('.faq-item').forEach(child => {
-                        child.classList.remove('active');
-                        child.querySelector('.faq-answer').style.max-height = null;
-                    });
-                    
-                    parent.classList.add('active');
-                    answer.style.max-height = answer.scrollHeight + "px";
-                }
-            });
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".faq-question").forEach(item => {
+        item.addEventListener("click", function () {
+
+            const parent = this.parentElement;
+            const answer = this.nextElementSibling;
+
+            if (parent.classList.contains("active")) {
+                parent.classList.remove("active");
+                answer.style.maxHeight = null;
+            } else {
+
+                document.querySelectorAll(".faq-item").forEach(faq => {
+                    faq.classList.remove("active");
+                    faq.querySelector(".faq-answer").style.maxHeight = null;
+                });
+
+                parent.classList.add("active");
+                answer.style.maxHeight = answer.scrollHeight + "px";
+            }
+
         });
+    });
+
+});
     </script>
 </body>
 </html>
