@@ -22,7 +22,7 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
   
-    <script type="application/ld+json">
+     <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
@@ -439,8 +439,16 @@ compressBtn.addEventListener('click', async () => {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // IMAGE COMPRESSION
-// Binary-search on JPEG quality at full resolution; only shrink dimensions
-// if quality alone can't reach the target.
+//
+// FIXED ALGORITHM:
+// JPEG quality is not a smooth/continuous dial — neighbouring quality values
+// can jump from (say) 24KB straight to 36KB, so a target of 30KB can land
+// noticeably below what you asked for. To fix this we now search across a
+// FINE grid of both SCALE *and* QUALITY together, and keep the single best
+// result found so far (the one closest to — but never over — the target),
+// instead of stopping at the very first scale that satisfies the target.
+// This gives many more possible output sizes to choose from, so the final
+// file lands much closer to your requested KB/MB.
 // ═══════════════════════════════════════════════════════════════════════════════
 function dataURItoBlob(dataURI) {
     const [head, data] = dataURI.split(',');
@@ -464,35 +472,55 @@ function compressImage(file, targetBytes) {
                 const ctx    = canvas.getContext('2d');
                 const origW  = img.width, origH = img.height;
 
-                let best = null, reached = false;
+                // Fine-grained scale grid (2% steps instead of 5%) gives many
+                // more achievable byte sizes to pick from.
+                const scaleSteps = [];
+                for (let s = 1.0; s >= 0.05; s -= 0.02) scaleSteps.push(parseFloat(s.toFixed(2)));
 
-                for (let scale = 1.0; scale >= 0.05; scale -= 0.05) {
+                let bestUnder = null;                 // largest blob that is <= target so far
+                let smallestSeen = null;               // fallback: smallest blob achieved overall
+                const closeEnough = targetBytes * 0.02; // stop once within 2% of target
+
+                for (let i = 0; i < scaleSteps.length; i++) {
+                    const scale = scaleSteps[i];
                     canvas.width  = Math.max(1, Math.round(origW * scale));
                     canvas.height = Math.max(1, Math.round(origH * scale));
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    // Binary search on quality
-                    let lo = 0.01, hi = 0.95, found = null;
-                    for (let i = 0; i < 20; i++) {
+                    // Binary search quality at THIS scale to get as close to
+                    // target as possible without exceeding it.
+                    let lo = 0.01, hi = 0.98, foundAtScale = null;
+                    for (let iter = 0; iter < 25; iter++) {
                         const mid  = (lo + hi) / 2;
                         const blob = dataURItoBlob(canvas.toDataURL('image/jpeg', mid));
-                        if (blob.size <= targetBytes) { found = blob; lo = mid; }
+                        if (blob.size <= targetBytes) { foundAtScale = blob; lo = mid; }
                         else hi = mid;
-                        if (hi - lo < 0.003) break;
+                        if (hi - lo < 0.0015) break;
                     }
-                    if (found) { best = found; reached = true; break; }
 
-                    // Keep smallest achieved so far
+                    if (foundAtScale && (!bestUnder || foundAtScale.size > bestUnder.size)) {
+                        bestUnder = foundAtScale;
+                    }
+
+                    // Track smallest achievable file (for fallback if target is
+                    // unreachable, e.g. asking for a size smaller than min possible)
                     const probe = dataURItoBlob(canvas.toDataURL('image/jpeg', 0.01));
-                    if (!best || probe.size < best.size) best = probe;
+                    if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
 
-                    setProgress(20 + Math.round((1 - scale) * 60), `Trying ${(scale * 100).toFixed(0)}% size…`);
+                    setProgress(20 + Math.round((i / scaleSteps.length) * 65), `Fine-tuning ${(scale * 100).toFixed(0)}% size…`);
+
+                    // Stop early once we're within 2% of the target — good enough
+                    // and saves time on large images.
+                    if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
                 }
+
+                const finalBlob = bestUnder || smallestSeen;
+                const reached   = !!bestUnder;
 
                 setProgress(95, 'Saving…');
                 const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
-                showResult(best, file.size, outName, reached);
+                showResult(finalBlob, file.size, outName, reached);
                 resolve();
             };
             img.src = e.target.result;
@@ -510,8 +538,9 @@ function compressImage(file, targetBytes) {
 //   3. Convert canvas → JPEG with binary-searched quality
 //   4. Embed each JPEG into a new PDF using pdf-lib
 //
-// This is the only browser-side method that achieves real byte reduction
-// because it re-rasterises and re-encodes the page content.
+// FIXED: like the image compressor, we now scan a finer set of render
+// scales and keep the overall CLOSEST-TO-TARGET result across all of them,
+// instead of stopping at the first scale that fits.
 // ═══════════════════════════════════════════════════════════════════════════════
 async function compressPDF(file, targetBytes) {
     setProgress(8, 'Loading PDF…');
@@ -522,20 +551,16 @@ async function compressPDF(file, targetBytes) {
 
     setProgress(15, `Loaded ${numPages} page(s). Rendering…`);
 
-    // We'll try several quality levels to binary-search toward the target.
-    // Each attempt renders all pages and builds a full PDF blob.
-    // To avoid re-rendering on every quality tweak, we render once per scale
-    // and binary-search quality on the JPEG step.
+    // Finer scale grid than before for more achievable output sizes.
+    const scales = [2.0, 1.75, 1.5, 1.3, 1.15, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3];
 
-    // Scale = pixels per CSS px at 1× zoom; start at 1.5 (≈108 ppi), go down.
-    const scales = [2.0, 1.5, 1.2, 1.0, 0.8, 0.6, 0.5, 0.4, 0.3];
+    let bestUnder = null;      // largest blob that is <= target so far
+    let smallestSeen = null;   // fallback smallest achieved
+    const closeEnough = targetBytes * 0.02;
 
-    let bestBlob = null, reached = false;
-
-    outerLoop:
     for (let si = 0; si < scales.length; si++) {
         const scale = scales[si];
-        setProgress(15 + si * 8, `Rendering pages at scale ${scale}…`);
+        setProgress(15 + Math.round((si / scales.length) * 65), `Rendering pages at scale ${scale}…`);
 
         // Render all pages to canvases
         const pageCanvases = [];
@@ -550,29 +575,35 @@ async function compressPDF(file, targetBytes) {
             pageCanvases.push(canvas);
         }
 
-        // Binary-search JPEG quality to hit targetBytes
-        let lo = 0.01, hi = 0.95, foundBlob = null;
-        for (let iter = 0; iter < 18; iter++) {
-            const mid     = (lo + hi) / 2;
-            const blob    = await buildPdfFromCanvases(pageCanvases, mid);
+        // Binary-search JPEG quality to get as close to targetBytes as possible
+        let lo = 0.01, hi = 0.98, foundBlob = null;
+        for (let iter = 0; iter < 22; iter++) {
+            const mid  = (lo + hi) / 2;
+            const blob = await buildPdfFromCanvases(pageCanvases, mid);
 
             if (blob.size <= targetBytes) { foundBlob = blob; lo = mid; }
             else hi = mid;
-            if (hi - lo < 0.004) break;
+            if (hi - lo < 0.002) break;
         }
 
-        if (foundBlob) {
-            bestBlob = foundBlob; reached = true; break outerLoop;
+        if (foundBlob && (!bestUnder || foundBlob.size > bestUnder.size)) {
+            bestUnder = foundBlob;
         }
 
-        // Keep smallest so far (lowest quality at this scale)
         const probe = await buildPdfFromCanvases(pageCanvases, 0.01);
-        if (!bestBlob || probe.size < bestBlob.size) bestBlob = probe;
+        if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
+
+        // Stop early once close enough to the target — saves time on
+        // multi-page documents.
+        if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
     }
+
+    const finalBlob = bestUnder || smallestSeen;
+    const reached   = !!bestUnder;
 
     setProgress(97, 'Saving PDF…');
     const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
-    showResult(bestBlob, file.size, outName, reached);
+    showResult(finalBlob, file.size, outName, reached);
 }
 
 // Build a PDF blob from an array of canvases at given JPEG quality
