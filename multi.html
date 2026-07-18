@@ -290,7 +290,6 @@
             justify-content: center;
         }
 
-        /* Password Strength Meter CSS with Entropy Trackers */
         .strength-container {
             margin-top: 6px;
             display: flex;
@@ -389,7 +388,6 @@
         }
         .output-title.error-title { color: var(--error); }
 
-        /* Success Dynamic Check Animation Graphic Component */
         .success-checkmark {
             width: 22px;
             height: 22px;
@@ -415,22 +413,6 @@
         }
 
         @keyframes stroke { to { stroke-dashoffset: 0; } }
-
-        /* Client-Side SVG QR Canvas Element Box CSS */
-        .qr-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: var(--radius-md);
-            width: fit-content;
-            margin: 15px auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .qr-wrapper span { color: #0f172a; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .qr-wrapper svg { display: block; }
 
         .toast-msg {
             padding: 10px 16px;
@@ -605,8 +587,6 @@
                 </div>
                 <textarea id="encResult" readonly placeholder="Encrypted package will appear here..." aria-label="ReadOnly Encrypted Ciphertext Payload Result Box"></textarea>
                 
-                <div id="qrContainer"></div>
-
                 <div class="actions-toolbar">
                     <button class="btn btn-secondary" id="encCopyBtn" onclick="copyToClipboard('encResult', 'encCopyBtn', 'encToast')" aria-label="Copy Encrypted Payload String to Clipboard">📋 Copy String</button>
                     <button class="btn btn-secondary" onclick="downloadTxtFile('encResult', 'encrypted')" aria-label="Download Encrypted Text Payload File">💾 Download .TXT</button>
@@ -679,8 +659,8 @@
 
     <article class="document-panel">
         <h2>About Private Message Cryptographic Infrastructure</h2>
-        <p>The system utilizes the standalone native <strong>Web Crypto API</strong> framework deployed straight within modern engine runtimes to enable elite cryptographic safety protocols. It operates independently of any remote script configurations, structural database dependencies, or remote external software libraries. When plaintext undergoes compilation inside the workspace, an ultra-safe <strong>AES-256-GCM (Advanced Encryption Standard - Galois/Counter Mode)</strong> structural layout wraps your content. This standard is preferred over legacy ciphers because it delivers simultaneous cryptographic authentication alongside confidentiality, rendering malicious payload modifications immediately detectable during string breakdown.</p>
-        <p>Passphrases do not directly serve as processing keys. Instead, the console routes your inputted password string into a <strong>PBKDF2 (Password-Based Key Derivation Function 2)</strong> processing chain. This routine incorporates a dynamically refreshing, completely randomized unique cryptographic <strong>Salt value</strong> along with 600,000 algorithmic cycles of <strong>SHA-256 hashing</strong> to derive a cryptographically hardened key block. Additionally, each independent encryption sequence produces a distinct random <strong>Initialization Vector (IV)</strong>. This guarantees that if you process identical text messages multiple times using matching password variables, the generated output cipher strings will look completely distinct. The output is cleanly packed into an easily transportable Base64 JSON wrapper, making it ideal for secure transmissions across open public pipelines.</p>
+        <p>The system utilizes the standalone native <strong>Web Crypto API</strong> framework deployed straight within modern engine runtimes to enable elite cryptographic safety protocols. It operates independently of any remote script configurations, structural database dependencies, or remote external software libraries. When plaintext undergoes compilation inside the workspace, an ultra-safe <strong>AES-256-GCM (Advanced Encryption Standard - Galois/Counter Mode)</strong> structural layout wraps your content.</p>
+        <p>Passphrases do not directly serve as processing keys. Instead, the console routes your inputted password string into a <strong>PBKDF2 (Password-Based Key Derivation Function 2)</strong> processing chain. This routine incorporates a dynamically refreshing, completely randomized unique cryptographic <strong>Salt value</strong> along with 600,000 algorithmic cycles of <strong>SHA-256 hashing</strong> to derive a cryptographically hardened key block. Additionally, each independent encryption sequence produces a distinct random <strong>Initialization Vector (IV)</strong>.</p>
     </article>
 
     <section class="faq-section">
@@ -692,11 +672,7 @@
             </div>
             <div class="faq-item">
                 <div class="faq-q">Are any of my text strings uploaded online?</div>
-                <p>No. The browser handles every aspect of initialization and execution locally inside sandboxed memory loops. Even QR matrix codes are created completely local inside standalone micro-rendering functions. You can completely disconnect your web router from the internet once loaded.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-q">Can forgotten passwords or lost messages be recovered?</div>
-                <p>No. Because this environment retains no databases or tracking variables, there is no way to retrieve your data if the key is lost. Always record and store passphrases securely.</p>
+                <p>No. The browser handles every aspect of initialization and execution locally inside sandboxed memory loops. You can completely disconnect your web router from the internet once loaded.</p>
             </div>
         </div>
     </section>
@@ -724,7 +700,6 @@
     });
     initTheme();
 
-    // Tab Management Engine Logic 
     function switchTab(target) {
         document.querySelectorAll('.tab-btn').forEach(b => {
             b.classList.remove('active');
@@ -743,7 +718,6 @@
         }
     }
 
-    // Dynamic Sizing Fields
     function onInputText(textarea, counterId) {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
@@ -754,7 +728,6 @@
         validateForm(counterId ? 'encrypt' : 'decrypt');
     }
 
-    // Accurate Math-Based Information Entropy Calculator
     function calculatePasswordEntropy(pwd) {
         if (!pwd) return 0;
         let poolSize = 0;
@@ -767,7 +740,6 @@
         return Math.floor(pwd.length * Math.log2(poolSize));
     }
 
-    // Password Evaluation Strength Handler
     function onPasswordInput() {
         const val = document.getElementById('encPassword').value;
         const bar = document.getElementById('strengthBar');
@@ -802,7 +774,6 @@
         validateForm('encrypt');
     }
 
-    // Complete Dynamic Fields Validator
     function validateForm(mode) {
         if (mode === 'encrypt') {
             const msg = document.getElementById('encMessage').value;
@@ -816,7 +787,6 @@
         }
     }
 
-    // Interactive Password View Eye Management Function
     function togglePasswordVisibility(inputId, btnId) {
         const field = document.getElementById(inputId);
         const btn = document.getElementById(btnId);
@@ -829,7 +799,6 @@
         }
     }
 
-    // Secure Random Generator Logic - Upgraded to 32 Characters Length
     function generateSecurePassword() {
         const len = 32;
         const upper = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
@@ -867,7 +836,6 @@
         showNotification('encToast', '32-character cryptographically strong password confirmed!', 'success');
     }
 
-    // Direct Buffer Clipboard Reader Integration Module
     async function pasteFromClipboard(targetTextAreaId) {
         try {
             const text = await navigator.clipboard.readText();
@@ -880,7 +848,6 @@
         }
     }
 
-    // Interactive Dynamic Copy Text Switch Trigger with Complete Selection Removal
     function copyToClipboard(textareaId, btnId, toastId) {
         const el = document.getElementById(textareaId);
         const btn = document.getElementById(btnId);
@@ -891,7 +858,6 @@
             btn.textContent = "Copied ✓";
             showNotification(toastId, 'Payload copied cleanly inside systemic workspace context!', 'success');
             
-            // Clean selection removal patch
             if (window.getSelection) {
                 window.getSelection().removeAllRanges();
             } else if (document.selection) {
@@ -904,7 +870,6 @@
         });
     }
 
-    // File Writer System Engine
     function downloadTxtFile(textareaId, basePrefix) {
         const val = document.getElementById(textareaId).value;
         if (!val) return;
@@ -921,7 +886,6 @@
         URL.revokeObjectURL(link.href);
     }
 
-    // Clipboard Web Share API Core Framework Integration
     async function sharePayload() {
         const textVal = document.getElementById('encResult').value;
         if (!textVal) return;
@@ -932,14 +896,13 @@
                     text: textVal
                 });
             } catch (err) {
-                console.log('Share canceled or blocked.');
+                console.log('Share canceled.');
             }
         } else {
             showNotification('encToast', 'Web Share execution context is missing on this engine layout.', 'error');
         }
     }
 
-    // Local Disk Drag & Drop File Reading Interface
     const dropZone = document.getElementById('dropZone');
     ['dragenter', 'dragover'].forEach(name => {
         dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }, false);
@@ -961,82 +924,6 @@
         }
     });
 
-    /**
-     * 100% Client-Side Pure Vanilla JS SVG QR Generator
-     * Runs completely offline inside sandboxed JS loop math macros.
-     */
-    function createLocalSvgQrCode(text, size = 180) {
-        // Safe basic structural matrix layout implementation
-        const qrSize = 33; 
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", size);
-        svg.setAttribute("height", size);
-        svg.setAttribute("viewBox", `0 0 ${qrSize} ${qrSize}`);
-        svg.setAttribute("shape-rendering", "crispEdges");
-
-        // Background
-        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        bg.setAttribute("width", qrSize);
-        bg.setAttribute("height", qrSize);
-        bg.setAttribute("fill", "#ffffff");
-        svg.appendChild(bg);
-
-        // Deterministic string pseudo-hash to safely generate recognizable scannable-style structural layouts
-        let hash = 0;
-        for (let i = 0; i < text.length; i++) {
-            hash = text.charCodeAt(i) + ((hash << 5) - hash);
-        }
-
-        const checkPixel = (x, y) => {
-            // Static alignment finder patterns
-            if ((x < 7 && y < 7) || (x > qrSize - 8 && y < 7) || (x < 7 && y > qrSize - 8)) {
-                return (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4));
-            }
-            // Small structural helper tracking dots
-            if ((x === 24 && y === 24) || (x === 24 && y === 8) || (x === 8 && y === 24)) return true;
-            // Alternating timing bars
-            if (x === 6 || y === 6) return (x % 2 === 0 || y % 2 === 0);
-            
-            // Generate pseudo-random matrix array blocks using deterministic bit math shifts
-            const bitIndex = Math.abs((x * 17 + y * 31 + hash) % 32);
-            return ((hash >> bitIndex) & 1) === 1;
-        };
-
-        // Render modules
-        for (let y = 0; y < qrSize; y++) {
-            for (let x = 0; x < qrSize; x++) {
-                if (checkPixel(x, y)) {
-                    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                    rect.setAttribute("x", x);
-                    rect.setAttribute("y", y);
-                    rect.setAttribute("width", 1);
-                    rect.setAttribute("height", 1);
-                    rect.setAttribute("fill", "#0f172a");
-                    svg.appendChild(rect);
-                }
-            }
-        }
-        return svg;
-    }
-
-    function renderInlineLocalQrCode(targetContainerId, textData) {
-        const container = document.getElementById(targetContainerId);
-        container.innerHTML = ''; 
-        
-        const qrWrapper = document.createElement('div');
-        qrWrapper.className = 'qr-wrapper';
-        
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = "Local Offline Secure QR";
-        qrWrapper.appendChild(titleSpan);
-
-        const svgElement = createLocalSvgQrCode(textData, 180);
-        qrWrapper.appendChild(svgElement);
-        
-        container.appendChild(qrWrapper);
-    }
-
-    // Universal Clear Forms Routing Functions
     function clearForm(mode) {
         if (mode === 'encrypt') {
             document.getElementById('encMessage').value = '';
@@ -1045,7 +932,6 @@
             document.getElementById('encResult').value = '';
             document.getElementById('encCharCount').textContent = '0 characters';
             document.getElementById('encOutputBox').classList.remove('show');
-            document.getElementById('qrContainer').innerHTML = '';
             document.getElementById('encMessage').style.height = 'auto';
             onPasswordInput();
         } else {
@@ -1116,7 +1002,6 @@
                 encoder.encode(plaintext)
             );
 
-            // Comprehensive Explicit Configuration Meta Mapping with created timestamp
             const payload = {
                 v: 1,
                 alg: "AES-256-GCM",
@@ -1135,7 +1020,6 @@
             const resultArea = document.getElementById('encResult');
             const successHeader = document.getElementById('encSuccessHeader');
             
-            // Clean dynamic check graphic injection sequence
             successHeader.innerHTML = `
                 <div class="success-checkmark">
                     <svg viewBox="0 0 52 52"><circle class="checkmark-circle" cx="26" cy="26" r="25"/><path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
@@ -1149,8 +1033,6 @@
             resultArea.style.height = 'auto';
             resultArea.style.height = resultArea.scrollHeight + 'px';
             
-            // Generate QR completely inside sandboxed JavaScript local routine
-            renderInlineLocalQrCode('qrContainer', base64PayloadString);
             showNotification('encToast', 'Text successfully encrypted using AES-256-GCM!', 'success');
         } catch (e) {
             showNotification('encToast', 'An unexpected error blocked encryption cycles.', 'error');
@@ -1223,7 +1105,6 @@
             resultArea.style.height = 'auto';
             resultArea.style.height = resultArea.scrollHeight + 'px';
             
-            // Check self destruct informational flag setup
             if (parsedData.expire === "1time") {
                 document.getElementById('destructWarningBox').style.display = 'block';
             }
@@ -1232,7 +1113,7 @@
         } catch (e) {
             outTitle.textContent = "Processing Failure";
             outTitle.className = "output-title error-title";
-            resultArea.value = "Invalid payload format block string.";
+            resultArea.value = "Incorrect password or corrupted encrypted text.";
             outActions.style.display = 'none';
             outputBox.classList.add('show');
             showNotification('decToast', 'Unable to parse structural data arrays.', 'error');
@@ -1240,7 +1121,6 @@
         }
     }
 
-    // Keyboard Shortcuts Listeners Configuration Mapping Blocks
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && !e.shiftKey && e.key === 'Enter') {
             const activeTab = document.getElementById('encryptTab').classList.contains('active');
