@@ -909,8 +909,6 @@
     const layout = document.getElementById('layoutSelect').value;
     const grid = document.getElementById('videoGridContainer');
 
-    // YouTube की तरह इनपुट फील्ड्स से सेटिंग्स उठाना (अगर आपके HTML में ये IDs हैं)
-    // अगर HTML में नहीं हैं, तो डिफ़ॉल्ट रूप से ये म्यूटेड (1) और ऑटोप्ले रहेंगे
     const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
     const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value : "1";
 
@@ -929,7 +927,6 @@
 
     grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
 
-    // 70% सोशल मीडिया सोर्सेज (Referrers)
     const socialPlatforms = [
         "https://www.facebook.com",
         "https://l.facebook.com/",
@@ -939,7 +936,6 @@
         "https://twitter.com"
     ];
 
-    // 30% अन्य चीनी और ग्लोबल सोर्सेज (Bilibili के लिए बेस्ट)
     const otherPlatforms = [
         "https://www.bilibili.com/v/trending/",
         "https://m.bilibili.com/",
@@ -948,7 +944,7 @@
         "https://www.google.co.in"
     ];
 
-    // लूप के जरिए एक-एक करके (1.5 सेकंड के अंतराल पर) स्लॉट लोड करना
+   
     for (let i = 0; i < count; i++) {
 
         setTimeout(() => {
