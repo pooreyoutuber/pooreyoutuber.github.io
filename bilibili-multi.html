@@ -904,27 +904,54 @@
     }
 
     function launchBilibili() {
-        const rawInput = document.getElementById('biliUrl').value.trim();
-        const count = Math.min(Math.max(parseInt(document.getElementById('slotCount').value) || 4, 1), 20);
-        const layout = document.getElementById('layoutSelect').value;
-        const grid = document.getElementById('videoGridContainer');
+    const rawInput = document.getElementById('biliUrl').value.trim();
+    const count = Math.min(Math.max(parseInt(document.getElementById('slotCount').value) || 4, 1), 20);
+    const layout = document.getElementById('layoutSelect').value;
+    const grid = document.getElementById('videoGridContainer');
 
-        grid.innerHTML = '';
+    // YouTube की तरह इनपुट फील्ड्स से सेटिंग्स उठाना (अगर आपके HTML में ये IDs हैं)
+    // अगर HTML में नहीं हैं, तो डिफ़ॉल्ट रूप से ये म्यूटेड (1) और ऑटोप्ले रहेंगे
+    const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
+    const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value : "1";
 
-        if (!rawInput) {
-            showEmpty(grid, 'Please paste a valid Bilibili video URL or standard BV ID to configure.');
-            return;
-        }
+    grid.innerHTML = '';
 
-        const videoId = extractBilibiliId(rawInput);
-        if (!videoId) {
-            showEmpty(grid, 'Failed to extract a valid Bilibili content ID. Please check the URL format and try again.');
-            return;
-        }
+    if (!rawInput) {
+        showEmpty(grid, 'Please paste a valid Bilibili video URL or standard BV ID to configure.');
+        return;
+    }
 
-        grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
+    const videoId = extractBilibiliId(rawInput);
+    if (!videoId) {
+        showEmpty(grid, 'Failed to extract a valid Bilibili content ID. Please check the URL format and try again.');
+        return;
+    }
 
-        for (let i = 0; i < count; i++) {
+    grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
+
+    // 70% सोशल मीडिया सोर्सेज (Referrers)
+    const socialPlatforms = [
+        "https://www.facebook.com",
+        "https://l.facebook.com/",
+        "https://www.instagram.com",
+        "https://t.co", // X (Twitter)
+        "https://www.google.com",
+        "https://twitter.com"
+    ];
+
+    // 30% अन्य चीनी और ग्लोबल सोर्सेज (Bilibili के लिए बेस्ट)
+    const otherPlatforms = [
+        "https://www.bilibili.com/v/trending/",
+        "https://m.bilibili.com/",
+        "https://www.baidu.com",
+        "https://www.bing.com",
+        "https://www.google.co.in"
+    ];
+
+    // लूप के जरिए एक-एक करके (1.5 सेकंड के अंतराल पर) स्लॉट लोड करना
+    for (let i = 0; i < count; i++) {
+
+        setTimeout(() => {
             const box = document.createElement('div');
             box.className = 'video-box';
 
@@ -932,49 +959,55 @@
             label.className = 'video-box-label';
             label.textContent = `#${i + 1} · Slot`;
 
-            // Clean, responsive Bilibili public embed structural URL setup
-            // Handles both 'bvid' parameters and traditional 'aid' variations
+            // Logic for 70/30 Traffic Split
+            let randomRef;
+            let chance = Math.random() * 100;
+            
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
+            
+            const randomStart = Math.floor(Math.random() * 15);
+            const cacheBuster = Math.random().toString(36).substring(7); 
+
+          
             let embedSrc = '';
+            let baseParams = `page=1&high_quality=1&as_wide=1&autoplay=${autoPlayStatus}&muted=${isMuted ? 1 : 0}&t=${randomStart}&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
+
             if (videoId.toLowerCase().startsWith('bv')) {
-                embedSrc = `https://player.bilibili.com/player.html?bvid=${videoId}&page=1&high_quality=1&as_wide=1&autoplay=0`;
+                embedSrc = `https://player.bilibili.com/player.html?bvid=${videoId}&${baseParams}`;
             } else {
                 const numericAid = videoId.replace('av', '');
-                embedSrc = `https://player.bilibili.com/player.html?aid=${numericAid}&page=1&high_quality=1&as_wide=1&autoplay=0`;
+                embedSrc = `https://player.bilibili.com/player.html?aid=${numericAid}&${baseParams}`;
             }
 
             const iframe = document.createElement('iframe');
             iframe.src = embedSrc;
+            iframe.width = "100%";
+            iframe.height = "100%";
             iframe.setAttribute('scrolling', 'no');
             iframe.setAttribute('border', '0');
             iframe.setAttribute('frameborder', 'no');
             iframe.setAttribute('framespacing', '0');
+            
+        
             iframe.allow = 'autoplay; encrypted-media; fullscreen';
             iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
 
             box.appendChild(label);
             box.appendChild(iframe);
             grid.appendChild(box);
-        }
 
-        // Smooth viewport shift right to the compiled content grid area
-        setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }, i * 1500); 
     }
 
-    function clearBilibili() {
-        const grid = document.getElementById('videoGridContainer');
-        grid.className = 'video-grid cols-auto';
-        grid.innerHTML = '';
-        document.getElementById('biliUrl').value = '';
-        showEmpty(grid, 'Your Bilibili video slots will compile here synchronously. Input a proper link above and trigger Launch Workspace to start rendering.');
-    }
-
-    function showEmpty(container, msg) {
-        container.innerHTML = `<div class="empty-state"><div class="icon">📺</div><p>${msg}</p></div>`;
-    }
-
-    document.getElementById('biliUrl').addEventListener('keydown', e => {
-        if (e.key === 'Enter') launchBilibili();
-    });
-</script>
+    setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+}
+ </script>   
 </body>
 </html>
