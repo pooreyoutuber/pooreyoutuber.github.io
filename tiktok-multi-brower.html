@@ -791,28 +791,26 @@
                 answer.style.maxHeight = "0px";
             }
         }
-        // 1. TikTok URL से सटीक Video ID निकालने का फंक्शन
+       
 function getTikTokID(url) {
-    // यह रेगुलर एक्सप्रेशन /video/ या /v/ के बाद आने वाली 19 अंकों की ID को कैप्चर करता है
+   
     const regExp = /\/(video|v)\/(\d{19})/;
     const match = url.match(regExp);
     return (match && match[2]) ? match[2] : null;
 }
 
-// 2. मुख्य मल्टी-व्यू फंक्शन जो ग्रिड और एम्बेड को मैनेज करेगा
+
 function launchViewers() {
     const urlInput = document.getElementById('videoUrl').value.trim();
     const countInput = parseInt(document.getElementById('browserCount').value);
     const gridContainer = document.getElementById('videoGridContainer');
     
-    // YouTube की तरह इनपुट फील्ड्स से सेटिंग्स उठाना (अगर आपके HTML में ये IDs हैं)
-    // अगर HTML में नहीं हैं, तो डिफ़ॉल्ट रूप से ये म्यूटेड (1) और ऑटोप्ले रहेंगे
     const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
     const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value : "1";
 
     const videoId = getTikTokID(urlInput);
 
-    // 70% सोशल मीडिया सोर्सेज (Referrers)
+
     const socialPlatforms = [
         "https://www.facebook.com",
         "https://l.facebook.com/",
@@ -822,7 +820,6 @@ function launchViewers() {
         "https://twitter.com"
     ];
 
-    // 30% अन्य सोर्सेज
     const otherPlatforms = [
         "https://www.tiktok.com/explore",
         "https://m.tiktok.com/",
@@ -830,23 +827,21 @@ function launchViewers() {
         "https://www.google.co.in"
     ];
 
-    // अगर गलत लिंक हो या ID न मिले
+
     if (!videoId) {
-        alert('कृपया एक सही TikTok वीडियो लिंक डालें (जैसे: https://www.tiktok.com/@user/video/1234567890123456789)');
+        alert(' TikTok(example: https://www.tiktok.com/@user/video/1234567890123456789)');
         return;
     }
 
-    // पुराना ग्रिड साफ़ करें
+    
     gridContainer.innerHTML = '';
     
-    // लूप के जरिए एक-एक करके (1.5 सेकंड के अंतराल पर) वीडियो लोड करना
     for (let i = 0; i < countInput; i++) {
         
         setTimeout(() => {
             const videoBox = document.createElement('div');
             videoBox.className = 'video-box';
 
-            // 70/30 ट्रैफिक स्प्लिट लॉजिक (Referrer बदलना)
             let randomRef;
             let chance = Math.random() * 100;
             
@@ -856,19 +851,17 @@ function launchViewers() {
                 randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
             }
             
-            // डेटा को फ्रेश रखने के लिए एक रैंडम कैशे बस्टर जेनरेट करना
+
             const cacheBuster = Math.random().toString(36).substring(7); 
             
-            // TikTok का एडवांस एम्बेड URL तैयार करना
-            // नोट: TikTok सीधे 'widget_referrer' को URL में इस तरह सपोर्ट करता है
+
             let embedUrl = `https://www.tiktok.com/embed/v2/${videoId}?autoplay=${autoPlayStatus}&muted=${isMuted ? 1 : 0}&rel=0&loop=1&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
 
             const iframe = document.createElement('iframe');
             iframe.width = "100%";
             iframe.height = "100%";
             iframe.src = embedUrl;
-            
-            // जरूरी ब्राउज़र अनुमतियाँ (Permissions) सेट करना
+        
             iframe.allow = "autoplay; encrypted-media; picture-in-picture; clipboard-write";
             iframe.setAttribute('allowfullscreen', 'true');
             iframe.style.border = "none";
@@ -877,7 +870,7 @@ function launchViewers() {
             videoBox.appendChild(iframe);
             gridContainer.appendChild(videoBox);
             
-        }, i * 1500); // हर अगला वीडियो 1.5 सेकंड बाद खुलेगा ताकि सर्वर पर एक साथ लोड न आए
+        }, i * 1500);
     }
 }
      </script>   
