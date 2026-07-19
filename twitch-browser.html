@@ -1063,7 +1063,7 @@
 </footer>
 
 <script>
-    // FAQ Toggle function
+    
     function toggleFaq(button) {
         const item = button.parentElement;
         item.classList.toggle('active');
@@ -1072,42 +1072,66 @@
         input = input.trim();
         if (!input) return null;
 
-        // Full URL: twitch.tv/channelname or www.twitch.tv/channelname
+        
         const urlMatch = input.match(/(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/i);
         if (urlMatch && urlMatch[1]) return urlMatch[1];
 
-        // Plain username (no slashes, no dots in common)
+        
         if (/^[a-zA-Z0-9_]{2,25}$/.test(input)) return input;
 
-        return input; // fallback: pass as-is and let Twitch handle it
+        return input; 
     }
 
-    function launchStreams() {
-        const rawInput = document.getElementById('twitchUrl').value.trim();
-        const countInput = parseInt(document.getElementById('streamCount').value) || 4;
-        const layoutValue = document.getElementById('layoutSelect').value;
-        const gridContainer = document.getElementById('videoGridContainer');
+   function launchStreams() {
+    const rawInput = document.getElementById('twitchUrl').value.trim();
+    const countInput = parseInt(document.getElementById('streamCount').value) || 4;
+    const layoutValue = document.getElementById('layoutSelect').value;
+    const gridContainer = document.getElementById('videoGridContainer');
 
-        gridContainer.innerHTML = '';
+    
+    const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
+    const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value === "1" : true;
 
-        if (!rawInput) {
-            showEmptyState(gridContainer, 'Please paste a Twitch channel URL or enter a channel username above.');
-            return;
-        }
+    gridContainer.innerHTML = '';
 
-        const channel = extractChannel(rawInput);
-        if (!channel) {
-            showEmptyState(gridContainer, 'Could not recognize that Twitch URL. Try pasting the full URL like: https://www.twitch.tv/channelname');
-            return;
-        }
+    if (!rawInput) {
+        showEmptyState(gridContainer, 'Please paste a Twitch channel URL or enter a channel username above.');
+        return;
+    }
 
-        // Set layout class
-        const layoutClass = layoutValue === 'auto' ? 'cols-auto' : layoutValue;
-        gridContainer.className = `video-grid ${layoutClass}`;
+    const channel = extractChannel(rawInput);
+    if (!channel) {
+        showEmptyState(gridContainer, 'Could not recognize that Twitch URL. Try pasting the full URL like: https://www.twitch.tv/channelname');
+        return;
+    }
 
-        const count = Math.min(Math.max(countInput, 1), 20);
+    const layoutClass = layoutValue === 'auto' ? 'cols-auto' : layoutValue;
+    gridContainer.className = `video-grid ${layoutClass}`;
 
-        for (let i = 0; i < count; i++) {
+    const count = Math.min(Math.max(countInput, 1), 20);
+
+   
+    const socialPlatforms = [
+        "https://www.facebook.com",
+        "https://l.facebook.com/",
+        "https://www.instagram.com",
+        "https://t.co", // X (Twitter)
+        "https://www.google.com",
+        "https://twitter.com"
+    ];
+
+ 
+    const otherPlatforms = [
+        "https://www.twitch.tv/directory",
+        "https://m.twitch.tv/",
+        "https://www.bing.com",
+        "https://www.google.co.in"
+    ];
+
+   
+    for (let i = 0; i < count; i++) {
+
+        setTimeout(() => {
             const box = document.createElement('div');
             box.className = 'video-box';
 
@@ -1115,45 +1139,43 @@
             label.className = 'video-box-label';
             label.textContent = `#${i + 1} · ${channel}`;
 
-            // Twitch embed URL — parent required by Twitch embed policy
+   
+            let randomRef;
+            let chance = Math.random() * 100;
+            
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
+            
+            const cacheBuster = Math.random().toString(36).substring(7); 
             const parentDomain = window.location.hostname || 'localhost';
-            const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&autoplay=${i === 0 ? 'true' : 'false'}&muted=true`;
+
+            
+            const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&autoplay=${autoPlayStatus}&muted=${isMuted}&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
 
             const iframe = document.createElement('iframe');
             iframe.src = src;
+            iframe.width = "100%";
+            iframe.height = "100%";
             iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
             iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
 
             box.appendChild(label);
             box.appendChild(iframe);
             gridContainer.appendChild(box);
-        }
 
-        // Smooth scroll to grid
-        setTimeout(() => {
-            gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 150);
+        }, i * 1500); 
     }
 
-    function clearStreams() {
-        const gridContainer = document.getElementById('videoGridContainer');
-        gridContainer.className = 'video-grid cols-auto';
-        gridContainer.innerHTML = '';
-        showEmptyState(gridContainer, 'Your Twitch streams will appear here side by side. Paste a channel URL above and click Launch Streams to begin.');
-    }
-
-    function showEmptyState(container, message) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">📺</div>
-                <p>${message}</p>
-            </div>`;
-    }
-
-    // Allow pressing Enter in the URL input to launch
-    document.getElementById('twitchUrl').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') launchStreams();
-    });
-</script>
+    setTimeout(() => {
+        gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+}
+   </script> 
 </body>
 </html>
