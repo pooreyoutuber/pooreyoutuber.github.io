@@ -67,6 +67,11 @@
              min-width:1200px;
    
 }
+        /* Fixed-width Desktop Container */
+        .desktop-canvas {
+            width: 1000px;
+            margin: 0 auto;
+        }
        .header{
     background:var(--card-bg);
     padding:15px 40px;
@@ -185,38 +190,20 @@
             margin: 20px 0;
         }
 
- @media (max-width:768px){
+ @media (max-width: 1024px) {
+            /* Calculated dynamically via CSS scale logic based on screen width */
+            .tool-wrapper {
+                width: 1000px;
+                transform-origin: top left;
+                margin: 0 auto;
+            }
 
-    .hero-section{
-        transform:scale(.48);
-        width:1200px;
-    }
-
-    body{
-        overflow-x:auto;
-        overflow-y:auto;
-    }
-
-    #players{
-        grid-template-columns:repeat(5,1fr);
-    }
-
-    .input-group{
-        flex-direction:row;
-    }
-}
-
-
-
-    input#videoUrl, input#viewCount, select, .btn-play {
-
-        width: 100% !important;
-
-        box-sizing: border-box;
-
-        font-size: 14px; 
-
-    }
+            /* Wrap container to fit scaled dimensions and remove extra white space */
+            .tool-scaler {
+                width: 100vw;
+                overflow: hidden;
+            }
+ }
 
 
 
