@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="viewport" content="width=1024">
+
 
         <title>Multi YouTube Live Viewer | YouTubeHelper</title>
 
@@ -115,7 +116,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root {
+         :root {
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.15);
             --primary: #FF3D3D;
@@ -124,20 +125,14 @@
             --text-light: #cbd5e1;
         }
 
-          /* --- Force Universal Desktop Scale & Layout --- */
-        html {
-            width: 100%;
-            overflow-x: visible;
-        }
-
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-           background: #0f172a;
+            margin: 0;
+            background: #0f172a;
             color: var(--text-main);
-             min-height: 100vh;
+            min-height: 100vh;
             line-height: 1.6;
-            min-width: 1024px; 
-        }    
+        }
 
         .algo-context { display: none; visibility: hidden; height: 0; overflow: hidden; }
 
@@ -320,25 +315,24 @@
         .faq-item input[type="checkbox"]:checked ~ .faq-question::after {
             transform: rotate(180deg);
         }
-         @media (max-width: 1024px) {
-            #players {
-                grid-template-columns: repeat(2, 1fr) !important; 
-                gap: 10px !important;
-            }
-            .input-group {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-                gap: 10px !important;
-                overflow-x: auto;
-            }
-            input#videoUrl { flex: 3 !important; width: auto !important; }
-            input#viewCount { width: 70px !important; flex: 0.5 !important; }
-            select#audioSetting, select#qualitySetting { flex: 1 !important; width: auto !important; }
-            .btn-play { flex: 1 !important; width: auto !important; white-space: nowrap !important; }
-            h1 { font-size: 20px; }
+           @media (max-width: 992px) {
+            .video-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
         }
-     
+
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            input[type="text"], input[type="number"], select, .btn-add {
+                width: 100% !important;
+                flex: none !important;
+                box-sizing: border-box;
+            }
+            .video-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+            .video-slot { aspect-ratio: 9/16; } /* Standard Mobile short format optimized */
+            .hero-title { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
