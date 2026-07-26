@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <!-- Fixed Desktop Viewport for Mobile Devices -->
-    <meta name="viewport" content="width=1200, initial-scale=0.3">
+    <!-- Standard Viewport to allow Google AdSense script to detect screen properly -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>PooreYouTuber Tools | Free Online YouTube & Utility Tools</title>
 
@@ -137,10 +137,10 @@
             --yt-border: #333;
         }
 
-        /* --- Strict Fixed Desktop Layout Rules --- */
+        /* Force Desktop Width via CSS (Allows AdSense script to work correctly) */
         html {
-            width: 1200px !important;
-            min-width: 1200px !important;
+            min-width: 1200px;
+            overflow-x: auto;
         }
 
         body {
@@ -151,10 +151,12 @@
             line-height: 1.6;
             width: 1200px !important;
             min-width: 1200px !important;
+            margin-left: auto;
+            margin-right: auto;
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Header (Navigation) - Fixed Horizontal Layout */
+        /* Header Navigation */
         header {
             background: var(--yt-red);
             display: flex !important;
@@ -163,7 +165,7 @@
             align-items: center !important;
             padding: 12px 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            width: 1200px !important;
+            width: 100%;
             box-sizing: border-box;
         }
 
@@ -209,7 +211,7 @@
             padding-bottom: 5px;
         }
 
-        /* Fixed Grid Layout (Exact PC 3-Column View for All Screen Sizes) */
+        /* Strict Desktop Grid Layout (3 Columns) */
         .tools {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
@@ -348,7 +350,7 @@
             padding: 20px;
             text-align: center;
             color: var(--yt-text);
-            width: 1200px !important;
+            width: 100%;
             box-sizing: border-box;
         }
 
@@ -360,14 +362,17 @@
         }
         footer a:hover { text-decoration: underline; }
 
-        /* Ads */
-        .ad-container { margin: 25px 0; overflow: visible; }
-        .content-section {
-            text-align: left;
-            width: 1000px !important;
-            margin: 40px auto;
-            padding: 20px;
-            box-sizing: border-box;
+        /* Optimized Ad Container Styles */
+        .ad-container { 
+            margin: 25px auto; 
+            text-align: center;
+            width: 100%;
+            min-height: 90px;
+            overflow: hidden;
+        }
+        ins.adsbygoogle {
+            display: block !important;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -396,7 +401,7 @@
         <div class="ad-container">
             <!-- poore multi display -->
             <ins class="adsbygoogle"
-                 style="display:block"
+                 style="display:block; min-width:250px; min-height:90px;"
                  data-ad-client="ca-pub-7020422718957281"
                  data-ad-slot="6541049739"
                  data-ad-format="auto"
@@ -435,7 +440,7 @@
 
         <div class="ad-container">
             <ins class="adsbygoogle"
-                 style="display:block"
+                 style="display:block; min-width:250px; min-height:90px;"
                  data-ad-client="ca-pub-7020422718957281"
                  data-ad-slot="6541049739"
                  data-ad-format="auto"
@@ -481,7 +486,7 @@
         <div class="seo-description">
             <h2>Trusted & Secure Free Online Tools for Everyone</h2>
             <ins class="adsbygoogle"
-                 style="display:block"
+                 style="display:block; min-width:250px; min-height:90px;"
                  data-ad-format="fluid"
                  data-ad-layout-key="-fb+5w+4e-db+86"
                  data-ad-client="ca-pub-7020422718957281"
@@ -494,7 +499,7 @@
             
             <div class="ad-container">
                 <ins class="adsbygoogle"
-                     style="display:block"
+                     style="display:block; min-width:250px; min-height:90px;"
                      data-ad-format="autorelaxed"
                      data-ad-client="ca-pub-7020422718957281"
                      data-ad-slot="8237208544"></ins>
