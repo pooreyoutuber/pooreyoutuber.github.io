@@ -430,19 +430,40 @@
 
         /* -------------------------------------------------------------
            MOBILE PC-VIEW DYNAMIC TRANSFORM ENGINE
-           ------------------------------------------------------------- */
-        @media (max-width: 1024px) {
-            .tool-wrapper {
-                width: 1000px;
-                transform-origin: top left;
-                margin: 0 auto;
-            }
+           ----/* Mobile and Responsive Fix for Video Players & Shorts */
+@media (max-width: 768px) {
+    /* Main Player Grid ko mobile par 1 ya 2 column karein */
+    #players {
+        grid-template-columns: repeat(1, 1fr) !important; /* Single column layout mobile par */
+        gap: 12px !important;
+        padding: 5px !important;
+    }
 
-            .tool-scaler {
-                width: 100vw;
-                overflow: hidden;
-            }
-        }
+    /* Input Controls ko vertical stacking karein taaki easily click ho */
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #videoUrl, #viewCount, #audioSetting, #autoplaySetting, .btn-play {
+        width: 100% !important;
+        flex: none !important;
+    }
+
+    /* Shorts Grid Responsive Layout */
+    .shorts-grid {
+        grid-template-columns: repeat(2, 1fr) !important; /* Mobile par 2 columns */
+        gap: 10px !important;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    /* Tablet & Medium Screens ke liye 2 Columns */
+    #players {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}--------------------------------------------------------- */
+       
 </style>
 </head>
 <body> 
