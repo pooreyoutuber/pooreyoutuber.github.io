@@ -979,15 +979,30 @@
 <footer>
     © 2026 PooreYoutuber &nbsp;·&nbsp; Free Creator Tools &nbsp;·&nbsp; Kick.com Multi-Browser Stream Viewer
 </footer>
-
 <script>
+    const socialPlatforms = [
+        "https://www.facebook.com",
+        "https://l.facebook.com/",
+        "https://www.instagram.com",
+        "https://t.co",
+        "https://www.google.com",
+        "https://twitter.com"
+    ];
+const otherPlatforms = [
+  "https://www.google.com",
+        "https://www.google.co.in",
+        "https://www.bing.com",
+        "https://www.reddit.com",
+        "https://duckduckgo.com"
+    ];
+
     function extractChannel(raw) {
         raw = raw.trim();
         if (!raw) return null;
-        // Full URL: kick.com/channelname
+        // Full URL Check: kick.com/channelname
         const match = raw.match(/(?:https?:\/\/)?(?:www\.)?kick\.com\/([a-zA-Z0-9_\-]+)/i);
         if (match && match[1]) return match[1];
-        // Plain username
+        // Plain Username Check
         if (/^[a-zA-Z0-9_\-]{2,30}$/.test(raw)) return raw;
         return raw;
     }
@@ -1017,12 +1032,20 @@
             const box = document.createElement('div');
             box.className = 'video-box';
 
+            let randomRef;
+            let chance = Math.random() * 100;
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
             const label = document.createElement('div');
             label.className = 'video-box-label';
-            label.textContent = `#${i + 1} · ${channel}`;
+            label.textContent = `#${i + 1} · ${channel} (Ref: ${new URL(randomRef).hostname})`;
 
-            // Kick embed URL — Kick supports iframe embedding via their player
-            const src = `https://player.kick.com/${encodeURIComponent(channel)}?autoplay=${i === 0 ? 1 : 0}&muted=true`;
+            // Kick embed URL with referrer parameter
+            const src = `https://player.kick.com/${encodeURIComponent(channel)}?autoplay=${i === 0 ? 1 : 0}&muted=true&ref=${encodeURIComponent(randomRef)}`;
 
             const iframe = document.createElement('iframe');
             iframe.src = src;
@@ -1052,5 +1075,6 @@
         if (e.key === 'Enter') launchStreams();
     });
 </script>
+
 </body>
 </html>
