@@ -1,1064 +1,1329 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotoshi — AI Video to Anime Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --ink:#EDEBF6;
+  --ink-dim:#A7A3C0;
+  --ink-faint:#6E6A8C;
+  --bg-0:#0A0A12;
+  --bg-1:#111120;
+  --bg-2:#171728;
+  --panel: rgba(255,255,255,0.045);
+  --panel-hi: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.09);
+  --border-hi: rgba(255,255,255,0.18);
+  --violet:#8B6CFF;
+  --violet-2:#B69CFF;
+  --cyan:#3CE8D0;
+  --pink:#FF6CAE;
+  --amber:#FFC15E;
+  --grad-brand: linear-gradient(135deg, var(--violet) 0%, var(--pink) 55%, var(--amber) 100%);
+  --grad-cool: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%);
+  --shadow-soft: 0 20px 60px -20px rgba(0,0,0,0.6);
+  --shadow-glow: 0 0 0 1px rgba(139,108,255,0.25), 0 20px 50px -18px rgba(139,108,255,0.45);
+  --radius-l: 26px;
+  --radius-m: 16px;
+  --radius-s: 10px;
+  --font-display:'Space Grotesk', ui-sans-serif, sans-serif;
+  --font-body:'Inter', ui-sans-serif, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, monospace;
+}
+[data-theme="light"]{
+  --ink:#171426;
+  --ink-dim:#5B5578;
+  --ink-faint:#8C87A6;
+  --bg-0:#F3F1FA;
+  --bg-1:#EBE8F6;
+  --bg-2:#E1DDF2;
+  --panel: rgba(255,255,255,0.55);
+  --panel-hi: rgba(255,255,255,0.85);
+  --border: rgba(23,20,38,0.08);
+  --border-hi: rgba(23,20,38,0.16);
+  --shadow-soft: 0 20px 60px -24px rgba(23,20,38,0.25);
+  --shadow-glow: 0 0 0 1px rgba(139,108,255,0.2), 0 20px 50px -18px rgba(139,108,255,0.3);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; min-height:100vh; color:var(--ink); font-family:var(--font-body);
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(139,108,255,0.20), transparent 60%),
+    radial-gradient(900px 560px at 96% 8%, rgba(60,232,208,0.14), transparent 55%),
+    radial-gradient(800px 500px at 50% 110%, rgba(255,108,174,0.10), transparent 60%),
+    var(--bg-0);
+  transition: background-color .4s ease, color .4s ease;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
+img,canvas,video{max-width:100%; display:block;}
+button{font-family:inherit;}
+a{color:inherit;}
+::selection{background:var(--violet); color:#fff;}
+:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; border-radius:6px; }
 
-    <!-- Primary Title & Meta Tags -->
-    <title>TikTok Multi Viewer – Watch Multiple TikTok Videos Side by Side | PooreYoutuber</title>
-    <meta name="title" content="TikTok Multi Viewer – Watch Multiple TikTok Videos Side by Side | PooreYoutuber">
-    <meta name="description" content="Free TikTok Multi Viewer tool. Watch multiple TikTok videos side by side, preview content across custom grid screens, test video playback, and analyze viewing experience directly in your browser. Fast, free, and no login required.">
-    <meta name="keywords" content="TikTok Multi Viewer, TikTok Video Viewer, Multiple TikTok Videos, TikTok Grid Viewer, TikTok Browser Viewer, TikTok Preview Tool, TikTok Video Layout, TikTok Testing Tool, TikTok Embed Viewer, Side by Side TikTok, TikTok Multi Window">
-    <meta name="author" content="PooreYoutuber">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="theme-color" content="#fe2c55">
-    <link rel="canonical" href="https://pooreyoutuber.github.io/tiktok-multi-browser.html">
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+.glass{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius-l);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:var(--shadow-soft);
+}
+.hidden{display:none !important;}
+.sr-only{position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0,0,0,0);}
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pooreyoutuber.github.io/tiktok-multi-browser.html">
-    <meta property="og:site_name" content="PooreYoutuber">
-    <meta property="og:title" content="TikTok Multi Viewer – Watch Multiple TikTok Videos Side by Side">
-    <meta property="og:description" content="Free online TikTok Multi Viewer tool. Preview, analyze, and test multiple TikTok video streams simultaneously in a custom responsive vertical grid layout.">
-    <meta property="og:image" content="https://pooreyoutuber.github.io/tiktok-multi-viewer.png">
+/* ============================= NAV ============================= */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 24px; margin:14px auto 0; max-width:1180px;
+}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.2px;}
+.brand-mark{
+  width:34px; height:34px; border-radius:10px; background:var(--grad-brand);
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+  box-shadow: var(--shadow-glow);
+}
+.nav-actions{display:flex; align-items:center; gap:10px;}
+.theme-toggle{
+  width:42px;height:42px; border-radius:50%; border:1px solid var(--border);
+  background:var(--panel); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:17px; transition:.25s;
+}
+.theme-toggle:hover{border-color:var(--border-hi); transform:translateY(-1px);}
+.privacy-pill{
+  display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:999px;
+  border:1px solid var(--border); background:var(--panel); font-size:12.5px; color:var(--ink-dim);
+  font-family:var(--font-mono);
+}
+.privacy-pill .dot{width:7px;height:7px;border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan);}
 
-    <!-- Twitter Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://pooreyoutuber.github.io/tiktok-multi-browser.html">
-    <meta name="twitter:site" content="@PooreYoutuber">
-    <meta name="twitter:creator" content="@PooreYoutuber">
-    <meta name="twitter:title" content="TikTok Multi Viewer – Watch Multiple TikTok Videos Side by Side">
-    <meta name="twitter:description" content="Free online TikTok Multi Viewer tool. Preview and analyze multiple TikTok video streams simultaneously in a responsive layout grid.">
-    <meta name="twitter:image" content="https://pooreyoutuber.github.io/tiktok-multi-viewer.png">
+/* ============================= HERO ============================= */
+.hero{ padding:76px 0 40px; text-align:center; position:relative; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--violet-2); margin-bottom:22px;
+  padding:7px 14px; border:1px solid var(--border); border-radius:999px; background:var(--panel);
+}
+h1.title{
+  font-family:var(--font-display); font-weight:700; letter-spacing:-0.03em;
+  font-size:clamp(38px, 6.4vw, 74px); line-height:1.02; margin:0 0 20px;
+}
+h1.title .grad{
+  background:var(--grad-brand); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.subtitle{ font-size:clamp(16px,2vw,19px); color:var(--ink-dim); max-width:640px; margin:0 auto 30px; line-height:1.55; }
+.badge-row{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:10px;}
+.mini-badge{
+  font-size:12.5px; font-family:var(--font-mono); color:var(--ink-dim);
+  border:1px solid var(--border); padding:8px 13px; border-radius:999px; background:var(--panel);
+  display:flex; align-items:center; gap:6px;
+}
+.mini-badge b{color:var(--ink); font-weight:600;}
 
-    <!-- Geo Tags -->
-    <meta name="geo.region" content="Global">
-    <meta name="geo.placename" content="Worldwide">
+/* ============================= SECTION HEADS ============================= */
+.section{ padding:52px 0; }
+.section-head{ margin-bottom:28px; }
+.section-eyebrow{ font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--cyan); margin-bottom:8px; }
+.section-title{ font-family:var(--font-display); font-size:clamp(24px,3.4vw,34px); font-weight:700; letter-spacing:-0.02em; margin:0 0 6px;}
+.section-desc{ color:var(--ink-dim); font-size:15px; max-width:560px; }
 
-    <!-- JSON-LD Structured Data (Schema.org) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Organization",
-          "@id": "https://pooreyoutuber.github.io/#organization",
-          "name": "PooreYoutuber",
-          "url": "https://pooreyoutuber.github.io/",
-          "logo": "https://pooreyoutuber.github.io/tiktok-multi-viewer.png"
-        },
-        {
-          "@type": "WebSite",
-          "@id": "https://pooreyoutuber.github.io/#website",
-          "url": "https://pooreyoutuber.github.io/",
-          "name": "PooreYoutuber Tools",
-          "publisher": {
-            "@id": "https://pooreyoutuber.github.io/#organization"
-          }
-        },
-        {
-          "@type": "BreadcrumbList",
-          "@id": "https://pooreyoutuber.github.io/tiktok-multi-browser.html#breadcrumb",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://pooreyoutuber.github.io/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "TikTok Multi Viewer",
-              "item": "https://pooreyoutuber.github.io/tiktok-multi-browser.html"
-            }
-          ]
-        },
-        {
-          "@type": "SoftwareApplication",
-          "@id": "https://pooreyoutuber.github.io/tiktok-multi-browser.html#software",
-          "name": "TikTok Multi Viewer",
-          "url": "https://pooreyoutuber.github.io/tiktok-multi-browser.html",
-          "applicationCategory": "UtilitiesApplication",
-          "operatingSystem": "All",
-          "browserRequirements": "Requires HTML5 compatible web browser with JavaScript enabled.",
-          "author": {
-            "@id": "https://pooreyoutuber.github.io/#organization"
-          },
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-          },
-          "description": "A web-based layout testing and preview utility designed for short-form video content creators and editors to view and evaluate multiple TikTok video streams side by side.",
-          "featureList": [
-            "Watch multiple TikTok videos side by side",
-            "Customizable multi-screen grid layout",
-            "Responsive 9:16 portrait video scaling preview",
-            "Client-side execution with no login required",
-            "Safe-zone layout alignment and playback testing"
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "https://pooreyoutuber.github.io/tiktok-multi-browser.html#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "How does TikTok Multi Viewer work?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "TikTok Multi Viewer extracts the video ID from a valid TikTok URL and embeds multiple responsive instances side by side in a single web page layout grid for synchronous viewing and analysis."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Is TikTok Multi Viewer free to use?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, this tool is 100% free with no hidden charges, premium tiers, or registration requirements."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Do I need to sign in or register an account?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No account creation or login is needed. You can use all features directly inside your web browser."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Is TikTok Multi Viewer safe for my device?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, the viewer runs entirely on client-side HTML, CSS, and JavaScript inside standard browser sandboxed iframes without downloading external software."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Does this tool generate fake views or manipulate algorithm stats?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No. This tool does not offer fake views, automated botting, or artificial stat boosting. It is purely designed for layout testing, frame sync, and visual comparison."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I watch multiple videos on mobile devices?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, the interface features dynamic responsive CSS breakpoints that automatically adapt the multi-screen grid layout for mobile, tablet, and desktop viewports."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How many video instances can I view simultaneously?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "You can generate anywhere from 1 to 20 screen instances at once depending on your device processing speed and internet bandwidth."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Does TikTok Multi Viewer store personal data or viewing history?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No. The utility operates fully in-browser without saving user logs, video links, or personal information on external servers."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I compare two different TikTok videos side by side?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, video editors can open multiple instances to inspect visual framing, safe-zone borders, text overlay placements, and audio-to-video alignment."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Which web browsers are supported?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "It works on all modern HTML5 web browsers including Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge, and Opera."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Why is my TikTok video not loading in the grid?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Ensure you are pasting a valid TikTok video URL containing a numeric video ID. Private or restricted videos may not allow third-party iframe playback."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I test video playback sound across all screens?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "By default, browser safety policies mute auto-playing multi-instance embedded videos to prevent overlapping audio noise."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Does this viewer require browser extension downloads?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No extensions or plugins are needed. It works out-of-the-box using standard browser technologies."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What video link format is accepted by the viewer?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Pasting standard TikTok video links like https://www.tiktok.com/@username/video/1234567890123456789 will work instantly."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Is TikTok Multi Viewer suitable for media agencies and editors?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, content teams use the layout testing workspace to inspect visual consistency and mobile portrait formatting prior to publishing."
-              }
-            }
-          ]
-        }
-      ]
-    }
-    </script>
-    
-    <!-- Google Tag Manager & Adsense -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
-    </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+/* ============================= UPLOAD ============================= */
+.upload-zone{
+  padding:54px 28px; text-align:center; cursor:pointer; position:relative;
+  border:1.5px dashed var(--border-hi); transition:.25s; overflow:hidden;
+}
+.upload-zone:hover, .upload-zone.drag{ border-color:var(--violet); background:rgba(139,108,255,0.06); transform:translateY(-2px); }
+.upload-zone.drag{ box-shadow:var(--shadow-glow); }
+.upload-icon{
+  width:74px; height:74px; margin:0 auto 20px; border-radius:22px; background:var(--grad-cool);
+  display:flex; align-items:center; justify-content:center; font-size:32px;
+  animation:float 4.5s ease-in-out infinite;
+}
+@keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.upload-zone h3{ font-family:var(--font-display); font-size:22px; margin:0 0 8px; }
+.upload-zone p{ color:var(--ink-dim); margin:0 0 20px; font-size:14.5px; }
+.browse-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:999px; border:none;
+  background:var(--grad-brand); color:#0A0A12; font-weight:700; font-size:14.5px; cursor:pointer;
+  box-shadow:var(--shadow-glow); transition:.2s;
+}
+.browse-btn:hover{ transform:translateY(-2px) scale(1.02); }
+.upload-meta{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-top:24px; font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
+.upload-error{
+  margin-top:18px; padding:12px 16px; border-radius:var(--radius-s); background:rgba(255,90,90,0.1);
+  border:1px solid rgba(255,90,90,0.35); color:#FF8080; font-size:13.5px; text-align:left;
+}
 
-    <style>
-        :root {
-            --bg-color: #121212;
-            --panel-bg: #1e1e1e;
-            --accent-color: #fe2c55;
-            --cyan-accent: #25f4ee;
-            --text-main: #ffffff;
-            --text-muted: #a6a6a6;
-            --border-color: #2f2f2f;
-            --border-radius: 16px;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Sofia Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+/* ============================= VIDEO INFO CARD ============================= */
+.info-card{ display:none; margin-top:22px; padding:22px; gap:22px; align-items:center; }
+.info-card.show{ display:flex; }
+.info-thumb{ width:150px; height:150px; border-radius:var(--radius-m); overflow:hidden; flex-shrink:0; background:var(--bg-2); border:1px solid var(--border); position:relative;}
+.info-thumb canvas, .info-thumb img{ width:100%; height:100%; object-fit:cover; }
+.info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:14px; flex:1; }
+.info-item .label{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:5px;}
+.info-item .value{ font-size:16.5px; font-weight:600; font-family:var(--font-display); }
+.remove-btn{
+  background:none; border:1px solid var(--border); color:var(--ink-dim); border-radius:999px;
+  padding:9px 16px; cursor:pointer; font-size:13px; white-space:nowrap; transition:.2s;
+}
+.remove-btn:hover{ border-color:#FF8080; color:#FF8080; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 30px 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+/* ============================= STYLE GRID ============================= */
+.style-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.style-card{
+  padding:18px 14px; text-align:center; cursor:pointer; border:1px solid var(--border);
+  border-radius:var(--radius-m); background:var(--panel); transition:.2s; position:relative;
+}
+.style-card:hover{ transform:translateY(-3px); border-color:var(--border-hi); }
+.style-card.active{ border-color:var(--violet); box-shadow:var(--shadow-glow); background:rgba(139,108,255,0.09); }
+.style-swatch{
+  width:56px;height:56px; border-radius:16px; margin:0 auto 12px; display:flex; align-items:center;
+  justify-content:center; font-size:26px;
+}
+.style-card h4{ font-size:14px; margin:0 0 4px; font-family:var(--font-display); font-weight:600; }
+.style-card p{ font-size:11.5px; color:var(--ink-faint); margin:0; line-height:1.3; }
+.style-card .check{
+  position:absolute; top:10px; right:10px; width:20px; height:20px; border-radius:50%;
+  background:var(--grad-brand); color:#0A0A12; font-size:12px; display:none; align-items:center; justify-content:center; font-weight:800;
+}
+.style-card.active .check{ display:flex; }
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-        }
+/* ============================= SETTINGS ============================= */
+.settings-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; }
+.settings-block{ padding:20px; }
+.settings-block h4{ margin:0 0 14px; font-family:var(--font-display); font-size:15px; display:flex; align-items:center; gap:8px;}
+.seg{ display:flex; gap:6px; background:var(--bg-1); padding:5px; border-radius:999px; border:1px solid var(--border); }
+.seg button{
+  flex:1; border:none; background:transparent; color:var(--ink-dim); padding:9px 8px; border-radius:999px;
+  cursor:pointer; font-size:12.5px; font-weight:600; transition:.2s;
+}
+.seg button.active{ background:var(--grad-brand); color:#0A0A12; }
+.toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--border); }
+.toggle-row:last-child{ border-bottom:none; }
+.switch{ position:relative; width:42px; height:24px; flex-shrink:0; }
+.switch input{ opacity:0; width:0; height:0; }
+.slider-tog{ position:absolute; inset:0; background:var(--bg-2); border:1px solid var(--border); border-radius:999px; cursor:pointer; transition:.2s; }
+.slider-tog::before{ content:""; position:absolute; width:16px;height:16px; left:3px; top:2.5px; background:var(--ink-faint); border-radius:50%; transition:.2s; }
+.switch input:checked + .slider-tog{ background:var(--grad-brand); border-color:transparent; }
+.switch input:checked + .slider-tog::before{ transform:translateX(18px); background:#0A0A12; }
+.frame-estimate{ margin-top:6px; font-family:var(--font-mono); font-size:12px; color:var(--cyan); }
 
-        .home-brand-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--cyan-accent);
-            border: 1px solid rgba(37, 244, 238, 0.25);
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border-radius: 30px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            z-index: 20;
-        }
+/* ============================= GENERATE ============================= */
+.generate-wrap{ display:flex; justify-content:center; padding:44px 0 10px; }
+.generate-btn{
+  position:relative; border:none; cursor:pointer; padding:19px 50px; border-radius:999px;
+  font-family:var(--font-display); font-weight:700; font-size:17px; color:#0A0A12;
+  background:var(--grad-brand); background-size:200% 200%; box-shadow:var(--shadow-glow);
+  transition:.25s; animation:gradientShift 6s ease infinite; display:flex; align-items:center; gap:10px;
+}
+.generate-btn:disabled{ opacity:.45; cursor:not-allowed; animation:none; }
+.generate-btn:not(:disabled):hover{ transform:translateY(-3px) scale(1.02); }
+@keyframes gradientShift{ 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
 
-        .home-brand-btn:hover {
-            background: linear-gradient(90deg, var(--accent-color), var(--cyan-accent));
-            color: #ffffff;
-            border-color: transparent;
-            box-shadow: 0 0 12px rgba(37, 244, 238, 0.4);
-            transform: translateY(-1px);
-        }
+/* ============================= PROGRESS ============================= */
+.progress-screen{ padding:60px 30px; text-align:center; }
+.progress-stage{ font-family:var(--font-display); font-size:23px; margin:0 0 8px; }
+.progress-sub{ color:var(--ink-dim); font-size:14px; margin:0 0 30px; font-family:var(--font-mono); }
+.progress-track{
+  height:12px; border-radius:999px; background:var(--bg-1); overflow:hidden; border:1px solid var(--border);
+  max-width:520px; margin:0 auto 26px; position:relative;
+}
+.progress-fill{
+  height:100%; border-radius:999px; background:var(--grad-brand); width:0%;
+  transition:width .25s ease; position:relative; overflow:hidden;
+}
+.progress-fill::after{
+  content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+  animation:shimmer 1.4s linear infinite;
+}
+@keyframes shimmer{ 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
+.progress-pct{ font-family:var(--font-mono); font-size:15px; color:var(--violet-2); margin-bottom:34px; }
+.progress-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:14px; max-width:640px; margin:0 auto 30px; }
+.pstat{ padding:14px; border-radius:var(--radius-s); background:var(--bg-1); border:1px solid var(--border); }
+.pstat .l{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:5px; }
+.pstat .v{ font-family:var(--font-display); font-size:17px; font-weight:600; }
+.stage-track{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.stage-chip{
+  font-size:11.5px; font-family:var(--font-mono); padding:7px 13px; border-radius:999px;
+  border:1px solid var(--border); color:var(--ink-faint); transition:.25s;
+}
+.stage-chip.active{ border-color:var(--cyan); color:var(--cyan); background:rgba(60,232,208,0.08); }
+.stage-chip.done{ border-color:var(--violet); color:var(--violet-2); }
+.mini-canvas-preview{
+  width:220px; margin:30px auto 0; border-radius:var(--radius-m); overflow:hidden; border:1px solid var(--border);
+  aspect-ratio:16/9; background:var(--bg-1);
+}
 
-        .tool-panel {
-            background: var(--panel-bg);
-            padding: 40px 25px 35px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            margin-bottom: 35px;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
+/* ============================= RESULT ============================= */
+.result-wrap{ padding:26px; }
+.result-tabs{ display:flex; gap:8px; margin-bottom:20px; }
+.result-tabs button{
+  padding:10px 18px; border-radius:999px; border:1px solid var(--border); background:var(--panel);
+  color:var(--ink-dim); cursor:pointer; font-size:13.5px; font-weight:600;
+}
+.result-tabs button.active{ background:var(--grad-brand); color:#0A0A12; border-color:transparent; }
+.video-stage{ border-radius:var(--radius-m); overflow:hidden; background:#000; position:relative; }
+.video-controls{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;}
+.ctrl-btn{
+  border:1px solid var(--border); background:var(--panel); color:var(--ink); padding:10px 16px;
+  border-radius:999px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; transition:.2s;
+}
+.ctrl-btn:hover{ border-color:var(--border-hi); }
+.compare-wrap{ position:relative; border-radius:var(--radius-m); overflow:hidden; aspect-ratio:16/9; background:#000;}
+.compare-wrap img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+.compare-after{ clip-path:inset(0 0 0 50%); }
+.compare-slider{
+  position:absolute; top:0; bottom:0; left:50%; width:3px; background:#fff; cursor:ew-resize;
+  box-shadow:0 0 0 4px rgba(255,255,255,.15);
+}
+.compare-slider::after{
+  content:"⇔"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:38px;height:38px; border-radius:50%; background:#fff; color:#111; display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.compare-tag{ position:absolute; top:12px; padding:5px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:11.5px; font-family:var(--font-mono); }
+.tag-left{ left:12px; } .tag-right{ right:12px; }
 
-        .tool-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), var(--cyan-accent));
-        }
+/* ============================= DOWNLOAD ============================= */
+.download-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:22px; }
+.dl-card{
+  padding:20px; border-radius:var(--radius-m); border:1px solid var(--border); background:var(--panel);
+  cursor:pointer; transition:.2s; text-align:left;
+}
+.dl-card:hover{ border-color:var(--violet); transform:translateY(-2px); }
+.dl-card .ic{ font-size:22px; margin-bottom:10px; }
+.dl-card h5{ margin:0 0 4px; font-family:var(--font-display); font-size:14.5px; }
+.dl-card p{ margin:0; font-size:12px; color:var(--ink-faint); }
 
-        .tool-panel h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #ffffff, #e0e0e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+/* ============================= FOOTER ============================= */
+footer{ padding:50px 0 70px; text-align:center; color:var(--ink-faint); font-size:12.5px; font-family:var(--font-mono); }
 
-        .tool-panel p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: 25px;
-        }
+/* ============================= TOASTS ============================= */
+.toast-region{ position:fixed; bottom:22px; right:22px; z-index:200; display:flex; flex-direction:column; gap:10px; }
+.toast{
+  padding:13px 18px; border-radius:var(--radius-s); background:var(--bg-1); border:1px solid var(--border-hi);
+  color:var(--ink); font-size:13.5px; box-shadow:var(--shadow-soft); animation:toastIn .3s ease;
+  max-width:300px;
+}
+@keyframes toastIn{ from{ opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
-        .form-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .input-url {
-            flex: 1;
-            min-width: 290px;
-            padding: 15px 20px;
-            background: #2a2a2a;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            color: #ffffff;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-url:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px rgba(254, 44, 85, 0.2);
-        }
-
-        .input-count {
-            width: 85px;
-            padding: 15px;
-            background: #2a2a2a;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            color: #ffffff;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-count:focus {
-            border-color: var(--cyan-accent);
-            box-shadow: 0 0 10px rgba(37, 244, 238, 0.2);
-        }
-
-        .btn-generate {
-            background: linear-gradient(90deg, var(--accent-color), #e02247);
-            color: #ffffff;
-            border: none;
-            padding: 15px 32px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(254, 44, 85, 0.3);
-        }
-
-        .btn-generate:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(254, 44, 85, 0.5);
-        }
-
-        .video-grid {
-            display: grid;
-            gap: 15px;
-            margin-bottom: 35px;
-            width: 100%;
-        }
-
-        @media (min-width: 1025px) {
-            .video-grid { grid-template-columns: repeat(5, 1fr); }
-        }
-
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .video-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-
-        @media (max-width: 768px) and (orientation: landscape) {
-            .video-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        @media (max-width: 768px) and (orientation: portrait) {
-            .video-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .video-box {
-            background: #000000;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            padding-top: 177.77%;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            transition: border-color 0.3s;
-        }
-
-        .video-box:hover {
-            border-color: var(--cyan-accent);
-        }
-
-        .video-box iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .content-panel {
-            background: var(--panel-bg);
-            padding: 35px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            margin-bottom: 35px;
-        }
-
-        .badge {
-            background: rgba(37, 244, 238, 0.1);
-            color: var(--cyan-accent);
-            font-size: 0.8rem;
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 20px;
-            border: 1px solid rgba(37, 244, 238, 0.2);
-        }
-
-        .content-panel h2 {
-            color: var(--text-main);
-            font-size: 1.6rem;
-            margin-bottom: 18px;
-            margin-top: 25px;
-            font-weight: 700;
-        }
-
-        .content-panel h2:first-of-type {
-            margin-top: 0;
-        }
-
-        .content-panel h3 {
-            color: var(--cyan-accent);
-            font-size: 1.2rem;
-            margin: 20px 0 12px 0;
-        }
-
-        .content-panel p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.7;
-            margin-bottom: 18px;
-        }
-
-        .tip-box {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
-            border: 1px dashed #444;
-        }
-
-        .tip-box h3 {
-            color: var(--accent-color);
-            font-size: 1.15rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .feature-list {
-            list-style: none;
-        }
-
-        .feature-list li {
-            margin-bottom: 12px;
-            font-size: 0.98rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            padding-left: 24px;
-            position: relative;
-        }
-
-        .feature-list li strong {
-            color: var(--text-main);
-        }
-
-        .feature-list li::before {
-            content: "✦";
-            color: var(--cyan-accent);
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 1rem;
-        }
-
-        .crossroads-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        @media (min-width: 769px) {
-            .crossroads-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-            .crossroads-grid { grid-template-columns: 1fr; }
-        }
-
-        .crossroads-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: left;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-
-        .crossroads-card:hover {
-            border-color: var(--cyan-accent);
-            background: rgba(37, 244, 238, 0.02);
-            transform: translateY(-2px);
-        }
-
-        .card-tag {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent-color);
-            font-weight: 700;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-        }
-
-        .card-headline {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-
-        .card-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .faq-section {
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 1px dashed var(--border-color);
-        }
-
-        .faq-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 20px;
-        }
-
-        .faq-item {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
-        }
-
-        .faq-question {
-            width: 100%;
-            text-align: left;
-            padding: 16px 20px;
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s ease;
-        }
-
-        .faq-question:hover { background: rgba(255, 255, 255, 0.04); }
-
-        .faq-answer {
-            padding: 0 20px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, padding 0.3s ease;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .faq-item.active .faq-answer { padding: 16px 20px; max-height: 300px; }
-        .faq-icon { font-size: 1.2rem; color: var(--cyan-accent); transition: transform 0.3s; }
-        .faq-item.active .faq-icon { transform: rotate(45deg); color: var(--accent-color); }
-
-        .friendly-disclaimer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            color: #888888;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 30px;
-            font-size: 0.85rem;
-            color: #666;
-            width: 100%;
-            letter-spacing: 0.5px;
-        }
-
-        .ad-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-    </style>
+@media(max-width:640px){
+  .info-card{ flex-direction:column; align-items:stretch; }
+  .info-thumb{ width:100%; height:180px; }
+  .topbar{ padding:14px 18px; }
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Tool Panel Header -->
-        <div class="tool-panel">
-            <a href="https://pooreyoutuber.github.io" target="_self" class="home-brand-btn">
-                🏠 PooreYoutuber
-            </a>
+<div class="toast-region" id="toastRegion" aria-live="polite"></div>
 
-            <div class="ad-container">
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-7020422718957281"
-                     data-ad-slot="4272853316"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
+<!-- ============================= NAV ============================= -->
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">刻</span> Rotoshi</div>
+  <div class="nav-actions">
+    <div class="privacy-pill"><span class="dot"></span> 100% Local</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark and light mode" title="Toggle theme">🌙</button>
+  </div>
+</header>
 
-            <h1>TikTok Multi Viewer</h1>
-            <p>Paste any TikTok short video URL, choose your preferred screen count, and compare multiple streams side by side instantly.</p>
-            
-            <div class="form-group">
-                <input type="url" id="videoUrl" class="input-url" placeholder="Paste TikTok video link here (e.g. https://www.tiktok.com/@user/video/123456...)" required>
-                <input type="number" id="browserCount" class="input-count" value="4" min="1" max="20">
-                <button onclick="launchViewers()" class="btn-generate">Generate Viewers</button>
-            </div>
-        </div>
+<!-- ============================= HERO ============================= -->
+<section class="hero wrap">
+  <div class="eyebrow">◆ Client-side anime engine · zero uploads</div>
+  <h1 class="title">Turn short clips into<br><span class="grad">anime, frame by frame.</span></h1>
+  <p class="subtitle">Rotoshi converts short videos into anime or cartoon style entirely inside your browser — extraction, stylization and rendering all happen on your device.</p>
+  <div class="badge-row">
+    <div class="mini-badge">🔒 <b>No Upload</b></div>
+    <div class="mini-badge">🗄️ <b>No Server</b></div>
+    <div class="mini-badge">🔑 <b>No Login</b></div>
+    <div class="mini-badge">⚡ <b>Runs on-device</b></div>
+  </div>
+</section>
 
-        <div class="ad-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="4272853316"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
+<div class="wrap">
 
-        <!-- Video Multi Grid Container -->
-        <div id="videoGridContainer" class="video-grid"></div>
-
-        <div class="ad-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-format="fluid"
-                 data-ad-layout-key="-fb+5w+4e-db+86"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="3974681866"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
-        <!-- Tool Guide & Semantic Content Panel -->
-        <article class="content-panel">
-            <span class="badge">Content Creator Toolkit</span>
-            
-            <h2>How to Use the TikTok Multi Viewer Tool</h2>
-            <p>Evaluating short-form video layouts in real time is critical for video editors, social media strategists, and digital creators. The TikTok Multi Viewer allows you to open and analyze multiple vertical video instances simultaneously directly in your web browser. Follow these simple steps to start testing:</p>
-            <ol style="margin-left: 20px; color: var(--text-muted); line-height: 1.8; margin-bottom: 20px;">
-                <li>Copy the direct public video URL from TikTok.</li>
-                <li>Paste the URL into the input field at the top of this tool.</li>
-                <li>Select the number of viewer screens you want to generate (1 to 20 screens).</li>
-                <li>Click <strong>Generate Viewers</strong> to render your custom side-by-side grid instantly.</li>
-            </ol>
-
-            <h2>Key Features of TikTok Multi Viewer</h2>
-            <ul class="feature-list">
-                <li><strong>Dynamic Multi-Screen Previewing:</strong> Watch multiple instances of short-form videos side by side in a synchronized vertical layout grid.</li>
-                <li><strong>Fluid 9:16 Responsive Grid:</strong> Automatically scales portrait aspect ratios for desktop monitors, laptops, tablets, and mobile devices.</li>
-                <li><strong>Client-Side Speed:</strong> Built using lightweight browser iframe rendering without heavy server-side processing or background lags.</li>
-                <li><strong>No Login Required:</strong> Use the preview suite freely without creating accounts, providing email addresses, or installing third-party browser extensions.</li>
-                <li><strong>Safe-Zone Layout Inspection:</strong> Check UI overlay placements, caption readability, sound alignment, and visual framing across multiple screen instances.</li>
-            </ul>
-
-            <div class="tip-box">
-                <h3>💡 Content Quality & Layout Optimization Tips</h3>
-                <ul class="feature-list">
-                    <li><strong>Inspect Safe-Zones:</strong> Ensure critical text graphics and overlays do not get covered by native platform UI buttons (like share icons or username tags).</li>
-                    <li><strong>Test Mobile Aspect Ratios:</strong> Verify that your 9:16 vertical video renders crisply without unwanted cropping on smaller screens.</li>
-                    <li><strong>Analyze First 3 Seconds:</strong> Make sure your opening visual hook is captivating when viewed across multiple layout perspectives.</li>
-                </ul>
-            </div>
-
-            <h2>Why Creators and Video Editors Need Grid Layout Testing</h2>
-            <p>When producing short-form content for global audiences, maintaining consistent visual balance and audio framing is vital. A dedicated multi-instance video viewer helps editors compare different playback scaling properties, test frame synchronization, and evaluate overall presentation quality prior to launch.</p>
-            <p>Our tool runs completely client-side in your web browser, ensuring fast page load speeds, low resource usage, and total privacy for your creative testing workflows.</p>
-
-            <!-- Related Tools Section -->
-            <div style="margin-top: 35px; padding-top: 20px; border-top: 1px dashed #444;">
-                <h3 style="color: var(--cyan-accent); font-size: 1.2rem; margin-bottom: 15px;">
-                    🔗 Related Multi-View Tools for Content Creators
-                </h3>
-                <div class="crossroads-grid">
-                    <a href="https://pooreyoutuber.github.io/multi-live.html" target="_blank" class="crossroads-card">
-                        <div>
-                            <div class="card-tag">Tool #1</div>
-                            <div class="card-headline">YouTube Multi Live Viewer</div>
-                        </div>
-                        <div class="card-desc">Monitor multiple YouTube live streams side by side in real time.</div>
-                    </a>
-
-                    <a href="https://pooreyoutuber.github.io/shorts-booster.html" target="_blank" class="crossroads-card">
-                        <div>
-                            <div class="card-tag">Tool #2</div>
-                            <div class="card-headline">YouTube Shorts Grid Viewer</div>
-                        </div>
-                        <div class="card-desc">Dedicated vertical multi-window preview tool for YouTube Shorts.</div>
-                    </a>
-
-                    <a href="https://pooreyoutuber.github.io/instagram-booster.html" target="_blank" class="crossroads-card">
-                        <div>
-                            <div class="card-tag">Tool #3</div>
-                            <div class="card-headline">Instagram Reel Multi Viewer</div>
-                        </div>
-                        <div class="card-desc">Compare and preview multiple Instagram Reels layouts simultaneously.</div>
-                    </a>
-
-                    <a href="https://pooreyoutuber.github.io/website-booster.html" target="_blank" class="crossroads-card">
-                        <div>
-                            <div class="card-tag">Tool #4</div>
-                            <div class="card-headline">Multi Browser Grid Tool</div>
-                        </div>
-                        <div class="card-desc">Test web layouts and responsive design screens across multiple windows.</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- FAQs Accordion -->
-            <div class="faq-section">
-                <h2 class="faq-title">Frequently Asked Questions (FAQs)</h2>
-                
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        How does TikTok Multi Viewer work?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        TikTok Multi Viewer extracts the video ID from a valid TikTok URL and embeds multiple responsive instances side by side in a single web page layout grid for synchronous viewing and analysis.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Is TikTok Multi Viewer free to use?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Yes, this tool is 100% free with no hidden charges, premium subscriptions, or sign-up requirements.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Do I need to sign in or register an account?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        No registration or login is required. You can use all features directly inside your web browser without entering personal information.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Is TikTok Multi Viewer safe for my device?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Yes, the viewer runs entirely on client-side HTML, CSS, and JavaScript inside standard browser sandboxed iframes without requiring executable downloads.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Does this tool generate fake views or manipulate algorithm stats?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        No. This tool does not generate fake views, automated background clicks, or artificial stats. It is purely designed for video layout testing, frame sync, and visual presentation comparison.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Can I watch multiple videos on mobile devices?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Yes, the layout uses fully responsive CSS flex/grid breakpoints that adapt automatically across smartphones, tablets, and desktop displays.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        How many video instances can I view simultaneously?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        You can set your viewer count anywhere between 1 and 20 screens based on your device performance and internet speed.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Does TikTok Multi Viewer store personal data?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        No. The utility operates fully in-browser without storing logs, links, or personal information on external database servers.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Can I compare two different videos side by side?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Yes, video creators use the multi-screen grid to inspect video framing, safe-zone borders, text overlay placements, and audio sync side by side.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Which web browsers are supported?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        It is compatible with modern HTML5 web browsers including Chrome, Firefox, Safari, Edge, and Opera.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Why is my video not loading in the grid?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Make sure you enter a valid public TikTok video URL containing a standard numeric video ID. Private or deleted videos cannot be embedded.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Can I test audio across all viewer windows?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Modern web browsers enforce autoplay restrictions that mute multi-instance embedded videos by default to prevent overlapping sound.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Does this viewer require browser extension downloads?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        No extensions or plugins are needed. The utility runs natively inside standard web browser tabs.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        What video link format is accepted?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Standard web URLs like https://www.tiktok.com/@username/video/1234567890123456789 are fully supported.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Is TikTok Multi Viewer suitable for video editors and media teams?
-                        <span class="faq-icon">+</span>
-                    </button>
-                    <div class="faq-answer">
-                        Yes, content teams and editors use this workspace to verify safe-zone text alignments and visual playback flow before final publishing.
-                    </div>
-                </div>
-            </div>
-
-            <!-- Disclaimer Statement -->
-            <p class="friendly-disclaimer">
-                <strong>Disclaimer:</strong> TikTok Multi Viewer is an independent web utility designed for media testing, responsive design evaluation, and creative layout inspection. It does not provide artificial views, automated stats, or algorithmic growth manipulation. All users utilize this layout testing workspace at their own discretion for content analysis purposes.
-            </p>
-        </article>
+  <!-- ============================= UPLOAD ============================= -->
+  <section class="section" id="uploadSection">
+    <div class="section-head">
+      <div class="section-eyebrow">Step 01</div>
+      <h2 class="section-title">Upload your clip</h2>
+      <p class="section-desc">Short clips work best — up to 15 seconds, 720p, under 100MB.</p>
     </div>
 
-    <footer>
-        © 2026 PooreYoutuber | Optimized for Creator Success & Technical Standards
-    </footer>
+    <div class="upload-zone glass" id="uploadZone" tabindex="0" role="button" aria-label="Upload a video, drag and drop or browse files">
+      <div class="upload-icon">🎬</div>
+      <h3>Drag &amp; drop your video</h3>
+      <p>or click below to browse your files</p>
+      <button class="browse-btn" id="browseBtn" type="button">Browse Files</button>
+      <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/webm" class="sr-only">
+      <div class="upload-meta">
+        <span>Formats: MP4 · MOV · WEBM</span>
+        <span>Max 15 seconds</span>
+        <span>Max 720p</span>
+        <span>Recommended ≤ 100MB</span>
+      </div>
+      <div class="upload-error hidden" id="uploadError"></div>
+    </div>
 
-    <!-- JavaScript Execution Layer -->
-    <script>
-        // FAQ Accordion Toggle Logic
-        function toggleFaq(button) {
-            const item = button.parentElement;
-            item.classList.toggle('active');
-            
-            const answer = button.nextElementSibling;
-            if (item.classList.contains('active')) {
-                answer.style.maxHeight = answer.scrollHeight + "px";
-            } else {
-                answer.style.maxHeight = "0px";
-            }
+    <div class="info-card glass" id="infoCard">
+      <div class="info-thumb"><canvas id="thumbCanvas"></canvas></div>
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Resolution</div><div class="value" id="infoRes">—</div></div>
+        <div class="info-item"><div class="label">Duration</div><div class="value" id="infoDur">—</div></div>
+        <div class="info-item"><div class="label">Est. Frames</div><div class="value" id="infoFrames">—</div></div>
+        <div class="info-item"><div class="label">Est. Time</div><div class="value" id="infoTime">—</div></div>
+        <div class="info-item"><div class="label">File Size</div><div class="value" id="infoSize">—</div></div>
+      </div>
+      <button class="remove-btn" id="removeBtn" type="button">Remove ✕</button>
+    </div>
+    <video id="sourceVideo" class="hidden" muted playsinline crossorigin="anonymous"></video>
+  </section>
+
+  <!-- ============================= STYLE SELECTION ============================= -->
+  <section class="section hidden" id="styleSection">
+    <div class="section-head">
+      <div class="section-eyebrow">Step 02</div>
+      <h2 class="section-title">Choose an anime style</h2>
+      <p class="section-desc">Every style tunes outlines, palette, contrast and lighting a little differently.</p>
+    </div>
+    <div class="style-grid" id="styleGrid"></div>
+  </section>
+
+  <!-- ============================= SETTINGS ============================= -->
+  <section class="section hidden" id="settingsSection">
+    <div class="section-head">
+      <div class="section-eyebrow">Step 03</div>
+      <h2 class="section-title">Processing settings</h2>
+      <p class="section-desc">Balance speed and quality — everything still runs locally on your device.</p>
+    </div>
+    <div class="settings-grid">
+      <div class="settings-block glass">
+        <h4>⚙️ Quality</h4>
+        <div class="seg" id="qualitySeg">
+          <button data-quality="fast">Fast</button>
+          <button data-quality="balanced" class="active">Balanced</button>
+          <button data-quality="high">High Quality</button>
+        </div>
+        <div class="frame-estimate" id="frameEstimateText">Your video will generate approximately — frames.</div>
+      </div>
+      <div class="settings-block glass">
+        <h4>🖼️ Output</h4>
+        <div class="toggle-row"><span>Resolution</span><b style="color:var(--ink)">720p max</b></div>
+        <div class="toggle-row"><span>Frame rate</span><b id="fpsLabel" style="color:var(--ink)">7 FPS</b></div>
+      </div>
+      <div class="settings-block glass">
+        <h4>✨ Enhancements</h4>
+        <div class="toggle-row"><span>Eye Enhancement</span>
+          <label class="switch"><input type="checkbox" id="optEye" checked><span class="slider-tog"></span></label>
+        </div>
+        <div class="toggle-row"><span>Hair Enhancement</span>
+          <label class="switch"><input type="checkbox" id="optHair" checked><span class="slider-tog"></span></label>
+        </div>
+        <div class="toggle-row"><span>Face Smoothing</span>
+          <label class="switch"><input type="checkbox" id="optSkin" checked><span class="slider-tog"></span></label>
+        </div>
+        <div class="toggle-row"><span>Cartoon Outline</span>
+          <label class="switch"><input type="checkbox" id="optOutline" checked><span class="slider-tog"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="generate-wrap">
+      <button class="generate-btn" id="generateBtn" disabled>🪄 Generate Anime Video</button>
+    </div>
+  </section>
+
+  <!-- ============================= PROGRESS ============================= -->
+  <section class="section hidden" id="progressSection">
+    <div class="glass progress-screen">
+      <h3 class="progress-stage" id="progStage">Preparing…</h3>
+      <p class="progress-sub" id="progSub">Warming up the anime engine</p>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <div class="progress-pct" id="progPct">0%</div>
+      <div class="progress-stats">
+        <div class="pstat"><div class="l">Elapsed</div><div class="v" id="statElapsed">0s</div></div>
+        <div class="pstat"><div class="l">Remaining</div><div class="v" id="statRemaining">—</div></div>
+        <div class="pstat"><div class="l">Frame</div><div class="v" id="statFrame">0 / 0</div></div>
+        <div class="pstat"><div class="l">Memory</div><div class="v" id="statMemory">—</div></div>
+      </div>
+      <div class="stage-track" id="stageTrack"></div>
+      <div class="mini-canvas-preview"><canvas id="livePreview"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============================= RESULT ============================= -->
+  <section class="section hidden" id="resultSection">
+    <div class="section-head">
+      <div class="section-eyebrow">Done</div>
+      <h2 class="section-title">Your anime video is ready</h2>
+      <p class="section-desc">Preview, compare against the original, and download.</p>
+    </div>
+    <div class="glass result-wrap">
+      <div class="result-tabs">
+        <button class="active" data-tab="preview" type="button">▶ Preview</button>
+        <button data-tab="compare" type="button">⇔ Compare</button>
+      </div>
+
+      <div id="tabPreview">
+        <div class="video-stage"><video id="resultVideo" controls playsinline></video></div>
+        <div class="video-controls">
+          <button class="ctrl-btn" id="playBtn">▶ Play</button>
+          <button class="ctrl-btn" id="pauseBtn">⏸ Pause</button>
+          <button class="ctrl-btn" id="replayBtn">↺ Replay</button>
+        </div>
+      </div>
+
+      <div id="tabCompare" class="hidden">
+        <div class="compare-wrap" id="compareWrap">
+          <img id="compareBefore" alt="Original frame">
+          <img id="compareAfter" class="compare-after" alt="Anime styled frame">
+          <div class="compare-slider" id="compareSlider"></div>
+          <div class="compare-tag tag-left">Original</div>
+          <div class="compare-tag tag-right">Anime</div>
+        </div>
+      </div>
+
+      <div class="download-grid">
+        <button class="dl-card" id="dlVideo" type="button"><div class="ic">⬇️</div><h5>Download Video</h5><p>WebM, ready to share</p></button>
+        <button class="dl-card" id="dlZip" type="button"><div class="ic">🗂️</div><h5>Download ZIP Frames</h5><p>Every processed frame as PNG</p></button>
+        <button class="dl-card" id="dlThumb" type="button"><div class="ic">🖼️</div><h5>Download Thumbnail</h5><p>First anime frame as PNG</p></button>
+        <button class="dl-card" id="dlLink" type="button"><div class="ic">🔗</div><h5>Copy Link</h5><p>Local object URL to clipboard</p></button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Rotoshi · Runs entirely in your browser · No files ever leave your device
+</footer>
+
+<!-- JSZip is loaded on-demand only when the user requests a ZIP download -->
+<script>
+/* ======================================================================
+   ROTOSHI — AI Video to Anime Converter
+   100% client-side. No network calls for processing.
+   ====================================================================== */
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+   0. CONSTANTS & STYLE DEFINITIONS
+--------------------------------------------------------------------- */
+const MAX_DURATION = 15;          // seconds
+const MAX_DIM = 720;              // px, longest side cap
+const RECOMMENDED_SIZE = 100 * 1024 * 1024; // 100MB
+
+const QUALITY_FPS = { fast: 5, balanced: 7, high: 10 };
+
+// 20 anime/cartoon style presets. Each tunes a shared filter pipeline.
+const STYLES = [
+  { id:'anime-classic', name:'Anime Classic', emoji:'🎴', desc:'Bold outlines, warm palette', swatch:'linear-gradient(135deg,#FF9A5A,#FF6C6C)',
+    p:{ posterize:6, saturation:1.35, contrast:1.18, brightness:1.03, hue:2, warmth:8, edge:0.55, edgeColor:'#241018', skin:0.5 } },
+  { id:'modern-anime', name:'Modern Anime', emoji:'✨', desc:'Crisp, vibrant, high contrast', swatch:'linear-gradient(135deg,#8B6CFF,#3CE8D0)',
+    p:{ posterize:7, saturation:1.3, contrast:1.28, brightness:1.02, hue:0, warmth:0, edge:0.5, edgeColor:'#101018', skin:0.55 } },
+  { id:'japanese-anime', name:'Japanese Anime', emoji:'⛩️', desc:'Cel-shaded, saturated tones', swatch:'linear-gradient(135deg,#FF6CAE,#8B6CFF)',
+    p:{ posterize:5, saturation:1.4, contrast:1.2, brightness:1.0, hue:-4, warmth:4, edge:0.6, edgeColor:'#1a0f14', skin:0.5 } },
+  { id:'studio-style', name:'Studio Style', emoji:'🎬', desc:'Cinematic, filmic contrast', swatch:'linear-gradient(135deg,#3C3C56,#8B6CFF)',
+    p:{ posterize:6, saturation:1.15, contrast:1.32, brightness:0.98, hue:0, warmth:-2, edge:0.45, edgeColor:'#141420', skin:0.4 } },
+  { id:'manga', name:'Manga', emoji:'🖋️', desc:'High-contrast near mono', swatch:'linear-gradient(135deg,#DADADA,#3C3C56)',
+    p:{ posterize:4, saturation:0.25, contrast:1.5, brightness:1.05, hue:0, warmth:0, edge:0.85, edgeColor:'#000000', skin:0.15 } },
+  { id:'comic', name:'Comic', emoji:'💥', desc:'Pop halftone-style contrast', swatch:'linear-gradient(135deg,#FFC15E,#FF6C6C)',
+    p:{ posterize:5, saturation:1.5, contrast:1.35, brightness:1.02, hue:6, warmth:10, edge:0.7, edgeColor:'#12080a', skin:0.35 } },
+  { id:'cartoon', name:'Cartoon', emoji:'🎈', desc:'Flat color, thick outlines', swatch:'linear-gradient(135deg,#FF8FB1,#FFC15E)',
+    p:{ posterize:5, saturation:1.45, contrast:1.15, brightness:1.06, hue:0, warmth:6, edge:0.75, edgeColor:'#241018', skin:0.6 } },
+  { id:'3d-cartoon', name:'3D Cartoon', emoji:'🧊', desc:'Rounded, soft shading', swatch:'linear-gradient(135deg,#7CE8C4,#8B6CFF)',
+    p:{ posterize:8, saturation:1.2, contrast:1.1, brightness:1.05, hue:0, warmth:2, edge:0.3, edgeColor:'#1a1a24', skin:0.65 } },
+  { id:'pixar-inspired', name:'Pixar Inspired', emoji:'🎠', desc:'Warm, glossy, expressive', swatch:'linear-gradient(135deg,#FFC15E,#3CE8D0)',
+    p:{ posterize:9, saturation:1.25, contrast:1.12, brightness:1.08, hue:2, warmth:10, edge:0.28, edgeColor:'#20140f', skin:0.7 } },
+  { id:'ghibli-inspired', name:'Ghibli Inspired', emoji:'🌿', desc:'Soft pastel, painterly', swatch:'linear-gradient(135deg,#9BD68D,#8FC1E3)',
+    p:{ posterize:7, saturation:1.1, contrast:1.05, brightness:1.06, hue:-6, warmth:6, edge:0.35, edgeColor:'#20241a', skin:0.55 } },
+  { id:'cute-anime', name:'Cute Anime', emoji:'🎀', desc:'Bright pastels, big eyes', swatch:'linear-gradient(135deg,#FFB3D9,#B3E0FF)',
+    p:{ posterize:6, saturation:1.3, contrast:1.05, brightness:1.12, hue:-2, warmth:8, edge:0.4, edgeColor:'#2a1420', skin:0.75 } },
+  { id:'soft-anime', name:'Soft Anime', emoji:'🌙', desc:'Muted glow, gentle contrast', swatch:'linear-gradient(135deg,#C7B8FF,#F2C9E0)',
+    p:{ posterize:8, saturation:1.0, contrast:0.98, brightness:1.1, hue:-4, warmth:4, edge:0.25, edgeColor:'#221a26', skin:0.6 } },
+  { id:'fantasy-anime', name:'Fantasy Anime', emoji:'🐉', desc:'Rich saturated fantasy hues', swatch:'linear-gradient(135deg,#8B6CFF,#FF6CAE)',
+    p:{ posterize:6, saturation:1.4, contrast:1.22, brightness:1.0, hue:8, warmth:2, edge:0.5, edgeColor:'#160a20', skin:0.45 } },
+  { id:'cyber-anime', name:'Cyber Anime', emoji:'🤖', desc:'Cool tones, sharp edges', swatch:'linear-gradient(135deg,#3CE8D0,#3C3CFF)',
+    p:{ posterize:5, saturation:1.3, contrast:1.35, brightness:0.96, hue:-10, warmth:-14, edge:0.65, edgeColor:'#00131a', skin:0.3 } },
+  { id:'neon-anime', name:'Neon Anime', emoji:'🌆', desc:'Electric glow, deep shadows', swatch:'linear-gradient(135deg,#FF3CAE,#3CE8FF)',
+    p:{ posterize:5, saturation:1.55, contrast:1.4, brightness:0.95, hue:4, warmth:-6, edge:0.6, edgeColor:'#100018', skin:0.35, glow:true } },
+  { id:'watercolor-anime', name:'Watercolor Anime', emoji:'🎨', desc:'Bleeding pastel washes', swatch:'linear-gradient(135deg,#B3E0FF,#FFD6E0)',
+    p:{ posterize:9, saturation:0.95, contrast:0.92, brightness:1.1, hue:-2, warmth:4, edge:0.18, edgeColor:'#2a2430', skin:0.5, blurWash:true } },
+  { id:'sketch-anime', name:'Sketch Anime', emoji:'✏️', desc:'Graphite lines, low color', swatch:'linear-gradient(135deg,#CFCFCF,#8A8A8A)',
+    p:{ posterize:4, saturation:0.15, contrast:1.25, brightness:1.1, hue:0, warmth:0, edge:0.9, edgeColor:'#000000', skin:0.1 } },
+  { id:'ink-style', name:'Ink Style', emoji:'🖌️', desc:'Bold black ink, stark', swatch:'linear-gradient(135deg,#1a1a1a,#5a5a5a)',
+    p:{ posterize:3, saturation:0.4, contrast:1.5, brightness:1.0, hue:0, warmth:0, edge:0.95, edgeColor:'#000000', skin:0.1 } },
+  { id:'vintage-anime', name:'Vintage Anime', emoji:'📼', desc:'Faded film, sepia warmth', swatch:'linear-gradient(135deg,#D8A857,#8C6239)',
+    p:{ posterize:6, saturation:0.75, contrast:1.05, brightness:1.0, hue:10, warmth:18, edge:0.4, edgeColor:'#241a10', skin:0.4 } },
+  { id:'pop-art', name:'Pop Art', emoji:'🧨', desc:'Loud primaries, hard edges', swatch:'linear-gradient(135deg,#FF3C3C,#FFD23C)',
+    p:{ posterize:4, saturation:1.7, contrast:1.4, brightness:1.02, hue:0, warmth:0, edge:0.8, edgeColor:'#000000', skin:0.2 } },
+];
+
+/* ---------------------------------------------------------------------
+   1. STATE
+--------------------------------------------------------------------- */
+const state = {
+  file:null, videoW:0, videoH:0, outW:0, outH:0, duration:0,
+  style: STYLES[0],
+  quality:'balanced',
+  fps:7,
+  frameCount:0,
+  options:{ eye:true, hair:true, skin:true, outline:true },
+  processedFrames: [],   // array of dataURLs (small, resized) kept only for the currently generated video
+  videoBlobUrl:null,
+  cancelled:false,
+};
+
+/* ---------------------------------------------------------------------
+   2. DOM SHORTCUTS
+--------------------------------------------------------------------- */
+const $ = (id)=>document.getElementById(id);
+const sourceVideo = $('sourceVideo');
+const fileInput = $('fileInput');
+const uploadZone = $('uploadZone');
+const uploadError = $('uploadError');
+const infoCard = $('infoCard');
+const thumbCanvas = $('thumbCanvas');
+const styleSection = $('styleSection');
+const settingsSection = $('settingsSection');
+const styleGrid = $('styleGrid');
+const generateBtn = $('generateBtn');
+const progressSection = $('progressSection');
+const resultSection = $('resultSection');
+
+/* ---------------------------------------------------------------------
+   3. UTILITIES
+--------------------------------------------------------------------- */
+function toast(msg, ms=3600){
+  const region = $('toastRegion');
+  const t = document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  region.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, ms);
+}
+function fmtTime(s){
+  s = Math.max(0, Math.round(s));
+  const m = Math.floor(s/60), sec = s%60;
+  return m>0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+function fmtBytes(b){
+  if(b > 1024*1024) return (b/(1024*1024)).toFixed(1)+' MB';
+  return (b/1024).toFixed(0)+' KB';
+}
+function memoryUsage(){
+  if(performance.memory){
+    return fmtBytes(performance.memory.usedJSHeapSize);
+  }
+  return 'N/A';
+}
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+/* ---------------------------------------------------------------------
+   4. THEME TOGGLE
+--------------------------------------------------------------------- */
+$('themeToggle').addEventListener('click', ()=>{
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  $('themeToggle').textContent = isDark ? '☀️' : '🌙';
+});
+
+/* ---------------------------------------------------------------------
+   5. STYLE GRID RENDER
+--------------------------------------------------------------------- */
+function renderStyleGrid(){
+  styleGrid.innerHTML = STYLES.map(s=>`
+    <div class="style-card ${s.id===state.style.id?'active':''}" data-id="${s.id}" tabindex="0" role="button" aria-pressed="${s.id===state.style.id}">
+      <div class="check">✓</div>
+      <div class="style-swatch" style="background:${s.swatch}">${s.emoji}</div>
+      <h4>${s.name}</h4>
+      <p>${s.desc}</p>
+    </div>
+  `).join('');
+  styleGrid.querySelectorAll('.style-card').forEach(card=>{
+    card.addEventListener('click', ()=>selectStyle(card.dataset.id));
+    card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectStyle(card.dataset.id); } });
+  });
+}
+function selectStyle(id){
+  state.style = STYLES.find(s=>s.id===id) || STYLES[0];
+  styleGrid.querySelectorAll('.style-card').forEach(c=>{
+    const active = c.dataset.id === id;
+    c.classList.toggle('active', active);
+    c.setAttribute('aria-pressed', active);
+  });
+  generateBtn.disabled = false;
+}
+renderStyleGrid();
+
+/* ---------------------------------------------------------------------
+   6. UPLOAD HANDLING
+--------------------------------------------------------------------- */
+$('browseBtn').addEventListener('click', (e)=>{ e.stopPropagation(); fileInput.click(); });
+uploadZone.addEventListener('click', ()=> fileInput.click());
+uploadZone.addEventListener('keydown', (e)=>{ if(e.key==='Enter') fileInput.click(); });
+fileInput.addEventListener('change', (e)=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+['dragenter','dragover'].forEach(ev=>uploadZone.addEventListener(ev, e=>{
+  e.preventDefault(); e.stopPropagation(); uploadZone.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev=>uploadZone.addEventListener(ev, e=>{
+  e.preventDefault(); e.stopPropagation(); uploadZone.classList.remove('drag');
+}));
+uploadZone.addEventListener('drop', (e)=>{
+  const f = e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+
+function showUploadError(msg){
+  uploadError.textContent = '⚠️ '+msg;
+  uploadError.classList.remove('hidden');
+}
+function clearUploadError(){ uploadError.classList.add('hidden'); }
+
+function handleFile(file){
+  clearUploadError();
+  const okTypes = ['video/mp4','video/quicktime','video/webm','video/x-m4v'];
+  if(!okTypes.includes(file.type) && !/\.(mp4|mov|webm)$/i.test(file.name)){
+    showUploadError('Unsupported format. Please upload MP4, MOV or WEBM.');
+    return;
+  }
+  if(file.size > RECOMMENDED_SIZE){
+    toast('This file is larger than the recommended 100MB — processing may be slow.');
+  }
+  state.file = file;
+  const url = URL.createObjectURL(file);
+  sourceVideo.src = url;
+  sourceVideo.onloadedmetadata = ()=>{
+    if(sourceVideo.duration > MAX_DURATION + 0.25){
+      showUploadError(`Video is ${sourceVideo.duration.toFixed(1)}s — please upload a clip of 15 seconds or less.`);
+      infoCard.classList.remove('show');
+      styleSection.classList.add('hidden');
+      settingsSection.classList.add('hidden');
+      return;
+    }
+    state.duration = Math.min(sourceVideo.duration, MAX_DURATION);
+    state.videoW = sourceVideo.videoWidth;
+    state.videoH = sourceVideo.videoHeight;
+    computeOutputSize();
+    drawThumbnail();
+    updateInfoCard(file);
+    infoCard.classList.add('show');
+    styleSection.classList.remove('hidden');
+    settingsSection.classList.remove('hidden');
+    updateFrameEstimate();
+    generateBtn.disabled = false;
+    styleSection.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  sourceVideo.onerror = ()=> showUploadError('Could not read this video file. Try a different file.');
+}
+
+function computeOutputSize(){
+  const {videoW, videoH} = state;
+  const longest = Math.max(videoW, videoH);
+  const scale = longest > MAX_DIM ? MAX_DIM/longest : 1;
+  state.outW = Math.round(videoW*scale/2)*2;
+  state.outH = Math.round(videoH*scale/2)*2;
+}
+
+function drawThumbnail(){
+  sourceVideo.currentTime = 0.05;
+  sourceVideo.onseeked = ()=>{
+    const c = thumbCanvas;
+    c.width = 300; c.height = 300;
+    const ctx = c.getContext('2d');
+    const s = Math.max(300/state.videoW, 300/state.videoH);
+    const w = state.videoW*s, h = state.videoH*s;
+    ctx.drawImage(sourceVideo, (300-w)/2, (300-h)/2, w, h);
+    sourceVideo.onseeked = null;
+  };
+}
+
+function updateInfoCard(file){
+  $('infoRes').textContent = `${state.outW}×${state.outH}`;
+  $('infoDur').textContent = state.duration.toFixed(1)+'s';
+  $('infoSize').textContent = fmtBytes(file.size);
+  updateFrameEstimate();
+}
+
+function updateFrameEstimate(){
+  const fps = QUALITY_FPS[state.quality];
+  state.fps = fps;
+  const frames = Math.round(state.duration * fps);
+  state.frameCount = frames;
+  $('infoFrames').textContent = frames;
+  const estSecPerFrame = 0.045 + (fps>=10?0.02:0);
+  const estTotal = frames * estSecPerFrame + 1.5;
+  $('infoTime').textContent = fmtTime(estTotal);
+  $('fpsLabel').textContent = fps+' FPS';
+  $('frameEstimateText').textContent = `Your video will generate approximately ${frames} frames.`;
+}
+
+$('removeBtn').addEventListener('click', ()=>{
+  state.file = null;
+  fileInput.value='';
+  infoCard.classList.remove('show');
+  styleSection.classList.add('hidden');
+  settingsSection.classList.add('hidden');
+  clearUploadError();
+});
+
+/* ---------------------------------------------------------------------
+   7. SETTINGS
+--------------------------------------------------------------------- */
+$('qualitySeg').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  $('qualitySeg').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  state.quality = btn.dataset.quality;
+  updateFrameEstimate();
+});
+$('optEye').addEventListener('change', e=> state.options.eye = e.target.checked);
+$('optHair').addEventListener('change', e=> state.options.hair = e.target.checked);
+$('optSkin').addEventListener('change', e=> state.options.skin = e.target.checked);
+$('optOutline').addEventListener('change', e=> state.options.outline = e.target.checked);
+
+/* ---------------------------------------------------------------------
+   8. IMAGE PROCESSING PIPELINE (shared by worker + main-thread fallback)
+   Techniques: color quantization (posterize), brightness/contrast/
+   saturation/hue matrix, Sobel edge detection for outlines, heuristic
+   skin-tone smoothing (box blur masked by skin-tone range), and
+   region-weighted "eye/hair enhancement" (saturation/contrast boost in
+   heuristic hair/eye regions). This is a canvas-only pipeline — no
+   model weights are required.
+--------------------------------------------------------------------- */
+const PIPELINE_SRC = `
+function clampByte(v){ return v<0?0:v>255?255:v; }
+
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return [h,s,l];
+}
+function hslToRgb(h,s,l){
+  let r,g,b;
+  if(s===0){ r=g=b=l; }
+  else{
+    const hue2rgb=(p,q,t)=>{
+      if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l-q;
+    r = hue2rgb(p,q,h+1/3);
+    g = hue2rgb(p,q,h);
+    b = hue2rgb(p,q,h-1/3);
+  }
+  return [r*255,g*255,b*255];
+}
+function isSkinTone(r,g,b){
+  return (r>60 && g>30 && b>15 && r>g && r>b && (r-g)>10 && (Math.abs(r-g)+Math.abs(g-b))>12 && r<250);
+}
+
+function processFrame(imageData, params, options, w, h){
+  const src = imageData.data;
+  const out = new Uint8ClampedArray(src);
+
+  // --- 1. Brightness / contrast / saturation / hue / warmth ---
+  const contrast = params.contrast, brightness = params.brightness;
+  const satMul = params.saturation, hueShift = (params.hue||0)/360;
+  const warmth = params.warmth||0;
+  for(let i=0;i<out.length;i+=4){
+    let r=out[i], g=out[i+1], b=out[i+2];
+    r = clampByte((r-128)*contrast+128); g = clampByte((g-128)*contrast+128); b = clampByte((b-128)*contrast+128);
+    r = clampByte(r*brightness); g = clampByte(g*brightness); b = clampByte(b*brightness);
+    r = clampByte(r+warmth); b = clampByte(b-warmth*0.6);
+    let [h_,s_,l_] = rgbToHsl(r,g,b);
+    s_ = clampByte(s_*255*satMul)/255;
+    h_ = (h_ + hueShift + 1) % 1;
+    [r,g,b] = hslToRgb(h_,s_,l_);
+    out[i]=clampByte(r); out[i+1]=clampByte(g); out[i+2]=clampByte(b);
+  }
+
+  // --- 2. Region-weighted eye/hair enhancement (heuristic zones) ---
+  if(options.eye || options.hair){
+    for(let y=0;y<h;y++){
+      const hairZone = y < h*0.32;             // heuristic "hair" band (top)
+      const eyeZone  = y > h*0.28 && y < h*0.52; // heuristic "eye" band (upper-mid face)
+      if(!hairZone && !eyeZone) continue;
+      for(let x=0;x<w;x++){
+        const idx=(y*w+x)*4;
+        let r=out[idx], g=out[idx+1], b=out[idx+2];
+        let [h_,s_,l_] = rgbToHsl(r,g,b);
+        if(hairZone && options.hair){ s_=clampByte(s_*255*1.18)/255; l_=clamp(l_*0.97,0,1); }
+        if(eyeZone && options.eye){ s_=clampByte(s_*255*1.12)/255; }
+        const [nr,ng,nb]=hslToRgb(h_,s_,l_);
+        out[idx]=clampByte(nr); out[idx+1]=clampByte(ng); out[idx+2]=clampByte(nb);
+      }
+    }
+  }
+
+  // --- 3. Skin smoothing (masked box blur) ---
+  if(options.skin && params.skin>0){
+    const radius=2, copy=new Uint8ClampedArray(out);
+    for(let y=radius;y<h-radius;y++){
+      for(let x=radius;x<w-radius;x++){
+        const idx=(y*w+x)*4;
+        const r0=copy[idx], g0=copy[idx+1], b0=copy[idx+2];
+        if(!isSkinTone(r0,g0,b0)) continue;
+        let rs=0,gs=0,bs=0,n=0;
+        for(let dy=-radius;dy<=radius;dy++){
+          for(let dx=-radius;dx<=radius;dx++){
+            const j=((y+dy)*w+(x+dx))*4;
+            rs+=copy[j]; gs+=copy[j+1]; bs+=copy[j+2]; n++;
+          }
         }
+        const mix = params.skin;
+        out[idx]  = clampByte(r0*(1-mix)+ (rs/n)*mix);
+        out[idx+1]= clampByte(g0*(1-mix)+ (gs/n)*mix);
+        out[idx+2]= clampByte(b0*(1-mix)+ (bs/n)*mix);
+      }
+    }
+  }
 
-        // TikTok Video ID Extraction Utility
-        function getTikTokID(url) {
-            const regExp = /\/(video|v)\/(\d{19})/;
-            const match = url.match(regExp);
-            return (match && match[2]) ? match[2] : null;
+  // --- 4. Color quantization (posterize) for a flat "cel-shaded" look ---
+  const levels = params.posterize||6;
+  const step = 255/(levels-1);
+  for(let i=0;i<out.length;i+=4){
+    out[i]   = clampByte(Math.round(out[i]/step)*step);
+    out[i+1] = clampByte(Math.round(out[i+1]/step)*step);
+    out[i+2] = clampByte(Math.round(out[i+2]/step)*step);
+  }
+
+  // --- 5. Sobel edge detection -> cartoon outline overlay ---
+  if(options.outline && params.edge>0){
+    const gray = new Float32Array(w*h);
+    for(let i=0,p=0;i<out.length;i+=4,p++){
+      gray[p] = 0.299*out[i]+0.587*out[i+1]+0.114*out[i+2];
+    }
+    const gx=[-1,0,1,-2,0,2,-1,0,1], gy=[-1,-2,-1,0,0,0,1,2,1];
+    const edgeCol = params.edgeColor ? hexToRgb(params.edgeColor) : [20,15,20];
+    const thresh = 90 - params.edge*40;
+    for(let y=1;y<h-1;y++){
+      for(let x=1;x<w-1;x++){
+        let sx=0, sy=0, k=0;
+        for(let dy=-1;dy<=1;dy++){
+          for(let dx=-1;dx<=1;dx++){
+            const v = gray[(y+dy)*w+(x+dx)];
+            sx += v*gx[k]; sy += v*gy[k]; k++;
+          }
         }
-
-        // Launch Viewer Grid Functionality
-        function launchViewers() {
-            const urlInput = document.getElementById('videoUrl').value.trim();
-            const countInput = parseInt(document.getElementById('browserCount').value);
-            const gridContainer = document.getElementById('videoGridContainer');
-            
-            const isMuted = true;
-            const autoPlayStatus = "1";
-
-            const videoId = getTikTokID(urlInput);
-
-            const socialPlatforms = [
-                "https://www.facebook.com",
-                "https://l.facebook.com/",
-                "https://www.instagram.com",
-                "https://t.co",
-                "https://www.google.com",
-                "https://twitter.com"
-            ];
-
-            const otherPlatforms = [
-                "https://www.tiktok.com/explore",
-                "https://m.tiktok.com/",
-                "https://www.bing.com",
-                "https://www.google.co.in"
-            ];
-
-            if (!videoId) {
-                alert('Please enter a valid TikTok video URL (e.g., https://www.tiktok.com/@user/video/1234567890123456789)');
-                return;
-            }
-
-            gridContainer.innerHTML = '';
-            
-            for (let i = 0; i < countInput; i++) {
-                setTimeout(() => {
-                    const videoBox = document.createElement('div');
-                    videoBox.className = 'video-box';
-
-                    let randomRef;
-                    let chance = Math.random() * 100;
-                    
-                    if (chance <= 70) {
-                        randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
-                    } else {
-                        randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
-                    }
-
-                    const cacheBuster = Math.random().toString(36).substring(7); 
-                    
-                    let embedUrl = `https://www.tiktok.com/embed/v2/${videoId}?autoplay=${autoPlayStatus}&muted=${isMuted ? 1 : 0}&rel=0&loop=1&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
-
-                    const iframe = document.createElement('iframe');
-                    iframe.width = "100%";
-                    iframe.height = "100%";
-                    iframe.src = embedUrl;
-                
-                    iframe.allow = "autoplay; encrypted-media; picture-in-picture; clipboard-write";
-                    iframe.setAttribute('allowfullscreen', 'true');
-                    iframe.style.border = "none";
-                    iframe.style.borderRadius = "12px";
-
-                    videoBox.appendChild(iframe);
-                    gridContainer.appendChild(videoBox);
-                    
-                }, i * 1500);
-            }
+        const mag = Math.sqrt(sx*sx+sy*sy);
+        if(mag > thresh){
+          const idx=(y*w+x)*4;
+          const blend = clamp(params.edge,0,1);
+          out[idx]   = clampByte(out[idx]*(1-blend)+edgeCol[0]*blend);
+          out[idx+1] = clampByte(out[idx+1]*(1-blend)+edgeCol[1]*blend);
+          out[idx+2] = clampByte(out[idx+2]*(1-blend)+edgeCol[2]*blend);
         }
-    </script>
+      }
+    }
+  }
+
+  // --- 6. Optional soft glow (neon-style) ---
+  if(params.glow){
+    for(let i=0;i<out.length;i+=4){
+      out[i]=clampByte(out[i]*1.05+4); out[i+1]=clampByte(out[i+1]*1.02); out[i+2]=clampByte(out[i+2]*1.08+4);
+    }
+  }
+
+  imageData.data.set(out);
+  return imageData;
+}
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  const n = parseInt(hex,16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+`;
+
+// Build real functions in this scope by evaluating the shared source once.
+// eslint-disable-next-line no-new-func
+const pipelineFactory = new Function(PIPELINE_SRC + '; return {processFrame, hexToRgb, clampByte};');
+const Pipeline = pipelineFactory();
+
+/* ---------------------------------------------------------------------
+   9. WORKER SETUP (OffscreenCanvas). Falls back silently if unsupported.
+--------------------------------------------------------------------- */
+let worker = null;
+let workerReady = false;
+function initWorker(){
+  if(!('Worker' in window) || typeof OffscreenCanvas === 'undefined'){
+    workerReady = false; return;
+  }
+  try{
+    const workerBody = `
+      ${PIPELINE_SRC}
+      self.onmessage = function(e){
+        const { bitmap, params, options, w, h, id } = e.data;
+        try{
+          const canvas = new OffscreenCanvas(w, h);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(bitmap, 0, 0, w, h);
+          bitmap.close && bitmap.close();
+          let imgData = ctx.getImageData(0,0,w,h);
+          imgData = processFrame(imgData, params, options, w, h);
+          ctx.putImageData(imgData, 0, 0);
+          canvas.convertToBlob({type:'image/png'}).then(blob=>{
+            self.postMessage({ id, blob });
+          });
+        }catch(err){
+          self.postMessage({ id, error: String(err) });
+        }
+      };
+    `;
+    const blob = new Blob([workerBody], {type:'application/javascript'});
+    worker = new Worker(URL.createObjectURL(blob));
+    workerReady = true;
+  }catch(err){
+    workerReady = false; // silent fallback — never surface errors to the user
+  }
+}
+initWorker();
+
+let workerMsgId = 0;
+function processFrameInWorker(bitmap, params, options, w, h){
+  return new Promise((resolve)=>{
+    const id = ++workerMsgId;
+    const onMsg = (e)=>{
+      if(e.data.id !== id) return;
+      worker.removeEventListener('message', onMsg);
+      if(e.data.error || !e.data.blob){ resolve(null); return; }
+      resolve(e.data.blob);
+    };
+    worker.addEventListener('message', onMsg);
+    try{
+      worker.postMessage({ bitmap, params, options, w, h, id }, [bitmap]);
+    }catch(err){
+      worker.removeEventListener('message', onMsg);
+      resolve(null);
+    }
+  });
+}
+
+/* ---------------------------------------------------------------------
+   10. GENERATE PIPELINE
+--------------------------------------------------------------------- */
+const STAGES = ['Extracting Frames','Converting Frames','Applying Anime Style','Rendering Video','Finalizing'];
+let stageStartTime = 0, overallStartTime = 0;
+
+function setStage(idx, sub){
+  $('progStage').textContent = STAGES[idx] + '…';
+  $('progSub').textContent = sub || '';
+  $('stageTrack').querySelectorAll('.stage-chip').forEach((c,i)=>{
+    c.classList.toggle('active', i===idx);
+    c.classList.toggle('done', i<idx);
+  });
+}
+function renderStageTrack(){
+  $('stageTrack').innerHTML = STAGES.map(s=>`<div class="stage-chip">${s}</div>`).join('');
+}
+function setProgress(pct){
+  $('progFill').style.width = clamp(pct,0,100)+'%';
+  $('progPct').textContent = Math.round(clamp(pct,0,100))+'%';
+}
+function updateStats(frameIdx, total){
+  const elapsed = (performance.now()-overallStartTime)/1000;
+  $('statElapsed').textContent = fmtTime(elapsed);
+  const perFrame = frameIdx>0 ? elapsed/frameIdx : 0.08;
+  const remaining = Math.max(0, (total-frameIdx)*perFrame);
+  $('statRemaining').textContent = frameIdx>0 ? fmtTime(remaining) : '—';
+  $('statFrame').textContent = `${frameIdx} / ${total}`;
+  $('statMemory').textContent = memoryUsage();
+}
+
+generateBtn.addEventListener('click', runPipeline);
+
+async function runPipeline(){
+  if(!state.file){ toast('Please upload a video first.'); return; }
+  state.cancelled = false;
+  state.processedFrames = [];
+
+  styleSection.classList.add('hidden');
+  settingsSection.classList.add('hidden');
+  resultSection.classList.add('hidden');
+  progressSection.classList.remove('hidden');
+  renderStageTrack();
+  overallStartTime = performance.now();
+  progressSection.scrollIntoView({behavior:'smooth', block:'start'});
+
+  const { outW, outH, fps, duration, style, options } = state;
+  const frameCount = Math.max(1, Math.round(duration*fps));
+  const liveCanvas = $('livePreview');
+  liveCanvas.width = outW; liveCanvas.height = outH;
+  const liveCtx = liveCanvas.getContext('2d');
+
+  // Offscreen extraction canvas
+  const extractCanvas = document.createElement('canvas');
+  extractCanvas.width = outW; extractCanvas.height = outH;
+  const extractCtx = extractCanvas.getContext('2d', { willReadFrequently:true });
+
+  setStage(0, `Preparing to extract ~${frameCount} frames at ${fps} FPS`);
+  setProgress(2);
+  await sleep(120);
+
+  const processedBlobs = [];
+
+  for(let i=0;i<frameCount;i++){
+    if(state.cancelled) return;
+    const t = Math.min(duration - 0.001, i/fps);
+    await seekTo(sourceVideo, t);
+
+    setStage(1, `Frame ${i+1} of ${frameCount}`);
+    extractCtx.drawImage(sourceVideo, 0, 0, outW, outH);
+
+    setStage(2, `Applying "${style.name}" · frame ${i+1} of ${frameCount}`);
+
+    let resultBlob = null;
+    if(workerReady){
+      try{
+        const bitmap = await createImageBitmap(extractCanvas);
+        resultBlob = await processFrameInWorker(bitmap, style.p, options, outW, outH);
+      }catch(err){ resultBlob = null; }
+    }
+    if(!resultBlob){
+      // Main-thread fallback — never shown as an error to the user.
+      let imgData = extractCtx.getImageData(0,0,outW,outH);
+      imgData = Pipeline.processFrame(imgData, style.p, options, outW, outH);
+      extractCtx.putImageData(imgData,0,0);
+      resultBlob = await new Promise(res=> extractCanvas.toBlob(res,'image/png'));
+    }
+
+    processedBlobs.push(resultBlob);
+
+    // live preview
+    const bmp = await createImageBitmap(resultBlob);
+    liveCtx.clearRect(0,0,outW,outH);
+    liveCtx.drawImage(bmp,0,0,outW,outH);
+    bmp.close && bmp.close();
+
+    const pct = 5 + (i+1)/frameCount*70;
+    setProgress(pct);
+    updateStats(i+1, frameCount);
+
+    // yield to keep the UI responsive
+    await sleep(0);
+  }
+
+  setStage(3, 'Encoding your anime video…');
+  setProgress(78);
+  await sleep(100);
+
+  try{
+    const videoBlob = await renderVideoFromFrames(processedBlobs, outW, outH, fps, (pct)=>{
+      setProgress(78 + pct*0.18);
+    });
+    setStage(4, 'Wrapping up');
+    setProgress(98);
+    await sleep(200);
+
+    if(state.videoBlobUrl) URL.revokeObjectURL(state.videoBlobUrl);
+    state.videoBlobUrl = URL.createObjectURL(videoBlob);
+    state.videoBlob = videoBlob;
+    state.processedFrames = processedBlobs;
+
+    setProgress(100);
+    await sleep(300);
+    showResult();
+  }catch(err){
+    // Never surface a hard error — degrade gracefully to a frame-preview-only result.
+    toast('Video encoding used a fallback path — frames are still available to download.');
+    state.processedFrames = processedBlobs;
+    state.videoBlob = null;
+    showResult(true);
+  }
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function seekTo(video, time){
+  return new Promise((resolve)=>{
+    const onSeeked = ()=>{ video.removeEventListener('seeked', onSeeked); resolve(); };
+    video.addEventListener('seeked', onSeeked);
+    video.currentTime = time;
+  });
+}
+
+// Renders a sequence of frame blobs into a WebM video via captureStream + MediaRecorder.
+function renderVideoFromFrames(blobs, w, h, fps, onProgress){
+  return new Promise(async (resolve, reject)=>{
+    if(typeof MediaRecorder === 'undefined' || !HTMLCanvasElement.prototype.captureStream){
+      reject(new Error('MediaRecorder unsupported')); return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const stream = canvas.captureStream(fps);
+
+    let mimeType = 'video/webm;codecs=vp9';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4_000_000 });
+    const chunks = [];
+    recorder.ondataavailable = (e)=>{ if(e.data.size>0) chunks.push(e.data); };
+    recorder.onstop = ()=> resolve(new Blob(chunks, {type:'video/webm'}));
+    recorder.onerror = (e)=> reject(e.error || new Error('recorder error'));
+
+    recorder.start();
+    const frameDuration = 1000/fps;
+
+    for(let i=0;i<blobs.length;i++){
+      const bmp = await createImageBitmap(blobs[i]);
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(bmp,0,0,w,h);
+      bmp.close && bmp.close();
+      onProgress && onProgress((i+1)/blobs.length*100);
+      await sleep(frameDuration);
+    }
+    await sleep(frameDuration + 60);
+    recorder.stop();
+  });
+}
+
+/* ---------------------------------------------------------------------
+   11. RESULT SCREEN
+--------------------------------------------------------------------- */
+function showResult(videoFailed){
+  progressSection.classList.add('hidden');
+  resultSection.classList.remove('hidden');
+  resultSection.scrollIntoView({behavior:'smooth', block:'start'});
+
+  const rv = $('resultVideo');
+  if(state.videoBlobUrl && !videoFailed){
+    rv.src = state.videoBlobUrl;
+  }else{
+    rv.removeAttribute('src');
+  }
+
+  // Compare tab: first original frame vs first processed frame
+  const beforeImg = $('compareBefore');
+  const afterImg = $('compareAfter');
+  const compareCanvas = document.createElement('canvas');
+  compareCanvas.width = state.outW; compareCanvas.height = state.outH;
+  const cctx = compareCanvas.getContext('2d');
+  seekTo(sourceVideo, 0).then(()=>{
+    cctx.drawImage(sourceVideo,0,0,state.outW,state.outH);
+    beforeImg.src = compareCanvas.toDataURL('image/jpeg',0.9);
+  });
+  if(state.processedFrames[0]){
+    const url = URL.createObjectURL(state.processedFrames[0]);
+    afterImg.src = url;
+  }
+}
+
+// Result tabs
+document.querySelectorAll('.result-tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.result-tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    $('tabPreview').classList.toggle('hidden', tab!=='preview');
+    $('tabCompare').classList.toggle('hidden', tab!=='compare');
+  });
+});
+
+// Compare slider drag
+(function setupCompareSlider(){
+  const wrap = $('compareWrap'), slider = $('compareSlider'), after = $('compareAfter');
+  let dragging=false;
+  function setPos(clientX){
+    const rect = wrap.getBoundingClientRect();
+    const pct = clamp(((clientX-rect.left)/rect.width)*100, 0, 100);
+    slider.style.left = pct+'%';
+    after.style.clipPath = `inset(0 0 0 ${pct}%)`;
+  }
+  slider.addEventListener('pointerdown', ()=>dragging=true);
+  window.addEventListener('pointerup', ()=>dragging=false);
+  window.addEventListener('pointermove', (e)=>{ if(dragging) setPos(e.clientX); });
+  wrap.addEventListener('click', (e)=> setPos(e.clientX));
+})();
+
+// Video controls
+$('playBtn').addEventListener('click', ()=> $('resultVideo').play());
+$('pauseBtn').addEventListener('click', ()=> $('resultVideo').pause());
+$('replayBtn').addEventListener('click', ()=>{ const v=$('resultVideo'); v.currentTime=0; v.play(); });
+
+/* ---------------------------------------------------------------------
+   12. DOWNLOADS
+--------------------------------------------------------------------- */
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+$('dlVideo').addEventListener('click', ()=>{
+  if(!state.videoBlob){ toast('Video export is unavailable in this browser — try the ZIP frames instead.'); return; }
+  downloadBlob(state.videoBlob, `rotoshi-${state.style.id}.webm`);
+});
+
+$('dlThumb').addEventListener('click', ()=>{
+  if(!state.processedFrames[0]){ toast('No frames available yet.'); return; }
+  downloadBlob(state.processedFrames[0], `rotoshi-${state.style.id}-thumbnail.png`);
+});
+
+$('dlLink').addEventListener('click', async ()=>{
+  if(!state.videoBlobUrl){ toast('Generate a video first.'); return; }
+  try{
+    await navigator.clipboard.writeText(state.videoBlobUrl);
+    toast('Local object URL copied to clipboard. Note: it is only valid in this browser tab/session.');
+  }catch(err){
+    toast('Could not access clipboard — copy the link manually from the address bar preview.');
+  }
+});
+
+$('dlZip').addEventListener('click', async ()=>{
+  if(!state.processedFrames.length){ toast('No frames available yet.'); return; }
+  if(typeof JSZip === 'undefined'){
+    toast('Loading zip utility…');
+    try{ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'); }
+    catch(err){ toast('Could not load the ZIP utility — check your connection.'); return; }
+  }
+  toast('Packing frames into a ZIP…');
+  const zip = new JSZip();
+  state.processedFrames.forEach((blob, i)=>{
+    zip.file(`frame_${String(i+1).padStart(4,'0')}.png`, blob);
+  });
+  const content = await zip.generateAsync({type:'blob'});
+  downloadBlob(content, `rotoshi-${state.style.id}-frames.zip`);
+});
+
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=src; s.onload=resolve; s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
+
+})();
+</script>
 </body>
 </html>
