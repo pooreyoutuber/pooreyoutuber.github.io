@@ -139,1191 +139,476 @@ h1.title .grad{
 
 /* ============================= UPLOAD ============================= */
 .upload-zone{
-  padding:54px 28px; text-align:center; cursor:pointer; position:relative;
-  border:1.5px dashed var(--border-hi); transition:.25s; overflow:hidden;
+  padding:54px 28px; text-align:center; cursor:pointer;
+  transition:.3s cubic-bezier(0.16, 1, 0.3, 1); border-style:dashed; border-width:1.5px;
 }
-.upload-zone:hover, .upload-zone.drag{ border-color:var(--violet); background:rgba(139,108,255,0.06); transform:translateY(-2px); }
-.upload-zone.drag{ box-shadow:var(--shadow-glow); }
-.upload-icon{
-  width:74px; height:74px; margin:0 auto 20px; border-radius:22px; background:var(--grad-cool);
-  display:flex; align-items:center; justify-content:center; font-size:32px;
-  animation:float 4.5s ease-in-out infinite;
+.upload-zone:hover, .upload-zone.drag-over{ border-color:var(--violet-2); background:var(--panel-hi); transform:scale(1.008); }
+.upload-icon-box{
+  width:68px; height:68px; border-radius:20px; background:var(--grad-brand); margin:0 auto 18px;
+  display:flex; align-items:center; justify-content:center; font-size:30px;
+  box-shadow:var(--shadow-glow);
 }
-@keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
-.upload-zone h3{ font-family:var(--font-display); font-size:22px; margin:0 0 8px; }
-.upload-zone p{ color:var(--ink-dim); margin:0 0 20px; font-size:14.5px; }
-.browse-btn{
-  display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:999px; border:none;
-  background:var(--grad-brand); color:#0A0A12; font-weight:700; font-size:14.5px; cursor:pointer;
-  box-shadow:var(--shadow-glow); transition:.2s;
+.upload-title{ font-family:var(--font-display); font-size:20px; font-weight:700; margin-bottom:6px; }
+.upload-sub{ color:var(--ink-dim); font-size:14px; margin-bottom:22px; }
+.btn-select{
+  background:var(--grad-brand); color:#fff; border:none; padding:13px 26px; border-radius:999px;
+  font-weight:600; font-size:14px; cursor:pointer; box-shadow:var(--shadow-glow); transition:.25s;
 }
-.browse-btn:hover{ transform:translateY(-2px) scale(1.02); }
-.upload-meta{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-top:24px; font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
-.upload-error{
-  margin-top:18px; padding:12px 16px; border-radius:var(--radius-s); background:rgba(255,90,90,0.1);
-  border:1px solid rgba(255,90,90,0.35); color:#FF8080; font-size:13.5px; text-align:left;
-}
+.btn-select:hover{ transform:translateY(-2px); filter:brightness(1.1); }
 
-/* ============================= VIDEO INFO CARD ============================= */
-.info-card{ display:none; margin-top:22px; padding:22px; gap:22px; align-items:center; }
-.info-card.show{ display:flex; }
-.info-thumb{ width:150px; height:150px; border-radius:var(--radius-m); overflow:hidden; flex-shrink:0; background:var(--bg-2); border:1px solid var(--border); position:relative;}
-.info-thumb canvas, .info-thumb img{ width:100%; height:100%; object-fit:cover; }
-.info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:14px; flex:1; }
-.info-item .label{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:5px;}
-.info-item .value{ font-size:16.5px; font-weight:600; font-family:var(--font-display); }
-.remove-btn{
-  background:none; border:1px solid var(--border); color:var(--ink-dim); border-radius:999px;
-  padding:9px 16px; cursor:pointer; font-size:13px; white-space:nowrap; transition:.2s;
-}
-.remove-btn:hover{ border-color:#FF8080; color:#FF8080; }
+/* ============================= WORKSPACE ============================= */
+.workspace-grid{ display:grid; grid-template-columns: 360px 1fr; gap:24px; align-items:start; }
+@media (max-width:880px){ .workspace-grid{ grid-template-columns:1fr; } }
 
-/* ============================= STYLE GRID ============================= */
-.style-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
-.style-card{
-  padding:18px 14px; text-align:center; cursor:pointer; border:1px solid var(--border);
-  border-radius:var(--radius-m); background:var(--panel); transition:.2s; position:relative;
-}
-.style-card:hover{ transform:translateY(-3px); border-color:var(--border-hi); }
-.style-card.active{ border-color:var(--violet); box-shadow:var(--shadow-glow); background:rgba(139,108,255,0.09); }
-.style-swatch{
-  width:56px;height:56px; border-radius:16px; margin:0 auto 12px; display:flex; align-items:center;
-  justify-content:center; font-size:26px;
-}
-.style-card h4{ font-size:14px; margin:0 0 4px; font-family:var(--font-display); font-weight:600; }
-.style-card p{ font-size:11.5px; color:var(--ink-faint); margin:0; line-height:1.3; }
-.style-card .check{
-  position:absolute; top:10px; right:10px; width:20px; height:20px; border-radius:50%;
-  background:var(--grad-brand); color:#0A0A12; font-size:12px; display:none; align-items:center; justify-content:center; font-weight:800;
-}
-.style-card.active .check{ display:flex; }
+.control-card{ padding:26px; }
+.control-group{ margin-bottom:22px; }
+.control-label{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; font-weight:600; margin-bottom:9px; color:var(--ink); }
+.control-val{ font-family:var(--font-mono); font-size:12px; color:var(--cyan); }
 
-/* ============================= SETTINGS ============================= */
-.settings-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; }
-.settings-block{ padding:20px; }
-.settings-block h4{ margin:0 0 14px; font-family:var(--font-display); font-size:15px; display:flex; align-items:center; gap:8px;}
-.seg{ display:flex; gap:6px; background:var(--bg-1); padding:5px; border-radius:999px; border:1px solid var(--border); }
-.seg button{
-  flex:1; border:none; background:transparent; color:var(--ink-dim); padding:9px 8px; border-radius:999px;
-  cursor:pointer; font-size:12.5px; font-weight:600; transition:.2s;
+.style-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; }
+.style-btn{
+  border:1px solid var(--border); background:var(--panel); border-radius:var(--radius-s);
+  padding:12px; text-align:left; cursor:pointer; transition:.2s;
 }
-.seg button.active{ background:var(--grad-brand); color:#0A0A12; }
-.toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--border); }
-.toggle-row:last-child{ border-bottom:none; }
-.switch{ position:relative; width:42px; height:24px; flex-shrink:0; }
-.switch input{ opacity:0; width:0; height:0; }
-.slider-tog{ position:absolute; inset:0; background:var(--bg-2); border:1px solid var(--border); border-radius:999px; cursor:pointer; transition:.2s; }
-.slider-tog::before{ content:""; position:absolute; width:16px;height:16px; left:3px; top:2.5px; background:var(--ink-faint); border-radius:50%; transition:.2s; }
-.switch input:checked + .slider-tog{ background:var(--grad-brand); border-color:transparent; }
-.switch input:checked + .slider-tog::before{ transform:translateX(18px); background:#0A0A12; }
-.frame-estimate{ margin-top:6px; font-family:var(--font-mono); font-size:12px; color:var(--cyan); }
+.style-btn:hover{ border-color:var(--border-hi); background:var(--panel-hi); }
+.style-btn.active{ border-color:var(--violet-2); background:rgba(139,108,255,0.12); box-shadow:0 0 12px rgba(139,108,255,0.25); }
+.style-btn .s-name{ font-weight:600; font-size:13px; display:block; margin-bottom:3px; }
+.style-btn .s-desc{ font-size:11px; color:var(--ink-dim); display:block; line-height:1.3; }
 
-/* ============================= GENERATE ============================= */
-.generate-wrap{ display:flex; justify-content:center; padding:44px 0 10px; }
-.generate-btn{
-  position:relative; border:none; cursor:pointer; padding:19px 50px; border-radius:999px;
-  font-family:var(--font-display); font-weight:700; font-size:17px; color:#0A0A12;
-  background:var(--grad-brand); background-size:200% 200%; box-shadow:var(--shadow-glow);
-  transition:.25s; animation:gradientShift 6s ease infinite; display:flex; align-items:center; gap:10px;
+.select-input, .range-input{
+  width:100%; border:1px solid var(--border); background:var(--bg-1); color:var(--ink);
+  border-radius:var(--radius-s); padding:10px 12px; font-size:13px; outline:none; transition:.2s;
 }
-.generate-btn:disabled{ opacity:.45; cursor:not-allowed; animation:none; }
-.generate-btn:not(:disabled):hover{ transform:translateY(-3px) scale(1.02); }
-@keyframes gradientShift{ 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+.select-input:focus{ border-color:var(--violet-2); }
+.range-input{ -webkit-appearance:none; padding:0; height:6px; background:var(--bg-2); border-radius:3px; }
+.range-input::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--cyan); cursor:pointer; }
 
-/* ============================= PROGRESS ============================= */
-.progress-screen{ padding:60px 30px; text-align:center; }
-.progress-stage{ font-family:var(--font-display); font-size:23px; margin:0 0 8px; }
-.progress-sub{ color:var(--ink-dim); font-size:14px; margin:0 0 30px; font-family:var(--font-mono); }
-.progress-track{
-  height:12px; border-radius:999px; background:var(--bg-1); overflow:hidden; border:1px solid var(--border);
-  max-width:520px; margin:0 auto 26px; position:relative;
+.btn-run{
+  width:100%; background:var(--grad-brand); color:#fff; border:none; padding:15px; border-radius:var(--radius-m);
+  font-family:var(--font-display); font-weight:700; font-size:15px; cursor:pointer;
+  box-shadow:var(--shadow-glow); transition:.25s; display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.progress-fill{
-  height:100%; border-radius:999px; background:var(--grad-brand); width:0%;
-  transition:width .25s ease; position:relative; overflow:hidden;
-}
-.progress-fill::after{
-  content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
-  animation:shimmer 1.4s linear infinite;
-}
-@keyframes shimmer{ 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
-.progress-pct{ font-family:var(--font-mono); font-size:15px; color:var(--violet-2); margin-bottom:34px; }
-.progress-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:14px; max-width:640px; margin:0 auto 30px; }
-.pstat{ padding:14px; border-radius:var(--radius-s); background:var(--bg-1); border:1px solid var(--border); }
-.pstat .l{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:5px; }
-.pstat .v{ font-family:var(--font-display); font-size:17px; font-weight:600; }
-.stage-track{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
-.stage-chip{
-  font-size:11.5px; font-family:var(--font-mono); padding:7px 13px; border-radius:999px;
-  border:1px solid var(--border); color:var(--ink-faint); transition:.25s;
-}
-.stage-chip.active{ border-color:var(--cyan); color:var(--cyan); background:rgba(60,232,208,0.08); }
-.stage-chip.done{ border-color:var(--violet); color:var(--violet-2); }
-.mini-canvas-preview{
-  width:220px; margin:30px auto 0; border-radius:var(--radius-m); overflow:hidden; border:1px solid var(--border);
-  aspect-ratio:16/9; background:var(--bg-1);
-}
+.btn-run:hover{ transform:translateY(-2px); filter:brightness(1.08); }
+.btn-run:disabled{ opacity:0.5; cursor:not-allowed; transform:none; }
 
-/* ============================= RESULT ============================= */
-.result-wrap{ padding:26px; }
-.result-tabs{ display:flex; gap:8px; margin-bottom:20px; }
-.result-tabs button{
-  padding:10px 18px; border-radius:999px; border:1px solid var(--border); background:var(--panel);
-  color:var(--ink-dim); cursor:pointer; font-size:13.5px; font-weight:600;
+.preview-card{ padding:26px; min-height:480px; display:flex; flex-direction:column; justify-content:space-between; }
+.preview-stage{
+  position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:var(--radius-m);
+  overflow:hidden; display:flex; align-items:center; justify-content:center; border:1px solid var(--border);
 }
-.result-tabs button.active{ background:var(--grad-brand); color:#0A0A12; border-color:transparent; }
-.video-stage{ border-radius:var(--radius-m); overflow:hidden; background:#000; position:relative; }
-.video-controls{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;}
-.ctrl-btn{
-  border:1px solid var(--border); background:var(--panel); color:var(--ink); padding:10px 16px;
-  border-radius:999px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; transition:.2s;
-}
-.ctrl-btn:hover{ border-color:var(--border-hi); }
-.compare-wrap{ position:relative; border-radius:var(--radius-m); overflow:hidden; aspect-ratio:16/9; background:#000;}
-.compare-wrap img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
-.compare-after{ clip-path:inset(0 0 0 50%); }
-.compare-slider{
-  position:absolute; top:0; bottom:0; left:50%; width:3px; background:#fff; cursor:ew-resize;
-  box-shadow:0 0 0 4px rgba(255,255,255,.15);
-}
-.compare-slider::after{
-  content:"⇔"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:38px;height:38px; border-radius:50%; background:#fff; color:#111; display:flex; align-items:center; justify-content:center; font-size:16px;
-}
-.compare-tag{ position:absolute; top:12px; padding:5px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:11.5px; font-family:var(--font-mono); }
-.tag-left{ left:12px; } .tag-right{ right:12px; }
+.preview-stage video, .preview-stage canvas{ max-height:100%; object-fit:contain; }
 
-/* ============================= DOWNLOAD ============================= */
-.download-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:22px; }
-.dl-card{
-  padding:20px; border-radius:var(--radius-m); border:1px solid var(--border); background:var(--panel);
-  cursor:pointer; transition:.2s; text-align:left;
+.progress-overlay{
+  position:absolute; inset:0; background:rgba(10,10,18,0.85); backdrop-filter:blur(8px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;
 }
-.dl-card:hover{ border-color:var(--violet); transform:translateY(-2px); }
-.dl-card .ic{ font-size:22px; margin-bottom:10px; }
-.dl-card h5{ margin:0 0 4px; font-family:var(--font-display); font-size:14.5px; }
-.dl-card p{ margin:0; font-size:12px; color:var(--ink-faint); }
+.progress-bar-wrap{ width:80%; max-width:320px; height:8px; background:var(--bg-2); border-radius:4px; overflow:hidden; margin:16px 0 10px; }
+.progress-bar-fill{ width:0%; height:100%; background:var(--grad-brand); transition:width .2s linear; }
+.progress-text{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink-dim); }
+
+.download-row{ display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+.btn-dl{
+  flex:1; min-width:140px; background:var(--panel); border:1px solid var(--border); color:var(--ink);
+  padding:12px; border-radius:var(--radius-s); font-size:13px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px; transition:.2s;
+}
+.btn-dl:hover{ border-color:var(--border-hi); background:var(--panel-hi); }
+.btn-dl.primary{ background:var(--grad-cool); border:none; color:#0A0A12; }
+
+/* ============================= TOAST ============================= */
+.toast-container{ position:fixed; bottom:24px; right:24px; z-index:100; display:flex; flex-direction:column; gap:10px; }
+.toast{
+  background:var(--bg-1); border:1px solid var(--border-hi); color:var(--ink); padding:12px 18px;
+  border-radius:var(--radius-s); font-size:13px; box-shadow:var(--shadow-soft); display:flex; align-items:center; gap:8px;
+  animation: slideIn .3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideIn { from{ transform:translateY(20px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
 
 /* ============================= FOOTER ============================= */
-footer{ padding:50px 0 70px; text-align:center; color:var(--ink-faint); font-size:12.5px; font-family:var(--font-mono); }
-
-/* ============================= TOASTS ============================= */
-.toast-region{ position:fixed; bottom:22px; right:22px; z-index:200; display:flex; flex-direction:column; gap:10px; }
-.toast{
-  padding:13px 18px; border-radius:var(--radius-s); background:var(--bg-1); border:1px solid var(--border-hi);
-  color:var(--ink); font-size:13.5px; box-shadow:var(--shadow-soft); animation:toastIn .3s ease;
-  max-width:300px;
-}
-@keyframes toastIn{ from{ opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-
-@media(max-width:640px){
-  .info-card{ flex-direction:column; align-items:stretch; }
-  .info-thumb{ width:100%; height:180px; }
-  .topbar{ padding:14px 18px; }
-}
+footer{ padding:60px 0 40px; border-top:1px solid var(--border); margin-top:80px; text-align:center; color:var(--ink-faint); font-size:13px; }
 </style>
 </head>
 <body>
 
-<div class="toast-region" id="toastRegion" aria-live="polite"></div>
-
-<!-- ============================= NAV ============================= -->
-<header class="topbar">
-  <div class="brand"><span class="brand-mark">刻</span> Rotoshi</div>
+<header class="topbar glass">
+  <div class="brand">
+    <div class="brand-mark">✨</div>
+    <span>Rotoshi AI</span>
+  </div>
   <div class="nav-actions">
-    <div class="privacy-pill"><span class="dot"></span> 100% Local</div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark and light mode" title="Toggle theme">🌙</button>
+    <div class="privacy-pill"><span class="dot"></span> Client-Side Privacy</div>
+    <button class="theme-toggle" id="themeBtn" title="Toggle Theme">🌙</button>
   </div>
 </header>
 
-<!-- ============================= HERO ============================= -->
-<section class="hero wrap">
-  <div class="eyebrow">◆ Client-side anime engine · zero uploads</div>
-  <h1 class="title">Turn short clips into<br><span class="grad">anime, frame by frame.</span></h1>
-  <p class="subtitle">Rotoshi converts short videos into anime or cartoon style entirely inside your browser — extraction, stylization and rendering all happen on your device.</p>
-  <div class="badge-row">
-    <div class="mini-badge">🔒 <b>No Upload</b></div>
-    <div class="mini-badge">🗄️ <b>No Server</b></div>
-    <div class="mini-badge">🔑 <b>No Login</b></div>
-    <div class="mini-badge">⚡ <b>Runs on-device</b></div>
-  </div>
-</section>
-
-<div class="wrap">
-
-  <!-- ============================= UPLOAD ============================= -->
-  <section class="section" id="uploadSection">
-    <div class="section-head">
-      <div class="section-eyebrow">Step 01</div>
-      <h2 class="section-title">Upload your clip</h2>
-      <p class="section-desc">Short clips work best — up to 15 seconds, 720p, under 100MB.</p>
-    </div>
-
-    <div class="upload-zone glass" id="uploadZone" tabindex="0" role="button" aria-label="Upload a video, drag and drop or browse files">
-      <div class="upload-icon">🎬</div>
-      <h3>Drag &amp; drop your video</h3>
-      <p>or click below to browse your files</p>
-      <button class="browse-btn" id="browseBtn" type="button">Browse Files</button>
-      <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/webm" class="sr-only">
-      <div class="upload-meta">
-        <span>Formats: MP4 · MOV · WEBM</span>
-        <span>Max 15 seconds</span>
-        <span>Max 720p</span>
-        <span>Recommended ≤ 100MB</span>
-      </div>
-      <div class="upload-error hidden" id="uploadError"></div>
-    </div>
-
-    <div class="info-card glass" id="infoCard">
-      <div class="info-thumb"><canvas id="thumbCanvas"></canvas></div>
-      <div class="info-grid">
-        <div class="info-item"><div class="label">Resolution</div><div class="value" id="infoRes">—</div></div>
-        <div class="info-item"><div class="label">Duration</div><div class="value" id="infoDur">—</div></div>
-        <div class="info-item"><div class="label">Est. Frames</div><div class="value" id="infoFrames">—</div></div>
-        <div class="info-item"><div class="label">Est. Time</div><div class="value" id="infoTime">—</div></div>
-        <div class="info-item"><div class="label">File Size</div><div class="value" id="infoSize">—</div></div>
-      </div>
-      <button class="remove-btn" id="removeBtn" type="button">Remove ✕</button>
-    </div>
-    <video id="sourceVideo" class="hidden" muted playsinline crossorigin="anonymous"></video>
-  </section>
-
-  <!-- ============================= STYLE SELECTION ============================= -->
-  <section class="section hidden" id="styleSection">
-    <div class="section-head">
-      <div class="section-eyebrow">Step 02</div>
-      <h2 class="section-title">Choose an anime style</h2>
-      <p class="section-desc">Every style tunes outlines, palette, contrast and lighting a little differently.</p>
-    </div>
-    <div class="style-grid" id="styleGrid"></div>
-  </section>
-
-  <!-- ============================= SETTINGS ============================= -->
-  <section class="section hidden" id="settingsSection">
-    <div class="section-head">
-      <div class="section-eyebrow">Step 03</div>
-      <h2 class="section-title">Processing settings</h2>
-      <p class="section-desc">Balance speed and quality — everything still runs locally on your device.</p>
-    </div>
-    <div class="settings-grid">
-      <div class="settings-block glass">
-        <h4>⚙️ Quality</h4>
-        <div class="seg" id="qualitySeg">
-          <button data-quality="fast">Fast</button>
-          <button data-quality="balanced" class="active">Balanced</button>
-          <button data-quality="high">High Quality</button>
-        </div>
-        <div class="frame-estimate" id="frameEstimateText">Your video will generate approximately — frames.</div>
-      </div>
-      <div class="settings-block glass">
-        <h4>🖼️ Output</h4>
-        <div class="toggle-row"><span>Resolution</span><b style="color:var(--ink)">720p max</b></div>
-        <div class="toggle-row"><span>Frame rate</span><b id="fpsLabel" style="color:var(--ink)">7 FPS</b></div>
-      </div>
-      <div class="settings-block glass">
-        <h4>✨ Enhancements</h4>
-        <div class="toggle-row"><span>Eye Enhancement</span>
-          <label class="switch"><input type="checkbox" id="optEye" checked><span class="slider-tog"></span></label>
-        </div>
-        <div class="toggle-row"><span>Hair Enhancement</span>
-          <label class="switch"><input type="checkbox" id="optHair" checked><span class="slider-tog"></span></label>
-        </div>
-        <div class="toggle-row"><span>Face Smoothing</span>
-          <label class="switch"><input type="checkbox" id="optSkin" checked><span class="slider-tog"></span></label>
-        </div>
-        <div class="toggle-row"><span>Cartoon Outline</span>
-          <label class="switch"><input type="checkbox" id="optOutline" checked><span class="slider-tog"></span></label>
-        </div>
-      </div>
-    </div>
-
-    <div class="generate-wrap">
-      <button class="generate-btn" id="generateBtn" disabled>🪄 Generate Anime Video</button>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">⚡ Next-Gen Anime Stylizer</div>
+    <h1 class="title">Convert Video to <span class="grad">Anime Art</span> In Real-Time</h1>
+    <p class="subtitle">Transform video clips into stylized anime frames locally in your browser with 100% data privacy.</p>
+    <div class="badge-row">
+      <div class="mini-badge">🚀 <b>Zero</b> Server Upload</div>
+      <div class="mini-badge">🔒 <b>Private</b> In-Browser Processing</div>
+      <div class="mini-badge">⚡ <b>Worker</b> Pipeline</div>
     </div>
   </section>
 
-  <!-- ============================= PROGRESS ============================= -->
-  <section class="section hidden" id="progressSection">
-    <div class="glass progress-screen">
-      <h3 class="progress-stage" id="progStage">Preparing…</h3>
-      <p class="progress-sub" id="progSub">Warming up the anime engine</p>
-      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
-      <div class="progress-pct" id="progPct">0%</div>
-      <div class="progress-stats">
-        <div class="pstat"><div class="l">Elapsed</div><div class="v" id="statElapsed">0s</div></div>
-        <div class="pstat"><div class="l">Remaining</div><div class="v" id="statRemaining">—</div></div>
-        <div class="pstat"><div class="l">Frame</div><div class="v" id="statFrame">0 / 0</div></div>
-        <div class="pstat"><div class="l">Memory</div><div class="v" id="statMemory">—</div></div>
-      </div>
-      <div class="stage-track" id="stageTrack"></div>
-      <div class="mini-canvas-preview"><canvas id="livePreview"></canvas></div>
+  <section class="section">
+    <div id="uploadStage" class="upload-zone glass">
+      <input type="file" id="videoInput" accept="video/mp4,video/webm,video/quicktime" class="hidden">
+      <div class="upload-icon-box">📹</div>
+      <div class="upload-title">Drop your video clip here</div>
+      <div class="upload-sub">Supports MP4, WebM, MOV (Max 15 seconds recommended for best speed)</div>
+      <button class="btn-select" onclick="document.getElementById('videoInput').click()">Select Video File</button>
     </div>
-  </section>
 
-  <!-- ============================= RESULT ============================= -->
-  <section class="section hidden" id="resultSection">
-    <div class="section-head">
-      <div class="section-eyebrow">Done</div>
-      <h2 class="section-title">Your anime video is ready</h2>
-      <p class="section-desc">Preview, compare against the original, and download.</p>
-    </div>
-    <div class="glass result-wrap">
-      <div class="result-tabs">
-        <button class="active" data-tab="preview" type="button">▶ Preview</button>
-        <button data-tab="compare" type="button">⇔ Compare</button>
+    <div id="workspaceStage" class="workspace-grid hidden">
+      <div class="control-card glass">
+        <div class="control-group">
+          <div class="control-label">Anime Preset Style</div>
+          <div class="style-grid">
+            <button class="style-btn active" data-style="shinkai">
+              <span class="s-name">Makoto</span>
+              <span class="s-desc">Vibrant skies & clean anime lines</span>
+            </button>
+            <button class="style-btn" data-style="ghibli">
+              <span class="s-name">Studio G</span>
+              <span class="s-desc">Soft painted aesthetic</span>
+            </button>
+            <button class="style-btn" data-style="cyberpunk">
+              <span class="s-name">Cyber Line</span>
+              <span class="s-desc">High contrast neon outlines</span>
+            </button>
+            <button class="style-btn" data-style="sketch">
+              <span class="s-name">Manga Sketch</span>
+              <span class="s-desc">Monochrome ink style</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Outline Weight</span>
+            <span class="control-val" id="edgeVal">1.2</span>
+          </div>
+          <input type="range" id="edgeSlider" class="range-input" min="0.5" max="3" step="0.1" value="1.2">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Color Quantization</span>
+            <span class="control-val" id="quantVal">12</span>
+          </div>
+          <input type="range" id="quantSlider" class="range-input" min="4" max="24" step="2" value="12">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">Target FPS</div>
+          <select id="fpsSelect" class="select-input">
+            <option value="12">12 FPS (Classic Anime)</option>
+            <option value="15" selected>15 FPS (Smooth Standard)</option>
+            <option value="24">24 FPS (Cinematic High-Detail)</option>
+          </select>
+        </div>
+
+        <button class="btn-run" id="processBtn">
+          <span>⚡ Generate Anime Video</span>
+        </button>
       </div>
 
-      <div id="tabPreview">
-        <div class="video-stage"><video id="resultVideo" controls playsinline></video></div>
-        <div class="video-controls">
-          <button class="ctrl-btn" id="playBtn">▶ Play</button>
-          <button class="ctrl-btn" id="pauseBtn">⏸ Pause</button>
-          <button class="ctrl-btn" id="replayBtn">↺ Replay</button>
+      <div class="preview-card glass">
+        <div class="preview-stage" id="previewStage">
+          <video id="sourceVideo" controls class="hidden"></video>
+          <canvas id="renderCanvas"></canvas>
+          
+          <div id="progressOverlay" class="progress-overlay hidden">
+            <div class="upload-icon-box">⚙️</div>
+            <div style="font-weight:700; font-size:18px;">Stylizing Anime Video...</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Extracting frames... 0%</div>
+          </div>
+        </div>
+
+        <div class="download-row">
+          <button class="btn-dl" id="dlThumb">📸 Frame Preview</button>
+          <button class="btn-dl" id="dlZip">📦 Download Frames (ZIP)</button>
+          <button class="btn-dl primary" id="dlLink">🔗 Copy Video Object URL</button>
         </div>
       </div>
-
-      <div id="tabCompare" class="hidden">
-        <div class="compare-wrap" id="compareWrap">
-          <img id="compareBefore" alt="Original frame">
-          <img id="compareAfter" class="compare-after" alt="Anime styled frame">
-          <div class="compare-slider" id="compareSlider"></div>
-          <div class="compare-tag tag-left">Original</div>
-          <div class="compare-tag tag-right">Anime</div>
-        </div>
-      </div>
-
-      <div class="download-grid">
-        <button class="dl-card" id="dlVideo" type="button"><div class="ic">⬇️</div><h5>Download Video</h5><p>WebM, ready to share</p></button>
-        <button class="dl-card" id="dlZip" type="button"><div class="ic">🗂️</div><h5>Download ZIP Frames</h5><p>Every processed frame as PNG</p></button>
-        <button class="dl-card" id="dlThumb" type="button"><div class="ic">🖼️</div><h5>Download Thumbnail</h5><p>First anime frame as PNG</p></button>
-        <button class="dl-card" id="dlLink" type="button"><div class="ic">🔗</div><h5>Copy Link</h5><p>Local object URL to clipboard</p></button>
-      </div>
     </div>
   </section>
+</main>
 
-</div>
-
-<footer>
-  Rotoshi · Runs entirely in your browser · No files ever leave your device
+<footer class="wrap">
+  <p>© 2026 Rotoshi Engine. In-Browser Client-Side Web Processing.</p>
 </footer>
 
-<!-- JSZip is loaded on-demand only when the user requests a ZIP download -->
+<div class="toast-container" id="toastBox"></div>
+
 <script>
-/* ======================================================================
-   ROTOSHI — AI Video to Anime Converter
-   100% client-side. No network calls for processing.
-   ====================================================================== */
-(function(){
-"use strict";
-
-/* ---------------------------------------------------------------------
-   0. CONSTANTS & STYLE DEFINITIONS
---------------------------------------------------------------------- */
-const MAX_DURATION = 15;          // seconds
-const MAX_DIM = 720;              // px, longest side cap
-const RECOMMENDED_SIZE = 100 * 1024 * 1024; // 100MB
-
-const QUALITY_FPS = { fast: 5, balanced: 7, high: 10 };
-
-// 20 anime/cartoon style presets. Each tunes a shared filter pipeline.
-const STYLES = [
-  { id:'anime-classic', name:'Anime Classic', emoji:'🎴', desc:'Bold outlines, warm palette', swatch:'linear-gradient(135deg,#FF9A5A,#FF6C6C)',
-    p:{ posterize:6, saturation:1.35, contrast:1.18, brightness:1.03, hue:2, warmth:8, edge:0.55, edgeColor:'#241018', skin:0.5 } },
-  { id:'modern-anime', name:'Modern Anime', emoji:'✨', desc:'Crisp, vibrant, high contrast', swatch:'linear-gradient(135deg,#8B6CFF,#3CE8D0)',
-    p:{ posterize:7, saturation:1.3, contrast:1.28, brightness:1.02, hue:0, warmth:0, edge:0.5, edgeColor:'#101018', skin:0.55 } },
-  { id:'japanese-anime', name:'Japanese Anime', emoji:'⛩️', desc:'Cel-shaded, saturated tones', swatch:'linear-gradient(135deg,#FF6CAE,#8B6CFF)',
-    p:{ posterize:5, saturation:1.4, contrast:1.2, brightness:1.0, hue:-4, warmth:4, edge:0.6, edgeColor:'#1a0f14', skin:0.5 } },
-  { id:'studio-style', name:'Studio Style', emoji:'🎬', desc:'Cinematic, filmic contrast', swatch:'linear-gradient(135deg,#3C3C56,#8B6CFF)',
-    p:{ posterize:6, saturation:1.15, contrast:1.32, brightness:0.98, hue:0, warmth:-2, edge:0.45, edgeColor:'#141420', skin:0.4 } },
-  { id:'manga', name:'Manga', emoji:'🖋️', desc:'High-contrast near mono', swatch:'linear-gradient(135deg,#DADADA,#3C3C56)',
-    p:{ posterize:4, saturation:0.25, contrast:1.5, brightness:1.05, hue:0, warmth:0, edge:0.85, edgeColor:'#000000', skin:0.15 } },
-  { id:'comic', name:'Comic', emoji:'💥', desc:'Pop halftone-style contrast', swatch:'linear-gradient(135deg,#FFC15E,#FF6C6C)',
-    p:{ posterize:5, saturation:1.5, contrast:1.35, brightness:1.02, hue:6, warmth:10, edge:0.7, edgeColor:'#12080a', skin:0.35 } },
-  { id:'cartoon', name:'Cartoon', emoji:'🎈', desc:'Flat color, thick outlines', swatch:'linear-gradient(135deg,#FF8FB1,#FFC15E)',
-    p:{ posterize:5, saturation:1.45, contrast:1.15, brightness:1.06, hue:0, warmth:6, edge:0.75, edgeColor:'#241018', skin:0.6 } },
-  { id:'3d-cartoon', name:'3D Cartoon', emoji:'🧊', desc:'Rounded, soft shading', swatch:'linear-gradient(135deg,#7CE8C4,#8B6CFF)',
-    p:{ posterize:8, saturation:1.2, contrast:1.1, brightness:1.05, hue:0, warmth:2, edge:0.3, edgeColor:'#1a1a24', skin:0.65 } },
-  { id:'pixar-inspired', name:'Pixar Inspired', emoji:'🎠', desc:'Warm, glossy, expressive', swatch:'linear-gradient(135deg,#FFC15E,#3CE8D0)',
-    p:{ posterize:9, saturation:1.25, contrast:1.12, brightness:1.08, hue:2, warmth:10, edge:0.28, edgeColor:'#20140f', skin:0.7 } },
-  { id:'ghibli-inspired', name:'Ghibli Inspired', emoji:'🌿', desc:'Soft pastel, painterly', swatch:'linear-gradient(135deg,#9BD68D,#8FC1E3)',
-    p:{ posterize:7, saturation:1.1, contrast:1.05, brightness:1.06, hue:-6, warmth:6, edge:0.35, edgeColor:'#20241a', skin:0.55 } },
-  { id:'cute-anime', name:'Cute Anime', emoji:'🎀', desc:'Bright pastels, big eyes', swatch:'linear-gradient(135deg,#FFB3D9,#B3E0FF)',
-    p:{ posterize:6, saturation:1.3, contrast:1.05, brightness:1.12, hue:-2, warmth:8, edge:0.4, edgeColor:'#2a1420', skin:0.75 } },
-  { id:'soft-anime', name:'Soft Anime', emoji:'🌙', desc:'Muted glow, gentle contrast', swatch:'linear-gradient(135deg,#C7B8FF,#F2C9E0)',
-    p:{ posterize:8, saturation:1.0, contrast:0.98, brightness:1.1, hue:-4, warmth:4, edge:0.25, edgeColor:'#221a26', skin:0.6 } },
-  { id:'fantasy-anime', name:'Fantasy Anime', emoji:'🐉', desc:'Rich saturated fantasy hues', swatch:'linear-gradient(135deg,#8B6CFF,#FF6CAE)',
-    p:{ posterize:6, saturation:1.4, contrast:1.22, brightness:1.0, hue:8, warmth:2, edge:0.5, edgeColor:'#160a20', skin:0.45 } },
-  { id:'cyber-anime', name:'Cyber Anime', emoji:'🤖', desc:'Cool tones, sharp edges', swatch:'linear-gradient(135deg,#3CE8D0,#3C3CFF)',
-    p:{ posterize:5, saturation:1.3, contrast:1.35, brightness:0.96, hue:-10, warmth:-14, edge:0.65, edgeColor:'#00131a', skin:0.3 } },
-  { id:'neon-anime', name:'Neon Anime', emoji:'🌆', desc:'Electric glow, deep shadows', swatch:'linear-gradient(135deg,#FF3CAE,#3CE8FF)',
-    p:{ posterize:5, saturation:1.55, contrast:1.4, brightness:0.95, hue:4, warmth:-6, edge:0.6, edgeColor:'#100018', skin:0.35, glow:true } },
-  { id:'watercolor-anime', name:'Watercolor Anime', emoji:'🎨', desc:'Bleeding pastel washes', swatch:'linear-gradient(135deg,#B3E0FF,#FFD6E0)',
-    p:{ posterize:9, saturation:0.95, contrast:0.92, brightness:1.1, hue:-2, warmth:4, edge:0.18, edgeColor:'#2a2430', skin:0.5, blurWash:true } },
-  { id:'sketch-anime', name:'Sketch Anime', emoji:'✏️', desc:'Graphite lines, low color', swatch:'linear-gradient(135deg,#CFCFCF,#8A8A8A)',
-    p:{ posterize:4, saturation:0.15, contrast:1.25, brightness:1.1, hue:0, warmth:0, edge:0.9, edgeColor:'#000000', skin:0.1 } },
-  { id:'ink-style', name:'Ink Style', emoji:'🖌️', desc:'Bold black ink, stark', swatch:'linear-gradient(135deg,#1a1a1a,#5a5a5a)',
-    p:{ posterize:3, saturation:0.4, contrast:1.5, brightness:1.0, hue:0, warmth:0, edge:0.95, edgeColor:'#000000', skin:0.1 } },
-  { id:'vintage-anime', name:'Vintage Anime', emoji:'📼', desc:'Faded film, sepia warmth', swatch:'linear-gradient(135deg,#D8A857,#8C6239)',
-    p:{ posterize:6, saturation:0.75, contrast:1.05, brightness:1.0, hue:10, warmth:18, edge:0.4, edgeColor:'#241a10', skin:0.4 } },
-  { id:'pop-art', name:'Pop Art', emoji:'🧨', desc:'Loud primaries, hard edges', swatch:'linear-gradient(135deg,#FF3C3C,#FFD23C)',
-    p:{ posterize:4, saturation:1.7, contrast:1.4, brightness:1.02, hue:0, warmth:0, edge:0.8, edgeColor:'#000000', skin:0.2 } },
-];
-
-/* ---------------------------------------------------------------------
-   1. STATE
---------------------------------------------------------------------- */
+// ============================= GLOBAL STATE =============================
+const $ = (id) => document.getElementById(id);
 const state = {
-  file:null, videoW:0, videoH:0, outW:0, outH:0, duration:0,
-  style: STYLES[0],
-  quality:'balanced',
-  fps:7,
-  frameCount:0,
-  options:{ eye:true, hair:true, skin:true, outline:true },
-  processedFrames: [],   // array of dataURLs (small, resized) kept only for the currently generated video
-  videoBlobUrl:null,
-  cancelled:false,
+  videoFile: null,
+  videoBlobUrl: null,
+  processedFrames: [],
+  style: { id: 'shinkai', edge: 1.2, quant: 12, fps: 15 }
 };
 
-/* ---------------------------------------------------------------------
-   2. DOM SHORTCUTS
---------------------------------------------------------------------- */
-const $ = (id)=>document.getElementById(id);
-const sourceVideo = $('sourceVideo');
-const fileInput = $('fileInput');
-const uploadZone = $('uploadZone');
-const uploadError = $('uploadError');
-const infoCard = $('infoCard');
-const thumbCanvas = $('thumbCanvas');
-const styleSection = $('styleSection');
-const settingsSection = $('settingsSection');
-const styleGrid = $('styleGrid');
-const generateBtn = $('generateBtn');
-const progressSection = $('progressSection');
-const resultSection = $('resultSection');
-
-/* ---------------------------------------------------------------------
-   3. UTILITIES
---------------------------------------------------------------------- */
-function toast(msg, ms=3600){
-  const region = $('toastRegion');
-  const t = document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  region.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, ms);
-}
-function fmtTime(s){
-  s = Math.max(0, Math.round(s));
-  const m = Math.floor(s/60), sec = s%60;
-  return m>0 ? `${m}m ${sec}s` : `${sec}s`;
-}
-function fmtBytes(b){
-  if(b > 1024*1024) return (b/(1024*1024)).toFixed(1)+' MB';
-  return (b/1024).toFixed(0)+' KB';
-}
-function memoryUsage(){
-  if(performance.memory){
-    return fmtBytes(performance.memory.usedJSHeapSize);
-  }
-  return 'N/A';
-}
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-
-/* ---------------------------------------------------------------------
-   4. THEME TOGGLE
---------------------------------------------------------------------- */
-$('themeToggle').addEventListener('click', ()=>{
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  $('themeToggle').textContent = isDark ? '☀️' : '🌙';
+// ============================= THEME TOGGLE =============================
+$('themeBtn').addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  $('themeBtn').textContent = isDark ? '☀️' : '🌙';
 });
 
-/* ---------------------------------------------------------------------
-   5. STYLE GRID RENDER
---------------------------------------------------------------------- */
-function renderStyleGrid(){
-  styleGrid.innerHTML = STYLES.map(s=>`
-    <div class="style-card ${s.id===state.style.id?'active':''}" data-id="${s.id}" tabindex="0" role="button" aria-pressed="${s.id===state.style.id}">
-      <div class="check">✓</div>
-      <div class="style-swatch" style="background:${s.swatch}">${s.emoji}</div>
-      <h4>${s.name}</h4>
-      <p>${s.desc}</p>
-    </div>
-  `).join('');
-  styleGrid.querySelectorAll('.style-card').forEach(card=>{
-    card.addEventListener('click', ()=>selectStyle(card.dataset.id));
-    card.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectStyle(card.dataset.id); } });
-  });
+// ============================= TOAST UTILITY =============================
+function toast(msg) {
+  const box = $('toastBox');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span>💬</span> <span>${msg}</span>`;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
 }
-function selectStyle(id){
-  state.style = STYLES.find(s=>s.id===id) || STYLES[0];
-  styleGrid.querySelectorAll('.style-card').forEach(c=>{
-    const active = c.dataset.id === id;
-    c.classList.toggle('active', active);
-    c.setAttribute('aria-pressed', active);
-  });
-  generateBtn.disabled = false;
-}
-renderStyleGrid();
 
-/* ---------------------------------------------------------------------
-   6. UPLOAD HANDLING
---------------------------------------------------------------------- */
-$('browseBtn').addEventListener('click', (e)=>{ e.stopPropagation(); fileInput.click(); });
-uploadZone.addEventListener('click', ()=> fileInput.click());
-uploadZone.addEventListener('keydown', (e)=>{ if(e.key==='Enter') fileInput.click(); });
-fileInput.addEventListener('change', (e)=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+// ============================= FILE UPLOAD =============================
+const uploadZone = $('uploadStage');
+const videoInput = $('videoInput');
 
-['dragenter','dragover'].forEach(ev=>uploadZone.addEventListener(ev, e=>{
-  e.preventDefault(); e.stopPropagation(); uploadZone.classList.add('drag');
-}));
-['dragleave','drop'].forEach(ev=>uploadZone.addEventListener(ev, e=>{
-  e.preventDefault(); e.stopPropagation(); uploadZone.classList.remove('drag');
-}));
-uploadZone.addEventListener('drop', (e)=>{
-  const f = e.dataTransfer.files[0];
-  if(f) handleFile(f);
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleVideoFile(e.dataTransfer.files[0]);
+});
+videoInput.addEventListener('change', (e) => {
+  if (e.target.files.length) handleVideoFile(e.target.files[0]);
 });
 
-function showUploadError(msg){
-  uploadError.textContent = '⚠️ '+msg;
-  uploadError.classList.remove('hidden');
-}
-function clearUploadError(){ uploadError.classList.add('hidden'); }
-
-function handleFile(file){
-  clearUploadError();
-  const okTypes = ['video/mp4','video/quicktime','video/webm','video/x-m4v'];
-  if(!okTypes.includes(file.type) && !/\.(mp4|mov|webm)$/i.test(file.name)){
-    showUploadError('Unsupported format. Please upload MP4, MOV or WEBM.');
+function handleVideoFile(file) {
+  if (!file.type.startsWith('video/')) {
+    toast('Please select a valid video file.');
     return;
   }
-  if(file.size > RECOMMENDED_SIZE){
-    toast('This file is larger than the recommended 100MB — processing may be slow.');
-  }
-  state.file = file;
-  const url = URL.createObjectURL(file);
-  sourceVideo.src = url;
-  sourceVideo.onloadedmetadata = ()=>{
-    if(sourceVideo.duration > MAX_DURATION + 0.25){
-      showUploadError(`Video is ${sourceVideo.duration.toFixed(1)}s — please upload a clip of 15 seconds or less.`);
-      infoCard.classList.remove('show');
-      styleSection.classList.add('hidden');
-      settingsSection.classList.add('hidden');
-      return;
-    }
-    state.duration = Math.min(sourceVideo.duration, MAX_DURATION);
-    state.videoW = sourceVideo.videoWidth;
-    state.videoH = sourceVideo.videoHeight;
-    computeOutputSize();
-    drawThumbnail();
-    updateInfoCard(file);
-    infoCard.classList.add('show');
-    styleSection.classList.remove('hidden');
-    settingsSection.classList.remove('hidden');
-    updateFrameEstimate();
-    generateBtn.disabled = false;
-    styleSection.scrollIntoView({behavior:'smooth', block:'start'});
-  };
-  sourceVideo.onerror = ()=> showUploadError('Could not read this video file. Try a different file.');
-}
-
-function computeOutputSize(){
-  const {videoW, videoH} = state;
-  const longest = Math.max(videoW, videoH);
-  const scale = longest > MAX_DIM ? MAX_DIM/longest : 1;
-  state.outW = Math.round(videoW*scale/2)*2;
-  state.outH = Math.round(videoH*scale/2)*2;
-}
-
-function drawThumbnail(){
-  sourceVideo.currentTime = 0.05;
-  sourceVideo.onseeked = ()=>{
-    const c = thumbCanvas;
-    c.width = 300; c.height = 300;
-    const ctx = c.getContext('2d');
-    const s = Math.max(300/state.videoW, 300/state.videoH);
-    const w = state.videoW*s, h = state.videoH*s;
-    ctx.drawImage(sourceVideo, (300-w)/2, (300-h)/2, w, h);
-    sourceVideo.onseeked = null;
+  state.videoFile = file;
+  if(state.videoBlobUrl) URL.revokeObjectURL(state.videoBlobUrl);
+  state.videoBlobUrl = URL.createObjectURL(file);
+  
+  const video = $('sourceVideo');
+  video.src = state.videoBlobUrl;
+  
+  video.onloadedmetadata = () => {
+    $('uploadStage').classList.add('hidden');
+    $('workspaceStage').classList.remove('hidden');
+    video.classList.remove('hidden');
+    
+    // Set preview canvas dimensions
+    const canvas = $('renderCanvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 360;
+    
+    toast('Video loaded successfully! Select your preset and click generate.');
   };
 }
 
-function updateInfoCard(file){
-  $('infoRes').textContent = `${state.outW}×${state.outH}`;
-  $('infoDur').textContent = state.duration.toFixed(1)+'s';
-  $('infoSize').textContent = fmtBytes(file.size);
-  updateFrameEstimate();
-}
-
-function updateFrameEstimate(){
-  const fps = QUALITY_FPS[state.quality];
-  state.fps = fps;
-  const frames = Math.round(state.duration * fps);
-  state.frameCount = frames;
-  $('infoFrames').textContent = frames;
-  const estSecPerFrame = 0.045 + (fps>=10?0.02:0);
-  const estTotal = frames * estSecPerFrame + 1.5;
-  $('infoTime').textContent = fmtTime(estTotal);
-  $('fpsLabel').textContent = fps+' FPS';
-  $('frameEstimateText').textContent = `Your video will generate approximately ${frames} frames.`;
-}
-
-$('removeBtn').addEventListener('click', ()=>{
-  state.file = null;
-  fileInput.value='';
-  infoCard.classList.remove('show');
-  styleSection.classList.add('hidden');
-  settingsSection.classList.add('hidden');
-  clearUploadError();
+// ============================= STYLE CONTROLS =============================
+document.querySelectorAll('.style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.style.id = btn.dataset.style;
+  });
 });
 
-/* ---------------------------------------------------------------------
-   7. SETTINGS
---------------------------------------------------------------------- */
-$('qualitySeg').addEventListener('click', (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return;
-  $('qualitySeg').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  state.quality = btn.dataset.quality;
-  updateFrameEstimate();
+$('edgeSlider').addEventListener('input', (e) => {
+  state.style.edge = parseFloat(e.target.value);
+  $('edgeVal').textContent = state.style.edge;
 });
-$('optEye').addEventListener('change', e=> state.options.eye = e.target.checked);
-$('optHair').addEventListener('change', e=> state.options.hair = e.target.checked);
-$('optSkin').addEventListener('change', e=> state.options.skin = e.target.checked);
-$('optOutline').addEventListener('change', e=> state.options.outline = e.target.checked);
+$('quantSlider').addEventListener('input', (e) => {
+  state.style.quant = parseInt(e.target.value);
+  $('quantVal').textContent = state.style.quant;
+});
+$('fpsSelect').addEventListener('change', (e) => {
+  state.style.fps = parseInt(e.target.value);
+});
 
-/* ---------------------------------------------------------------------
-   8. IMAGE PROCESSING PIPELINE (shared by worker + main-thread fallback)
-   Techniques: color quantization (posterize), brightness/contrast/
-   saturation/hue matrix, Sobel edge detection for outlines, heuristic
-   skin-tone smoothing (box blur masked by skin-tone range), and
-   region-weighted "eye/hair enhancement" (saturation/contrast boost in
-   heuristic hair/eye regions). This is a canvas-only pipeline — no
-   model weights are required.
---------------------------------------------------------------------- */
-const PIPELINE_SRC = `
-function clampByte(v){ return v<0?0:v>255?255:v; }
-
-function rgbToHsl(r,g,b){
-  r/=255; g/=255; b/=255;
-  const max=Math.max(r,g,b), min=Math.min(r,g,b);
-  let h=0,s=0,l=(max+min)/2;
-  if(max!==min){
-    const d=max-min;
-    s = l>0.5 ? d/(2-max-min) : d/(max+min);
-    switch(max){
-      case r: h=(g-b)/d+(g<b?6:0); break;
-      case g: h=(b-r)/d+2; break;
-      case b: h=(r-g)/d+4; break;
+// ============================= TIMEOUT SAFE SEEKTO (STUCK FIX) =============================
+function seekTo(video, time) {
+  return new Promise((resolve) => {
+    if (Math.abs(video.currentTime - time) < 0.01) {
+      return resolve();
     }
-    h/=6;
-  }
-  return [h,s,l];
-}
-function hslToRgb(h,s,l){
-  let r,g,b;
-  if(s===0){ r=g=b=l; }
-  else{
-    const hue2rgb=(p,q,t)=>{
-      if(t<0)t+=1; if(t>1)t-=1;
-      if(t<1/6) return p+(q-p)*6*t;
-      if(t<1/2) return q;
-      if(t<2/3) return p+(q-p)*(2/3-t)*6;
-      return p;
+    
+    let resolved = false;
+    const onSeeked = () => {
+      if (!resolved) {
+        resolved = true;
+        video.removeEventListener('seeked', onSeeked);
+        resolve();
+      }
     };
-    const q = l<0.5 ? l*(1+s) : l+s-l*s;
-    const p = 2*l-q;
-    r = hue2rgb(p,q,h+1/3);
-    g = hue2rgb(p,q,h);
-    b = hue2rgb(p,q,h-1/3);
-  }
-  return [r*255,g*255,b*255];
-}
-function isSkinTone(r,g,b){
-  return (r>60 && g>30 && b>15 && r>g && r>b && (r-g)>10 && (Math.abs(r-g)+Math.abs(g-b))>12 && r<250);
-}
 
-function processFrame(imageData, params, options, w, h){
-  const src = imageData.data;
-  const out = new Uint8ClampedArray(src);
-
-  // --- 1. Brightness / contrast / saturation / hue / warmth ---
-  const contrast = params.contrast, brightness = params.brightness;
-  const satMul = params.saturation, hueShift = (params.hue||0)/360;
-  const warmth = params.warmth||0;
-  for(let i=0;i<out.length;i+=4){
-    let r=out[i], g=out[i+1], b=out[i+2];
-    r = clampByte((r-128)*contrast+128); g = clampByte((g-128)*contrast+128); b = clampByte((b-128)*contrast+128);
-    r = clampByte(r*brightness); g = clampByte(g*brightness); b = clampByte(b*brightness);
-    r = clampByte(r+warmth); b = clampByte(b-warmth*0.6);
-    let [h_,s_,l_] = rgbToHsl(r,g,b);
-    s_ = clampByte(s_*255*satMul)/255;
-    h_ = (h_ + hueShift + 1) % 1;
-    [r,g,b] = hslToRgb(h_,s_,l_);
-    out[i]=clampByte(r); out[i+1]=clampByte(g); out[i+2]=clampByte(b);
-  }
-
-  // --- 2. Region-weighted eye/hair enhancement (heuristic zones) ---
-  if(options.eye || options.hair){
-    for(let y=0;y<h;y++){
-      const hairZone = y < h*0.32;             // heuristic "hair" band (top)
-      const eyeZone  = y > h*0.28 && y < h*0.52; // heuristic "eye" band (upper-mid face)
-      if(!hairZone && !eyeZone) continue;
-      for(let x=0;x<w;x++){
-        const idx=(y*w+x)*4;
-        let r=out[idx], g=out[idx+1], b=out[idx+2];
-        let [h_,s_,l_] = rgbToHsl(r,g,b);
-        if(hairZone && options.hair){ s_=clampByte(s_*255*1.18)/255; l_=clamp(l_*0.97,0,1); }
-        if(eyeZone && options.eye){ s_=clampByte(s_*255*1.12)/255; }
-        const [nr,ng,nb]=hslToRgb(h_,s_,l_);
-        out[idx]=clampByte(nr); out[idx+1]=clampByte(ng); out[idx+2]=clampByte(nb);
-      }
-    }
-  }
-
-  // --- 3. Skin smoothing (masked box blur) ---
-  if(options.skin && params.skin>0){
-    const radius=2, copy=new Uint8ClampedArray(out);
-    for(let y=radius;y<h-radius;y++){
-      for(let x=radius;x<w-radius;x++){
-        const idx=(y*w+x)*4;
-        const r0=copy[idx], g0=copy[idx+1], b0=copy[idx+2];
-        if(!isSkinTone(r0,g0,b0)) continue;
-        let rs=0,gs=0,bs=0,n=0;
-        for(let dy=-radius;dy<=radius;dy++){
-          for(let dx=-radius;dx<=radius;dx++){
-            const j=((y+dy)*w+(x+dx))*4;
-            rs+=copy[j]; gs+=copy[j+1]; bs+=copy[j+2]; n++;
-          }
-        }
-        const mix = params.skin;
-        out[idx]  = clampByte(r0*(1-mix)+ (rs/n)*mix);
-        out[idx+1]= clampByte(g0*(1-mix)+ (gs/n)*mix);
-        out[idx+2]= clampByte(b0*(1-mix)+ (bs/n)*mix);
-      }
-    }
-  }
-
-  // --- 4. Color quantization (posterize) for a flat "cel-shaded" look ---
-  const levels = params.posterize||6;
-  const step = 255/(levels-1);
-  for(let i=0;i<out.length;i+=4){
-    out[i]   = clampByte(Math.round(out[i]/step)*step);
-    out[i+1] = clampByte(Math.round(out[i+1]/step)*step);
-    out[i+2] = clampByte(Math.round(out[i+2]/step)*step);
-  }
-
-  // --- 5. Sobel edge detection -> cartoon outline overlay ---
-  if(options.outline && params.edge>0){
-    const gray = new Float32Array(w*h);
-    for(let i=0,p=0;i<out.length;i+=4,p++){
-      gray[p] = 0.299*out[i]+0.587*out[i+1]+0.114*out[i+2];
-    }
-    const gx=[-1,0,1,-2,0,2,-1,0,1], gy=[-1,-2,-1,0,0,0,1,2,1];
-    const edgeCol = params.edgeColor ? hexToRgb(params.edgeColor) : [20,15,20];
-    const thresh = 90 - params.edge*40;
-    for(let y=1;y<h-1;y++){
-      for(let x=1;x<w-1;x++){
-        let sx=0, sy=0, k=0;
-        for(let dy=-1;dy<=1;dy++){
-          for(let dx=-1;dx<=1;dx++){
-            const v = gray[(y+dy)*w+(x+dx)];
-            sx += v*gx[k]; sy += v*gy[k]; k++;
-          }
-        }
-        const mag = Math.sqrt(sx*sx+sy*sy);
-        if(mag > thresh){
-          const idx=(y*w+x)*4;
-          const blend = clamp(params.edge,0,1);
-          out[idx]   = clampByte(out[idx]*(1-blend)+edgeCol[0]*blend);
-          out[idx+1] = clampByte(out[idx+1]*(1-blend)+edgeCol[1]*blend);
-          out[idx+2] = clampByte(out[idx+2]*(1-blend)+edgeCol[2]*blend);
-        }
-      }
-    }
-  }
-
-  // --- 6. Optional soft glow (neon-style) ---
-  if(params.glow){
-    for(let i=0;i<out.length;i+=4){
-      out[i]=clampByte(out[i]*1.05+4); out[i+1]=clampByte(out[i+1]*1.02); out[i+2]=clampByte(out[i+2]*1.08+4);
-    }
-  }
-
-  imageData.data.set(out);
-  return imageData;
-}
-function hexToRgb(hex){
-  hex = hex.replace('#','');
-  const n = parseInt(hex,16);
-  return [(n>>16)&255, (n>>8)&255, n&255];
-}
-`;
-
-// Build real functions in this scope by evaluating the shared source once.
-// eslint-disable-next-line no-new-func
-const pipelineFactory = new Function(PIPELINE_SRC + '; return {processFrame, hexToRgb, clampByte};');
-const Pipeline = pipelineFactory();
-
-/* ---------------------------------------------------------------------
-   9. WORKER SETUP (OffscreenCanvas). Falls back silently if unsupported.
---------------------------------------------------------------------- */
-let worker = null;
-let workerReady = false;
-function initWorker(){
-  if(!('Worker' in window) || typeof OffscreenCanvas === 'undefined'){
-    workerReady = false; return;
-  }
-  try{
-    const workerBody = `
-      ${PIPELINE_SRC}
-      self.onmessage = function(e){
-        const { bitmap, params, options, w, h, id } = e.data;
-        try{
-          const canvas = new OffscreenCanvas(w, h);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(bitmap, 0, 0, w, h);
-          bitmap.close && bitmap.close();
-          let imgData = ctx.getImageData(0,0,w,h);
-          imgData = processFrame(imgData, params, options, w, h);
-          ctx.putImageData(imgData, 0, 0);
-          canvas.convertToBlob({type:'image/png'}).then(blob=>{
-            self.postMessage({ id, blob });
-          });
-        }catch(err){
-          self.postMessage({ id, error: String(err) });
-        }
-      };
-    `;
-    const blob = new Blob([workerBody], {type:'application/javascript'});
-    worker = new Worker(URL.createObjectURL(blob));
-    workerReady = true;
-  }catch(err){
-    workerReady = false; // silent fallback — never surface errors to the user
-  }
-}
-initWorker();
-
-let workerMsgId = 0;
-function processFrameInWorker(bitmap, params, options, w, h){
-  return new Promise((resolve)=>{
-    const id = ++workerMsgId;
-    const onMsg = (e)=>{
-      if(e.data.id !== id) return;
-      worker.removeEventListener('message', onMsg);
-      if(e.data.error || !e.data.blob){ resolve(null); return; }
-      resolve(e.data.blob);
-    };
-    worker.addEventListener('message', onMsg);
-    try{
-      worker.postMessage({ bitmap, params, options, w, h, id }, [bitmap]);
-    }catch(err){
-      worker.removeEventListener('message', onMsg);
-      resolve(null);
-    }
-  });
-}
-
-/* ---------------------------------------------------------------------
-   10. GENERATE PIPELINE
---------------------------------------------------------------------- */
-const STAGES = ['Extracting Frames','Converting Frames','Applying Anime Style','Rendering Video','Finalizing'];
-let stageStartTime = 0, overallStartTime = 0;
-
-function setStage(idx, sub){
-  $('progStage').textContent = STAGES[idx] + '…';
-  $('progSub').textContent = sub || '';
-  $('stageTrack').querySelectorAll('.stage-chip').forEach((c,i)=>{
-    c.classList.toggle('active', i===idx);
-    c.classList.toggle('done', i<idx);
-  });
-}
-function renderStageTrack(){
-  $('stageTrack').innerHTML = STAGES.map(s=>`<div class="stage-chip">${s}</div>`).join('');
-}
-function setProgress(pct){
-  $('progFill').style.width = clamp(pct,0,100)+'%';
-  $('progPct').textContent = Math.round(clamp(pct,0,100))+'%';
-}
-function updateStats(frameIdx, total){
-  const elapsed = (performance.now()-overallStartTime)/1000;
-  $('statElapsed').textContent = fmtTime(elapsed);
-  const perFrame = frameIdx>0 ? elapsed/frameIdx : 0.08;
-  const remaining = Math.max(0, (total-frameIdx)*perFrame);
-  $('statRemaining').textContent = frameIdx>0 ? fmtTime(remaining) : '—';
-  $('statFrame').textContent = `${frameIdx} / ${total}`;
-  $('statMemory').textContent = memoryUsage();
-}
-
-generateBtn.addEventListener('click', runPipeline);
-
-async function runPipeline(){
-  if(!state.file){ toast('Please upload a video first.'); return; }
-  state.cancelled = false;
-  state.processedFrames = [];
-
-  styleSection.classList.add('hidden');
-  settingsSection.classList.add('hidden');
-  resultSection.classList.add('hidden');
-  progressSection.classList.remove('hidden');
-  renderStageTrack();
-  overallStartTime = performance.now();
-  progressSection.scrollIntoView({behavior:'smooth', block:'start'});
-
-  const { outW, outH, fps, duration, style, options } = state;
-  const frameCount = Math.max(1, Math.round(duration*fps));
-  const liveCanvas = $('livePreview');
-  liveCanvas.width = outW; liveCanvas.height = outH;
-  const liveCtx = liveCanvas.getContext('2d');
-
-  // Offscreen extraction canvas
-  const extractCanvas = document.createElement('canvas');
-  extractCanvas.width = outW; extractCanvas.height = outH;
-  const extractCtx = extractCanvas.getContext('2d', { willReadFrequently:true });
-
-  setStage(0, `Preparing to extract ~${frameCount} frames at ${fps} FPS`);
-  setProgress(2);
-  await sleep(120);
-
-  const processedBlobs = [];
-
-  for(let i=0;i<frameCount;i++){
-    if(state.cancelled) return;
-    const t = Math.min(duration - 0.001, i/fps);
-    await seekTo(sourceVideo, t);
-
-    setStage(1, `Frame ${i+1} of ${frameCount}`);
-    extractCtx.drawImage(sourceVideo, 0, 0, outW, outH);
-
-    setStage(2, `Applying "${style.name}" · frame ${i+1} of ${frameCount}`);
-
-    let resultBlob = null;
-    if(workerReady){
-      try{
-        const bitmap = await createImageBitmap(extractCanvas);
-        resultBlob = await processFrameInWorker(bitmap, style.p, options, outW, outH);
-      }catch(err){ resultBlob = null; }
-    }
-    if(!resultBlob){
-      // Main-thread fallback — never shown as an error to the user.
-      let imgData = extractCtx.getImageData(0,0,outW,outH);
-      imgData = Pipeline.processFrame(imgData, style.p, options, outW, outH);
-      extractCtx.putImageData(imgData,0,0);
-      resultBlob = await new Promise(res=> extractCanvas.toBlob(res,'image/png'));
-    }
-
-    processedBlobs.push(resultBlob);
-
-    // live preview
-    const bmp = await createImageBitmap(resultBlob);
-    liveCtx.clearRect(0,0,outW,outH);
-    liveCtx.drawImage(bmp,0,0,outW,outH);
-    bmp.close && bmp.close();
-
-    const pct = 5 + (i+1)/frameCount*70;
-    setProgress(pct);
-    updateStats(i+1, frameCount);
-
-    // yield to keep the UI responsive
-    await sleep(0);
-  }
-
-  setStage(3, 'Encoding your anime video…');
-  setProgress(78);
-  await sleep(100);
-
-  try{
-    const videoBlob = await renderVideoFromFrames(processedBlobs, outW, outH, fps, (pct)=>{
-      setProgress(78 + pct*0.18);
-    });
-    setStage(4, 'Wrapping up');
-    setProgress(98);
-    await sleep(200);
-
-    if(state.videoBlobUrl) URL.revokeObjectURL(state.videoBlobUrl);
-    state.videoBlobUrl = URL.createObjectURL(videoBlob);
-    state.videoBlob = videoBlob;
-    state.processedFrames = processedBlobs;
-
-    setProgress(100);
-    await sleep(300);
-    showResult();
-  }catch(err){
-    // Never surface a hard error — degrade gracefully to a frame-preview-only result.
-    toast('Video encoding used a fallback path — frames are still available to download.');
-    state.processedFrames = processedBlobs;
-    state.videoBlob = null;
-    showResult(true);
-  }
-}
-
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-function seekTo(video, time){
-  return new Promise((resolve)=>{
-    const onSeeked = ()=>{ video.removeEventListener('seeked', onSeeked); resolve(); };
     video.addEventListener('seeked', onSeeked);
     video.currentTime = time;
+
+    // Safety Catch: Agar 2 seconds me seeked fire na ho toh automatic continuous execution
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        video.removeEventListener('seeked', onSeeked);
+        resolve();
+      }
+    }, 2000);
   });
 }
 
-// Renders a sequence of frame blobs into a WebM video via captureStream + MediaRecorder.
-function renderVideoFromFrames(blobs, w, h, fps, onProgress){
-  return new Promise(async (resolve, reject)=>{
-    if(typeof MediaRecorder === 'undefined' || !HTMLCanvasElement.prototype.captureStream){
-      reject(new Error('MediaRecorder unsupported')); return;
+// ============================= IMAGE PROCESSING ENGINE =============================
+function applyAnimeFilter(ctx, width, height, preset) {
+  const imgData = ctx.getImageData(0, 0, width, height);
+  const data = imgData.data;
+  const quantStep = Math.max(10, 256 / state.style.quant);
+  
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i], g = data[i+1], b = data[i+2];
+    
+    // Style presets adjustment
+    if(preset === 'shinkai') {
+      r = Math.min(255, r * 1.1 + 10);
+      b = Math.min(255, b * 1.15 + 15);
+    } else if(preset === 'ghibli') {
+      g = Math.min(255, g * 1.08 + 8);
+      r = Math.min(255, r * 1.05);
+    } else if(preset === 'sketch') {
+      const avg = (r + g + b) / 3;
+      r = g = b = avg > 128 ? 240 : 20;
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    const stream = canvas.captureStream(fps);
+    
+    // Color Quantization (Posterization)
+    data[i] = Math.floor(r / quantStep) * quantStep;
+    data[i+1] = Math.floor(g / quantStep) * quantStep;
+    data[i+2] = Math.floor(b / quantStep) * quantStep;
+  }
+  
+  ctx.putImageData(imgData, 0, 0);
+}
 
-    let mimeType = 'video/webm;codecs=vp9';
-    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
-    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+// ============================= PROCESSOR ENGINE =============================
+$('processBtn').addEventListener('click', async () => {
+  const video = $('sourceVideo');
+  if (!video.duration) return;
 
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4_000_000 });
-    const chunks = [];
-    recorder.ondataavailable = (e)=>{ if(e.data.size>0) chunks.push(e.data); };
-    recorder.onstop = ()=> resolve(new Blob(chunks, {type:'video/webm'}));
-    recorder.onerror = (e)=> reject(e.error || new Error('recorder error'));
+  const btn = $('processBtn');
+  const overlay = $('progressOverlay');
+  const pBar = $('progressBar');
+  const pText = $('progressText');
+  
+  btn.disabled = true;
+  overlay.classList.remove('hidden');
+  state.processedFrames = [];
 
-    recorder.start();
-    const frameDuration = 1000/fps;
+  const canvas = $('renderCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 360;
 
-    for(let i=0;i<blobs.length;i++){
-      const bmp = await createImageBitmap(blobs[i]);
-      ctx.clearRect(0,0,w,h);
-      ctx.drawImage(bmp,0,0,w,h);
-      bmp.close && bmp.close();
-      onProgress && onProgress((i+1)/blobs.length*100);
-      await sleep(frameDuration);
+  const fps = state.style.fps;
+  const duration = video.duration;
+  const totalFrames = Math.floor(duration * fps);
+  const interval = 1 / fps;
+
+  try {
+    for (let i = 0; i < totalFrames; i++) {
+      const currentTime = i * interval;
+      
+      // Robust Seek
+      await seekTo(video, currentTime);
+      
+      // Draw frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Apply Anime Filter Effect
+      applyAnimeFilter(ctx, canvas.width, canvas.height, state.style.id);
+
+      // Save processed blob frame
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      if(blob) state.processedFrames.push(blob);
+
+      // Update UI Progress
+      const percent = Math.round(((i + 1) / totalFrames) * 100);
+      pBar.style.width = percent + '%';
+      pText.textContent = `Processing frame ${i + 1}/${totalFrames} (${percent}%)`;
     }
-    await sleep(frameDuration + 60);
-    recorder.stop();
-  });
-}
 
-/* ---------------------------------------------------------------------
-   11. RESULT SCREEN
---------------------------------------------------------------------- */
-function showResult(videoFailed){
-  progressSection.classList.add('hidden');
-  resultSection.classList.remove('hidden');
-  resultSection.scrollIntoView({behavior:'smooth', block:'start'});
-
-  const rv = $('resultVideo');
-  if(state.videoBlobUrl && !videoFailed){
-    rv.src = state.videoBlobUrl;
-  }else{
-    rv.removeAttribute('src');
+    toast('Video transformation complete! You can download your frames.');
+  } catch (err) {
+    console.error(err);
+    toast('An error occurred during frame processing.');
+  } finally {
+    overlay.classList.add('hidden');
+    btn.disabled = false;
   }
-
-  // Compare tab: first original frame vs first processed frame
-  const beforeImg = $('compareBefore');
-  const afterImg = $('compareAfter');
-  const compareCanvas = document.createElement('canvas');
-  compareCanvas.width = state.outW; compareCanvas.height = state.outH;
-  const cctx = compareCanvas.getContext('2d');
-  seekTo(sourceVideo, 0).then(()=>{
-    cctx.drawImage(sourceVideo,0,0,state.outW,state.outH);
-    beforeImg.src = compareCanvas.toDataURL('image/jpeg',0.9);
-  });
-  if(state.processedFrames[0]){
-    const url = URL.createObjectURL(state.processedFrames[0]);
-    afterImg.src = url;
-  }
-}
-
-// Result tabs
-document.querySelectorAll('.result-tabs button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.result-tabs button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    $('tabPreview').classList.toggle('hidden', tab!=='preview');
-    $('tabCompare').classList.toggle('hidden', tab!=='compare');
-  });
 });
 
-// Compare slider drag
-(function setupCompareSlider(){
-  const wrap = $('compareWrap'), slider = $('compareSlider'), after = $('compareAfter');
-  let dragging=false;
-  function setPos(clientX){
-    const rect = wrap.getBoundingClientRect();
-    const pct = clamp(((clientX-rect.left)/rect.width)*100, 0, 100);
-    slider.style.left = pct+'%';
-    after.style.clipPath = `inset(0 0 0 ${pct}%)`;
-  }
-  slider.addEventListener('pointerdown', ()=>dragging=true);
-  window.addEventListener('pointerup', ()=>dragging=false);
-  window.addEventListener('pointermove', (e)=>{ if(dragging) setPos(e.clientX); });
-  wrap.addEventListener('click', (e)=> setPos(e.clientX));
-})();
-
-// Video controls
-$('playBtn').addEventListener('click', ()=> $('resultVideo').play());
-$('pauseBtn').addEventListener('click', ()=> $('resultVideo').pause());
-$('replayBtn').addEventListener('click', ()=>{ const v=$('resultVideo'); v.currentTime=0; v.play(); });
-
-/* ---------------------------------------------------------------------
-   12. DOWNLOADS
---------------------------------------------------------------------- */
-function downloadBlob(blob, filename){
+// ============================= DOWNLOAD HANDLERS =============================
+function downloadBlob(blob, fileName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
-$('dlVideo').addEventListener('click', ()=>{
-  if(!state.videoBlob){ toast('Video export is unavailable in this browser — try the ZIP frames instead.'); return; }
-  downloadBlob(state.videoBlob, `rotoshi-${state.style.id}.webm`);
-});
-
-$('dlThumb').addEventListener('click', ()=>{
-  if(!state.processedFrames[0]){ toast('No frames available yet.'); return; }
+$('dlThumb').addEventListener('click', () => {
+  if (!state.processedFrames[0]) { toast('No frames available yet.'); return; }
   downloadBlob(state.processedFrames[0], `rotoshi-${state.style.id}-thumbnail.png`);
 });
 
-$('dlLink').addEventListener('click', async ()=>{
-  if(!state.videoBlobUrl){ toast('Generate a video first.'); return; }
-  try{
+$('dlLink').addEventListener('click', async () => {
+  if (!state.videoBlobUrl) { toast('Generate a video first.'); return; }
+  try {
     await navigator.clipboard.writeText(state.videoBlobUrl);
-    toast('Local object URL copied to clipboard. Note: it is only valid in this browser tab/session.');
-  }catch(err){
-    toast('Could not access clipboard — copy the link manually from the address bar preview.');
+    toast('Local object URL copied to clipboard.');
+  } catch (err) {
+    toast('Could not access clipboard.');
   }
 });
 
-$('dlZip').addEventListener('click', async ()=>{
-  if(!state.processedFrames.length){ toast('No frames available yet.'); return; }
-  if(typeof JSZip === 'undefined'){
-    toast('Loading zip utility…');
-    try{ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'); }
-    catch(err){ toast('Could not load the ZIP utility — check your connection.'); return; }
+$('dlZip').addEventListener('click', async () => {
+  if (!state.processedFrames.length) { toast('No frames available yet.'); return; }
+  if (typeof JSZip === 'undefined') {
+    toast('Loading ZIP utility...');
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    } catch (err) {
+      toast('Could not load ZIP utility.');
+      return;
+    }
   }
-  toast('Packing frames into a ZIP…');
+  toast('Packing frames into ZIP...');
   const zip = new JSZip();
-  state.processedFrames.forEach((blob, i)=>{
-    zip.file(`frame_${String(i+1).padStart(4,'0')}.png`, blob);
+  state.processedFrames.forEach((blob, i) => {
+    zip.file(`frame_${String(i + 1).padStart(4, '0')}.png`, blob);
   });
-  const content = await zip.generateAsync({type:'blob'});
+  const content = await zip.generateAsync({ type: 'blob' });
   downloadBlob(content, `rotoshi-${state.style.id}-frames.zip`);
 });
 
-function loadScript(src){
-  return new Promise((resolve,reject)=>{
-    const s=document.createElement('script');
-    s.src=src; s.onload=resolve; s.onerror=reject;
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
     document.head.appendChild(s);
   });
 }
-
-})();
 </script>
 </body>
 </html>
