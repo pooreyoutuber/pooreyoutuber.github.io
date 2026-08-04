@@ -511,57 +511,41 @@
 <footer style="text-align: center; padding: 40px; color: var(--accent); font-size: 14px;">
     &copy; 2026 PooreYoutuber | Free Creator Tools
 </footer>
-<script>
+    <script>
     function generateFBViews() {
-        let urlInput = document.getElementById('fbUrl').value.trim();
-        const countInput = parseInt(document.getElementById('windowCount').value, 10);
+        const rawUrl = document.getElementById('fbUrl').value.trim();
+        const count = parseInt(document.getElementById('windowCount').value, 10) || 1;
         const grid = document.getElementById('video-grid');
 
-        if (!urlInput) {
-            alert("Please enter a Facebook Video or Reel URL");
-            return;
-        }
-
-        // URL Normalizer & Clean Up
-        let targetUrl = urlInput;
-        try {
-            let parsed = new URL(urlInput);
-            if (parsed.hostname === 'm.facebook.com') {
-                parsed.hostname = 'www.facebook.com';
-                targetUrl = parsed.href;
-            }
-        } catch(e) {
-            alert("Please enter a valid Facebook URL");
+        if (!rawUrl.includes('facebook.com') && !rawUrl.includes('fb.watch')) {
+            alert("Please enter a valid Facebook Video or Reel URL");
             return;
         }
 
         grid.innerHTML = '';
         grid.style.display = 'grid';
 
-        // Safe Limit Check (Max 25)
-        const safeCount = Math.min(Math.max(countInput || 1, 1), 25);
-
-        // Fallback Iframe Embed URL
-        const encodedUrl = encodeURIComponent(targetUrl);
-        const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
+        const safeCount = Math.min(Math.max(count, 1), 25);
+        const encodedUrl = encodeURIComponent(rawUrl);
+        const embedIframeUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
 
         for (let i = 0; i < safeCount; i++) {
             const div = document.createElement('div');
             div.className = 'video-box';
 
-            // Check if Facebook Share Link, use SDK container, else use standard iframe
-            if (targetUrl.includes('/share/') || targetUrl.includes('fb.watch')) {
-                const fbContainer = document.createElement('div');
-                fbContainer.className = 'fb-video';
-                fbContainer.setAttribute('data-href', targetUrl);
-                fbContainer.setAttribute('data-width', 'auto');
-                fbContainer.setAttribute('data-autoplay', 'true');
-                fbContainer.setAttribute('data-allowfullscreen', 'true');
-                fbContainer.setAttribute('data-show-text', 'false');
-                div.appendChild(fbContainer);
+            // Agar Share Link / Short Link hai
+            if (rawUrl.includes('/share/') || rawUrl.includes('fb.watch')) {
+                const fbSDKDiv = document.createElement('div');
+                fbSDKDiv.className = 'fb-video';
+                fbSDKDiv.setAttribute('data-href', rawUrl);
+                fbSDKDiv.setAttribute('data-width', 'auto');
+                fbSDKDiv.setAttribute('data-autoplay', 'true');
+                fbSDKDiv.setAttribute('data-allowfullscreen', 'true');
+                div.appendChild(fbSDKDiv);
             } else {
+                // Normal direct video/reel link ke liye Standard Iframe
                 const iframe = document.createElement('iframe');
-                iframe.src = embedUrl;
+                iframe.src = embedIframeUrl;
                 iframe.loading = "lazy";
                 iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
                 iframe.setAttribute('allowfullscreen', 'true');
@@ -571,16 +555,15 @@
             grid.appendChild(div);
         }
 
-        // Dynamically parse Facebook SDK for share links
+        // Facebook SDK Re-parse Call (share links ko instant load karne ke liye)
         if (window.FB && window.FB.XFBML) {
             window.FB.XFBML.parse(grid);
         }
 
-        // Scroll to players
         grid.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // FAQ Accordion JavaScript Logic
+    // FAQ Accordion
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".faq-question").forEach(item => {
             item.addEventListener("click", function () {
@@ -593,8 +576,8 @@
                 } else {
                     document.querySelectorAll(".faq-item").forEach(faq => {
                         faq.classList.remove("active");
-                        const faqAnswer = faq.querySelector(".faq-answer");
-                        if (faqAnswer) faqAnswer.style.maxHeight = null;
+                        const targetAnswer = faq.querySelector(".faq-answer");
+                        if (targetAnswer) targetAnswer.style.maxHeight = null;
                     });
 
                     parent.classList.add("active");
@@ -604,6 +587,5 @@
         });
     });
 </script>
-
 </body>
 </html>
