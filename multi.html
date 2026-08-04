@@ -514,50 +514,68 @@
 
 <script>
     function generateFBViews() {
-        const urlInput = document.getElementById('fbUrl').value.trim();
-        const count = parseInt(document.getElementById('windowCount').value, 10);
-        const grid = document.getElementById('video-grid');
+    let urlInput = document.getElementById('fbUrl').value.trim();
+    const count = parseInt(document.getElementById('windowCount').value, 10);
+    const grid = document.getElementById('video-grid');
 
-        // Robust URL validation
-        let isValidUrl = false;
-        try {
-            const parsedUrl = new URL(urlInput);
-            if (parsedUrl.hostname.includes('facebook.com') || parsedUrl.hostname.includes('fb.watch')) {
-                isValidUrl = true;
-            }
-        } catch (e) {
-            isValidUrl = false;
-        }
-
-        if (!isValidUrl) {
-            alert("Please enter a valid Facebook Video or Reel URL (e.g. https://www.facebook.com/watch/?v=...)");
-            return;
-        }
-
-        const encodedUrl = encodeURIComponent(urlInput);
-        const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
-        
-        grid.innerHTML = '';
-        grid.style.display = 'grid';
-
-        const safeCount = Math.min(Math.max(count, 1), 25);
-
-        for (let i = 0; i < safeCount; i++) {
-            const div = document.createElement('div');
-            div.className = 'video-box';
-
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.loading = "lazy";
-            iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
-            iframe.setAttribute('allowfullscreen', 'true');
-
-            div.appendChild(iframe);
-            grid.appendChild(div);
-        }
-
-        grid.scrollIntoView({ behavior: 'smooth' });
+    if (!urlInput) {
+        alert("Please enter a Facebook Video or Reel URL");
+        return;
     }
+
+    // Facebook App Share Links Check (/share/v/ ya /share/r/)
+    if (urlInput.includes('/share/v/') || urlInput.includes('/share/r/') || urlInput.includes('fb.watch')) {
+        alert("⚠️ Note: You pasted a Mobile Share Link!\n\nFacebook App Share Links (/share/v/...) cannot be embedded directly by Facebook. \n\nPlease open the video in a browser and copy the direct URL (e.g. facebook.com/watch/?v=... or facebook.com/reel/...)");
+        return;
+    }
+
+    // Direct Clean URL Parsing
+    try {
+        let cleanUrlObj = new URL(urlInput);
+        
+        // Mobile link (m.facebook.com) ko standard desktop link me badlo
+        if (cleanUrlObj.hostname === 'm.facebook.com') {
+            cleanUrlObj.hostname = 'www.facebook.com';
+        }
+        
+        // Faltu tracking parameters (?mibextid=... &rdid=...) ko saaf karo
+        if (cleanUrlObj.pathname.includes('/watch')) {
+            const vParam = cleanUrlObj.searchParams.get('v');
+            if (vParam) {
+                urlInput = `https://www.facebook.com/watch/?v=${vParam}`;
+            }
+        } else {
+            urlInput = cleanUrlObj.origin + cleanUrlObj.pathname;
+        }
+    } catch (e) {
+        alert("Please enter a valid Facebook URL");
+        return;
+    }
+
+    const encodedUrl = encodeURIComponent(urlInput);
+    const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
+    
+    grid.innerHTML = '';
+    grid.style.display = 'grid';
+
+    const safeCount = Math.min(Math.max(count, 1), 25);
+
+    for (let i = 0; i < safeCount; i++) {
+        const div = document.createElement('div');
+        div.className = 'video-box';
+
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.loading = "lazy";
+        iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
+        iframe.setAttribute('allowfullscreen', 'true');
+
+        div.appendChild(iframe);
+        grid.appendChild(div);
+    }
+
+    grid.scrollIntoView({ behavior: 'smooth' });
+}
 </script>
 
 </body>
