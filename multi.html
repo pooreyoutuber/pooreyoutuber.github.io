@@ -511,71 +511,98 @@
 <footer style="text-align: center; padding: 40px; color: var(--accent); font-size: 14px;">
     &copy; 2026 PooreYoutuber | Free Creator Tools
 </footer>
-
 <script>
     function generateFBViews() {
-    let urlInput = document.getElementById('fbUrl').value.trim();
-    const count = parseInt(document.getElementById('windowCount').value, 10);
-    const grid = document.getElementById('video-grid');
+        let urlInput = document.getElementById('fbUrl').value.trim();
+        const countInput = parseInt(document.getElementById('windowCount').value, 10);
+        const grid = document.getElementById('video-grid');
 
-    if (!urlInput) {
-        alert("Please enter a Facebook Video or Reel URL");
-        return;
-    }
-
-    // Facebook App Share Links Check (/share/v/ ya /share/r/)
-    if (urlInput.includes('/share/v/') || urlInput.includes('/share/r/') || urlInput.includes('fb.watch')) {
-        alert("⚠️ Note: You pasted a Mobile Share Link!\n\nFacebook App Share Links (/share/v/...) cannot be embedded directly by Facebook. \n\nPlease open the video in a browser and copy the direct URL (e.g. facebook.com/watch/?v=... or facebook.com/reel/...)");
-        return;
-    }
-
-    // Direct Clean URL Parsing
-    try {
-        let cleanUrlObj = new URL(urlInput);
-        
-        // Mobile link (m.facebook.com) ko standard desktop link me badlo
-        if (cleanUrlObj.hostname === 'm.facebook.com') {
-            cleanUrlObj.hostname = 'www.facebook.com';
+        if (!urlInput) {
+            alert("Please enter a Facebook Video or Reel URL");
+            return;
         }
-        
-        // Faltu tracking parameters (?mibextid=... &rdid=...) ko saaf karo
-        if (cleanUrlObj.pathname.includes('/watch')) {
-            const vParam = cleanUrlObj.searchParams.get('v');
-            if (vParam) {
-                urlInput = `https://www.facebook.com/watch/?v=${vParam}`;
+
+        // URL Normalizer & Clean Up
+        let targetUrl = urlInput;
+        try {
+            let parsed = new URL(urlInput);
+            if (parsed.hostname === 'm.facebook.com') {
+                parsed.hostname = 'www.facebook.com';
+                targetUrl = parsed.href;
             }
-        } else {
-            urlInput = cleanUrlObj.origin + cleanUrlObj.pathname;
+        } catch(e) {
+            alert("Please enter a valid Facebook URL");
+            return;
         }
-    } catch (e) {
-        alert("Please enter a valid Facebook URL");
-        return;
+
+        grid.innerHTML = '';
+        grid.style.display = 'grid';
+
+        // Safe Limit Check (Max 25)
+        const safeCount = Math.min(Math.max(countInput || 1, 1), 25);
+
+        // Fallback Iframe Embed URL
+        const encodedUrl = encodeURIComponent(targetUrl);
+        const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
+
+        for (let i = 0; i < safeCount; i++) {
+            const div = document.createElement('div');
+            div.className = 'video-box';
+
+            // Check if Facebook Share Link, use SDK container, else use standard iframe
+            if (targetUrl.includes('/share/') || targetUrl.includes('fb.watch')) {
+                const fbContainer = document.createElement('div');
+                fbContainer.className = 'fb-video';
+                fbContainer.setAttribute('data-href', targetUrl);
+                fbContainer.setAttribute('data-width', 'auto');
+                fbContainer.setAttribute('data-autoplay', 'true');
+                fbContainer.setAttribute('data-allowfullscreen', 'true');
+                fbContainer.setAttribute('data-show-text', 'false');
+                div.appendChild(fbContainer);
+            } else {
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl;
+                iframe.loading = "lazy";
+                iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
+                iframe.setAttribute('allowfullscreen', 'true');
+                div.appendChild(iframe);
+            }
+
+            grid.appendChild(div);
+        }
+
+        // Dynamically parse Facebook SDK for share links
+        if (window.FB && window.FB.XFBML) {
+            window.FB.XFBML.parse(grid);
+        }
+
+        // Scroll to players
+        grid.scrollIntoView({ behavior: 'smooth' });
     }
 
-    const encodedUrl = encodeURIComponent(urlInput);
-    const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
-    
-    grid.innerHTML = '';
-    grid.style.display = 'grid';
+    // FAQ Accordion JavaScript Logic
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".faq-question").forEach(item => {
+            item.addEventListener("click", function () {
+                const parent = this.parentElement;
+                const answer = this.nextElementSibling;
 
-    const safeCount = Math.min(Math.max(count, 1), 25);
+                if (parent.classList.contains("active")) {
+                    parent.classList.remove("active");
+                    answer.style.maxHeight = null;
+                } else {
+                    document.querySelectorAll(".faq-item").forEach(faq => {
+                        faq.classList.remove("active");
+                        const faqAnswer = faq.querySelector(".faq-answer");
+                        if (faqAnswer) faqAnswer.style.maxHeight = null;
+                    });
 
-    for (let i = 0; i < safeCount; i++) {
-        const div = document.createElement('div');
-        div.className = 'video-box';
-
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.loading = "lazy";
-        iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
-        iframe.setAttribute('allowfullscreen', 'true');
-
-        div.appendChild(iframe);
-        grid.appendChild(div);
-    }
-
-    grid.scrollIntoView({ behavior: 'smooth' });
-}
+                    parent.classList.add("active");
+                    answer.style.maxHeight = answer.scrollHeight + "px";
+                }
+            });
+        });
+    });
 </script>
 
 </body>
