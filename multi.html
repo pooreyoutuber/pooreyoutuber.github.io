@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Fixed Viewport for Mobile Usability & Core Web Vitals -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <!-- Title & H1 Alignment -->
     <title>YouTube Thumbnail Downloader – Download HD & 4K Video Thumbnails Free</title>
     
-    <!-- Keyword-focused Description -->
     <meta name="description" content="YouTube Thumbnail Downloader lets you extract and save high-resolution HD & 4K thumbnails from YouTube videos. Also supports cover images from TikTok, Pinterest, Instagram, and Facebook. Free and fast with no sign-up.">
     <meta name="keywords" content="YouTube thumbnail downloader, get YouTube thumbnail, YT thumbnail grabber, high-res thumbnail download, YouTube image saver, 4K thumbnail downloader, YouTube video cover downloader, online thumbnail extractor, save YouTube image, HD thumbnail download">
     <meta name="author" content="PoorEYoutuber Tools">
@@ -29,7 +26,7 @@
     <meta name="twitter:description" content="Extract high-resolution YouTube thumbnails in 1080p, 720p HD, or 4K. Fast and free.">
     <meta name="twitter:image" content="https://pooreyoutuber.github.io/images/youtube-thumbnail-downloader.webp">
 
-    <!-- Google Fonts Preconnect for Faster Performance -->
+    <!-- Google Fonts Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +34,7 @@
     <!-- AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
-    <!-- JSON-LD Structured Data: WebApplication -->
+    <!-- Schema Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -54,7 +51,6 @@
     }
     </script>
 
-    <!-- JSON-LD Structured Data: FAQPage -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -121,25 +117,26 @@
             background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 20px 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
             transition: all 0.3s ease;
         }
 
-        .top-bar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        .header-nav {
+            width: 100%;
+            max-width: 1400px;
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
 
         .theme-switch, .home-btn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
@@ -151,44 +148,66 @@
             align-items: center;
         }
 
+        /* Full Screen Responsive Layout Container */
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 1400px;
             background: var(--card-bg);
             border-radius: 24px;
-            padding: 40px;
+            padding: 36px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             margin-bottom: 30px;
         }
 
+        .header-zone {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         .header-zone h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             background: linear-gradient(90deg, var(--primary), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .header-zone p { color: var(--text-muted); margin-bottom: 30px; font-size: 1rem; }
+        .header-zone p { color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0 auto 20px auto; }
 
-        .platform-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .platform-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .platform-tag {
-            font-size: 0.78rem;
+            font-size: 0.82rem;
             font-weight: 700;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             color: var(--text-muted);
         }
         .platform-tag.ok { color: var(--accent-green); border-color: var(--accent-green); }
 
-        .input-group { display: flex; gap: 12px; margin-bottom: 10px; }
+        /* Full Screen 2-Column Workspace Grid */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 36px;
+            margin-top: 20px;
+            align-items: start;
+        }
+
+        .tool-box {
+            background: rgba(0,0,0,0.015);
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group { display: flex; gap: 12px; margin-bottom: 12px; }
 
         input[type="text"] {
             flex: 1;
-            padding: 16px 20px;
+            padding: 18px 20px;
             border: 2px solid var(--border-color);
             border-radius: 14px;
             font-size: 1rem;
@@ -204,7 +223,7 @@
         }
 
         button.btn-fetch {
-            padding: 16px 28px;
+            padding: 18px 30px;
             background: var(--primary);
             color: white;
             border: none;
@@ -220,9 +239,9 @@
         button.btn-fetch:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .status-msg {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             margin-bottom: 20px;
-            min-height: 20px;
+            min-height: 22px;
             font-weight: 600;
         }
         .status-msg.error { color: #e53e3e; }
@@ -230,15 +249,15 @@
         .status-msg.success { color: var(--accent-green); }
 
         .result-section {
-            margin-top: 10px;
-            padding-top: 30px;
+            margin-top: 15px;
+            padding-top: 20px;
             border-top: 2px dashed var(--border-color);
             display: none;
         }
 
         .result-section img {
             width: 100%;
-            max-height: 480px;
+            max-height: 500px;
             object-fit: contain;
             border-radius: 16px;
             border: 1px solid var(--border-color);
@@ -249,7 +268,7 @@
 
         .res-badge {
             display: inline-block;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--accent-blue);
             margin-bottom: 16px;
@@ -264,71 +283,81 @@
             text-decoration: none;
             border-radius: 14px;
             font-weight: 700;
-            margin-bottom: 20px;
             transition: opacity 0.2s;
             text-align: center;
         }
 
         .btn-download:hover { opacity: 0.9; }
 
-        .seo-content { text-align: left; margin-top: 20px; }
-        .seo-content h2, .seo-content h3 { color: var(--text-main); margin: 25px 0 12px 0; }
+        .seo-content { text-align: left; }
+        .seo-content h2, .seo-content h3 { color: var(--text-main); margin: 20px 0 10px 0; }
         .seo-content p, .seo-content ul { color: var(--text-muted); line-height: 1.7; margin-bottom: 15px; font-size: 0.95rem; }
         .seo-content ul { padding-left: 20px; }
 
         .trust-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-top: 20px;
         }
         .trust-card {
             background: rgba(56, 161, 105, 0.05);
             border: 1px solid var(--border-color);
-            padding: 20px;
+            padding: 18px;
             border-radius: 16px;
         }
-        .trust-card h4 { color: var(--accent-green); margin-bottom: 8px; font-size: 1rem; }
-        .trust-card p { margin-bottom: 0; font-size: 0.88rem; }
+        .trust-card h4 { color: var(--accent-green); margin-bottom: 6px; font-size: 0.95rem; }
+        .trust-card p { margin-bottom: 0; font-size: 0.85rem; }
 
-        .faq-section { margin-top: 40px; text-align: left; }
-        .faq-item { border-bottom: 1px solid var(--border-color); padding: 15px 0; cursor: pointer; }
+        .faq-section { margin-top: 40px; text-align: left; border-top: 1px solid var(--border-color); padding-top: 30px; }
+        .faq-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .faq-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; cursor: pointer; background: var(--card-bg); }
         .faq-question { font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: var(--text-muted); margin-top: 8px; line-height: 1.6; font-size: 0.9rem; }
 
         .ad-container { margin: 20px 0; width: 100%; min-height: 20px; overflow: hidden; }
 
         footer.site-footer {
-            max-width: 850px;
+            max-width: 1400px;
             width: 100%;
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             padding: 10px 20px 30px;
+        }
+
+        /* Mobile & Tablet Responsiveness */
+        @media (max-width: 992px) {
+            .workspace-grid { grid-template-columns: 1fr; }
+            .faq-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 600px) {
             .input-group { flex-direction: column; }
             .container { padding: 20px; }
+            .header-zone h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
+    <div class="header-nav">
         <a class="home-btn" href="https://pooreyoutuber.github.io/">🏠 Home</a>
         <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
     </div>
 
     <div class="container">
-        <!-- Ad Unit 1 -->
+        <!-- Top Banner Ad Unit -->
         <div class="ad-container">
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="6541049739" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
         <div class="header-zone">
-            <!-- Fixed H1 matching Title -->
             <h1>YouTube Thumbnail Downloader</h1>
             <p>Paste a video link from YouTube, TikTok, Pinterest, Instagram, or Facebook to extract high-resolution cover graphics directly in your browser.</p>
             <div class="platform-tags">
@@ -339,104 +368,98 @@
             </div>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="videoURL" placeholder="Paste YouTube video or web page URL here...">
-            <button class="btn-fetch" id="fetchBtn" onclick="getThumbnail()">Extract Thumbnail</button>
-        </div>
-        <div class="status-msg" id="statusMsg"></div>
-
-        <!-- Ad Unit 2 -->
-        <div class="ad-container">
-            <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-7020422718957281" data-ad-slot="9571266701"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
-        <!-- Output Display Area with Alt & Lazy Loading Fix -->
-        <div id="output" class="result-section">
-            <img id="thumbnail" src="" alt="YouTube Thumbnail Preview" loading="lazy">
-            <div class="res-badge" id="resBadge"></div>
-            <br>
-            <a id="downloadLink" class="btn-download" href="#" onclick="downloadCurrentImage(); return false;">Download Thumbnail</a>
-        </div>
-
-        <!-- Ad Unit 3 -->
-        <div class="ad-container">
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="6541049739" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
-        <!-- Natural Flow SEO Content Block -->
-        <div class="seo-content" id="explanation-section">
-            <h2>How This Thumbnail Downloader Works</h2>
-            <p>Our tool inspects public media references published by video hosts to locate the original graphics. Once identified, it serves the highest quality image available directly to your device without requiring registration or external software downloads.</p>
-
-            <h3>Step-by-Step Guide</h3>
-            <ul>
-                <li><strong>Step 1:</strong> Copy the target video URL from your web browser or mobile application.</li>
-                <li><strong>Step 2:</strong> Paste the link into the URL input field above.</li>
-                <li><strong>Step 3:</strong> Click "Extract Thumbnail" to initiate quality detection.</li>
-                <li><strong>Step 4:</strong> Click "Download Thumbnail" to save the file to your storage.</li>
-            </ul>
-
-            <h3>Supported Video Services</h3>
-            <p><strong>YouTube</strong> features complete resolution matching: the script checks for maxresdefault (1280x720) HD files and automatically moves to sddefault or hqdefault if an HD version is unavailable.</p>
-            <p><strong>TikTok and Pinterest</strong> links are analyzed through standard open-graph tags embedded in public post pages.</p>
-            <p><strong>Instagram and Facebook</strong> content must be hosted on public profiles. Private accounts and temporary stories are restricted by source platforms and cannot be fetched.</p>
-
-            <div class="ad-container">
-                <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="8237208544"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-
-            <div class="trust-grid">
-                <div class="trust-card">
-                    <h4>🔒 Privacy Protected</h4>
-                    <p>All URLs are processed within your active session. No server logging takes place.</p>
+        <!-- Dynamic 2-Column Full-Screen Workspace -->
+        <div class="workspace-grid">
+            
+            <!-- Left Side: Interactive Tool Block -->
+            <div class="tool-box">
+                <div class="input-group">
+                    <input type="text" id="videoURL" placeholder="Paste YouTube video or web page URL here...">
+                    <button class="btn-fetch" id="fetchBtn" onclick="getThumbnail()">Extract Thumbnail</button>
                 </div>
-                <div class="trust-card">
-                    <h4>⚡ Instant Access</h4>
-                    <p>Works smoothly across desktop, tablet, and mobile web browsers.</p>
+                <div class="status-msg" id="statusMsg"></div>
+
+                <!-- Extracted Image Output Area -->
+                <div id="output" class="result-section">
+                    <img id="thumbnail" src="" alt="YouTube Thumbnail Preview" loading="lazy">
+                    <div class="res-badge" id="resBadge"></div>
+                    <a id="downloadLink" class="btn-download" href="#" onclick="downloadCurrentImage(); return false;">Download Thumbnail</a>
                 </div>
-                <div class="trust-card">
-                    <h4>📐 Optimized Resolutions</h4>
-                    <p>Retrieves the highest quality image available for your selected link.</p>
-                </div>
-                <div class="trust-card">
-                    <h4>©️ Copyright Notice</h4>
-                    <p>Original graphic rights remain with their respective creators and publishers.</p>
+
+                <!-- In-Tool Ad Unit -->
+                <div class="ad-container">
+                    <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-7020422718957281" data-ad-slot="9571266701"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
             </div>
+
+            <!-- Right Side: Informational Content & Features -->
+            <div class="seo-content" id="explanation-section">
+                <h2>How This Thumbnail Downloader Works</h2>
+                <p>Our tool inspects public media references published by video hosts to locate the original graphics. Once identified, it serves the highest quality image available directly to your device without requiring registration.</p>
+
+                <h3>Step-by-Step Guide</h3>
+                <ul>
+                    <li><strong>Step 1:</strong> Copy the target video URL from your web browser or mobile app.</li>
+                    <li><strong>Step 2:</strong> Paste the link into the URL input field.</li>
+                    <li><strong>Step 3:</strong> Click "Extract Thumbnail" to initiate quality detection.</li>
+                    <li><strong>Step 4:</strong> Click "Download Thumbnail" to save the file.</li>
+                </ul>
+
+                <div class="trust-grid">
+                    <div class="trust-card">
+                        <h4>🔒 Privacy Protected</h4>
+                        <p>All URLs are processed within your active session. No server logging takes place.</p>
+                    </div>
+                    <div class="trust-card">
+                        <h4>⚡ Instant Access</h4>
+                        <p>Works smoothly across desktop, tablet, and mobile web browsers.</p>
+                    </div>
+                    <div class="trust-card">
+                        <h4>📐 Optimized Resolutions</h4>
+                        <p>Retrieves the highest quality image available for your selected link.</p>
+                    </div>
+                    <div class="trust-card">
+                        <h4>©️ Copyright Notice</h4>
+                        <p>Original graphic rights remain with their respective creators and publishers.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- FAQ Accordion -->
+        <!-- Bottom FAQ Section (2 Column Grid) -->
         <div class="faq-section">
-            <h2>Frequently Asked Questions</h2>
+            <h2 style="margin-bottom: 20px;">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">Is this thumbnail downloader really free? <span>▼</span></div>
+                    <div class="faq-answer">Yes. It's free to use, requires no sign-up, and has no daily limit.</div>
+                </div>
 
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Is this thumbnail downloader really free? <span>▼</span></div>
-                <div class="faq-answer">Yes. It's free to use, requires no sign-up, and has no daily limit.</div>
-            </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">What is the maximum resolution I can download? <span>▼</span></div>
+                    <div class="faq-answer">Most YouTube videos support maxresdefault at 1280x720. Older or lower-quality uploads fall back to standard resolutions automatically.</div>
+                </div>
 
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">What is the maximum resolution I can download for YouTube? <span>▼</span></div>
-                <div class="faq-answer">Most videos support maxresdefault at 1280x720. Older or lower-quality uploads may only have sddefault or hqdefault available, in which case the tool automatically shows the best one that exists.</div>
-            </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">Does this work for Instagram and Facebook? <span>▼</span></div>
+                    <div class="faq-answer">Only for public posts. Private accounts and temporary stories cannot be fetched due to platform security restrictions.</div>
+                </div>
 
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Does this work for Instagram and Facebook videos? <span>▼</span></div>
-                <div class="faq-answer">Only for public posts. Private accounts, login-gated content, and Stories can't be read because the platforms intentionally block that access outside their own apps.</div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Do you store the videos or links I paste? <span>▼</span></div>
-                <div class="faq-answer">No. The link is used only in your current browser session and is never saved to a server-side database.</div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Can I use the downloaded thumbnail commercially? <span>▼</span></div>
-                <div class="faq-answer">The image still belongs to its original creator or platform. Only reuse it if you own the content or have explicit permission — copyright law still applies.</div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">Do you store the videos or links I paste? <span>▼</span></div>
+                    <div class="faq-answer">No. The link is used only in your current browser session and is never saved to a database.</div>
+                </div>
             </div>
         </div>
+
+        <!-- Bottom Auto-Relaxed Ad Unit -->
+        <div class="ad-container">
+            <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="8237208544"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
     </div>
 
     <footer class="site-footer">
