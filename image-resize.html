@@ -3,353 +3,598 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProEdit | Professional Image Resizer & Editor</title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google AdSense (Replace ca-pub-XXXX with your ID) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script>
+    <title>Text to Doc Converter Online – Free Text to Word DOCX Tool</title>
+
+    <meta name="description" content="Convert plain text, notes, or uploaded text files into Microsoft Word (.docx) documents online for free. Clean, browser-based, and fast document creator.">
+    <meta name="author" content="PooreYoutuber">
+    <meta name="robots" content="index, follow">
+
+    <!-- Canonical Tag -->
+    <link rel="canonical" href="https://pooreyoutuber.github.io/text-to-doc.html">
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Text to Doc Converter Online – Free Text to Word DOCX Tool">
+    <meta property="og:description" content="Convert plain text or text files into formatted Microsoft Word (.docx) documents instantly in your browser. Free, secure, and fast.">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/text-to-doc.html">
+    <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg">
+
+    <!-- Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Text to Doc Converter Online">
+    <meta name="twitter:description" content="Convert plain text or text files into formatted Microsoft Word (.docx) documents instantly in your browser.">
+    <meta name="twitter:image" content="https://pooreyoutuber.github.io/banner.jpg">
+
+    <!-- Fonts & Preconnects -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- docx Library for genuine Word document generation -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+
+    <!-- Google Tag Manager & AdSense -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <!-- Structured Data (WebApplication + FAQ Schema) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://pooreyoutuber.github.io/text-to-doc.html#webapp",
+          "name": "Text to Doc Converter",
+          "url": "https://pooreyoutuber.github.io/text-to-doc.html",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires JavaScript and HTML5 browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "Free web utility to convert plain text input or uploaded text files into formatted Microsoft Word (.docx) documents directly inside your browser.",
+          "featureList": [
+            "Convert live typed text to DOCX format",
+            "Upload TXT or Markdown files to convert to Word document",
+            "Real-time word and character counter",
+            "Client-side processing with zero server tracking"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://pooreyoutuber.github.io/text-to-doc.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is this Text to Doc converter free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, our Text to Doc Converter is completely free. You can convert unlimited plain text files into Word DOCX documents without any paid account or subscription."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is my text uploaded to any external server?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. The document generation runs client-side inside your browser. Your typed content and uploaded text files are never saved or uploaded to external servers."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Will the generated document open in Microsoft Word?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! The output is a standard .docx file that opens seamlessly in Microsoft Word, Google Docs, LibreOffice, and mobile document viewers."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --bg: #f8fafc;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius: 12px;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-solid: #1e293b;
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --green: #10b981;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            overflow-x: hidden;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            padding: 16px; 
+            line-height: 1.6; 
+            min-height: 100vh;
         }
 
-        /* Ad Slot Styles */
-        .ad-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f1f5f9;
-            border: 1px dashed #cbd5e1;
-            margin: 15px 0;
-            overflow: hidden;
-            border-radius: 8px;
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
         }
 
-        /* Layout Structure */
-        .app-header {
-            background: white;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border);
+        /* Navigation Bar (Left: Brand Logo, Right: Home Button) */
+        .top-navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 14px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
         }
 
-        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-
-        .main-wrapper {
-            display: flex;
-            max-width: 1600px;
-            margin: 0 auto;
-            height: calc(100vh - 70px);
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.3px;
         }
 
-        /* Sidebar Control Panel */
-        .sidebar {
-            width: 380px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
-        }
-
-        /* Canvas Area */
-        .editor-stage {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
+        .home-btn {
+            display: inline-flex;
             align-items: center;
-            background: #f1f5f9;
-            position: relative;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
-        .canvas-container {
+        .home-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Tool Header */
+        header { text-align: center; margin-bottom: 28px; }
+        header h1 { font-size: 2.1rem; color: #ffffff; margin-bottom: 8px; font-weight: 800; }
+        header p { color: var(--muted); font-size: 0.98rem; }
+
+        /* Main Workspace Card */
+        .tool-card {
+            background: var(--card-solid);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 36px;
+        }
+
+        /* Document Title Input */
+        .doc-title-box {
+            margin-bottom: 16px;
+        }
+
+        .doc-title-box label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .doc-title-input {
             width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border: 2px dashed #cbd5e1;
-            position: relative;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
 
-        #preview-img {
-            max-width: 90%;
-            max-height: 90%;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .doc-title-input:focus {
+            border-color: var(--accent);
         }
 
-        /* UI Components */
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+        /* Upload Option Box */
+        .upload-dropzone {
+            border: 2px dashed var(--border);
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .upload-dropzone:hover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .upload-dropzone p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .upload-dropzone span {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        #fileInput { display: none; }
+
+        /* Text Editor Area */
+        .editor-container {
             margin-bottom: 20px;
         }
 
-        .filter-btn {
-            padding: 10px;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.75rem;
+        .editor-container label {
+            display: block;
+            font-size: 0.88rem;
             font-weight: 600;
-            transition: 0.2s;
+            color: var(--muted);
+            margin-bottom: 6px;
         }
 
-        .filter-btn:hover { border-color: var(--primary); color: var(--primary); background: #f5f3ff; }
-
-        .control-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; display: block; color: var(--text-muted); }
-
-        .input-box {
+        textarea {
             width: 100%;
-            padding: 12px;
+            min-height: 240px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
             outline: none;
-            font-family: inherit;
+            transition: border-color 0.2s;
         }
 
-        .input-box:focus { border-color: var(--primary); ring: 2px solid #c7d2fe; }
+        textarea:focus {
+            border-color: var(--accent);
+        }
 
-        .action-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
+        /* Stats Bar & Buttons */
+        .action-bar {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .stats-counter {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
 
-        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .stats-counter strong {
+            color: var(--accent);
+        }
 
-        /* Articles Section */
-        .content-section {
-            max-width: 1000px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
+        .btn-convert {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-convert:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* SEO Article Section */
+        .article-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            padding: 36px;
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 36px;
         }
 
-        .content-section h2 { font-size: 2rem; margin-bottom: 20px; color: var(--text-main); }
-        .content-section p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--text-muted); }
+        .article-section h2 { color: #ffffff; font-size: 1.5rem; margin-bottom: 14px; }
+        .article-section h3 { color: var(--accent); font-size: 1.15rem; margin-top: 24px; margin-bottom: 10px; }
+        .article-section h4 { color: #f1f5f9; font-size: 1rem; margin-top: 16px; margin-bottom: 6px; }
+        .article-section p, .article-section li { font-size: 0.95rem; margin-bottom: 12px; color: #cbd5e1; }
+        .article-section ul { margin-left: 20px; }
 
-        @media (max-width: 1024px) {
-            .main-wrapper { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
-            .editor-stage { height: 500px; padding: 20px; }
+        /* FAQ Section */
+        .faq-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 36px;
+        }
+
+        .faq-section h2 { color: #ffffff; font-size: 1.4rem; margin-bottom: 18px; }
+        .faq-card { border-bottom: 1px solid var(--border); padding: 14px 0; }
+        .faq-card:last-child { border-bottom: none; }
+        .faq-card h3 { color: #f8fafc; font-size: 1.02rem; margin-bottom: 6px; font-weight: 600; }
+        .faq-card p { color: var(--muted); font-size: 0.92rem; }
+
+        /* Internal Links Section */
+        .internal-links-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 36px;
+        }
+
+        .internal-links-box h3 { color: #ffffff; font-size: 1.1rem; margin-bottom: 16px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .tool-link {
+            display: block;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .tool-link:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 28px 0;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.6rem; }
+            .tool-card, .article-section, .faq-section { padding: 20px; }
+            .action-bar { flex-direction: column; align-items: stretch; }
+            .btn-convert { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <header class="app-header">
-        <div class="logo"><i class="fa-solid fa-wand-magic-sparkles"></i> ProEdit</div>
-        <div class="header-ads" style="max-width: 468px; width: 100%;">
-            <!-- Top Header Ad -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-XXXX"
-                 data-ad-slot="XXXXXXX"
-                 data-ad-format="horizontal"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
+<div class="container">
+
+    <!-- Navbar: Brand Left, Home Right -->
+    <nav class="top-navbar">
+        <a href="https://pooreyoutuber.github.io/" class="brand-logo">PooreYoutuber</a>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">🏠 Home</a>
+    </nav>
+
+    <header>
+        <h1>Text to Doc Converter</h1>
+        <p>Type, paste, or upload plain text to generate formatted Microsoft Word (.docx) documents instantly.</p>
     </header>
 
-    <div class="main-wrapper">
-        <!-- Sidebar Controls -->
-        <aside class="sidebar">
-            <button class="action-btn btn-outline" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Image
-            </button>
-            <input type="file" id="fileInput" hidden accept="image/*">
-
-            <div class="sidebar-ad">
-                <!-- Sidebar Square Ad -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXX"
-                     data-ad-slot="XXXXXXX"
-                     data-ad-format="rectangle"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-
-            <div>
-                <span class="control-label">QUICK FILTERS</span>
-                <div class="tool-grid">
-                    <button class="filter-btn" onclick="applyFilter('grayscale(100%)')">B&W</button>
-                    <button class="filter-btn" onclick="applyFilter('sepia(100%)')">Retro</button>
-                    <button class="filter-btn" onclick="applyFilter('brightness(1.5)')">Bright</button>
-                    <button class="filter-btn" onclick="applyFilter('contrast(1.8)')">Vivid</button>
-                    <button class="filter-btn" onclick="applyFilter('blur(4px)')">Soft</button>
-                    <button class="filter-btn" onclick="resetAll()">Reset</button>
-                </div>
-            </div>
-
-            <div>
-                <span class="control-label">RESITION (PX)</span>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="img-w" class="input-box" placeholder="Width">
-                    <input type="number" id="img-h" class="input-box" placeholder="Height">
-                </div>
-            </div>
-
-            <div>
-                <span class="control-label">TRANSFORM</span>
-                <div style="display: flex; gap: 10px;">
-                    <button class="filter-btn" style="flex:1" onclick="rotateImg(-90)"><i class="fa-solid fa-rotate-left"></i> Left</button>
-                    <button class="filter-btn" style="flex:1" onclick="rotateImg(90)"><i class="fa-solid fa-rotate-right"></i> Right</button>
-                </div>
-            </div>
-
-            <button class="action-btn btn-primary" onclick="downloadImage()">
-                <i class="fa-solid fa-download"></i> Export Result
-            </button>
-        </aside>
-
-        <!-- Main Editor -->
-        <main class="editor-stage">
-            <div class="canvas-container" id="dropzone">
-                <img id="preview-img" src="https://via.placeholder.com/800x450/e2e8f0/64748b?text=Drag+and+Drop+Image+Here" alt="Preview">
-            </div>
+    <main>
+        <div class="tool-card">
             
-            <div class="ad-container" style="width: 100%; height: 90px; margin-top: 20px;">
-                <!-- Bottom Tool Ad -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXX"
-                     data-ad-slot="XXXXXXX"
-                     data-ad-format="horizontal"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            <!-- Document Title -->
+            <div class="doc-title-box">
+                <label for="docTitle">Document Name (Optional):</label>
+                <input type="text" id="docTitle" class="doc-title-input" placeholder="e.g. My_Document">
             </div>
-        </main>
-    </div>
 
-    <!-- Content Area -->
-    <div class="content-section">
-        <h2>Professional Image Processing in Your Browser</h2>
-        <p>Welcome to ProEdit, the most advanced <strong>free online image resizer</strong> designed for creators in 2026. Whether you're optimizing photos for <strong>High-Yield Crypto Staking</strong> dashboards, preparing documents for <strong>New York Car Insurance</strong> claims, or scaling graphics for <strong>Enterprise Managed Cloud</strong> solutions, we've got you covered.</p>
-        
-        <div class="ad-container" style="margin: 40px 0;">
-            <!-- In-Article Native Ad -->
-            <ins class="adsbygoogle"
-                 style="display:block; text-align:center;"
-                 data-ad-layout="in-article"
-                 data-ad-format="fluid"
-                 data-ad-client="ca-pub-XXXX"
-                 data-ad-slot="XXXXXXX"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            <!-- Upload File Box -->
+            <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
+                <p>📄 Drag & drop a <span>.txt</span> file here or <span>Browse</span> to load text</p>
+                <input type="file" id="fileInput" accept=".txt,.md">
+            </div>
+
+            <!-- Text Area -->
+            <div class="editor-container">
+                <label for="textContent">Document Content:</label>
+                <textarea id="textContent" placeholder="Type or paste your text here..."></textarea>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="stats-counter">
+                    Words: <strong id="wordCount">0</strong> | Characters: <strong id="charCount">0</strong>
+                </div>
+                <button class="btn-convert" onclick="convertToDocx()">
+                    💾 Download Word Document (.docx)
+                </button>
+            </div>
+
         </div>
 
-        <h3>Why Image Optimization Matters?</h3>
-        <p>In the digital age, page speed is a ranking factor. Large, unoptimized images can hurt your SEO. Our tool ensures that you can resize, crop, and filter images without losing quality. We use client-side processing, meaning your <strong>Personal Loan</strong> documents or sensitive financial images stay on your computer and are never uploaded to any server.</p>
-    </div>
+        <!-- Comprehensive SEO Article (~600 Words) -->
+        <article class="article-section">
+            <h2>Online Text to DOCX Converter – Create Word Documents Instantly</h2>
+            <p>Creating standardized Word documents from plain text notes, articles, or raw data is a everyday requirement for students, writers, researchers, and office workers. The <strong>PooreYoutuber Text to Doc Converter</strong> provides a fast, browser-based solution that allows you to draft text or upload existing text files and convert them into clean <strong>Microsoft Word (.docx)</strong> files without installing heavy desktop software.</p>
 
-    <canvas id="hiddenCanvas" style="display:none;"></canvas>
+            <h3>How to Convert Plain Text into a Microsoft Word Document</h3>
+            <p>Our online converter is designed with simplicity, speed, and responsiveness in mind. Follow these simple steps to generate your file:</p>
+            <ul>
+                <li><strong>Step 1: Enter or Upload Text:</strong> Type your text directly into the interactive editor, paste copied content, or click the upload zone to load a plain text (.txt) file from your device.</li>
+                <li><strong>Step 2: Add a Document Name:</strong> Enter a custom title in the Document Name box to automatically set your file download name.</li>
+                <li><strong>Step 3: Review Word Metrics:</strong> Check real-time word and character counts below the editor to track your writing length.</li>
+                <li><strong>Step 4: Download DOCX:</strong> Click the "Download Word Document" button. Our client-side script compiles your content into a standard .docx file ready to open in Microsoft Word, Google Docs, or mobile office suites.</li>
+            </ul>
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview-img');
-        const imgW = document.getElementById('img-w');
-        const imgH = document.getElementById('img-h');
+            <h3>Key Benefits of Client-Side Text Conversion</h3>
+            <p>Unlike conventional file converters that process your private data through external backend servers, our platform operates entirely inside your local browser. This brings several practical advantages:</p>
+
+            <h4>1. Enhanced Privacy & Security</h4>
+            <p>Because processing takes place locally via browser JavaScript libraries, your typed notes, legal drafts, or personal content never get uploaded to or stored on any external server.</p>
+
+            <h4>2. High Cross-Platform Compatibility</h4>
+            <p>The output file is generated in the standard <strong>.docx format</strong>, ensuring perfect formatting compatibility across Microsoft Word, Office 365, LibreOffice Writer, Apple Pages, and Google Docs.</p>
+
+            <h4>3. Lightweight & Fast Mobile Workflow</h4>
+            <p>Designed with a mobile-first responsive layout, you can quickly write or convert text files on mobile devices and tablets on the go without slowdowns.</p>
+
+            <h3>Optimized for Modern Digital Workflows</h3>
+            <p>Whether you are formatting blog post drafts, converting exported code logs into reading notes, or preparing assignment submissions, turning plain text into structured Word documents simplifies sharing and printing across professional platforms.</p>
+
+            <p>Need to convert images into document formats as well? Try our <a href="https://pooreyoutuber.github.io/photo-to-pdf.html" style="color: var(--accent); font-weight: 600;">Photo to PDF Converter</a> or reduce existing document sizes using our <a href="https://pooreyoutuber.github.io/pdf-compress.html" style="color: var(--accent); font-weight: 600;">PDF Compressor Tool</a>.</p>
+        </article>
+
+        <!-- Visible FAQ Section -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-card">
+                <h3>Is this Text to Doc converter free to use?</h3>
+                <p>Yes, our Text to Doc Converter is completely free. You can convert unlimited plain text files into Word DOCX documents without any paid account or subscription.</p>
+            </div>
+            <div class="faq-card">
+                <h3>Is my text uploaded to any external server?</h3>
+                <p>No. The document generation runs client-side inside your browser. Your typed content and uploaded text files are never saved or uploaded to external servers.</p>
+            </div>
+            <div class="faq-card">
+                <h3>Will the generated document open in Microsoft Word?</h3>
+                <p>Yes! The output is a standard .docx file that opens seamlessly in Microsoft Word, Google Docs, LibreOffice, and mobile document viewers.</p>
+            </div>
+        </section>
+
+        <!-- Internal Links Section -->
+        <section class="internal-links-box">
+            <h3>Explore More Free Web Tools</h3>
+            <div class="tools-grid">
+                <a href="https://pooreyoutuber.github.io/pdf-compress.html" class="tool-link">📄 PDF Compressor</a>
+                <a href="https://pooreyoutuber.github.io/photo-to-pdf.html" class="tool-link">🖼️ Photo to PDF</a>
+                <a href="https://pooreyoutuber.github.io/multi-browser.html" class="tool-link">🌐 Multi Browser Tool</a>
+                <a href="https://pooreyoutuber.github.io/youtube-thumbnail.html" class="tool-link">📷 Thumbnail Downloader</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 PooreYoutuber. All Rights Reserved. Free client-side creator tools.</p>
+    </footer>
+
+</div>
+
+<script>
+    // Live Word and Character Counter
+    const textArea = document.getElementById('textContent');
+    const wordCountEl = document.getElementById('wordCount');
+    const charCountEl = document.getElementById('charCount');
+    const fileInput = document.getElementById('fileInput');
+
+    textArea.addEventListener('input', updateStats);
+
+    function updateStats() {
+        const text = textArea.value;
+        charCountEl.textContent = text.length;
         
-        let rotation = 0;
-        let originalImg = null;
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+        wordCountEl.textContent = text.trim() === '' ? 0 : words.length;
+    }
 
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    preview.src = event.target.result;
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        originalImg = img;
-                        imgW.value = img.width;
-                        imgH.value = img.height;
-                        resetAll();
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
+    // Load uploaded .txt or .md files into textarea
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            textArea.value = e.target.result;
+            updateStats();
+
+            // Set document title input automatically from file name
+            const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+            document.getElementById('docTitle').value = nameWithoutExt;
+        };
+        reader.readAsText(file);
+    });
+
+    // Generate and download .docx file using docx.js library
+    function convertToDocx() {
+        const text = textArea.value;
+        if (!text.trim()) {
+            alert('Please enter or upload some text first!');
+            return;
+        }
+
+        const customTitle = document.getElementById('docTitle').value.trim() || 'Converted_Document';
+        
+        // Split text by lines to create Word paragraphs
+        const lines = text.split('\n');
+        const docParagraphs = lines.map(line => {
+            return new docx.Paragraph({
+                children: [
+                    new docx.TextRun({
+                        text: line,
+                        font: "Calibri",
+                        size: 24 // 12pt font
+                    })
+                ],
+                spacing: { after: 120 } // Light spacing between paragraphs
+            });
         });
 
-        function applyFilter(f) { preview.style.filter = f; }
-        function rotateImg(deg) { rotation += deg; updateTransform(); }
-        function updateTransform() { preview.style.transform = `rotate(${rotation}deg)`; }
-        
-        function resetAll() {
-            rotation = 0;
-            preview.style.filter = 'none';
-            updateTransform();
-        }
+        // Create docx Document structure
+        const doc = new docx.Document({
+            sections: [{
+                properties: {},
+                children: docParagraphs
+            }]
+        });
 
-        function downloadImage() {
-            if (!originalImg) return alert("Upload image first!");
-            const canvas = document.getElementById('hiddenCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const w = parseInt(imgW.value) || originalImg.width;
-            const h = parseInt(imgH.value) || originalImg.height;
+        // Generate Blob and trigger browser download
+        docx.Packer.toBlob(doc).then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${customTitle}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }).catch(err => {
+            console.error('Document generation error:', err);
+            alert('Failed to generate document. Please try again.');
+        });
+    }
+</script>
 
-            canvas.width = w;
-            canvas.height = h;
-
-            ctx.filter = preview.style.filter;
-            ctx.translate(w/2, h/2);
-            ctx.rotate(rotation * Math.PI / 180);
-            ctx.drawImage(originalImg, -w/2, -h/2, w, h);
-            
-            const link = document.createElement('a');
-            link.download = 'proedit-optimized.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-    </script>
 </body>
 </html>
