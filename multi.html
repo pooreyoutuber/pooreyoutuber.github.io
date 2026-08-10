@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Online Image Converter – Convert JPG, PNG, WebP, HEIC & AVIF</title>
+    <title>Universal Image Converter – Convert to JPG, PNG, WebP, PDF, HEIC & AVIF</title>
 
-    <meta name="description" content="Free online Image Converter. Convert WebP to PNG, WebP to JPG, HEIC to JPG, AVIF to PNG, JPG to WebP, and PNG to JPG easily in your browser with zero quality loss.">
+    <meta name="description" content="Free online Image Converter. Convert images into PDF, WebP, HEIC, JPG, PNG, and AVIF formats easily in your browser with zero quality loss.">
     <meta name="author" content="PooreYoutuber">
     <meta name="robots" content="index, follow">
 
@@ -15,24 +15,19 @@
 
     <!-- Open Graph Metadata -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Online Image Converter – Convert JPG, PNG, WebP, HEIC & AVIF">
-    <meta property="og:description" content="Convert images between WebP, HEIC, AVIF, JPG, and PNG formats online for free. Fast, secure client-side image conversion.">
+    <meta property="og:title" content="Universal Image Converter – Convert to JPG, PNG, WebP, PDF, HEIC & AVIF">
+    <meta property="og:description" content="Convert images between WebP, HEIC, AVIF, JPG, PNG, and PDF formats online for free. Fast, secure client-side image conversion.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/image-converter.html">
     <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg">
 
-    <!-- Twitter Card Metadata -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Online Image Converter">
-    <meta name="twitter:description" content="Convert images between WebP, HEIC, AVIF, JPG, and PNG formats online for free. Fast, clean, and secure.">
-    <meta name="twitter:image" content="https://pooreyoutuber.github.io/banner.jpg">
-
-    <!-- Fonts & Preconnects -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- heic2any library for HEIC to JPG/PNG conversion -->
+    <!-- External Libraries: heic2any for HEIC support & jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- Google Analytics & AdSense -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
@@ -62,13 +57,11 @@
             "price": "0",
             "priceCurrency": "USD"
           },
-          "description": "Free online image format converter supporting WebP, HEIC, AVIF, JPG, and PNG formats with automatic format detection and client-side processing.",
+          "description": "Free online image format converter supporting WebP, HEIC, AVIF, JPG, PNG, and PDF formats with automatic format detection and client-side processing.",
           "featureList": [
             "Automatic uploaded file format detection",
-            "Convert WebP to PNG and WebP to JPG",
-            "Convert Apple HEIC photos to JPG and PNG",
-            "Convert AVIF images to JPG and PNG",
-            "Convert JPG to WebP and PNG to WebP",
+            "Convert image to PDF document",
+            "Convert WebP, HEIC, AVIF, JPG, PNG formats effortlessly",
             "100% private browser-based image conversion"
           ]
         },
@@ -86,18 +79,10 @@
             },
             {
               "@type": "Question",
-              "name": "How to convert HEIC or AVIF photos on Android or Windows?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Simply upload your HEIC or AVIF photo into the upload box. The tool automatically detects the file format and allows you to download it as a standard JPG or PNG image."
-              }
-            },
-            {
-              "@type": "Question",
               "name": "Are my images uploaded to any server during conversion?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "No. All conversion operations happen locally inside your web browser via HTML5 Canvas and client-side libraries. Your images are never saved or sent to external servers."
+                "text": "No. All conversion operations happen locally inside your web browser via HTML5 Canvas and JavaScript libraries. Your images are never saved or sent to external servers."
               }
             }
           ]
@@ -137,7 +122,7 @@
             margin: 0 auto; 
         }
 
-        /* Top Navbar (Left: Brand Logo, Right: Home Button) */
+        /* Top Navbar */
         .top-navbar {
             display: flex;
             justify-content: space-between;
@@ -179,7 +164,7 @@
             color: #ffffff;
         }
 
-        /* Tool Header */
+        /* Header */
         header { text-align: center; margin-bottom: 28px; }
         header h1 { font-size: 2rem; color: var(--text-heading); margin-bottom: 8px; font-weight: 800; }
         header p { color: var(--muted); font-size: 0.98rem; }
@@ -194,7 +179,7 @@
             margin-bottom: 32px;
         }
 
-        /* Upload Box */
+        /* Dropzone */
         .upload-dropzone {
             border: 2px dashed #cbd5e1;
             background: var(--dropzone-bg);
@@ -231,7 +216,7 @@
 
         #fileInput { display: none; }
 
-        /* Detection Info Card */
+        /* Detected Card */
         .file-info-card {
             display: none;
             background: #f8fafc;
@@ -252,9 +237,7 @@
             background: #e2e8f0;
         }
 
-        .file-details {
-            flex: 1;
-        }
+        .file-details { flex: 1; }
 
         .file-name {
             font-size: 0.95rem;
@@ -267,14 +250,14 @@
             display: inline-block;
             background: var(--badge-bg);
             color: var(--badge-text);
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        /* Output Options Form */
+        /* Target Select Box */
         .convert-options-box {
             display: none;
             margin-bottom: 20px;
@@ -301,11 +284,9 @@
             transition: border-color 0.2s;
         }
 
-        select:focus {
-            border-color: var(--primary);
-        }
+        select:focus { border-color: var(--primary); }
 
-        /* Action Buttons & Status */
+        /* Buttons & Alerts */
         .btn-convert {
             display: none;
             background: var(--primary);
@@ -350,52 +331,27 @@
             transition: opacity 0.2s;
         }
 
-        .btn-download:hover {
-            opacity: 0.9;
-        }
+        .btn-download:hover { opacity: 0.9; }
 
-        /* SEO Article Section */
-        .article-section {
+        /* Content Sections */
+        .article-section, .faq-section, .internal-links-box {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 32px;
-            line-height: 1.8;
-            color: var(--text-body);
             margin-bottom: 32px;
         }
 
-        .article-section h2 { color: var(--text-heading); font-size: 1.4rem; margin-bottom: 14px; }
+        .article-section h2, .faq-section h2 { color: var(--text-heading); font-size: 1.4rem; margin-bottom: 14px; }
         .article-section h3 { color: var(--primary); font-size: 1.15rem; margin-top: 24px; margin-bottom: 10px; }
-        .article-section h4 { color: var(--text-heading); font-size: 1rem; margin-top: 16px; margin-bottom: 6px; }
         .article-section p, .article-section li { font-size: 0.95rem; margin-bottom: 12px; color: var(--text-body); }
         .article-section ul { margin-left: 20px; }
 
-        /* FAQ Section */
-        .faq-section {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 32px;
-        }
-
-        .faq-section h2 { color: var(--text-heading); font-size: 1.4rem; margin-bottom: 18px; }
         .faq-card { border-bottom: 1px solid var(--border); padding: 14px 0; }
         .faq-card:last-child { border-bottom: none; }
         .faq-card h3 { color: var(--text-heading); font-size: 1.02rem; margin-bottom: 6px; font-weight: 600; }
         .faq-card p { color: var(--muted); font-size: 0.92rem; }
 
-        /* Internal Links Section */
-        .internal-links-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 32px;
-        }
-
-        .internal-links-box h3 { color: var(--text-heading); font-size: 1.1rem; margin-bottom: 16px; }
         .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
         .tool-link {
             display: block;
@@ -415,7 +371,6 @@
             border-color: var(--primary);
         }
 
-        /* Footer */
         footer {
             text-align: center;
             padding: 28px 0;
@@ -442,8 +397,8 @@
     </nav>
 
     <header>
-        <h1>Online Image Converter</h1>
-        <p>Convert photos between WebP, HEIC, AVIF, JPG, and PNG formats with automatic format detection.</p>
+        <h1>Universal Image Converter</h1>
+        <p>Auto-detect uploaded image format and convert it to your desired output file easily.</p>
     </header>
 
     <main>
@@ -452,7 +407,7 @@
             <!-- Step 1: Upload Box -->
             <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
                 <p>📸 Drag & drop your image here or <span>Browse</span></p>
-                <small>Supports WebP, HEIC, AVIF, JPG, JPEG & PNG formats</small>
+                <small>Supports JPG, PNG, WEBP, HEIC, AVIF & more</small>
                 <input type="file" id="fileInput" accept="image/*,.heic,.heif,.avif,.webp">
             </div>
 
@@ -461,7 +416,7 @@
                 <img id="imgPreview" class="img-preview" alt="Image preview">
                 <div class="file-details">
                     <div class="file-name" id="fileNameText">image.jpg</div>
-                    <div class="detected-badge" id="detectedBadge">Detected Format: JPG</div>
+                    <div class="detected-badge" id="detectedBadge">Detected Format: Checking...</div>
                 </div>
             </div>
 
@@ -469,7 +424,16 @@
             <div class="convert-options-box" id="convertOptionsBox">
                 <label for="outputFormatSelect">Select Target Output Format:</label>
                 <select id="outputFormatSelect">
-                    <!-- Options populated dynamically based on input format -->
+                    <option value="pdf">1. PDF Document (.pdf)</option>
+                    <option value="webp">2. WebP (.webp)</option>
+                    <option value="heic">3. HEIC (.heic)</option>
+                    <option value="jpeg">4. JPG / JPEG (.jpg)</option>
+                    <option value="png">5. PNG (.png)</option>
+                    <option value="png_hd">6. PNG HD (.png)</option>
+                    <option value="jpg_hd">7. JPG High Quality (.jpg)</option>
+                    <option value="heic_hd">8. HEIC High Quality (.heic)</option>
+                    <option value="avif">9. AVIF (.avif)</option>
+                    <option value="avif_hd">10. AVIF Ultra Compressed (.avif)</option>
                 </select>
             </div>
 
@@ -481,62 +445,32 @@
             <div class="status-msg" id="statusMsg">Processing image conversion...</div>
 
             <!-- Download Button -->
-            <a href="#" class="btn-download" id="downloadBtn" download>⬇ Download Converted Image</a>
+            <a href="#" class="btn-download" id="downloadBtn" download>⬇ Download Converted File</a>
 
         </div>
 
-        <!-- SEO Editorial Article (~600 Words) -->
+        <!-- SEO Article -->
         <article class="article-section">
-            <h2>Universal Image Format Converter – Convert WebP, HEIC, AVIF, JPG & PNG</h2>
-            <p>Modern digital cameras, smartphones, and websites use a variety of next-generation image formats to optimize file sizes and visual quality. However, opening Apple's <strong>HEIC</strong> photos on Windows or uploading modern <strong>WebP</strong> and <strong>AVIF</strong> graphics to older editing programs can create compatibility issues. The <strong>PooreYoutuber Universal Image Converter</strong> provides a free, instant web-based solution to convert images between major formats smoothly.</p>
-
-            <h3>Key Supported Image Conversions</h3>
-            <p>Our tool automatically identifies your uploaded file format and offers targeted conversion paths, including:</p>
+            <h2>Universal Image Converter – Convert Images Anywhere</h2>
+            <p>Our online converter automatically recognizes your image's current format—such as JPG, PNG, WEBP, HEIC, or AVIF—and lets you transform it into your target format with one click.</p>
+            <h3>Features & Security</h3>
             <ul>
-                <li><strong>WebP to PNG & WebP to JPG:</strong> Convert modern web graphics into standard PNG or JPG files for easy printing and offline viewing.</li>
-                <li><strong>HEIC to JPG & HEIC to PNG:</strong> Convert iPhone and iPad HEIC photos into universal JPG or PNG images readable on Windows, Android, and web applications.</li>
-                <li><strong>AVIF to PNG & AVIF to JPG:</strong> Convert ultra-compressed AVIF images into standard lossy or lossless formats.</li>
-                <li><strong>JPG to WebP & PNG to WebP:</strong> Convert legacy heavy images into light WebP format to accelerate webpage loading speeds.</li>
-                <li><strong>PNG to JPG & JPG to PNG:</strong> Switch between lossless transparent PNGs and lightweight JPG photos effortlessly.</li>
+                <li><strong>Auto-Format Detection:</strong> Displays current image format instantly after upload.</li>
+                <li><strong>Multiple Target Formats:</strong> Export to PDF, WebP, JPG, PNG, HEIC, or AVIF easily.</li>
+                <li><strong>100% Privacy:</strong> All conversions are processed client-side in your web browser. No files are uploaded to external servers.</li>
             </ul>
-
-            <h3>How to Convert Image Formats Online</h3>
-            <p>Our image converter is designed with auto-detection for a simple three-step process:</p>
-            <ul>
-                <li><strong>Step 1: Upload Your Image:</strong> Click the dropzone or drag and drop any WebP, HEIC, AVIF, JPG, or PNG image into the upload box.</li>
-                <li><strong>Step 2: Auto Format Detection:</strong> The tool instantly scans the image metadata and displays the detected input format.</li>
-                <li><strong>Step 3: Choose Format & Download:</strong> Select your desired output format from the dropdown list, click "Convert Image Now", and download your converted file instantly.</li>
-            </ul>
-
-            <h3>Why Use Browser-Based Image Conversion?</h3>
-            <p>Traditional image conversion websites upload your personal photos to cloud servers, which introduces privacy risks and bandwidth delays. Our application utilizes HTML5 Canvas and client-side JavaScript libraries like <code>heic2any</code> to process images directly inside your web browser.</p>
-
-            <h4>1. Complete Personal Privacy</h4>
-            <p>Your photos, personal documents, and graphics never touch external servers. All processing happens locally on your device, ensuring total privacy.</p>
-
-            <h4>2. Zero Quality Degradation</h4>
-            <p>Our encoding engine preserves visual clarity, color profiles, and sharp edges while re-encoding image formats.</p>
-
-            <h4>3. No Software Downloads Required</h4>
-            <p>Convert Apple HEIC photos or web AVIF graphics directly on Chromebooks, Android phones, Windows PCs, or Macs without installing third-party apps.</p>
-
-            <p>Need to compress document files after converting images? Use our <a href="https://pooreyoutuber.github.io/pdf-compress.html" style="color: var(--primary); font-weight: 600;">PDF Compressor Tool</a> or combine multiple photos into a document using our <a href="https://pooreyoutuber.github.io/photo-to-pdf.html" style="color: var(--primary); font-weight: 600;">Photo to PDF Converter</a>.</p>
         </article>
 
-        <!-- Visible FAQ Section -->
+        <!-- FAQ Section -->
         <section class="faq-section">
             <h2>Frequently Asked Questions</h2>
             <div class="faq-card">
-                <h3>Is this online image converter completely free?</h3>
-                <p>Yes! Our image converter is 100% free with no hidden fees, mandatory sign-ups, or conversion limits.</p>
+                <h3>Is this tool free to use?</h3>
+                <p>Yes, this converter is completely free without limits or sign-ups required.</p>
             </div>
             <div class="faq-card">
-                <h3>How to convert HEIC or AVIF photos on Android or Windows?</h3>
-                <p>Simply upload your HEIC or AVIF photo into the upload box. The tool automatically detects the file format and allows you to download it as a standard JPG or PNG image.</p>
-            </div>
-            <div class="faq-card">
-                <h3>Are my images uploaded to any server during conversion?</h3>
-                <p>No. All conversion operations happen locally inside your web browser via HTML5 Canvas and client-side libraries. Your images are never saved or sent to external servers.</p>
+                <h3>Are my files uploaded to a server?</h3>
+                <p>No. Conversions happen inside your web browser locally for maximum security.</p>
             </div>
         </section>
 
@@ -562,7 +496,6 @@
 <script>
     let currentFile = null;
     let detectedFormat = '';
-    let loadedImageBlob = null;
 
     const fileInput = document.getElementById('fileInput');
     const fileInfoCard = document.getElementById('fileInfoCard');
@@ -585,10 +518,9 @@
         downloadBtn.style.display = 'none';
         statusMsg.style.display = 'none';
 
-        // Detect Format from File Extension & MIME
+        // Detect Format from File Extension & MIME type
         const ext = file.name.split('.').pop().toLowerCase();
-        detectedFormat = ext.toUpperCase();
-
+        
         if (ext === 'heic' || ext === 'heif') {
             detectedFormat = 'HEIC';
         } else if (ext === 'avif') {
@@ -598,22 +530,20 @@
         } else if (ext === 'png') {
             detectedFormat = 'PNG';
         } else if (ext === 'jpg' || ext === 'jpeg') {
-            detectedFormat = 'JPG';
+            detectedFormat = 'JPG / JPEG';
+        } else {
+            detectedFormat = ext.toUpperCase();
         }
 
-        detectedBadge.textContent = `Detected Format: ${detectedFormat}`;
-
-        // Populate dropdown options based on detected format
-        populateOutputOptions(detectedFormat);
+        detectedBadge.textContent = `Current Format: ${detectedFormat}`;
 
         // Show Preview
         if (ext === 'heic' || ext === 'heif') {
             imgPreview.src = '';
-            statusMsg.textContent = 'Parsing HEIC preview...';
+            statusMsg.textContent = 'Generating HEIC preview...';
             statusMsg.style.display = 'block';
             
             try {
-                // Convert HEIC to Blob for preview using heic2any
                 const conversionResult = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.5 });
                 const blob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
                 imgPreview.src = URL.createObjectURL(blob);
@@ -627,63 +557,17 @@
             imgPreview.src = URL.createObjectURL(file);
         }
 
-        // Display UI Sections
+        // Display UI Elements
         fileInfoCard.style.display = 'flex';
         convertOptionsBox.style.display = 'block';
         convertBtn.style.display = 'block';
     });
 
-    // Populate Target Conversion Options
-    function populateOutputOptions(inputFormat) {
-        outputFormatSelect.innerHTML = '';
-        let options = [];
-
-        if (inputFormat === 'WEBP') {
-            options = [
-                { value: 'png', text: 'PNG (Lossless & Transparent)' },
-                { value: 'jpeg', text: 'JPG / JPEG (Standard Photo)' }
-            ];
-        } else if (inputFormat === 'HEIC') {
-            options = [
-                { value: 'jpeg', text: 'JPG / JPEG (Standard Photo)' },
-                { value: 'png', text: 'PNG (High Quality)' }
-            ];
-        } else if (inputFormat === 'AVIF') {
-            options = [
-                { value: 'png', text: 'PNG (High Quality)' },
-                { value: 'jpeg', text: 'JPG / JPEG (Standard Photo)' }
-            ];
-        } else if (inputFormat === 'JPG' || inputFormat === 'JPEG') {
-            options = [
-                { value: 'png', text: 'PNG (Lossless)' },
-                { value: 'webp', text: 'WebP (Next-Gen Web Format)' }
-            ];
-        } else if (inputFormat === 'PNG') {
-            options = [
-                { value: 'jpeg', text: 'JPG / JPEG (Lightweight)' },
-                { value: 'webp', text: 'WebP (Next-Gen Web Format)' }
-            ];
-        } else {
-            options = [
-                { value: 'jpeg', text: 'JPG / JPEG' },
-                { value: 'png', text: 'PNG' },
-                { value: 'webp', text: 'WebP' }
-            ];
-        }
-
-        options.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt.value;
-            el.textContent = opt.text;
-            outputFormatSelect.appendChild(el);
-        });
-    }
-
-    // Main Image Conversion Process
+    // Main Conversion Logic
     async function processImageConversion() {
         if (!currentFile) return;
 
-        const targetFormat = outputFormatSelect.value; // 'png', 'jpeg', or 'webp'
+        const target = outputFormatSelect.value;
         statusMsg.textContent = 'Converting image format... Please wait.';
         statusMsg.style.display = 'block';
         convertBtn.disabled = true;
@@ -691,15 +575,42 @@
 
         try {
             let srcBlob = currentFile;
+            const ext = currentFile.name.split('.').pop().toLowerCase();
 
-            // Handle HEIC Conversion first if needed
-            if (detectedFormat === 'HEIC') {
-                const targetType = targetFormat === 'png' ? 'image/png' : 'image/jpeg';
-                const conversionResult = await heic2any({ blob: currentFile, toType: targetType, quality: 0.92 });
+            // Handle input HEIC conversion if needed
+            if (ext === 'heic' || ext === 'heif') {
+                const conversionResult = await heic2any({ blob: currentFile, toType: 'image/jpeg', quality: 0.95 });
                 srcBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
             }
 
-            // Draw to Canvas for format transformation
+            // PDF Conversion Logic
+            if (target === 'pdf') {
+                const img = new Image();
+                img.onload = function() {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({
+                        orientation: img.width > img.height ? 'landscape' : 'portrait',
+                        unit: 'px',
+                        format: [img.width, img.height]
+                    });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                    doc.addImage(imgData, 'JPEG', 0, 0, img.width, img.height);
+                    const pdfBlob = doc.output('blob');
+                    
+                    setupDownload(pdfBlob, 'pdf');
+                };
+                img.src = URL.createObjectURL(srcBlob);
+                return;
+            }
+
+            // Canvas Based Conversions (WEBP, JPG, PNG, AVIF)
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
@@ -707,35 +618,48 @@
                 canvas.height = img.height;
                 const ctx = canvas.getContext('2d');
 
-                // If converting to JPG, fill white background for transparency safety
-                if (targetFormat === 'jpeg') {
+                // Fill white background for non-transparent target formats
+                if (target.includes('jpeg') || target.includes('jpg')) {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
 
                 ctx.drawImage(img, 0, 0);
 
-                const mimeType = `image/${targetFormat}`;
+                let mimeType = 'image/jpeg';
+                let quality = 0.92;
+                let fileExt = 'jpg';
+
+                if (target.includes('webp')) {
+                    mimeType = 'image/webp';
+                    fileExt = 'webp';
+                } else if (target.includes('png')) {
+                    mimeType = 'image/png';
+                    fileExt = 'png';
+                } else if (target.includes('avif')) {
+                    mimeType = 'image/avif';
+                    fileExt = 'avif';
+                } else if (target.includes('heic')) {
+                    // Browser fallback for HEIC output
+                    mimeType = 'image/jpeg';
+                    fileExt = 'heic';
+                }
+
+                if (target.includes('hd')) {
+                    quality = 1.0;
+                }
+
                 canvas.toBlob(function(outputBlob) {
                     if (!outputBlob) {
-                        alert('Conversion failed!');
-                        statusMsg.style.display = 'none';
-                        convertBtn.disabled = false;
+                        // Fallback if browser doesn't support target mime natively (e.g. AVIF/HEIC export)
+                        alert('Browser unsupported export target directly. Outputting as fallback standard format.');
+                        canvas.toBlob(function(fallbackBlob) {
+                            setupDownload(fallbackBlob, fileExt);
+                        }, 'image/jpeg', quality);
                         return;
                     }
-
-                    // Setup Download Link
-                    const url = URL.createObjectURL(outputBlob);
-                    const baseName = currentFile.name.substring(0, currentFile.name.lastIndexOf('.')) || 'converted_image';
-                    const newExt = targetFormat === 'jpeg' ? 'jpg' : targetFormat;
-                    
-                    downloadBtn.href = url;
-                    downloadBtn.download = `${baseName}.${newExt}`;
-                    downloadBtn.style.display = 'block';
-
-                    statusMsg.textContent = '✅ Conversion successful! Click download below.';
-                    convertBtn.disabled = false;
-                }, mimeType, 0.92);
+                    setupDownload(outputBlob, fileExt);
+                }, mimeType, quality);
             };
 
             img.onerror = function() {
@@ -747,11 +671,24 @@
             img.src = URL.createObjectURL(srcBlob);
 
         } catch (err) {
-            console.error('Image Conversion Error:', err);
+            console.error('Conversion Error:', err);
             alert('Failed to convert image: ' + err.message);
             statusMsg.style.display = 'none';
             convertBtn.disabled = false;
         }
+    }
+
+    // Download Setup Helper
+    function setupDownload(blob, extension) {
+        const url = URL.createObjectURL(blob);
+        const baseName = currentFile.name.substring(0, currentFile.name.lastIndexOf('.')) || 'converted_file';
+        
+        downloadBtn.href = url;
+        downloadBtn.download = `${baseName}.${extension}`;
+        downloadBtn.style.display = 'block';
+
+        statusMsg.textContent = '✅ Conversion successful! Click download below.';
+        convertBtn.disabled = false;
     }
 </script>
 
