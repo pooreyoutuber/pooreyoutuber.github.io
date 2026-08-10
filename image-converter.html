@@ -1,0 +1,696 @@
+\<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Universal Image Converter – Convert to JPG, PNG, WebP, PDF, HEIC & AVIF</title>
+
+    <meta name="description" content="Free online Image Converter. Convert images into PDF, WebP, HEIC, JPG, PNG, and AVIF formats easily in your browser with zero quality loss.">
+    <meta name="author" content="PooreYoutuber">
+    <meta name="robots" content="index, follow">
+
+    <!-- Canonical Tag -->
+    <link rel="canonical" href="https://pooreyoutuber.github.io/image-converter.html">
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Universal Image Converter – Convert to JPG, PNG, WebP, PDF, HEIC & AVIF">
+    <meta property="og:description" content="Convert images between WebP, HEIC, AVIF, JPG, PNG, and PDF formats online for free. Fast, secure client-side image conversion.">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/image-converter.html">
+    <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- External Libraries: heic2any for HEIC support & jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Google Analytics & AdSense -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <!-- Structured Data (WebApplication + FAQ Schema) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://pooreyoutuber.github.io/image-converter.html#webapp",
+          "name": "Universal Image Converter",
+          "url": "https://pooreyoutuber.github.io/image-converter.html",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires JavaScript and modern HTML5 browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "Free online image format converter supporting WebP, HEIC, AVIF, JPG, PNG, and PDF formats with automatic format detection and client-side processing.",
+          "featureList": [
+            "Automatic uploaded file format detection",
+            "Convert image to PDF document",
+            "Convert WebP, HEIC, AVIF, JPG, PNG formats effortlessly",
+            "100% private browser-based image conversion"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://pooreyoutuber.github.io/image-converter.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is this online image converter completely free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Our image converter is 100% free with no hidden fees, mandatory sign-ups, or conversion limits."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are my images uploaded to any server during conversion?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. All conversion operations happen locally inside your web browser via HTML5 Canvas and JavaScript libraries. Your images are never saved or sent to external servers."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --muted: #64748b;
+            --dropzone-bg: #f1f5f9;
+            --green: #10b981;
+            --badge-bg: #e0f2fe;
+            --badge-text: #0369a1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-body); 
+            padding: 16px; 
+            line-height: 1.6; 
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+        }
+
+        /* Top Navbar */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .brand-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            color: var(--text-heading);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Header */
+        header { text-align: center; margin-bottom: 28px; }
+        header h1 { font-size: 2rem; color: var(--text-heading); margin-bottom: 8px; font-weight: 800; }
+        header p { color: var(--muted); font-size: 0.98rem; }
+
+        /* Main Workspace Card */
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            margin-bottom: 32px;
+        }
+
+        /* Dropzone */
+        .upload-dropzone {
+            border: 2px dashed #cbd5e1;
+            background: var(--dropzone-bg);
+            border-radius: 12px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .upload-dropzone:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .upload-dropzone p {
+            color: var(--text-heading);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .upload-dropzone span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .upload-dropzone small {
+            display: block;
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 6px;
+        }
+
+        #fileInput { display: none; }
+
+        /* Detected Card */
+        .file-info-card {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .img-preview {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #e2e8f0;
+        }
+
+        .file-details { flex: 1; }
+
+        .file-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            word-break: break-all;
+        }
+
+        .detected-badge {
+            display: inline-block;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        /* Target Select Box */
+        .convert-options-box {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .convert-options-box label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-heading);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus { border-color: var(--primary); }
+
+        /* Buttons & Alerts */
+        .btn-convert {
+            display: none;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-convert:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .btn-download {
+            display: none;
+            background: var(--green);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            width: 100%;
+            text-align: center;
+            margin-top: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-download:hover { opacity: 0.9; }
+
+        /* Content Sections */
+        .article-section, .faq-section, .internal-links-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .article-section h2, .faq-section h2 { color: var(--text-heading); font-size: 1.4rem; margin-bottom: 14px; }
+        .article-section h3 { color: var(--primary); font-size: 1.15rem; margin-top: 24px; margin-bottom: 10px; }
+        .article-section p, .article-section li { font-size: 0.95rem; margin-bottom: 12px; color: var(--text-body); }
+        .article-section ul { margin-left: 20px; }
+
+        .faq-card { border-bottom: 1px solid var(--border); padding: 14px 0; }
+        .faq-card:last-child { border-bottom: none; }
+        .faq-card h3 { color: var(--text-heading); font-size: 1.02rem; margin-bottom: 6px; font-weight: 600; }
+        .faq-card p { color: var(--muted); font-size: 0.92rem; }
+
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .tool-link {
+            display: block;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .tool-link:hover {
+            background: #eef2ff;
+            border-color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 28px 0;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.6rem; }
+            .tool-card, .article-section, .faq-section { padding: 20px; }
+            .file-info-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <a href="https://pooreyoutuber.github.io/" class="brand-logo">PooreYoutuber</a>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">🏠 Home</a>
+    </nav>
+
+    <header>
+        <h1>Universal Image Converter</h1>
+        <p>Auto-detect uploaded image format and convert it to your desired output file easily.</p>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            
+            <!-- Step 1: Upload Box -->
+            <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
+                <p>📸 Drag & drop your image here or <span>Browse</span></p>
+                <small>Supports JPG, PNG, WEBP, HEIC, AVIF & more</small>
+                <input type="file" id="fileInput" accept="image/*,.heic,.heif,.avif,.webp">
+            </div>
+
+            <!-- Step 2: Auto-Detected Format Display -->
+            <div class="file-info-card" id="fileInfoCard">
+                <img id="imgPreview" class="img-preview" alt="Image preview">
+                <div class="file-details">
+                    <div class="file-name" id="fileNameText">image.jpg</div>
+                    <div class="detected-badge" id="detectedBadge">Detected Format: Checking...</div>
+                </div>
+            </div>
+
+            <!-- Step 3: Choose Output Target Format -->
+            <div class="convert-options-box" id="convertOptionsBox">
+                <label for="outputFormatSelect">Select Target Output Format:</label>
+                <select id="outputFormatSelect">
+                    <option value="pdf">1. PDF Document (.pdf)</option>
+                    <option value="webp">2. WebP (.webp)</option>
+                    <option value="heic">3. HEIC (.heic)</option>
+                    <option value="jpeg">4. JPG / JPEG (.jpg)</option>
+                    <option value="png">5. PNG (.png)</option>
+                    <option value="png_hd">6. PNG HD (.png)</option>
+                    <option value="jpg_hd">7. JPG High Quality (.jpg)</option>
+                    <option value="heic_hd">8. HEIC High Quality (.heic)</option>
+                    <option value="avif">9. AVIF (.avif)</option>
+                    <option value="avif_hd">10. AVIF Ultra Compressed (.avif)</option>
+                </select>
+            </div>
+
+            <!-- Convert Button & Status -->
+            <button class="btn-convert" id="convertBtn" onclick="processImageConversion()">
+                ⚡ Convert Image Now
+            </button>
+
+            <div class="status-msg" id="statusMsg">Processing image conversion...</div>
+
+            <!-- Download Button -->
+            <a href="#" class="btn-download" id="downloadBtn" download>⬇ Download Converted File</a>
+
+        </div>
+
+        <!-- SEO Article -->
+        <article class="article-section">
+            <h2>Universal Image Converter – Convert Images Anywhere</h2>
+            <p>Our online converter automatically recognizes your image's current format—such as JPG, PNG, WEBP, HEIC, or AVIF—and lets you transform it into your target format with one click.</p>
+            <h3>Features & Security</h3>
+            <ul>
+                <li><strong>Auto-Format Detection:</strong> Displays current image format instantly after upload.</li>
+                <li><strong>Multiple Target Formats:</strong> Export to PDF, WebP, JPG, PNG, HEIC, or AVIF easily.</li>
+                <li><strong>100% Privacy:</strong> All conversions are processed client-side in your web browser. No files are uploaded to external servers.</li>
+            </ul>
+        </article>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-card">
+                <h3>Is this tool free to use?</h3>
+                <p>Yes, this converter is completely free without limits or sign-ups required.</p>
+            </div>
+            <div class="faq-card">
+                <h3>Are my files uploaded to a server?</h3>
+                <p>No. Conversions happen inside your web browser locally for maximum security.</p>
+            </div>
+        </section>
+
+        <!-- Internal Links Section -->
+        <section class="internal-links-box">
+            <h3>Explore More Free Web Tools</h3>
+            <div class="tools-grid">
+                <a href="https://pooreyoutuber.github.io/photo-to-pdf.html" class="tool-link">🖼️ Photo to PDF Converter</a>
+                <a href="https://pooreyoutuber.github.io/pdf-compress.html" class="tool-link">📄 PDF Compressor</a>
+                <a href="https://pooreyoutuber.github.io/text-file-to-zip.html" class="tool-link">📦 Text & File to ZIP</a>
+                <a href="https://pooreyoutuber.github.io/text-to-doc.html" class="tool-link">📝 Text to Doc Converter</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 PooreYoutuber. All Rights Reserved. Free client-side creator tools.</p>
+    </footer>
+
+</div>
+
+<script>
+    let currentFile = null;
+    let detectedFormat = '';
+
+    const fileInput = document.getElementById('fileInput');
+    const fileInfoCard = document.getElementById('fileInfoCard');
+    const imgPreview = document.getElementById('imgPreview');
+    const fileNameText = document.getElementById('fileNameText');
+    const detectedBadge = document.getElementById('detectedBadge');
+    const convertOptionsBox = document.getElementById('convertOptionsBox');
+    const outputFormatSelect = document.getElementById('outputFormatSelect');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // Handle File Upload & Auto Detection
+    fileInput.addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        currentFile = file;
+        fileNameText.textContent = file.name;
+        downloadBtn.style.display = 'none';
+        statusMsg.style.display = 'none';
+
+        // Detect Format from File Extension & MIME type
+        const ext = file.name.split('.').pop().toLowerCase();
+        
+        if (ext === 'heic' || ext === 'heif') {
+            detectedFormat = 'HEIC';
+        } else if (ext === 'avif') {
+            detectedFormat = 'AVIF';
+        } else if (ext === 'webp') {
+            detectedFormat = 'WEBP';
+        } else if (ext === 'png') {
+            detectedFormat = 'PNG';
+        } else if (ext === 'jpg' || ext === 'jpeg') {
+            detectedFormat = 'JPG / JPEG';
+        } else {
+            detectedFormat = ext.toUpperCase();
+        }
+
+        detectedBadge.textContent = `Current Format: ${detectedFormat}`;
+
+        // Show Preview
+        if (ext === 'heic' || ext === 'heif') {
+            imgPreview.src = '';
+            statusMsg.textContent = 'Generating HEIC preview...';
+            statusMsg.style.display = 'block';
+            
+            try {
+                const conversionResult = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.5 });
+                const blob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
+                imgPreview.src = URL.createObjectURL(blob);
+                statusMsg.style.display = 'none';
+            } catch (err) {
+                console.error('HEIC preview error:', err);
+                imgPreview.src = '';
+                statusMsg.style.display = 'none';
+            }
+        } else {
+            imgPreview.src = URL.createObjectURL(file);
+        }
+
+        // Display UI Elements
+        fileInfoCard.style.display = 'flex';
+        convertOptionsBox.style.display = 'block';
+        convertBtn.style.display = 'block';
+    });
+
+    // Main Conversion Logic
+    async function processImageConversion() {
+        if (!currentFile) return;
+
+        const target = outputFormatSelect.value;
+        statusMsg.textContent = 'Converting image format... Please wait.';
+        statusMsg.style.display = 'block';
+        convertBtn.disabled = true;
+        downloadBtn.style.display = 'none';
+
+        try {
+            let srcBlob = currentFile;
+            const ext = currentFile.name.split('.').pop().toLowerCase();
+
+            // Handle input HEIC conversion if needed
+            if (ext === 'heic' || ext === 'heif') {
+                const conversionResult = await heic2any({ blob: currentFile, toType: 'image/jpeg', quality: 0.95 });
+                srcBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
+            }
+
+            // PDF Conversion Logic
+            if (target === 'pdf') {
+                const img = new Image();
+                img.onload = function() {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({
+                        orientation: img.width > img.height ? 'landscape' : 'portrait',
+                        unit: 'px',
+                        format: [img.width, img.height]
+                    });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                    doc.addImage(imgData, 'JPEG', 0, 0, img.width, img.height);
+                    const pdfBlob = doc.output('blob');
+                    
+                    setupDownload(pdfBlob, 'pdf');
+                };
+                img.src = URL.createObjectURL(srcBlob);
+                return;
+            }
+
+            // Canvas Based Conversions (WEBP, JPG, PNG, AVIF)
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+
+                // Fill white background for non-transparent target formats
+                if (target.includes('jpeg') || target.includes('jpg')) {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.drawImage(img, 0, 0);
+
+                let mimeType = 'image/jpeg';
+                let quality = 0.92;
+                let fileExt = 'jpg';
+
+                if (target.includes('webp')) {
+                    mimeType = 'image/webp';
+                    fileExt = 'webp';
+                } else if (target.includes('png')) {
+                    mimeType = 'image/png';
+                    fileExt = 'png';
+                } else if (target.includes('avif')) {
+                    mimeType = 'image/avif';
+                    fileExt = 'avif';
+                } else if (target.includes('heic')) {
+                    // Browser fallback for HEIC output
+                    mimeType = 'image/jpeg';
+                    fileExt = 'heic';
+                }
+
+                if (target.includes('hd')) {
+                    quality = 1.0;
+                }
+
+                canvas.toBlob(function(outputBlob) {
+                    if (!outputBlob) {
+                        // Fallback if browser doesn't support target mime natively (e.g. AVIF/HEIC export)
+                        alert('Browser unsupported export target directly. Outputting as fallback standard format.');
+                        canvas.toBlob(function(fallbackBlob) {
+                            setupDownload(fallbackBlob, fileExt);
+                        }, 'image/jpeg', quality);
+                        return;
+                    }
+                    setupDownload(outputBlob, fileExt);
+                }, mimeType, quality);
+            };
+
+            img.onerror = function() {
+                alert('Error loading image for conversion.');
+                statusMsg.style.display = 'none';
+                convertBtn.disabled = false;
+            };
+
+            img.src = URL.createObjectURL(srcBlob);
+
+        } catch (err) {
+            console.error('Conversion Error:', err);
+            alert('Failed to convert image: ' + err.message);
+            statusMsg.style.display = 'none';
+            convertBtn.disabled = false;
+        }
+    }
+
+    // Download Setup Helper
+    function setupDownload(blob, extension) {
+        const url = URL.createObjectURL(blob);
+        const baseName = currentFile.name.substring(0, currentFile.name.lastIndexOf('.')) || 'converted_file';
+        
+        downloadBtn.href = url;
+        downloadBtn.download = `${baseName}.${extension}`;
+        downloadBtn.style.display = 'block';
+
+        statusMsg.textContent = '✅ Conversion successful! Click download below.';
+        convertBtn.disabled = false;
+    }
+</script>
+
+</body>
+</html>
