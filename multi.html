@@ -31,7 +31,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Third-Party Libraries for Real 26/26 Document Exports -->
+    <!-- Third-Party Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -706,7 +706,6 @@
 
         try {
             let blob;
-            let mimeType = 'application/octet-stream';
 
             // Complete 26-Format Router
             switch (targetExt) {
@@ -720,17 +719,22 @@
                     blob = new Blob([parseTextToCSV(content)], { type: 'text/csv;charset=utf-8' });
                     break;
 
-                // 3. DOC / 5. DOCM / 7. DOT / 8. DOTX (.docx standard modern doc engine)
+                // 3. DOC (RTF Trick for MS Word seamless opening without warning)
                 case 'doc':
+                    const docRtf = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Arial;}}\\f0\\fs24 ${content.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n')}}`;
+                    blob = new Blob([docRtf], { type: 'application/msword' });
+                    break;
+
+                // 4. DJVU (Fallback Container)
+                case 'djvu':
+                    blob = await generateDjvuContainer(content);
+                    break;
+
+                // 5. DOCM / 7. DOT / 8. DOTX (Manual OOXML Package via JSZip)
                 case 'docm':
                 case 'dot':
                 case 'dotx':
-                    blob = await generateDocxBlob(content);
-                    break;
-
-                // 4. DJVU (Valid Container via JSZip)
-                case 'djvu':
-                    blob = await generateDjvuContainer(content);
+                    blob = await generateOoxmlPackage(content, targetExt);
                     break;
 
                 // 6. DBK (DocBook XML)
@@ -747,7 +751,7 @@
 
                 // 10. INI
                 case 'ini':
-                    blob = new Blob([`[Settings]\ncontent="${content.replace(/"/g, '\\"')}"`], { type: 'text/plain;charset=utf-8' });
+                    blob = new Blob([parseTextToINI(content)], { type: 'text/plain;charset=utf-8' });
                     break;
 
                 // 11. JSON
@@ -762,7 +766,7 @@
                     blob = new Blob([jsonStr], { type: 'application/json' });
                     break;
 
-                // 12. ODT (Real OpenDocument Package via JSZip)
+                // 12. ODT (Compliant OpenDocument Package)
                 case 'odt':
                     blob = await generateOdtBlob(content);
                     break;
@@ -772,7 +776,7 @@
                     blob = new Blob([`<?php\n// Converted Script Content\n$text_data = ${JSON.stringify(content)};\necho $text_data;\n?>`], { type: 'application/x-httpd-php' });
                     break;
 
-                // 14. PPT / 15. POT (Real Presentation via PptxGenJS)
+                // 14. PPT / 15. POT (Fallback Presentation)
                 case 'ppt':
                 case 'pot':
                     blob = await generatePptxBlob(content);
@@ -780,9 +784,9 @@
 
                 // 16. SVG
                 case 'svg':
-                    const lines = content.split('\n').slice(0, 15);
+                    const lines = content.split('\n');
                     let svgTextElements = lines.map((line, idx) => `<text x="20" y="${40 + idx * 25}" font-family="sans-serif" font-size="16" fill="#000000">${escapeXml(line)}</text>`).join('\n');
-                    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="${Math.max(400, lines.length * 30 + 60)}">\n<rect width="100%" height="100%" fill="#ffffff"/>\n${svgTextElements}\n</svg>`;
+                    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="${Math.max(400, lines.length * 28 + 60)}">\n<rect width="100%" height="100%" fill="#ffffff"/>\n${svgTextElements}\n</svg>`;
                     blob = new Blob([svgContent], { type: 'image/svg+xml' });
                     break;
 
@@ -794,17 +798,17 @@
 
                 // 18. SRT
                 case 'srt':
-                    blob = new Blob([`1\n00:00:01,000 --> 00:00:05,000\n${content}`], { type: 'text/plain' });
+                    blob = new Blob([parseTextToSRT(content)], { type: 'text/plain;charset=utf-8' });
                     break;
 
                 // 19. TSV
                 case 'tsv':
-                    blob = new Blob([parseTextToTSV(content)], { type: 'text/tab-separated-values' });
+                    blob = new Blob([parseTextToTSV(content)], { type: 'text/tab-separated-values;charset=utf-8' });
                     break;
 
                 // 20. VTT
                 case 'vtt':
-                    blob = new Blob([`WEBVTT\n\n1\n00:00:01.000 --> 00:00:05.000\n${content}`], { type: 'text/vtt' });
+                    blob = new Blob([parseTextToVTT(content)], { type: 'text/vtt;charset=utf-8' });
                     break;
 
                 // 21. XML
@@ -812,13 +816,13 @@
                     blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n<document>\n  <content>${escapeXml(content)}</content>\n</document>`], { type: 'application/xml' });
                     break;
 
-                // 22. XLS / 23. XLSX (Real Spreadsheet via SheetJS)
+                // 22. XLS / 23. XLSX (Spreadsheet via SheetJS)
                 case 'xls':
                 case 'xlsx':
                     blob = generateExcelBlob(content, targetExt);
                     break;
 
-                // 24. XPS (Real OpenXPS Container Package via JSZip)
+                // 24. XPS (Proper OpenXPS Container with _rels)
                 case 'xps':
                     blob = await generateXpsBlob(content);
                     break;
@@ -854,18 +858,78 @@
         }
     }
 
-    // Modern DOCX Generator (Used for DOC, DOCM, DOT, DOTX)
-    async function generateDocxBlob(text) {
-        const paragraphs = text.split('\n').map(line => new docx.Paragraph({
-            children: [new docx.TextRun(line)]
-        }));
-        const doc = new docx.Document({
-            sections: [{ properties: {}, children: paragraphs }]
-        });
-        return await docx.Packer.toBlob(doc);
+    // Manual OOXML Package Generator (Used for DOCM, DOT, DOTX)
+    async function generateOoxmlPackage(text, ext) {
+        const zip = new JSZip();
+        
+        let contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
+        if (ext === 'docm') contentType = "application/vnd.ms-word.document.macroEnabled.main+xml";
+        if (ext === 'dotx') contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml";
+        if (ext === 'dot') contentType = "application/vnd.ms-word.template.macroEnabled.main+xml";
+
+        zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="${contentType}"/>
+</Types>`);
+
+        zip.folder("_rels").file(".rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+
+        const paragraphs = text.split('\n').map(line => `<w:p><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`).join('');
+        zip.folder("word").file("document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>${paragraphs}</w:body>
+</w:document>`);
+
+        return await zip.generateAsync({ type: "blob" });
     }
 
-    // Modern SheetJS Workbook Generator (Used for XLS, XLSX)
+    // Full OpenDocument Text Generator (.odt)
+    async function generateOdtBlob(text) {
+        const zip = new JSZip();
+        zip.file("mimetype", "application/vnd.oasis.opendocument.text", { compression: "STORE" });
+
+        const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">
+  <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.text"/>
+  <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="meta.xml" manifest:media-type="text/xml"/>
+</manifest:manifest>`;
+        zip.folder("META-INF").file("manifest.xml", manifest);
+
+        const paragraphs = text.split('\n').map(l => `<text:p>${escapeXml(l)}</text:p>`).join('');
+        const contentXml = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">
+  <office:body><office:text>${paragraphs}</office:text></office:body>
+</office:document-content>`;
+        zip.file("content.xml", contentXml);
+
+        zip.file("styles.xml", `<?xml version="1.0" encoding="UTF-8"?><office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2"/>`);
+        zip.file("meta.xml", `<?xml version="1.0" encoding="UTF-8"?><office:document-meta xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2"/>`);
+
+        return await zip.generateAsync({ type: "blob", mimeType: "application/vnd.oasis.opendocument.text" });
+    }
+
+    // OpenXPS Container Generator (.xps)
+    async function generateXpsBlob(text) {
+        const zip = new JSZip();
+        zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="fdseq" ContentType="application/vnd.ms-package.xps-fixeddocumentsequence+xml"/><Default Extension="fdoc" ContentType="application/vnd.ms-package.xps-fixeddocument+xml"/><Default Extension="fpage" ContentType="application/vnd.ms-package.xps-fixedpage+xml"/></Types>`);
+        
+        zip.folder("_rels").file(".rels", `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Type="http://schemas.microsoft.com/xps/2005/06/fixedrepresentation" Target="/FixedDocumentSequence.fdseq" Id="R1"/></Relationships>`);
+        
+        zip.file("FixedDocumentSequence.fdseq", `<FixedDocumentSequence xmlns="http://schemas.microsoft.com/xps/2005/06"><DocumentReference Source="Documents/1/FixedDocument.fdoc"/></FixedDocumentSequence>`);
+        zip.folder("Documents/1").file("FixedDocument.fdoc", `<FixedDocument xmlns="http://schemas.microsoft.com/xps/2005/06"><PageContent Source="Pages/1.fpage"/></FixedDocument>`);
+        zip.folder("Documents/1/Pages").file("1.fpage", `<FixedPage xmlns="http://schemas.microsoft.com/xps/2005/06" Width="816" Height="1056" xml:lang="en-US"><Glyphs OriginX="96" OriginY="96" FontRenderingEmSize="16" Fill="#000000" UnicodeString="${escapeXml(text.substring(0, 500))}"/></FixedPage>`);
+        
+        return await zip.generateAsync({ type: "blob", mimeType: "application/vnd.ms-xpsdocument" });
+    }
+
+    // SheetJS Excel Generator (Used for XLS, XLSX)
     function generateExcelBlob(text, ext) {
         const lines = text.split('\n').map(l => l.split(/\t|,|;/));
         const wb = XLSX.utils.book_new();
@@ -876,52 +940,15 @@
         return new Blob([wbout], { type: 'application/octet-stream' });
     }
 
-    // Modern Presentation Generator (Used for PPT, POT)
+    // Presentation Generator (Used for PPT, POT)
     async function generatePptxBlob(text) {
         let pptx = new PptxGenJS();
         let slide = pptx.addSlide();
         slide.addText(text.substring(0, 1000), { x: 0.5, y: 0.5, w: '90%', h: '80%', fontSize: 16, color: '363636' });
-        const data = await pptx.write({ outputType: 'blob' });
-        return data;
+        return await pptx.write({ outputType: 'blob' });
     }
 
-    // OpenDocument Text Package Generator (.odt)
-    async function generateOdtBlob(text) {
-        const zip = new JSZip();
-        zip.file("mimetype", "application/vnd.oasis.opendocument.text", { compression: "STORE" });
-        
-        const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">
-  <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.text"/>
-  <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
-</manifest:manifest>`;
-        zip.folder("META-INF").file("manifest.xml", manifest);
-
-        const contentXml = `<?xml version="1.0" encoding="UTF-8"?>
-<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">
-  <office:body>
-    <office:text>
-      <text:p>${escapeXml(text)}</text:p>
-    </office:text>
-  </office:body>
-</office:document-content>`;
-        zip.file("content.xml", contentXml);
-
-        return await zip.generateAsync({ type: "blob", mimeType: "application/vnd.oasis.opendocument.text" });
-    }
-
-    // OpenXPS Document Package Generator (.xps)
-    async function generateXpsBlob(text) {
-        const zip = new JSZip();
-        zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="fdseq" ContentType="application/vnd.ms-package.xps-fixeddocumentsequence+xml"/><Default Extension="fdoc" ContentType="application/vnd.ms-package.xps-fixeddocument+xml"/><Default Extension="fpage" ContentType="application/vnd.ms-package.xps-fixedpage+xml"/></Types>`);
-        zip.file("FixedDocumentSequence.fdseq", `<FixedDocumentSequence xmlns="http://schemas.microsoft.com/xps/2005/06"><DocumentReference Source="Documents/1/FixedDocument.fdoc"/></FixedDocumentSequence>`);
-        zip.folder("Documents/1").file("FixedDocument.fdoc", `<FixedDocument xmlns="http://schemas.microsoft.com/xps/2005/06"><PageContent Source="Pages/1.fpage"/></FixedDocument>`);
-        zip.folder("Documents/1/Pages").file("1.fpage", `<FixedPage xmlns="http://schemas.microsoft.com/xps/2005/06" Width="816" Height="1056" xml:lang="en-US"><Glyphs OriginX="96" OriginY="96" FontRenderingEmSize="16" Fill="#000000" UnicodeString="${escapeXml(text.substring(0, 300))}"/></FixedPage>`);
-        
-        return await zip.generateAsync({ type: "blob", mimeType: "application/vnd.ms-xpsdocument" });
-    }
-
-    // DjVu Archive/Container Generator (.djvu)
+    // DjVu Archive Generator (.djvu)
     async function generateDjvuContainer(text) {
         const zip = new JSZip();
         zip.file("document_content.txt", text);
@@ -929,10 +956,12 @@
         return await zip.generateAsync({ type: "blob", mimeType: "image/vnd.djvu" });
     }
 
-    // Text to CSV/TSV Parsers
+    // Escape Parsers & Helper Logic
     function parseTextToCSV(text) {
         return text.split('\n').map(line => {
-            if (line.includes(',')) return `"${line.replace(/"/g, '""')}"`;
+            if (line.includes(',') || line.includes('"') || line.includes('\n')) {
+                return `"${line.replace(/"/g, '""')}"`;
+            }
             return line;
         }).join('\n');
     }
@@ -941,7 +970,43 @@
         return text.split('\n').map(line => line.replace(/,/g, '\t')).join('\n');
     }
 
-    // Escaping Utilities
+    function parseTextToINI(text) {
+        const lines = text.split('\n');
+        let iniOutput = "[General]\n";
+        lines.forEach((line, idx) => {
+            if (line.includes('=')) {
+                iniOutput += `${line}\n`;
+            } else {
+                iniOutput += `line_${idx + 1}="${line.replace(/"/g, '\\"')}"\n`;
+            }
+        });
+        return iniOutput;
+    }
+
+    function parseTextToSRT(text) {
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+        return lines.map((line, idx) => {
+            const startSec = idx * 5;
+            const endSec = startSec + 4;
+            const startStr = new Date(startSec * 1000).toISOString().substr(11, 8) + ",000";
+            const endStr = new Date(endSec * 1000).toISOString().substr(11, 8) + ",000";
+            return `${idx + 1}\n${startStr} --> ${endStr}\n${line}\n`;
+        }).join('\n');
+    }
+
+    function parseTextToVTT(text) {
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+        let vtt = "WEBVTT\n\n";
+        vtt += lines.map((line, idx) => {
+            const startSec = idx * 5;
+            const endSec = startSec + 4;
+            const startStr = new Date(startSec * 1000).toISOString().substr(11, 8) + ".000";
+            const endStr = new Date(endSec * 1000).toISOString().substr(11, 8) + ".000";
+            return `${idx + 1}\n${startStr} --> ${endStr}\n${line}\n`;
+        }).join('\n');
+        return vtt;
+    }
+
     function escapeHtml(str) {
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
