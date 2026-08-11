@@ -91,8 +91,7 @@
       ]
     }
     </script>
-
-    <style>
+ <style>
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
@@ -180,6 +179,36 @@
             margin-bottom: 32px;
         }
 
+        /* Target Select Box - Visible First Now */
+        .convert-options-box {
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .convert-options-box label {
+            display: block;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-heading);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            font-weight: 600;
+        }
+
+        select:focus { border-color: var(--primary); }
+
         /* Dropzone */
         .upload-dropzone {
             border: 2px dashed #cbd5e1;
@@ -257,35 +286,6 @@
             font-weight: 700;
             margin-top: 6px;
         }
-
-        /* Target Select Box */
-        .convert-options-box {
-            display: none;
-            margin-bottom: 20px;
-        }
-
-        .convert-options-box label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text-heading);
-            margin-bottom: 8px;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-heading);
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        select:focus { border-color: var(--primary); }
 
         /* Buttons & Alerts */
         .btn-convert {
@@ -391,7 +391,6 @@
 
 <div class="container">
 
-    <!-- Top Navigation Bar -->
     <nav class="top-navbar">
         <a href="https://pooreyoutuber.github.io/" class="brand-logo">PooreYoutuber</a>
         <a href="https://pooreyoutuber.github.io/" class="home-btn">🏠 Home</a>
@@ -399,20 +398,18 @@
 
     <header>
         <h1>Universal Image Converter</h1>
-        <p>Auto-detect uploaded image format and convert it to your desired output file easily.</p>
+        <p>Convert images into 10+ popular formats instantly with automatic detection and maximum quality.</p>
     </header>
 
     <main>
         <div class="tool-card">
             
-            <!-- Step 1: Upload Box -->
             <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
                 <p>📸 Drag & drop your image here or <span>Browse</span></p>
                 <small>Supports JPG, PNG, WEBP, HEIC, AVIF & more</small>
                 <input type="file" id="fileInput" accept="image/*,.heic,.heif,.avif,.webp">
             </div>
 
-            <!-- Step 2: Auto-Detected Format Display -->
             <div class="file-info-card" id="fileInfoCard">
                 <img id="imgPreview" class="img-preview" alt="Image preview">
                 <div class="file-details">
@@ -421,9 +418,12 @@
                 </div>
             </div>
 
-            <!-- Step 3: Choose Output Target Format -->
-            <div class="convert-options-box" id="convertOptionsBox">
-                <label for="outputFormatSelect">Select Target Output Format:</label>
+            <button class="btn-convert" id="convertBtn" onclick="processImageConversion()">
+                ⚡ Convert Image Now
+            </button>
+
+             <div class="convert-options-box" id="convertOptionsBox">
+                <label for="outputFormatSelect">🎯 Select Target Output Format (10 Formats Available):</label>
                 <select id="outputFormatSelect">
                     <option value="pdf">1. PDF Document (.pdf)</option>
                     <option value="webp">2. WebP (.webp)</option>
@@ -437,32 +437,31 @@
                     <option value="avif_hd">10. AVIF Ultra Compressed (.avif)</option>
                 </select>
             </div>
-
-            <!-- Convert Button & Status -->
-            <button class="btn-convert" id="convertBtn" onclick="processImageConversion()">
-                ⚡ Convert Image Now
-            </button>
-
+            
             <div class="status-msg" id="statusMsg">Processing image conversion...</div>
 
-            <!-- Download Button -->
+            
             <a href="#" class="btn-download" id="downloadBtn" download>⬇ Download Converted File</a>
 
         </div>
 
-        <!-- SEO Article -->
         <article class="article-section">
-            <h2>Universal Image Converter – Convert Images Anywhere</h2>
-            <p>Our online converter automatically recognizes your image's current format—such as JPG, PNG, WEBP, HEIC, or AVIF—and lets you transform it into your target format with one click.</p>
-            <h3>Features & Security</h3>
+            <h2>Universal Online Image Converter – Transform Any Picture Instantly</h2>
+            <p>Welcome to the ultimate client-side Universal Image Converter, engineered to handle all your daily photo reformatting needs. Modern digital platforms demand specific file extensions—whether you are uploading high-res photography to a modern website, attaching compressed images to an email, or submitting documents for online forms. Our browser-based utility automatically detects your uploaded file's original structure and converts it seamlessly into your desired target output format in just one click.</p>
+            
+            <h3>Why Use Our All-in-One Image Format Switcher?</h3>
+            <p>Unlike standard converters that limit you to basic JPEG and PNG exports, our converter provides complete flexibility across 10 distinct conversion pathways. Here is why web developers, content creators, and everyday users rely on this web app:</p>
             <ul>
-                <li><strong>Auto-Format Detection:</strong> Displays current image format instantly after upload.</li>
-                <li><strong>Multiple Target Formats:</strong> Export to PDF, WebP, JPG, PNG, HEIC, or AVIF easily.</li>
-                <li><strong>100% Privacy:</strong> All conversions are processed client-side in your web browser. No files are uploaded to external servers.</li>
+                <li><strong>10 Output Choices Pre-Loaded:</strong> Convert files directly into PDF, WebP, HEIC, JPG, PNG, PNG HD, High-Quality JPG, HEIC HD, AVIF, and Ultra Compressed AVIF without toggling multiple tools.</li>
+                <li><strong>Apple iPhone HEIC & Next-Gen AVIF Compatibility:</strong> Easily convert iOS High Efficiency Image Container (HEIC) photos or next-gen AVIF images into standard JPGs or PNGs so they open on Windows, Android, and older devices.</li>
+                <li><strong>Web Optimization & SEO Boost:</strong> Convert heavy PNG or JPEG assets into lightweight WebP or AVIF formats to drastically reduce website page load times and improve Core Web Vitals rankings.</li>
+                <li><strong>Document Conversion (Image to PDF):</strong> Turn receipt photos, scanned certificates, and artwork into clean single-page PDF files instantly for professional documentation.</li>
             </ul>
+
+            <h3>100% Private, Secure, & Instant Client-Side Processing</h3>
+            <p>Your privacy is our top priority. Traditional online image converters send your private photos to remote cloud servers to process conversion, which creates bandwidth delays and serious privacy risks. Our Universal Image Converter runs entirely inside your browser using JavaScript and HTML5 Canvas technology. Your photos are processed locally on your phone or PC and never touch any external server, ensuring maximum speed, zero data usage limits, and complete privacy guaranteed.</p>
         </article>
 
-        <!-- FAQ Section -->
         <section class="faq-section">
             <h2>Frequently Asked Questions</h2>
             <div class="faq-card">
@@ -475,7 +474,6 @@
             </div>
         </section>
 
-        <!-- Internal Links Section -->
         <section class="internal-links-box">
             <h3>Explore More Free Web Tools</h3>
             <div class="tools-grid">
@@ -558,9 +556,8 @@
             imgPreview.src = URL.createObjectURL(file);
         }
 
-        // Display UI Elements
+        // Display File Card & Convert Button
         fileInfoCard.style.display = 'flex';
-        convertOptionsBox.style.display = 'block';
         convertBtn.style.display = 'block';
     });
 
@@ -695,3 +692,4 @@
 
 </body>
 </html>
+   
