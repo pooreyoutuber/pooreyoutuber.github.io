@@ -3,32 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pooreyoutuber - All-in-One Financial & Business Calculators</title>
-    <meta name="description" content="Free online financial and business calculators for ROI, Profit Margin, GST, Loan Payments, Break-even point, and more. Accurately calculate your business metrics instantly.">
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-ZPMC525FGT');
-    </script>
-
-    <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "xz0usv8l2h");
-    </script>
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-
-    <!-- Google Funding Choices -->
-    <script async src="https://fundingchoicesmessages.google.com/i/pub-7020422718957281?ers=1"></script>
+    <title>Pooreyoutuber - Business & Financial Tools Suite</title>
+    <meta name="description" content="Free online business generators and financial calculators. Easily generate invoices, receipts, quotations, email signatures, meeting minutes, and calculate business metrics instantly.">
 
     <style>
         :root {
@@ -182,7 +158,7 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             padding: 2rem;
-            max-width: 750px;
+            max-width: 850px;
             margin: 0 auto;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
@@ -193,7 +169,7 @@
             color: var(--primary);
             font-weight: 600;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
@@ -212,7 +188,7 @@
             font-size: 0.95rem;
         }
 
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
@@ -222,7 +198,12 @@
             transition: border-color 0.2s;
         }
 
-        .form-group input:focus, .form-group select:focus {
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: var(--primary);
         }
 
@@ -266,10 +247,51 @@
         }
 
         .result-box p {
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-size: 1.1rem;
+            font-weight: 600;
             color: var(--text-color);
             line-height: 1.6;
+        }
+
+        /* Form Table Layout for Generators */
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .form-table th, .form-table td {
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .document-preview {
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 8px;
+            background: #ffffff;
+            margin-top: 1rem;
+        }
+
+        .document-preview h2 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .document-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .document-preview th, .document-preview td {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            text-align: left;
+        }
+
+        .document-preview th {
+            background-color: var(--bg-color);
         }
 
         /* Content Sections */
@@ -311,6 +333,26 @@
             font-size: 0.9rem;
             margin-top: auto;
         }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #resultBox, #resultBox * {
+                visibility: visible;
+            }
+            #resultBox {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -333,113 +375,130 @@
         <!-- DASHBOARD VIEW -->
         <div id="dashboardView">
             <div class="dashboard-title">
-                <h1>Financial & Business Calculators</h1>
-                <p>Select a tool below to perform quick, error-free, and precise calculations.</p>
+                <h1>Professional Business & Financial Suite</h1>
+                <p>Generate professional documents and run accurate financial calculations instantly.</p>
             </div>
 
             <div class="tool-grid">
-                <a href="/profit-margin-calculator" class="tool-card" onclick="openTool('profitMargin', event)">
+                <a href="/invoice-generator" class="tool-card" onclick="openTool('invoiceGen', event)">
                     <div>
-                        <h3>Profit Margin Calculator</h3>
+                        <h3>Invoice Generator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/markup-calculator" class="tool-card" onclick="openTool('markup', event)">
+                <a href="/quotation-generator" class="tool-card" onclick="openTool('quotationGen', event)">
+                    <div>
+                        <h3>Quotation Generator</h3>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                    <div class="btn-open">Open Tool</div>
+                </a>
+
+                <a href="/receipt-generator" class="tool-card" onclick="openTool('receiptGen', event)">
+                    <div>
+                        <h3>Receipt Generator</h3>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                    <div class="btn-open">Open Tool</div>
+                </a>
+
+                <a href="/profit-calculator" class="tool-card" onclick="openTool('profitCalc', event)">
+                    <div>
+                        <h3>Profit Calculator</h3>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                    <div class="btn-open">Open Tool</div>
+                </a>
+
+                <a href="/markup-calculator" class="tool-card" onclick="openTool('markupCalc', event)">
                     <div>
                         <h3>Markup Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/gst-calculator" class="tool-card" onclick="openTool('gst', event)">
-                    <div>
-                        <h3>GST Calculator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Calculator</div>
-                </a>
-
-                <a href="/discount-calculator" class="tool-card" onclick="openTool('discount', event)">
-                    <div>
-                        <h3>Discount Calculator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Calculator</div>
-                </a>
-
-                <a href="/commission-calculator" class="tool-card" onclick="openTool('commission', event)">
+                <a href="/commission-calculator" class="tool-card" onclick="openTool('commissionCalc', event)">
                     <div>
                         <h3>Commission Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/salary-calculator" class="tool-card" onclick="openTool('salary', event)">
+                <a href="/salary-calculator" class="tool-card" onclick="openTool('salaryCalc', event)">
                     <div>
-                        <h3>Gross to Net Salary Calculator</h3>
+                        <h3>Salary Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/hourly-rate-calculator" class="tool-card" onclick="openTool('hourly', event)">
+                <a href="/freelance-hourly-rate-calculator" class="tool-card" onclick="openTool('hourlyCalc', event)">
                     <div>
-                        <h3>Hourly Rate Calculator</h3>
+                        <h3>Freelance Hourly Rate Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/roi-calculator" class="tool-card" onclick="openTool('roi', event)">
+                <a href="/business-name-generator" class="tool-card" onclick="openTool('nameGen', event)">
                     <div>
-                        <h3>ROI Calculator</h3>
+                        <h3>Business Name Generator</h3>
+                        <div class="rating">★★★★☆</div>
+                    </div>
+                    <div class="btn-open">Open Tool</div>
+                </a>
+
+                <a href="/email-signature-generator" class="tool-card" onclick="openTool('signatureGen', event)">
+                    <div>
+                        <h3>Email Signature Generator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/break-even-calculator" class="tool-card" onclick="openTool('breakeven', event)">
+                <a href="/business-card-generator" class="tool-card" onclick="openTool('cardGen', event)">
                     <div>
-                        <h3>Break-even Calculator</h3>
+                        <h3>Business Card Generator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/loan-payment-calculator" class="tool-card" onclick="openTool('loan', event)">
+                <a href="/meeting-minutes-generator" class="tool-card" onclick="openTool('minutesGen', event)">
                     <div>
-                        <h3>Loan Payment Calculator</h3>
+                        <h3>Meeting Minutes Generator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
 
-                <a href="/invoice-tax-calculator" class="tool-card" onclick="openTool('invoiceTax', event)">
+                <a href="/purchase-order-generator" class="tool-card" onclick="openTool('poGen', event)">
                     <div>
-                        <h3>Invoice Tax Calculator</h3>
-                        <div class="rating">★★★★☆</div>
+                        <h3>Purchase Order Generator</h3>
+                        <div class="rating">★★★★★</div>
                     </div>
-                    <div class="btn-open">Open Calculator</div>
+                    <div class="btn-open">Open Tool</div>
                 </a>
             </div>
 
             <!-- Main Page Comprehensive Description -->
             <div class="page-content">
-                <h2>Mastering Financial Calculations for Business Success</h2>
-                <p>Welcome to <strong>Pooreyoutuber’s All-in-One Financial Suite</strong>. Managing finances effectively is the backbone of any successful business, freelance venture, or content creation journey. Whether you are calculating the return on investment for a marketing campaign, estimating monthly loan payments, or configuring sales margins, accurate figures make all the difference.</p>
+                <h2>Empowering Businesses and Freelancers with Precision Tools</h2>
+                <p>Welcome to <strong>Pooreyoutuber’s Business & Financial Suite</strong>. Managing modern commercial operations requires accurate financial calculations and professional documentation. Whether you are generating invoices, projecting profit margins, calculating freelance rates, or drafting official meeting minutes, our suite provides verified tools designed to streamline your daily workflow.</p>
                 
-                <h3>Why Precise Calculators Matter</h3>
-                <p>In today's fast-paced digital economy, guessing numbers can lead to squeezed margins, unexpected tax bills, or underfunded projects. Our suite of financial tools eliminates guesswork by implementing validated mathematical algorithms to give you real-time answers instantly.</p>
-                
-                <h3>Key Features of Our Suite</h3>
+                <h3>Why Use Our Suite?</h3>
+                <p>Manual administrative tasks and approximate financial estimations waste time and risk costly errors. Our web tools provide real-time validation, dynamic preview rendering, instant printable formats, and clean data output to keep your operations professional and aligned with accounting standards.</p>
+
+                <h3>Key Benefits</h3>
                 <ul>
-                    <li><strong>Multiple Currency Display:</strong> Switch between INR, USD, EUR and GBP.</li>
-                    <li><strong>Edge-Case Validation:</strong> Handles unique scenarios like 0% loan interest, zero-cost entries, and invalid break-even inputs safely.</li>
-                    <li><strong>User-Centric Design:</strong> Responsive, fast-loading, and mobile-friendly interface designed for professionals on the go.</li>
+                    <li><strong>Multiple Currency Support:</strong> Seamlessly toggle between INR (₹), USD ($), EUR (€), and GBP (£).</li>
+                    <li><strong>Instant Document Generation:</strong> Draft invoices, purchase orders, receipts, and quotations directly in your browser.</li>
+                    <li><strong>Validated Algorithms:</strong> Rely on precise formulas for markups, net salary estimates, commissions, and profit calculations.</li>
+                    <li><strong>Privacy Focused:</strong> All computations and document builds occur client-side in your browser; your business data remains private.</li>
                 </ul>
             </div>
         </div>
@@ -447,7 +506,7 @@
         <!-- CALCULATOR CONTAINER -->
         <div id="calculatorView" class="calculator-view">
             <a href="/" class="back-btn" onclick="showDashboard(event)">← Back to Dashboard</a>
-            <h2 id="calcTitle" style="margin-bottom: 1.5rem;">Calculator Title</h2>
+            <h2 id="calcTitle" style="margin-bottom: 1.5rem;">Tool Title</h2>
             <div id="calcForm"></div>
             <div id="resultBox" class="result-box">
                 <h4 id="resultHeader">Result</h4>
@@ -469,17 +528,19 @@
         let activeTool = "";
 
         const routes = {
-            'profitMargin': '/profit-margin-calculator',
-            'markup': '/markup-calculator',
-            'gst': '/gst-calculator',
-            'discount': '/discount-calculator',
-            'commission': '/commission-calculator',
-            'salary': '/salary-calculator',
-            'hourly': '/hourly-rate-calculator',
-            'roi': '/roi-calculator',
-            'breakeven': '/break-even-calculator',
-            'loan': '/loan-payment-calculator',
-            'invoiceTax': '/invoice-tax-calculator'
+            'invoiceGen': '/invoice-generator',
+            'quotationGen': '/quotation-generator',
+            'receiptGen': '/receipt-generator',
+            'profitCalc': '/profit-calculator',
+            'markupCalc': '/markup-calculator',
+            'commissionCalc': '/commission-calculator',
+            'salaryCalc': '/salary-calculator',
+            'hourlyCalc': '/freelance-hourly-rate-calculator',
+            'nameGen': '/business-name-generator',
+            'signatureGen': '/email-signature-generator',
+            'cardGen': '/business-card-generator',
+            'minutesGen': '/meeting-minutes-generator',
+            'poGen': '/purchase-order-generator'
         };
 
         function updateCurrency() {
@@ -515,200 +576,240 @@
             const toolDesc = document.getElementById('toolDescription');
 
             switch (toolKey) {
-                case 'profitMargin':
-                    calcTitle.innerText = "Profit Margin Calculator";
+                case 'invoiceGen':
+                    calcTitle.innerText = "Invoice Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Cost Price (${curr})</label><input type="number" id="cost" placeholder="e.g. 50"></div>
-                        <div class="form-group"><label>Selling Price (${curr})</label><input type="number" id="revenue" placeholder="e.g. 100"></div>
-                        <button class="calc-btn" onclick="calcProfitMargin()">Calculate</button>
+                        <div class="form-group"><label>Business Name</label><input type="text" id="invCompany" placeholder="Your Business Ltd"></div>
+                        <div class="form-group"><label>Client Name</label><input type="text" id="invClient" placeholder="Client Name / Company"></div>
+                        <div class="form-group"><label>Invoice Number</label><input type="text" id="invNum" value="INV-1001"></div>
+                        <div class="form-group"><label>Item Description</label><input type="text" id="invItem" placeholder="Web Development Services"></div>
+                        <div class="form-group"><label>Quantity</label><input type="number" id="invQty" value="1"></div>
+                        <div class="form-group"><label>Unit Price (${curr})</label><input type="number" id="invPrice" placeholder="500"></div>
+                        <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="invTax" value="10"></div>
+                        <button class="calc-btn" onclick="generateInvoice()">Generate Printable Invoice</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Understanding Profit Margin</h2>
-                        <p>Profit margin measures how much out of every dollar or rupee of sales a company keeps in earnings. Expressed as a percentage, it indicates the percentage of sales that has turned into profits. There are two primary types of profit margin: gross margin and net margin.</p>
-                        <h3>Formula & How to Calculate</h3>
-                        <p>The gross profit margin formula is:</p>
-                        <p><strong>Margin (%) = [(Selling Price - Cost Price) / Selling Price] × 100</strong></p>
-                        <p>For example, if you produce an item for ${curr}50 and sell it for ${curr}100, your total profit is ${curr}50. Dividing ${curr}50 profit by ${curr}100 revenue gives a profit margin of 50%.</p>
-                        <h3>Why It Matters</h3>
-                        <p>Understanding profit margins helps business owners determine pricing strategies, assess product line viability, and manage overhead costs effectively.</p>
+                        <h2>About the Invoice Generator</h2>
+                        <p>An Invoice Generator allows businesses, freelancers, and agencies to create professional billing statements for clients. Clear, itemized invoices ensure timely payment and maintain financial records.</p>
+                        <h3>Key Benefits</h3>
+                        <ul>
+                            <li><strong>Professional Client Billing:</strong> Outlines delivered services, applicable tax, and payment terms clearly.</li>
+                            <li><strong>Print & Save:</strong> Generates a clean preview ready for instant printing or PDF export.</li>
+                        </ul>
                     `;
                     break;
 
-                case 'markup':
-                    calcTitle.innerText = "Markup Calculator";
+                case 'quotationGen':
+                    calcTitle.innerText = "Quotation Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Cost Price (${curr})</label><input type="number" id="mCost" placeholder="e.g. 40"></div>
-                        <div class="form-group"><label>Markup Percentage (%)</label><input type="number" id="mPercent" placeholder="e.g. 25"></div>
-                        <button class="calc-btn" onclick="calcMarkup()">Calculate</button>
+                        <div class="form-group"><label>Company Name</label><input type="text" id="qCompany" placeholder="Acme Services"></div>
+                        <div class="form-group"><label>Customer Name</label><input type="text" id="qCustomer" placeholder="John Doe"></div>
+                        <div class="form-group"><label>Scope of Work</label><input type="text" id="qScope" placeholder="Mobile App Design Phase 1"></div>
+                        <div class="form-group"><label>Estimated Amount (${curr})</label><input type="number" id="qAmount" placeholder="1500"></div>
+                        <div class="form-group"><label>Validity Period (Days)</label><input type="number" id="qValid" value="30"></div>
+                        <button class="calc-btn" onclick="generateQuotation()">Generate Quotation</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Understanding Markup</h2>
-                        <p>Markup shows the percentage added to the cost price of a product to determine its final selling price. While profit margin calculates earnings relative to revenue, markup calculates earnings relative to wholesale cost.</p>
-                        <h3>Formula & Example</h3>
-                        <p><strong>Selling Price = Cost Price + [Cost Price × (Markup / 100)]</strong></p>
-                        <p>If an article costs ${curr}40 and you apply a 25% markup, the markup amount is ${curr}10 (${curr}40 × 0.25). The resulting selling price will be ${curr}50.</p>
-                        <h3>Margin vs. Markup</h3>
-                        <p>A common mistake is treating markup and profit margin as identical figures. A 25% markup on cost results in a 20% profit margin on selling price.</p>
+                        <h2>About the Quotation Generator</h2>
+                        <p>A Quotation Generator creates formal pricing estimates for prospective clients prior to contractual work. Providing written quotes sets expectations and prevents scope creep.</p>
+                        <h3>Key Benefits</h3>
+                        <ul>
+                            <li><strong>Clear Estimates:</strong> Details projected costs and proposal validity periods.</li>
+                            <li><strong>Improved Conversion:</strong> Well-formatted quotes instill trust in prospective buyers.</li>
+                        </ul>
                     `;
                     break;
 
-                case 'gst':
-                    calcTitle.innerText = "GST Calculator";
+                case 'receiptGen':
+                    calcTitle.innerText = "Receipt Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Amount (${curr})</label><input type="number" id="gstAmount" placeholder="e.g. 1000"></div>
-                        <div class="form-group"><label>GST Rate (%)</label><input type="number" id="gstRate" placeholder="e.g. 18"></div>
-                        <div class="form-group">
-                            <label>Calculation Type</label>
-                            <select id="gstType">
-                                <option value="add">GST Exclusive (Add GST)</option>
-                                <option value="sub">GST Inclusive (Remove GST)</option>
+                        <div class="form-group"><label>Merchant Name</label><input type="text" id="rcCompany" placeholder="Pooreyoutuber Retail"></div>
+                        <div class="form-group"><label>Received From</label><input type="text" id="rcPayer" placeholder="Jane Smith"></div>
+                        <div class="form-group"><label>Payment For</label><input type="text" id="rcFor" placeholder="Annual Consulting Fee"></div>
+                        <div class="form-group"><label>Amount Paid (${curr})</label><input type="number" id="rcAmount" placeholder="250"></div>
+                        <div class="form-group"><label>Payment Method</label>
+                            <select id="rcMethod">
+                                <option>Credit Card</option>
+                                <option>Bank Transfer</option>
+                                <option>Cash</option>
+                                <option>UPI / Online</option>
                             </select>
                         </div>
-                        <button class="calc-btn" onclick="calcGST()">Calculate</button>
+                        <button class="calc-btn" onclick="generateReceipt()">Generate Official Receipt</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Understanding Goods and Services Tax (GST)</h2>
-                        <p>GST is an indirect value-added tax levied on the supply of goods and services. Whether you are an entrepreneur billing clients or a buyer evaluating invoices, estimating tax amounts quickly is essential.</p>
-                        <h3>Exclusive vs. Inclusive Calculations</h3>
-                        <p><strong>GST Exclusive:</strong> Tax is added on top of the base product price. <br><em>Formula: GST = Amount × (Rate / 100)</em></p>
-                        <p><strong>GST Inclusive:</strong> The total price already includes tax. This option removes the tax component to show net value.<br><em>Formula: Base Amount = Price / (1 + Rate / 100)</em></p>
+                        <h2>About the Receipt Generator</h2>
+                        <p>A Receipt Generator creates proof of payment after a commercial transaction is completed. Providing instant payment confirmation builds client trust and maintains accounting records.</p>
+                        <h3>Key Benefits</h3>
+                        <ul>
+                            <li><strong>Proof of Payment:</strong> Documents completed financial transactions clearly.</li>
+                            <li><strong>Audit Preparedness:</strong> Maintains verified payment histories for tax verification.</li>
+                        </ul>
                     `;
                     break;
 
-                case 'discount':
-                    calcTitle.innerText = "Discount Calculator";
+                case 'profitCalc':
+                    calcTitle.innerText = "Profit Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Original Price (${curr})</label><input type="number" id="discPrice" placeholder="e.g. 80"></div>
-                        <div class="form-group"><label>Discount Percentage (%)</label><input type="number" id="discRate" placeholder="e.g. 20"></div>
-                        <button class="calc-btn" onclick="calcDiscount()">Calculate</button>
+                        <div class="form-group"><label>Total Revenue (${curr})</label><input type="number" id="prRevenue" placeholder="e.g. 5000"></div>
+                        <div class="form-group"><label>Total Cost Price (${curr})</label><input type="number" id="prCost" placeholder="e.g. 3200"></div>
+                        <button class="calc-btn" onclick="calcProfit()">Calculate Profit & Margin</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>How Discount Calculation Works</h2>
-                        <p>Discount calculators allow buyers and sales teams to figure out savings and reduced prices during promotional periods, clearance sales, or deal negotiations.</p>
+                        <h2>About the Profit Calculator</h2>
+                        <p>The Profit Calculator measures financial gain by comparing total revenue against cost price, displaying absolute monetary profit alongside percentage profit margin.</p>
                         <h3>Formula</h3>
-                        <p><strong>Savings = Original Price × (Discount / 100)</strong><br>
-                        <strong>Final Price = Original Price - Savings</strong></p>
-                        <p>For example, a product priced at ${curr}80 with a 20% discount yields ${curr}16 in savings, resulting in a net cost of ${curr}64.</p>
+                        <p><strong>Net Profit = Revenue - Total Cost</strong><br>
+                        <strong>Profit Margin (%) = (Net Profit / Revenue) × 100</strong></p>
                     `;
                     break;
 
-                case 'commission':
+                case 'markupCalc':
+                    calcTitle.innerText = "Markup Calculator";
+                    calcForm.innerHTML = `
+                        <div class="form-group"><label>Cost Price (${curr})</label><input type="number" id="mkCost" placeholder="e.g. 100"></div>
+                        <div class="form-group"><label>Markup Percentage (%)</label><input type="number" id="mkPercent" placeholder="e.g. 40"></div>
+                        <button class="calc-btn" onclick="calcMarkup()">Calculate Selling Price</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>About the Markup Calculator</h2>
+                        <p>The Markup Calculator calculates final retail prices based on unit cost and desired percentage markup. Cost markup ensures all operational overheads and profit targets are met.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Selling Price = Cost Price + [Cost Price × (Markup / 100)]</strong></p>
+                    `;
+                    break;
+
+                case 'commissionCalc':
                     calcTitle.innerText = "Commission Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Total Sale Amount (${curr})</label><input type="number" id="commSale" placeholder="e.g. 5000"></div>
-                        <div class="form-group"><label>Commission Rate (%)</label><input type="number" id="commRate" placeholder="e.g. 5"></div>
-                        <button class="calc-btn" onclick="calcCommission()">Calculate</button>
+                        <div class="form-group"><label>Total Sales Value (${curr})</label><input type="number" id="cmSale" placeholder="e.g. 10000"></div>
+                        <div class="form-group"><label>Commission Rate (%)</label><input type="number" id="cmRate" placeholder="e.g. 5"></div>
+                        <button class="calc-btn" onclick="calcCommission()">Calculate Earnings</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Calculating Sales Commissions</h2>
-                        <p>Commission calculations are fundamental for sales professionals, affiliate marketers, and agency owners who earn performance-based compensation per closed deal.</p>
+                        <h2>About the Commission Calculator</h2>
+                        <p>The Commission Calculator evaluates performance compensation for sales teams, affiliate marketers, and agents based on total deal value and commission percentage.</p>
                         <h3>Formula</h3>
-                        <p><strong>Earned Commission = Total Sales × (Commission Rate / 100)</strong></p>
-                        <p>Closing a deal worth ${curr}5,000 at a 5% commission rate returns earnings of ${curr}250 instantly.</p>
+                        <p><strong>Commission Earned = Total Sales Amount × (Commission Rate / 100)</strong></p>
                     `;
                     break;
 
-                case 'salary':
-                    calcTitle.innerText = "Gross to Net Salary Calculator";
+                case 'salaryCalc':
+                    calcTitle.innerText = "Salary Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Gross Monthly Salary (${curr})</label><input type="number" id="salMonthly" placeholder="e.g. 4000"></div>
-                        <div class="form-group"><label>Estimated Deductions/Tax (%)</label><input type="number" id="salTax" placeholder="e.g. 10"></div>
-                        <button class="calc-btn" onclick="calcSalary()">Calculate</button>
+                        <div class="form-group"><label>Gross Monthly Salary (${curr})</label><input type="number" id="slGross" placeholder="e.g. 4500"></div>
+                        <div class="form-group"><label>Estimated Deductions / Taxes (%)</label><input type="number" id="slTax" placeholder="e.g. 12"></div>
+                        <button class="calc-btn" onclick="calcSalary()">Estimate Take-Home Pay</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Gross to Net Salary Estimation</h2>
-                        <p>Take-home pay often differs significantly from gross salary offers. Deductions such as payroll taxes, social security contributions, and healthcare plans reduce overall compensation.</p>
+                        <h2>About the Salary Calculator</h2>
+                        <p>The Salary Calculator estimates monthly and annual net take-home earnings by subtracting deduction and tax percentages from gross salary figures.</p>
                         <h3>Formula</h3>
-                        <p><strong>Net Pay = Gross Monthly Salary × [1 - (Deduction Rate / 100)]</strong></p>
-                        <p>Use this tool to plan personal budgets accurately before accepting contract offers.</p>
+                        <p><strong>Net Monthly Pay = Gross Monthly × [1 - (Deduction Rate / 100)]</strong></p>
                     `;
                     break;
 
-                case 'hourly':
-                    calcTitle.innerText = "Hourly Rate Calculator";
+                case 'hourlyCalc':
+                    calcTitle.innerText = "Freelance Hourly Rate Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Target Annual Income (${curr})</label><input type="number" id="hrIncome" placeholder="e.g. 60000"></div>
-                        <div class="form-group"><label>Hours Worked Per Week</label><input type="number" id="hrHours" value="40"></div>
-                        <div class="form-group"><label>Weeks Worked Per Year</label><input type="number" id="hrWeeks" value="52"></div>
-                        <button class="calc-btn" onclick="calcHourly()">Calculate</button>
+                        <div class="form-group"><label>Target Annual Income (${curr})</label><input type="number" id="hrTarget" placeholder="e.g. 70000"></div>
+                        <div class="form-group"><label>Billable Hours Per Week</label><input type="number" id="hrHours" value="35"></div>
+                        <div class="form-group"><label>Working Weeks Per Year</label><input type="number" id="hrWeeks" value="48"></div>
+                        <button class="calc-btn" onclick="calcHourlyRate()">Calculate Required Rate</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Setting Your Professional Hourly Rate</h2>
-                        <p>Freelancers, consultants, and contractors often struggle with rate setting. This calculator reverse-engineers your hourly requirement based on targeted yearly income and billable working hours.</p>
+                        <h2>About the Freelance Hourly Rate Calculator</h2>
+                        <p>This calculator determines the minimum hourly billable rate needed to achieve target annual revenue, factoring in vacation time and billable capacity.</p>
                         <h3>Formula</h3>
-                        <p><strong>Hourly Rate = Desired Annual Income / (Weekly Hours × Annual Weeks)</strong></p>
-                        <p>Aiming for ${curr}60,000 yearly while working 40 hours per week for 52 weeks translates to a target rate of ${curr}28.85 per hour.</p>
+                        <p><strong>Hourly Rate = Target Annual Revenue / (Weekly Hours × Annual Weeks)</strong></p>
                     `;
                     break;
 
-                case 'roi':
-                    calcTitle.innerText = "Return on Investment (ROI) Calculator";
+                case 'nameGen':
+                    calcTitle.innerText = "Business Name Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Amount Invested (${curr})</label><input type="number" id="roiInv" placeholder="e.g. 1000"></div>
-                        <div class="form-group"><label>Amount Returned (${curr})</label><input type="number" id="roiRet" placeholder="e.g. 1500"></div>
-                        <button class="calc-btn" onclick="calcROI()">Calculate</button>
+                        <div class="form-group"><label>Core Keyword</label><input type="text" id="bnKeyword" placeholder="e.g. Tech, Media, Craft"></div>
+                        <div class="form-group"><label>Industry / Style</label>
+                            <select id="bnStyle">
+                                <option value="modern">Modern & Sleek</option>
+                                <option value="corporate">Corporate & Classic</option>
+                                <option value="creative">Creative & Punchy</option>
+                            </select>
+                        </div>
+                        <button class="calc-btn" onclick="generateNames()">Generate Name Ideas</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Evaluating Investment Return</h2>
-                        <p>ROI evaluates the efficiency and profitability of an investment. It measures the amount of return relative to the initial cost invested.</p>
-                        <h3>Formula</h3>
-                        <p><strong>ROI (%) = [(Total Return - Initial Investment) / Initial Investment] × 100</strong></p>
-                        <p>An investment of ${curr}1,000 returning ${curr}1,500 generates a net return of ${curr}500, or a 50% ROI.</p>
+                        <h2>About the Business Name Generator</h2>
+                        <p>The Business Name Generator combines core industry keywords with stylistic prefixes and suffixes to offer memorable, brandable company names.</p>
                     `;
                     break;
 
-                case 'breakeven':
-                    calcTitle.innerText = "Break-even Calculator";
+                case 'signatureGen':
+                    calcTitle.innerText = "Email Signature Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Total Fixed Costs (${curr})</label><input type="number" id="beFixed" placeholder="e.g. 2000"></div>
-                        <div class="form-group"><label>Selling Price Per Unit (${curr})</label><input type="number" id="bePrice" placeholder="e.g. 50"></div>
-                        <div class="form-group"><label>Variable Cost Per Unit (${curr})</label><input type="number" id="beVar" placeholder="e.g. 30"></div>
-                        <button class="calc-btn" onclick="calcBreakeven()">Calculate</button>
+                        <div class="form-group"><label>Full Name</label><input type="text" id="sigName" placeholder="Alex Morgan"></div>
+                        <div class="form-group"><label>Job Title</label><input type="text" id="sigTitle" placeholder="Senior Consultant"></div>
+                        <div class="form-group"><label>Company Name</label><input type="text" id="sigCompany" placeholder="Apex Innovations"></div>
+                        <div class="form-group"><label>Phone Number</label><input type="text" id="sigPhone" placeholder="+1 (555) 019-2834"></div>
+                        <div class="form-group"><label>Email Address</label><input type="text" id="sigEmail" placeholder="alex@apex.com"></div>
+                        <button class="calc-btn" onclick="generateSignature()">Generate HTML Signature</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Finding Your Break-even Point</h2>
-                        <p>The break-even point is the point at which total revenues equal total costs, resulting in zero profit and zero loss. It tells you how many units must be sold to cover overheads.</p>
-                        <h3>Formula</h3>
-                        <p><strong>Break-even Units = Fixed Costs / (Price Per Unit - Variable Cost Per Unit)</strong></p>
-                        <p>If fixed expenses are ${curr}2,000 and net revenue per unit is ${curr}20 (${curr}50 price - ${curr}30 cost), you must sell 100 units to reach break-even.</p>
+                        <h2>About the Email Signature Generator</h2>
+                        <p>Creates clean, professional email signatures to include in outbound business communications for improved branding and contact accessibility.</p>
                     `;
                     break;
 
-                case 'loan':
-                    calcTitle.innerText = "Loan Payment Calculator";
+                case 'cardGen':
+                    calcTitle.innerText = "Business Card Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Loan Amount (${curr})</label><input type="number" id="lnAmount" placeholder="e.g. 10000"></div>
-                        <div class="form-group"><label>Annual Interest Rate (%)</label><input type="number" id="lnRate" placeholder="e.g. 5"></div>
-                        <div class="form-group"><label>Loan Term (Years)</label><input type="number" id="lnTerm" placeholder="e.g. 3"></div>
-                        <button class="calc-btn" onclick="calcLoan()">Calculate</button>
+                        <div class="form-group"><label>Full Name</label><input type="text" id="bcName" placeholder="Sarah Jenkins"></div>
+                        <div class="form-group"><label>Title</label><input type="text" id="bcTitle" placeholder="Managing Director"></div>
+                        <div class="form-group"><label>Company</label><input type="text" id="bcCompany" placeholder="Jenkins Capital"></div>
+                        <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="bcContact" placeholder="sarah@jenkins.com | +123456789"></div>
+                        <button class="calc-btn" onclick="generateCard()">Preview Digital Business Card</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Loan Payment & Amortization</h2>
-                        <p>Understanding monthly debt commitments helps prevent financial distress. Our loan calculator handles standard interest rates alongside interest-free 0% promotional loans effortlessly.</p>
-                        <h3>Formula</h3>
-                        <p>For standard loans with interest: <br><strong>PMT = [P × r × (1+r)^n] / [(1+r)^n - 1]</strong><br><em>Where P = Principal, r = Monthly Rate, n = Total Months.</em></p>
+                        <h2>About the Business Card Generator</h2>
+                        <p>Layouts clean digital business cards formatted for quick previews, networking distribution, and print layout reference.</p>
                     `;
                     break;
 
-                case 'invoiceTax':
-                    calcTitle.innerText = "Invoice Tax Calculator";
+                case 'minutesGen':
+                    calcTitle.innerText = "Meeting Minutes Generator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Subtotal Amount (${curr})</label><input type="number" id="invSub" placeholder="e.g. 500"></div>
-                        <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="invTax" placeholder="e.g. 10"></div>
-                        <button class="calc-btn" onclick="calcInvoiceTax()">Calculate</button>
+                        <div class="form-group"><label>Meeting Title</label><input type="text" id="mmTitle" placeholder="Q3 Strategy Review"></div>
+                        <div class="form-group"><label>Attendees</label><input type="text" id="mmAttendees" placeholder="John, Sarah, Michael, Emma"></div>
+                        <div class="form-group"><label>Key Discussion Points</label><textarea id="mmDiscussion" placeholder="Reviewed marketing expenditure and upcoming campaign timeline..."></textarea></div>
+                        <div class="form-group"><label>Action Items</label><textarea id="mmActions" placeholder="Sarah to complete market budget audit by Friday..."></textarea></div>
+                        <button class="calc-btn" onclick="generateMinutes()">Format Meeting Minutes</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Invoice Tax Breakdown</h2>
-                        <p>Adding appropriate local or sales tax to client billing ensures compliant accounting. This tool helps compute tax liability and total billing amounts cleanly.</p>
-                        <h3>Formula</h3>
-                        <p><strong>Tax Amount = Subtotal × (Tax Rate / 100)</strong><br>
-                        <strong>Total Amount = Subtotal + Tax Amount</strong></p>
+                        <h2>About the Meeting Minutes Generator</h2>
+                        <p>Formats meeting notes into structured, professional summaries containing attendee lists, discussions, and clear action items.</p>
+                    `;
+                    break;
+
+                case 'poGen':
+                    calcTitle.innerText = "Purchase Order Generator";
+                    calcForm.innerHTML = `
+                        <div class="form-group"><label>Buyer Name</label><input type="text" id="poBuyer" placeholder="Pooreyoutuber Corp"></div>
+                        <div class="form-group"><label>Vendor Name</label><input type="text" id="poVendor" placeholder="Global Logistics Supplies"></div>
+                        <div class="form-group"><label>PO Number</label><input type="text" id="poNumber" value="PO-9901"></div>
+                        <div class="form-group"><label>Item Description</label><input type="text" id="poItem" placeholder="Office Ergonomic Chairs"></div>
+                        <div class="form-group"><label>Quantity</label><input type="number" id="poQty" value="10"></div>
+                        <div class="form-group"><label>Unit Price (${curr})</label><input type="number" id="poPrice" placeholder="150"></div>
+                        <button class="calc-btn" onclick="generatePO()">Generate Purchase Order</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>About the Purchase Order Generator</h2>
+                        <p>A Purchase Order (PO) is a legally binding document sent by buyers to vendors authorizing purchases, outlining agreed quantities, pricing, and item specifications.</p>
                     `;
                     break;
             }
         }
 
-        // Handle URL Routing on Page Load & Back/Forward Navigation
+        // Handle URL Routing on Load and History Navigation
         function handleRouting() {
             const path = window.location.pathname;
             const toolKey = Object.keys(routes).find(key => routes[key] === path);
@@ -733,40 +834,131 @@
                 resHeader.innerText = "Error";
             } else {
                 resBox.classList.remove('error');
-                resHeader.innerText = "Result";
+                resHeader.innerText = "Output / Document Preview";
             }
 
             resContent.innerHTML = htmlContent;
             resBox.style.display = 'block';
+            resBox.scrollIntoView({ behavior: 'smooth' });
         }
 
-        /* Validated Calculation Logics */
+        /* TOOL LOGIC FUNCTIONS */
 
-        function calcProfitMargin() {
-            const cost = parseFloat(document.getElementById('cost').value);
-            const revenue = parseFloat(document.getElementById('revenue').value);
-            
-            if (isNaN(cost) || isNaN(revenue)) {
-                return displayResult("Please enter valid numeric values for both fields.", true);
+        function generateInvoice() {
+            const company = document.getElementById('invCompany').value || 'Your Company';
+            const client = document.getElementById('invClient').value || 'Client Name';
+            const invNum = document.getElementById('invNum').value || 'INV-001';
+            const item = document.getElementById('invItem').value || 'Services';
+            const qty = parseFloat(document.getElementById('invQty').value) || 0;
+            const price = parseFloat(document.getElementById('invPrice').value) || 0;
+            const taxRate = parseFloat(document.getElementById('invTax').value) || 0;
+
+            if (qty <= 0 || price < 0 || taxRate < 0) {
+                return displayResult("Quantity must be greater than zero, and values cannot be negative.", true);
             }
-            if (cost < 0 || revenue < 0) {
-                return displayResult("Price values cannot be negative.", true);
+
+            const subtotal = qty * price;
+            const taxAmt = subtotal * (taxRate / 100);
+            const total = subtotal + taxAmt;
+
+            const html = `
+                <div class="document-preview">
+                    <h2>INVOICE</h2>
+                    <p><strong>From:</strong> ${company}</p>
+                    <p><strong>To:</strong> ${client}</p>
+                    <p><strong>Invoice #:</strong> ${invNum}</p>
+                    <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <table>
+                        <tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+                        <tr><td>${item}</td><td>${qty}</td><td>${curr}${price.toFixed(2)}</td><td>${curr}${subtotal.toFixed(2)}</td></tr>
+                    </table>
+                    <p style="text-align:right; margin-top:1rem;"><strong>Subtotal:</strong> ${curr}${subtotal.toFixed(2)}</p>
+                    <p style="text-align:right;"><strong>Tax (${taxRate}%):</strong> ${curr}${taxAmt.toFixed(2)}</p>
+                    <p style="text-align:right; font-size:1.2rem;"><strong>Total Due:</strong> ${curr}${total.toFixed(2)}</p>
+                    <button class="calc-btn no-print" onclick="window.print()">Print Invoice / Save PDF</button>
+                </div>
+            `;
+            displayResult(html);
+        }
+
+        function generateQuotation() {
+            const company = document.getElementById('qCompany').value || 'Company Name';
+            const customer = document.getElementById('qCustomer').value || 'Customer Name';
+            const scope = document.getElementById('qScope').value || 'Scope Description';
+            const amount = parseFloat(document.getElementById('qAmount').value) || 0;
+            const valid = parseInt(document.getElementById('qValid').value) || 30;
+
+            if (amount <= 0 || valid <= 0) {
+                return displayResult("Estimated amount and validity must be positive values.", true);
+            }
+
+            const html = `
+                <div class="document-preview">
+                    <h2>PRICE QUOTATION</h2>
+                    <p><strong>Provider:</strong> ${company}</p>
+                    <p><strong>Prepared For:</strong> ${customer}</p>
+                    <p><strong>Quote Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <p><strong>Valid For:</strong> ${valid} Days</p>
+                    <hr style="margin: 1rem 0;">
+                    <p><strong>Scope of Work:</strong> ${scope}</p>
+                    <p style="font-size:1.3rem; margin-top:1rem;"><strong>Estimated Investment:</strong> ${curr}${amount.toFixed(2)}</p>
+                    <button class="calc-btn no-print" onclick="window.print()">Print Quotation</button>
+                </div>
+            `;
+            displayResult(html);
+        }
+
+        function generateReceipt() {
+            const company = document.getElementById('rcCompany').value || 'Company Name';
+            const payer = document.getElementById('rcPayer').value || 'Customer Name';
+            const purpose = document.getElementById('rcFor').value || 'Goods / Services';
+            const amount = parseFloat(document.getElementById('rcAmount').value) || 0;
+            const method = document.getElementById('rcMethod').value;
+
+            if (amount <= 0) {
+                return displayResult("Amount paid must be greater than zero.", true);
+            }
+
+            const html = `
+                <div class="document-preview">
+                    <h2>PAYMENT RECEIPT</h2>
+                    <p><strong>Merchant:</strong> ${company}</p>
+                    <p><strong>Received From:</strong> ${payer}</p>
+                    <p><strong>Payment For:</strong> ${purpose}</p>
+                    <p><strong>Payment Method:</strong> ${method}</p>
+                    <p><strong>Receipt Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <h3 style="margin-top:1rem; color:var(--accent);">Amount Paid: ${curr}${amount.toFixed(2)}</h3>
+                    <button class="calc-btn no-print" onclick="window.print()">Print Receipt</button>
+                </div>
+            `;
+            displayResult(html);
+        }
+
+        function calcProfit() {
+            const revenue = parseFloat(document.getElementById('prRevenue').value);
+            const cost = parseFloat(document.getElementById('prCost').value);
+
+            if (isNaN(revenue) || isNaN(cost)) {
+                return displayResult("Please enter valid revenue and cost figures.", true);
+            }
+            if (revenue < 0 || cost < 0) {
+                return displayResult("Values cannot be negative.", true);
             }
             if (revenue === 0) {
-                return displayResult("Selling Price must be greater than zero to calculate margin.", true);
+                return displayResult("Revenue must be greater than zero to calculate margin.", true);
             }
 
             const profit = revenue - cost;
             const margin = (profit / revenue) * 100;
-            displayResult(`Profit: ${curr}${profit.toFixed(2)}<br>Profit Margin: ${margin.toFixed(2)}%`);
+            displayResult(`Net Profit: ${curr}${profit.toFixed(2)}<br>Profit Margin: ${margin.toFixed(2)}%`);
         }
 
         function calcMarkup() {
-            const cost = parseFloat(document.getElementById('mCost').value);
-            const percent = parseFloat(document.getElementById('mPercent').value);
+            const cost = parseFloat(document.getElementById('mkCost').value);
+            const percent = parseFloat(document.getElementById('mkPercent').value);
 
             if (isNaN(cost) || isNaN(percent)) {
-                return displayResult("Please enter valid numeric inputs.", true);
+                return displayResult("Please enter valid inputs.", true);
             }
             if (cost < 0 || percent < 0) {
                 return displayResult("Values cannot be negative.", true);
@@ -774,54 +966,12 @@
 
             const sellingPrice = cost + (cost * (percent / 100));
             const profit = sellingPrice - cost;
-            displayResult(`Selling Price: ${curr}${sellingPrice.toFixed(2)}<br>Profit: ${curr}${profit.toFixed(2)}`);
-        }
-
-        function calcGST() {
-            const amount = parseFloat(document.getElementById('gstAmount').value);
-            const rate = parseFloat(document.getElementById('gstRate').value);
-            const type = document.getElementById('gstType').value;
-
-            if (isNaN(amount) || isNaN(rate)) {
-                return displayResult("Please fill in all input fields.", true);
-            }
-            if (amount < 0 || rate < 0) {
-                return displayResult("Values cannot be negative.", true);
-            }
-
-            let gstAmount, total;
-            if (type === 'add') {
-                gstAmount = amount * (rate / 100);
-                total = amount + gstAmount;
-            } else {
-                gstAmount = amount - (amount * (100 / (100 + rate)));
-                total = amount;
-            }
-            displayResult(`GST Amount: ${curr}${gstAmount.toFixed(2)}<br>Total Amount: ${curr}${total.toFixed(2)}`);
-        }
-
-        function calcDiscount() {
-            const price = parseFloat(document.getElementById('discPrice').value);
-            const rate = parseFloat(document.getElementById('discRate').value);
-
-            if (isNaN(price) || isNaN(rate)) {
-                return displayResult("Please enter valid figures.", true);
-            }
-            if (price < 0 || rate < 0) {
-                return displayResult("Inputs cannot be negative.", true);
-            }
-            if (rate > 100) {
-                return displayResult("Discount percentage cannot exceed 100%.", true);
-            }
-
-            const savings = price * (rate / 100);
-            const finalPrice = price - savings;
-            displayResult(`Final Price: ${curr}${finalPrice.toFixed(2)}<br>You Save: ${curr}${savings.toFixed(2)}`);
+            displayResult(`Selling Price: ${curr}${sellingPrice.toFixed(2)}<br>Gross Profit per Unit: ${curr}${profit.toFixed(2)}`);
         }
 
         function calcCommission() {
-            const sale = parseFloat(document.getElementById('commSale').value);
-            const rate = parseFloat(document.getElementById('commRate').value);
+            const sale = parseFloat(document.getElementById('cmSale').value);
+            const rate = parseFloat(document.getElementById('cmRate').value);
 
             if (isNaN(sale) || isNaN(rate)) {
                 return displayResult("Please fill in both fields.", true);
@@ -831,117 +981,148 @@
             }
 
             const comm = sale * (rate / 100);
-            displayResult(`Commission Earned: ${curr}${comm.toFixed(2)}`);
+            displayResult(`Commission Earnings: ${curr}${comm.toFixed(2)}`);
         }
 
         function calcSalary() {
-            const monthly = parseFloat(document.getElementById('salMonthly').value);
-            const tax = parseFloat(document.getElementById('salTax').value) || 0;
+            const gross = parseFloat(document.getElementById('slGross').value);
+            const taxRate = parseFloat(document.getElementById('slTax').value) || 0;
 
-            if (isNaN(monthly) || monthly <= 0) {
-                return displayResult("Please enter a valid monthly salary.", true);
+            if (isNaN(gross) || gross <= 0) {
+                return displayResult("Please enter a valid gross monthly salary.", true);
             }
-            if (tax < 0 || tax > 100) {
+            if (taxRate < 0 || taxRate > 100) {
                 return displayResult("Deduction percentage must be between 0% and 100%.", true);
             }
 
-            const netMonthly = monthly - (monthly * (tax / 100));
+            const netMonthly = gross - (gross * (taxRate / 100));
             const netAnnual = netMonthly * 12;
-            displayResult(`Net Monthly Salary: ${curr}${netMonthly.toFixed(2)}<br>Net Annual Salary: ${curr}${netAnnual.toFixed(2)}`);
+            displayResult(`Estimated Net Monthly Take-Home: ${curr}${netMonthly.toFixed(2)}<br>Estimated Net Annual Take-Home: ${curr}${netAnnual.toFixed(2)}`);
         }
 
-        function calcHourly() {
-            const income = parseFloat(document.getElementById('hrIncome').value);
+        function calcHourlyRate() {
+            const target = parseFloat(document.getElementById('hrTarget').value);
             const hours = parseFloat(document.getElementById('hrHours').value);
             const weeks = parseFloat(document.getElementById('hrWeeks').value);
 
-            if (isNaN(income) || isNaN(hours) || isNaN(weeks)) {
-                return displayResult("Please fill in all parameters.", true);
+            if (isNaN(target) || isNaN(hours) || isNaN(weeks)) {
+                return displayResult("Please fill in all input parameters.", true);
             }
-            if (income <= 0 || hours <= 0 || weeks <= 0) {
-                return displayResult("Inputs must be positive non-zero numbers.", true);
+            if (target <= 0 || hours <= 0 || weeks <= 0) {
+                return displayResult("Inputs must be positive numbers greater than zero.", true);
             }
 
-            const rate = income / (hours * weeks);
-            displayResult(`Required Hourly Rate: ${curr}${rate.toFixed(2)} / hr`);
+            const rate = target / (hours * weeks);
+            displayResult(`Target Minimum Hourly Rate: ${curr}${rate.toFixed(2)} / hour`);
         }
 
-        function calcROI() {
-            const inv = parseFloat(document.getElementById('roiInv').value);
-            const ret = parseFloat(document.getElementById('roiRet').value);
-
-            if (isNaN(inv) || isNaN(ret)) {
-                return displayResult("Please enter valid numerical amounts.", true);
-            }
-            if (inv <= 0) {
-                return displayResult("Initial investment must be greater than zero.", true);
+        function generateNames() {
+            const keyword = document.getElementById('bnKeyword').value.trim();
+            if (!keyword) {
+                return displayResult("Please enter a core keyword to generate names.", true);
             }
 
-            const gain = ret - inv;
-            const roi = (gain / inv) * 100;
-            displayResult(`Total Gain/Loss: ${curr}${gain.toFixed(2)}<br>ROI: ${roi.toFixed(2)}%`);
+            const prefixes = ["Apex", "Nova", "Prime", "Vanguard", "Nexus", "Elevate", "Vertex", "Core"];
+            const suffixes = ["Labs", "Solutions", "Studio", "Ventures", "Group", "Dynamics", "Pulse", "Scale"];
+
+            let nameList = "<ul>";
+            for (let i = 0; i < 6; i++) {
+                const p = prefixes[Math.floor(Math.random() * prefixes.length)];
+                const s = suffixes[Math.floor(Math.random() * suffixes.length)];
+                nameList += `<li><strong>${p} ${keyword.charAt(0).toUpperCase() + keyword.slice(1)} ${s}</strong></li>`;
+            }
+            nameList += "</ul>";
+
+            displayResult(`Name Suggestions for "${keyword}":<br>${nameList}`);
         }
 
-        function calcBreakeven() {
-            const fixed = parseFloat(document.getElementById('beFixed').value);
-            const price = parseFloat(document.getElementById('bePrice').value);
-            const variable = parseFloat(document.getElementById('beVar').value);
+        function generateSignature() {
+            const name = document.getElementById('sigName').value || 'Full Name';
+            const title = document.getElementById('sigTitle').value || 'Job Title';
+            const company = document.getElementById('sigCompany').value || 'Company Name';
+            const phone = document.getElementById('sigPhone').value || 'Phone Number';
+            const email = document.getElementById('sigEmail').value || 'Email Address';
 
-            if (isNaN(fixed) || isNaN(price) || isNaN(variable)) {
-                return displayResult("Please enter all required costs and price.", true);
-            }
-            if (fixed < 0 || price < 0 || variable < 0) {
-                return displayResult("Cost and price values cannot be negative.", true);
-            }
-            if (price <= variable) {
-                return displayResult("Selling price per unit must be greater than variable cost per unit.", true);
-            }
-
-            const units = fixed / (price - variable);
-            displayResult(`Break-even Quantity: ${Math.ceil(units)} units`);
+            const html = `
+                <div style="font-family: Arial, sans-serif; border-left: 3px solid var(--primary); padding-left: 12px; margin-top: 10px;">
+                    <p style="margin:0; font-weight:bold; font-size:1.1rem; color:var(--text-color);">${name}</p>
+                    <p style="margin:0; color:var(--text-muted); font-size:0.95rem;">${title} | <strong>${company}</strong></p>
+                    <p style="margin-top:5px; font-size:0.9rem;">📞 ${phone} | ✉️ ${email}</p>
+                </div>
+            `;
+            displayResult(html);
         }
 
-        function calcLoan() {
-            const principal = parseFloat(document.getElementById('lnAmount').value);
-            const annualRate = parseFloat(document.getElementById('lnRate').value);
-            const years = parseFloat(document.getElementById('lnTerm').value);
+        function generateCard() {
+            const name = document.getElementById('bcName').value || 'Your Name';
+            const title = document.getElementById('bcTitle').value || 'Title';
+            const company = document.getElementById('bcCompany').value || 'Company';
+            const contact = document.getElementById('bcContact').value || 'Contact Info';
 
-            if (isNaN(principal) || isNaN(annualRate) || isNaN(years)) {
-                return displayResult("Please fill in all loan fields.", true);
-            }
-            if (principal <= 0 || years <= 0 || annualRate < 0) {
-                return displayResult("Loan amount and term must be greater than zero, and interest rate cannot be negative.", true);
-            }
-
-            const totalPayments = years * 12;
-            let monthlyPayment;
-
-            if (annualRate === 0) {
-                monthlyPayment = principal / totalPayments;
-            } else {
-                const monthlyRate = (annualRate / 100) / 12;
-                monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
-                                 (Math.pow(1 + monthlyRate, totalPayments) - 1);
-            }
-
-            const totalCost = monthlyPayment * totalPayments;
-            displayResult(`Monthly Payment: ${curr}${monthlyPayment.toFixed(2)}<br>Total Payment: ${curr}${totalCost.toFixed(2)}`);
+            const html = `
+                <div style="max-width:350px; background:linear-gradient(135deg, var(--primary), #312e81); color:white; padding:1.5rem; border-radius:10px; margin:1rem 0;">
+                    <h3 style="margin-bottom:0.2rem; font-size:1.3rem;">${name}</h3>
+                    <p style="font-size:0.9rem; opacity:0.9;">${title}</p>
+                    <hr style="margin:0.8rem 0; opacity:0.3;">
+                    <p style="font-weight:bold;">${company}</p>
+                    <p style="font-size:0.85rem; opacity:0.8; margin-top:0.4rem;">${contact}</p>
+                </div>
+            `;
+            displayResult(html);
         }
 
-        function calcInvoiceTax() {
-            const sub = parseFloat(document.getElementById('invSub').value);
-            const tax = parseFloat(document.getElementById('invTax').value);
+        function generateMinutes() {
+            const title = document.getElementById('mmTitle').value || 'Meeting Title';
+            const attendees = document.getElementById('mmAttendees').value || 'N/A';
+            const discussion = document.getElementById('mmDiscussion').value || 'No details entered.';
+            const actions = document.getElementById('mmActions').value || 'No action items recorded.';
 
-            if (isNaN(sub) || isNaN(tax)) {
-                return displayResult("Please enter subtotal and tax percentage.", true);
-            }
-            if (sub < 0 || tax < 0) {
-                return displayResult("Values cannot be negative.", true);
+            const html = `
+                <div class="document-preview">
+                    <h2>MEETING MINUTES: ${title}</h2>
+                    <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <p><strong>Attendees:</strong> ${attendees}</p>
+                    <hr style="margin:1rem 0;">
+                    <h3>Key Discussion Points</h3>
+                    <p>${discussion.replace(/\n/g, '<br>')}</p>
+                    <h3 style="margin-top:1rem;">Action Items</h3>
+                    <p>${actions.replace(/\n/g, '<br>')}</p>
+                    <button class="calc-btn no-print" onclick="window.print()">Print / Export Minutes</button>
+                </div>
+            `;
+            displayResult(html);
+        }
+
+        function generatePO() {
+            const buyer = document.getElementById('poBuyer').value || 'Buyer Name';
+            const vendor = document.getElementById('poVendor').value || 'Vendor Name';
+            const poNum = document.getElementById('poNumber').value || 'PO-000';
+            const item = document.getElementById('poItem').value || 'Item Description';
+            const qty = parseFloat(document.getElementById('poQty').value) || 0;
+            const price = parseFloat(document.getElementById('poPrice').value) || 0;
+
+            if (qty <= 0 || price < 0) {
+                return displayResult("Quantity must be greater than zero, and price cannot be negative.", true);
             }
 
-            const taxAmt = sub * (tax / 100);
-            const total = sub + taxAmt;
-            displayResult(`Tax Amount: ${curr}${taxAmt.toFixed(2)}<br>Total Invoice Amount: ${curr}${total.toFixed(2)}`);
+            const total = qty * price;
+
+            const html = `
+                <div class="document-preview">
+                    <h2>PURCHASE ORDER</h2>
+                    <p><strong>PO Number:</strong> ${poNum}</p>
+                    <p><strong>Buyer:</strong> ${buyer}</p>
+                    <p><strong>Vendor:</strong> ${vendor}</p>
+                    <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <table>
+                        <tr><th>Item</th><th>Quantity</th><th>Unit Price</th><th>Subtotal</th></tr>
+                        <tr><td>${item}</td><td>${qty}</td><td>${curr}${price.toFixed(2)}</td><td>${curr}${total.toFixed(2)}</td></tr>
+                    </table>
+                    <p style="text-align:right; font-size:1.2rem; margin-top:1rem;"><strong>Total Purchase Amount:</strong> ${curr}${total.toFixed(2)}</p>
+                    <button class="calc-btn no-print" onclick="window.print()">Print Purchase Order</button>
+                </div>
+            `;
+            displayResult(html);
         }
     </script>
 </body>
