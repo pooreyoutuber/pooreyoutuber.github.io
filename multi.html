@@ -111,127 +111,88 @@
             --red: #e11d48;
             --amber: #f59e0b;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 16px; line-height: 1.6; }
+        .container { max-width: 860px; margin: 24px auto; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* Top Navbar */
+        /* Top Navigation Header (Left: Brand Logo, Right: Home Button) */
         .top-navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 20px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 10px 4px;
         }
-
         .brand-logo {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            letter-spacing: -0.3px;
         }
-
-        .nav-home-btn {
-            background: #f1f5f9;
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--card);
+            border: 1px solid var(--border);
             color: var(--text);
+            text-decoration: none;
             padding: 8px 16px;
             border-radius: 8px;
-            text-decoration: none;
             font-size: 0.9rem;
             font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             transition: all 0.2s ease;
         }
-
-        .nav-home-btn:hover {
-            background: var(--primary);
-            color: white;
+        .home-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f5f3ff;
         }
+        
+        header { text-align: center; margin-bottom: 32px; }
+        header h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; font-weight: 700; }
+        header p { color: var(--muted); font-size: 0.95rem; }
 
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-
-        /* Tool Card */
-        .tool-card {
+        .card {
             background: var(--card);
             border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.07);
             border: 1px solid var(--border);
-            padding: 28px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             margin-bottom: 32px;
         }
 
+        /* Upload Drop Zone */
         .drop-zone {
-            border: 2px dashed #cbd5e1;
+            border: 2px dashed var(--primary);
             border-radius: 12px;
-            padding: 36px 20px;
+            padding: 32px 16px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            background: #fafafa;
+            background: #f5f3ff;
+            transition: background .25s;
         }
+        .drop-zone:hover, .drop-zone.over { background: #ede9fe; }
+        .drop-zone svg { display: block; margin: 0 auto 10px; }
+        .drop-zone p { font-weight: 600; font-size: 0.95rem; }
+        .drop-zone small { color: var(--muted); font-size: .8rem; }
+        #fileInput { display: none; }
 
-        .drop-zone:hover, .drop-zone.dragover {
-            border-color: var(--primary);
-            background: #f0fdf4;
-        }
-
-        .drop-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-
+        /* File Info */
         .file-info {
             display: none;
-            margin-top: 16px;
+            margin-top: 18px;
+            padding: 13px 15px;
             background: #f1f5f9;
-            padding: 12px 16px;
+            border-left: 4px solid var(--primary);
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: .9rem;
         }
+        .file-info p { margin-bottom: 3px; }
+        .file-info strong { color: var(--text); }
 
-        .file-info span {
-            font-weight: 600;
-        }
-
-        /* Controls - Always Visible */
+        /* Controls: Always Visible Now */
         .controls {
             display: grid;
             margin-top: 18px;
@@ -239,171 +200,88 @@
             gap: 12px;
             grid-template-columns: 1fr auto;
         }
-
-        label.ctrl-label {
-            display: block;
-            font-weight: 600;
-            font-size: .85rem;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-
-        .size-inputs {
-            display: flex;
-            gap: 8px;
-        }
-
-        input[type="number"], select {
+        label.ctrl-label { display: block; font-weight: 600; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+        .size-inputs { display: flex; gap: 8px; }
+        input[type=number], select {
             padding: 11px 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
             font-size: .95rem;
             outline: none;
+            background: var(--card);
+            transition: border-color .2s;
         }
-
-        input[type="number"] { flex: 1; min-width: 0; }
-
-        .btn-compress {
+        input[type=number]:focus, select:focus { border-color: var(--primary); }
+        input[type=number] { flex: 1; width: 100%; }
+        
+        .btn-primary {
             background: var(--primary);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 12px 22px;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-weight: 600;
             font-size: .95rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background .2s;
             white-space: nowrap;
         }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
 
-        .btn-compress:hover {
-            background: var(--primary-hover);
-        }
+        /* Progress */
+        .progress-wrap { display: none; margin-top: 18px; }
+        .progress-text { font-size: .83rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+        .progress-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; width: 0; transition: width .3s ease; }
 
-        .btn-compress:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background: var(--muted);
-        }
-
-        /* Progress Bar */
-        .progress-wrap {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .progress-bar-bg {
-            background: var(--border);
-            height: 10px;
-            border-radius: 99px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            background: var(--primary);
-            height: 100%;
-            width: 0%;
-            transition: width 0.2s ease;
-        }
-
-        .progress-status {
-            font-size: .85rem;
-            color: var(--muted);
-            margin-top: 6px;
-            text-align: center;
-        }
-
-        /* Result Area */
+        /* Result Box */
         .result-box {
             display: none;
-            margin-top: 24px;
-            padding: 20px;
+            margin-top: 20px;
             border-radius: 12px;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
+            padding: 18px 20px;
         }
+        .result-box.ok  { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .result-box.warn{ background: #fffbeb; border: 1px solid #fcd34d; }
+        .result-box h3 { font-size: 1rem; margin-bottom: 10px; }
+        .result-box.ok   h3 { color: var(--green); }
+        .result-box.warn h3 { color: var(--amber); }
 
-        .result-box.warn {
-            background: #fffbe6;
-            border-color: #ffe58f;
-        }
-
-        .res-title {
-            font-weight: 700;
-            color: #166534;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .result-box.warn .res-title {
-            color: #b78103;
-        }
-
-        .sz-comparison {
-            font-size: 0.95rem;
-            color: #334155;
-            margin-bottom: 16px;
-        }
-
-        .sz-old { text-decoration: line-through; color: var(--muted); }
-        .sz-arrow { margin: 0 6px; color: var(--muted); }
-        .sz-new { font-weight: 700; color: var(--green); }
+        .size-row { display: flex; align-items: center; gap: 14px; font-size: .9rem; margin-bottom: 14px; flex-wrap: wrap; }
+        .sz-old { color: var(--red); text-decoration: line-through; }
+        .sz-arrow { color: var(--muted); }
+        .sz-new { color: var(--green); font-weight: 700; font-size: 1.05rem; }
 
         .btn-dl {
             display: inline-block;
             background: var(--green);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            color: #fff;
             text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
+            font-size: .93rem;
+            transition: opacity .2s;
+            text-align: center;
         }
+        .btn-dl:hover { opacity: .88; }
 
-        .btn-dl:hover { opacity: 0.9; }
-
-        /* SEO Editorial Content Styles */
-        .seo-content {
-            background: var(--card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            padding: 32px;
+        /* SEO Editorial Article Styling Fix */
+        .seo-content { 
+            background: var(--card); 
+            border-radius: 16px; 
+            padding: 28px; 
+            border: 1px solid var(--border); 
             margin-bottom: 32px;
         }
+        .seo-content h2 { font-size: 1.4rem; margin-bottom: 12px; color: var(--text); }
+        .seo-content h3 { font-size: 1.1rem; color: var(--primary); margin: 20px 0 8px; }
+        .seo-content h4 { font-size: 0.98rem; color: var(--text); margin: 14px 0 6px; font-weight: 600; }
+        .seo-content p, .seo-content li { color: var(--muted); font-size: .95rem; margin-bottom: 10px; line-height: 1.6; }
+        .seo-content ul { margin-left: 20px; }
 
-        .seo-content h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        .seo-content h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 20px 0 8px;
-            color: var(--text);
-        }
-
-        .seo-content p {
-            color: var(--muted);
-            font-size: 0.95rem;
-            margin-bottom: 14px;
-        }
-
-        .seo-content ul {
-            margin-left: 20px;
-            margin-bottom: 14px;
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-
-        .seo-content li { margin-bottom: 6px; }
-
-        /* FAQ Section */
+        /* Visible FAQ Section */
         .faq-container {
             background: var(--card);
             border-radius: 16px;
@@ -411,168 +289,143 @@
             border: 1px solid var(--border);
             margin-bottom: 32px;
         }
-
-        .faq-container h2 {
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-            color: var(--text);
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--border);
-            padding: 12px 0;
-        }
-
+        .faq-container h2 { font-size: 1.4rem; margin-bottom: 16px; color: var(--text); }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
         .faq-item:last-child { border-bottom: none; }
+        .faq-item h3 { font-size: 1rem; color: var(--text); margin-bottom: 6px; font-weight: 600; }
+        .faq-item p { color: var(--muted); font-size: 0.92rem; }
 
-        .faq-item h3 {
-            font-size: 1rem;
-            color: var(--text);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        .faq-item p {
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
-
-        /* Relevant Internal Links Grid */
+        /* Internal Linking Grid */
         .internal-tools {
             background: var(--card);
             border-radius: 16px;
-            padding: 28px;
+            padding: 24px;
             border: 1px solid var(--border);
             margin-bottom: 32px;
         }
-
-        .internal-tools h3 {
-            font-size: 1.1rem;
-            margin-bottom: 16px;
-            color: var(--text);
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
-        }
-
+        .internal-tools h3 { font-size: 1.1rem; margin-bottom: 14px; color: var(--text); }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
         .tool-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            background: var(--bg);
+            display: block;
+            padding: 10px 14px;
+            background: #f8fafc;
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             text-decoration: none;
-            color: var(--text);
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .tool-link:hover {
-            border-color: var(--primary);
             color: var(--primary);
-            transform: translateY(-1px);
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s;
         }
+        .tool-link:hover { background: #ede9fe; border-color: var(--primary); }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.85rem;
-            padding: 20px 0;
-        }
-
-        footer a { color: var(--muted); text-decoration: underline; }
-
-        @media (max-width: 600px) {
+        @media(max-width:580px){
+            header h1 { font-size: 1.5rem; }
             .controls { grid-template-columns: 1fr; }
-            .btn-compress { width: 100%; }
+            .btn-primary { width: 100%; }
+            .size-inputs { flex-direction: row; }
+            .seo-content, .card, .faq-container { padding: 18px; }
         }
     </style>
 </head>
 <body>
+<div class="container">
 
-    <div class="container">
+     <nav class="top-navbar">
+        <span class="brand-logo">PooreYoutuber</span>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">
+            🏠 Home
+        </a>
+    </nav>
 
-        <nav class="top-navbar">
-            <a href="https://pooreyoutuber.github.io/" class="brand-logo">
-                📄 PooreYoutuber
-            </a>
-            <a href="https://pooreyoutuber.github.io/" class="nav-home-btn">Home</a>
-        </nav>
+    
+    <header>
+        <h1>PDF & Image Compressor Online</h1>
+        <p>Compress PDF documents and JPG, PNG, or WEBP images toward your target size in KB or MB.</p>
+    </header>
 
-        <header>
-            <h1>PDF & Image Compressor</h1>
-            <p class="subtitle">Shrink PDF, JPG, PNG, & WEBP files to your target size in KB or MB</p>
-        </header>
-
-        <main class="tool-card">
-            <div class="drop-zone" id="dropZone">
-                <span class="drop-icon">📁</span>
-                <strong>Click to select</strong> or drag and drop your file here
-                <p style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Supports PDF, JPG, JPEG, PNG, WEBP</p>
-                <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp" style="display:none">
+    <main>
+        <div class="card">
+            <div class="drop-zone" id="dropZone" onclick="fileInput.click()">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & Drop your file here or <span style="color:var(--primary);font-weight:700;">Browse</span></p>
+                <small>Supports: PDF, JPG, JPEG, PNG, WEBP</small>
+                <input type="file" id="fileInput" accept="image/*,application/pdf">
             </div>
 
             <div class="file-info" id="fileInfo">
-                File: <span id="fileName">-</span> | Format: <span id="fileType">-</span> | Original Size: <span id="currentSize">-</span>
+                <p><strong>Name:</strong> <span id="fileName"></span></p>
+                <p><strong>Type:</strong> <span id="fileType"></span></p>
+                <p><strong>Current Size:</strong> <span id="currentSize" style="color:var(--red);font-weight:600;"></span></p>
             </div>
 
             <div class="controls" id="controlBox">
                 <div>
-                    <label class="ctrl-label" for="targetSize">Target Size *</label>
+                    <label class="ctrl-label" for="targetSize">Target Size:</label>
                     <div class="size-inputs">
-                        <input type="number" id="targetSize" value="100" min="1" step="any">
+                        <input type="number" id="targetSize" placeholder="e.g. 50" min="1" step="any">
                         <select id="sizeUnit">
                             <option value="KB">KB</option>
                             <option value="MB">MB</option>
                         </select>
                     </div>
                 </div>
-                <button class="btn-compress" id="compressBtn" disabled>⚡ Compress File</button>
+                <button class="btn-primary" id="compressBtn">Compress File</button>
             </div>
 
             <div class="progress-wrap" id="progressWrap">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">Processing…</div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="progress-status" id="progressText">Initializing…</div>
             </div>
 
             <div class="result-box" id="resultBox">
-                <div class="res-title" id="resTitle">✓ Compression Complete</div>
-                <div class="sz-comparison">
+                <h3 id="resultTitle"></h3>
+                <div class="size-row">
                     <span class="sz-old" id="szOld"></span>
                     <span class="sz-arrow">→</span>
                     <span class="sz-new" id="szNew"></span>
                 </div>
                 <a href="#" class="btn-dl" id="dlLink" download>⬇ Download Compressed File</a>
             </div>
-        </main>
+        </div>
 
         <article class="seo-content">
             <h2>How to Compress a PDF or Image</h2>
             <p>Handling large file sizes can be difficult when submitting official applications, uploading documents to web portals, or optimizing media assets for websites. Our browser-based File Compressor helps adjust document and image sizes toward your required target in KB or MB.</p>
-            
+
             <h3>How to Use the File Compressor</h3>
-            <p>Follow these steps to optimize your documents:</p>
+            <p>Follow these steps to optimize your documents and photos:</p>
             <ul>
-                <li><strong>Select File:</strong> Upload a PDF document or an image file (JPG, PNG, WEBP).</li>
-                <li><strong>Set Target Size:</strong> Input your preferred target size and choose KB or MB.</li>
-                <li><strong>Start Compression:</strong> Click "Compress File" to process the file locally in your browser.</li>
-                <li><strong>Download:</strong> Save your newly compressed file immediately once complete.</li>
+                <li><strong>Step 1: Upload Your File:</strong> Drag and drop your PDF or image (JPG, PNG, WEBP) into the drop zone, or click "Browse" to choose a file from your device.</li>
+                <li><strong>Step 2: Review File Size:</strong> Once selected, the tool displays the file name, type, and current file size.</li>
+                <li><strong>Step 3: Specify Target Size:</strong> Enter your required numeric target size and choose KB or MB from the dropdown menu.</li>
+                <li><strong>Step 4: Compress File:</strong> Click "Compress File" to process your document or image locally.</li>
+                <li><strong>Step 5: Download:</strong> Review the compressed file size and click "Download Compressed File" to save it.</li>
             </ul>
 
-            <h3>Client-Side Local Processing</h3>
-            <p>Your privacy is important. Unlike traditional online converters, this utility processes files directly inside your browser memory using WebAssembly and client-side JavaScript libraries. Your files are not uploaded to an external server.</p>
+            <h3>Benefits of Compressing Files</h3>
+            <p>This client-side compression tool offers several key practical advantages:</p>
+
+            <h4>1. Browser-Based Processing</h4>
+            <p>File compression is performed locally in your browser rather than uploaded to an external compression server, maintaining document privacy during processing.</p>
+
+            <h4>2. Target Dimension Guidance</h4>
+            <p>Instead of restricting you to fixed percentage reductions, the algorithm attempts to scale image dimensions and PDF render qualities toward your specified target limit.</p>
+
+            <h4>3. Multi-Format Compatibility</h4>
+            <p>Manage documents and common image extensions in a single clean web page without switching between different single-purpose utilities.</p>
+
+            <h4>4. Optimized Loading for Web Assets</h4>
+            <p>Reducing file dimensions helps improve webpage rendering times and lower bandwidth usage for web managers and content publishers.</p>
         </article>
 
-        <section class="faq-container" id="faq">
+        <section class="faq-container">
             <h2>Frequently Asked Questions</h2>
             <div class="faq-item">
                 <h3>Is this online file compressor free to use?</h3>
@@ -591,330 +444,287 @@
         <section class="internal-tools">
             <h3>Explore Related Media Tools</h3>
             <div class="tools-grid">
-                <a href="https://pooreyoutuber.github.io/youtube-thumbnail.html" class="tool-link">🖼️ Thumbnail Downloader</a>
-                <a href="https://pooreyoutuber.github.io/photo-to-pdf.html" class="tool-link">📄 Photo to PDF Converter</a>
-                <a href="https://pooreyoutuber.github.io/multi-browser.html" class="tool-link">🌐 Multi Browser Viewer</a>
+                <a href="https://pooreyoutuber.github.io/youtube-thumbnail.html" class="tool-link">📷 Thumbnail Downloader</a>
+                <a href="https://pooreyoutuber.github.io/pdf-compress.html" class="tool-link">📄 PDF Compressor</a>
+                <a href="https://pooreyoutuber.github.io/website-ads5.html" class="tool-link">⚡ SEO Analytics Helper</a>
+                <a href="https://pooreyoutuber.github.io/multi-browser.html" class="tool-link">🌐 Multi Browser Tool</a>
+                <a href="https://pooreyoutuber.github.io/youtube-sine.html" class="tool-link">🚀 TubeVelocity Hub</a>
             </div>
         </section>
 
-        <footer>
-            <p>© 2026 PooreYoutuber. All Rights Reserved. | <a href="https://pooreyoutuber.github.io/privacy.html">Privacy Policy</a></p>
-        </footer>
+    </main>
 
-    </div>
+    <footer style="text-align: center; margin-top: 30px; padding: 20px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem;">
+        <p>&copy; 2026 PooreYoutuber. All Rights Reserved. Use of this tool is subject to our terms of service. Free forever, no login required.</p>
+    </footer>
+</div>
 
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+<script>
+// PDF.js worker setup
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const dropZone     = document.getElementById('dropZone');
-        const fileInput    = document.getElementById('fileInput');
-        const fileInfo     = document.getElementById('fileInfo');
-        const fileName     = document.getElementById('fileName');
-        const fileType     = document.getElementById('fileType');
-        const currentSize  = document.getElementById('currentSize');
-        const controlBox   = document.getElementById('controlBox');
-        const compressBtn  = document.getElementById('compressBtn');
-        const targetSizeIn = document.getElementById('targetSize');
-        const progressWrap = document.getElementById('progressWrap');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const resultBox    = document.getElementById('resultBox');
-        const resTitle     = document.getElementById('resTitle');
-        const szOld        = document.getElementById('szOld');
-        const szNew        = document.getElementById('szNew');
-        const dlLink       = document.getElementById('dlLink');
+// DOM Elements
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const fileInfo    = document.getElementById('fileInfo');
+const fileName    = document.getElementById('fileName');
+const fileType    = document.getElementById('fileType');
+const currentSize = document.getElementById('currentSize');
+const controlBox  = document.getElementById('controlBox');
+const compressBtn = document.getElementById('compressBtn');
+const progressWrap= document.getElementById('progressWrap');
+const progressText= document.getElementById('progressText');
+const progressFill= document.getElementById('progressFill');
+const resultBox   = document.getElementById('resultBox');
+const resultTitle = document.getElementById('resultTitle');
+const szOld       = document.getElementById('szOld');
+const szNew       = document.getElementById('szNew');
+const dlLink      = document.getElementById('dlLink');
 
-        let selectedFile = null;
+let selectedFile = null;
 
-        function fmt(b) {
-            if (b < 1024) return b + ' B';
-            if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-            return (b / 1048576).toFixed(2) + ' MB';
-        }
+// Drag & Drop Listeners
+['dragenter','dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
+['dragleave','drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
+dropZone.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value=''; });
 
-        function updateButtonState() {
-            const val = parseFloat(targetSizeIn.value);
-            if (selectedFile && val && val > 0) {
-                compressBtn.disabled = false;
-            } else {
-                compressBtn.disabled = true;
-            }
-        }
+// Helper Functions
+function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' Bytes';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+}
 
-        targetSizeIn.addEventListener('input', updateButtonState);
-        targetSizeIn.addEventListener('change', updateButtonState);
+function setProgress(pct, label) {
+    progressFill.style.width = pct + '%';
+    progressText.textContent = label;
+}
 
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-        });
+function showResult(blob, origSize, filename, reached) {
+    progressWrap.style.display = 'none';
+    compressBtn.disabled = false;
 
-        fileInput.addEventListener('change', e => {
-            if (e.target.files.length) handleFile(e.target.files[0]);
-        });
+    const url = URL.createObjectURL(blob);
+    dlLink.href = url;
+    dlLink.download = filename;
+    szOld.textContent = fmt(origSize);
+    szNew.textContent = fmt(blob.size);
 
-        function handleFile(file) {
-            selectedFile = file;
-            fileName.textContent = file.name;
-            fileType.textContent = file.type || 'Unknown';
-            currentSize.textContent = fmt(file.size);
-            fileInfo.style.display = 'block';
-            resultBox.style.display = 'none';
+    resultBox.className = 'result-box ' + (reached ? 'ok' : 'warn');
+    resultTitle.textContent = reached
+        ? '✅ Compressed successfully!'
+        : '⚠️ Best possible compression applied (target not fully reached)';
+    resultBox.style.display = 'block';
+}
+
+// File Pick Handler
+function handleFile(file) {
+    selectedFile = file;
+    fileName.textContent    = file.name;
+    fileType.textContent    = file.type || 'Unknown';
+    currentSize.textContent = fmt(file.size);
+    fileInfo.style.display  = 'block';
+    resultBox.style.display = 'none';
+    progressWrap.style.display = 'none';
+}
+
+// Compression Trigger
+compressBtn.addEventListener('click', async () => {
+    if (!selectedFile) {
+        alert('Please select a PDF or Image file first.');
+        return;
+    }
+
+    const val  = parseFloat(document.getElementById('targetSize').value);
+    const unit = document.getElementById('sizeUnit').value;
+    if (!val || val <= 0) { alert('Please enter a valid target size.'); return; }
+
+    let targetBytes = val * 1024;
+    if (unit === 'MB') targetBytes *= 1024;
+
+    if (targetBytes >= selectedFile.size) {
+        alert('Target size is already equal to or larger than current file size.');
+        return;
+    }
+
+    compressBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    resultBox.style.display    = 'none';
+    setProgress(5, 'Starting…');
+
+    try {
+        if (selectedFile.type === 'application/pdf') {
+            await compressPDF(selectedFile, targetBytes);
+        } else if (selectedFile.type.startsWith('image/')) {
+            await compressImage(selectedFile, targetBytes);
+        } else {
+            alert('Unsupported file type.'); 
+            compressBtn.disabled = false;
             progressWrap.style.display = 'none';
-            updateButtonState();
         }
+    } catch (err) {
+        console.error(err);
+        alert('Error during compression: ' + err.message);
+        compressBtn.disabled = false;
+        progressWrap.style.display = 'none';
+    }
+});
 
-        // Compression Trigger
-        compressBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+// Image Compression Logic
+function dataURItoBlob(dataURI) {
+    const [head, data] = dataURI.split(',');
+    const mime = head.match(/:(.*?);/)[1];
+    const raw  = atob(data);
+    const buf  = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return new Blob([buf], { type: mime });
+}
 
-            const val  = parseFloat(targetSizeIn.value);
-            const unit = document.getElementById('sizeUnit').value;
+function compressImage(file, targetBytes) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Cannot read file'));
+        reader.onload  = e => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Cannot load image'));
+            img.onload  = () => {
+                setProgress(20, 'Analyzing image…');
+                const canvas = document.createElement('canvas');
+                const ctx    = canvas.getContext('2d');
+                const origW  = img.width, origH = img.height;
 
-            if (!val || val <= 0) {
-                alert('Please enter a valid positive target size.');
-                return;
-            }
+                const scaleSteps = [];
+                for (let s = 1.0; s >= 0.05; s -= 0.02) scaleSteps.push(parseFloat(s.toFixed(2)));
 
-            const targetBytes = unit === 'MB' ? val * 1048576 : val * 1024;
+                let bestUnder = null;
+                let smallestSeen = null;
+                const closeEnough = targetBytes * 0.02;
 
-            progressWrap.style.display = 'block';
-            resultBox.style.display = 'none';
-            compressBtn.disabled = true;
+                for (let i = 0; i < scaleSteps.length; i++) {
+                    const scale = scaleSteps[i];
+                    canvas.width  = Math.max(1, Math.round(origW * scale));
+                    canvas.height = Math.max(1, Math.round(origH * scale));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            try {
-                if (selectedFile.type === 'application/pdf') {
-                    await compressPdf(selectedFile, targetBytes);
-                } else {
-                    await compressImage(selectedFile, targetBytes);
+                    let lo = 0.01, hi = 0.98, foundAtScale = null;
+                    for (let iter = 0; iter < 25; iter++) {
+                        const mid  = (lo + hi) / 2;
+                        const blob = dataURItoBlob(canvas.toDataURL('image/jpeg', mid));
+                        if (blob.size <= targetBytes) { foundAtScale = blob; lo = mid; }
+                        else hi = mid;
+                        if (hi - lo < 0.0015) break;
+                    }
+
+                    if (foundAtScale && (!bestUnder || foundAtScale.size > bestUnder.size)) {
+                        bestUnder = foundAtScale;
+                    }
+
+                    const probe = dataURItoBlob(canvas.toDataURL('image/jpeg', 0.01));
+                    if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
+
+                    setProgress(20 + Math.round((i / scaleSteps.length) * 65), `Optimizing resolution…`);
+
+                    if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
                 }
-            } catch (err) {
-                alert('Compression Error: ' + err.message);
-            } finally {
-                compressBtn.disabled = false;
-            }
-        });
 
-        function setProgress(pct, msg) {
-            progressFill.style.width = pct + '%';
-            progressText.textContent = msg;
-        }
+                const finalBlob = bestUnder || smallestSeen;
+                const reached   = !!bestUnder;
 
-        function showResult(blob, origSize, outName, reached) {
-            progressWrap.style.display = 'none';
-            resultBox.style.display = 'block';
-
-            if (reached) {
-                resultBox.className = 'result-box';
-                resTitle.textContent = '✓ Compression Complete';
-            } else {
-                resultBox.className = 'result-box warn';
-                resTitle.textContent = '⚠️ Smallest Quality Limit Reached';
-            }
-
-            szOld.textContent = fmt(origSize);
-            szNew.textContent = fmt(blob.size);
-
-            const url = URL.createObjectURL(blob);
-            dlLink.href = url;
-            dlLink.download = outName;
-        }
-
-        // Image Compression Algorithm
-        async function compressImage(file, targetBytes) {
-            setProgress(10, 'Loading image…');
-            const img = await loadImage(file);
-
-            if (file.size <= targetBytes) {
-                setProgress(100, 'Done');
+                setProgress(95, 'Saving…');
                 const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
-                showResult(file, file.size, outName, true);
-                return;
-            }
+                showResult(finalBlob, file.size, outName, reached);
+                resolve();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
-            let w = img.naturalWidth;
-            let h = img.naturalHeight;
+// PDF Compression Logic
+async function compressPDF(file, targetBytes) {
+    setProgress(8, 'Loading PDF…');
 
-            let bestUnder = null;
-            let smallestSeen = null;
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfJS       = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages    = pdfJS.numPages;
 
-            for (let scaleAttempt = 0; scaleAttempt <= 5; scaleAttempt++) {
-                const canvas = document.createElement('canvas');
-                canvas.width = Math.max(Math.floor(w), 20);
-                canvas.height = Math.max(Math.floor(h), 20);
+    setProgress(15, `Loaded ${numPages} page(s). Rendering…`);
 
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const scales = [2.0, 1.75, 1.5, 1.3, 1.15, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3];
 
-                let lo = 0.05, hi = 0.95;
-                let foundAtScale = null;
+    let bestUnder = null;
+    let smallestSeen = null;
+    const closeEnough = targetBytes * 0.02;
 
-                for (let step = 0; step < 7; step++) {
-                    const mid = (lo + hi) / 2;
-                    setProgress(20 + scaleAttempt * 12 + step, `Optimizing quality… (${Math.round(mid * 100)}%)`);
+    for (let si = 0; si < scales.length; si++) {
+        const scale = scales[si];
+        setProgress(15 + Math.round((si / scales.length) * 65), `Rendering page layouts…`);
 
-                    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', mid));
-
-                    if (!smallestSeen || blob.size < smallestSeen.size) {
-                        smallestSeen = blob;
-                    }
-
-                    if (blob.size <= targetBytes) {
-                        foundAtScale = blob;
-                        lo = mid;
-                    } else {
-                        hi = mid;
-                    }
-
-                    if (hi - lo < 0.0015) break;
-                }
-
-                if (foundAtScale && (!bestUnder || foundAtScale.size > bestUnder.size)) {
-                    bestUnder = foundAtScale;
-                }
-
-                if (bestUnder && (targetBytes - bestUnder.size) <= 1024) break;
-
-                w *= 0.82;
-                h *= 0.82;
-            }
-
-            const finalBlob = bestUnder || smallestSeen;
-            const reached = !!bestUnder;
-
-            const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
-            showResult(finalBlob, file.size, outName, reached);
+        const pageCanvases = [];
+        for (let p = 1; p <= numPages; p++) {
+            const page     = await pdfJS.getPage(p);
+            const viewport = page.getViewport({ scale });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = Math.round(viewport.width);
+            canvas.height  = Math.round(viewport.height);
+            const ctx      = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            pageCanvases.push(canvas);
         }
 
-        function loadImage(file) {
-            return new Promise((res, rej) => {
-                const url = URL.createObjectURL(file);
-                const img = new Image();
-                img.onload = () => { URL.revokeObjectURL(url); res(img); };
-                img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Image failed to load')); };
-                img.src = url;
-            });
+        let lo = 0.01, hi = 0.98, foundBlob = null;
+        for (let iter = 0; iter < 22; iter++) {
+            const mid  = (lo + hi) / 2;
+            const blob = await buildPdfFromCanvases(pageCanvases, mid);
+
+            if (blob.size <= targetBytes) { foundBlob = blob; lo = mid; }
+            else hi = mid;
+            if (hi - lo < 0.002) break;
         }
 
-        // PDF Compression Algorithm
-        async function compressPdf(file, targetBytes) {
-            setProgress(5, 'Parsing PDF document…');
-            const arrayBuf = await file.arrayBuffer();
-
-            if (file.size <= targetBytes) {
-                setProgress(100, 'Done');
-                const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
-                showResult(file, file.size, outName, true);
-                return;
-            }
-
-            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
-            const numPages = pdfDoc.numPages;
-
-            let scale = 1.5;
-            let pageCanvases = [];
-
-            for (let i = 1; i <= numPages; i++) {
-                setProgress(10 + Math.floor((i / numPages) * 35), `Rendering page ${i} of ${numPages}…`);
-                const page = await pdfDoc.getPage(i);
-                const viewport = page.getViewport({ scale });
-
-                const canvas = document.createElement('canvas');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                const ctx = canvas.getContext('2d');
-
-                await page.render({ canvasContext: ctx, viewport }).promise;
-                pageCanvases.push(canvas);
-            }
-
-            setProgress(50, 'Compressing PDF pages…');
-
-            let lo = 0.05, hi = 0.92;
-            let bestUnder = null;
-            let smallestSeen = null;
-
-            for (let step = 0; step < 6; step++) {
-                const mid = (lo + hi) / 2;
-                setProgress(55 + step * 7, `Testing PDF quality… (${Math.round(mid * 100)}%)`);
-
-                const blob = await buildPdfFromCanvases(pageCanvases, mid);
-
-                if (!smallestSeen || blob.size < smallestSeen.size) {
-                    smallestSeen = blob;
-                }
-
-                if (blob.size <= targetBytes) {
-                    bestUnder = blob;
-                    lo = mid;
-                } else {
-                    hi = mid;
-                }
-
-                if (hi - lo < 0.02) break;
-            }
-
-            if (!bestUnder && scale > 1.0) {
-                scale = 1.0;
-                pageCanvases = [];
-                for (let i = 1; i <= numPages; i++) {
-                    setProgress(75 + Math.floor((i / numPages) * 15), `Rescaling page ${i} of ${numPages}…`);
-                    const page = await pdfDoc.getPage(i);
-                    const viewport = page.getViewport({ scale });
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    const ctx = canvas.getContext('2d');
-
-                    await page.render({ canvasContext: ctx, viewport }).promise;
-                    pageCanvases.push(canvas);
-                }
-
-                const probe = await buildPdfFromCanvases(pageCanvases, 0.05);
-                if (probe.size <= targetBytes) {
-                    bestUnder = probe;
-                } else if (!smallestSeen || probe.size < smallestSeen.size) {
-                    smallestSeen = probe;
-                }
-            }
-
-            const finalBlob = bestUnder || smallestSeen;
-            const reached = !!bestUnder;
-
-            setProgress(100, 'Done');
-            const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
-            showResult(finalBlob, file.size, outName, reached);
+        if (foundBlob && (!bestUnder || foundBlob.size > bestUnder.size)) {
+            bestUnder = foundBlob;
         }
 
-        async function buildPdfFromCanvases(canvases, quality) {
-            const pdfDoc = await PDFLib.PDFDocument.create();
-            for (const canvas of canvases) {
-                const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
-                const jpegBytes   = base64ToBytes(jpegDataUrl.split(',')[1]);
-                const jpegImage   = await pdfDoc.embedJpg(jpegBytes);
-                const page        = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
-                page.drawImage(jpegImage, { x: 0, y: 0, width: jpegImage.width, height: jpegImage.height });
-            }
-            const bytes = await pdfDoc.save({ useObjectStreams: true });
-            return new Blob([bytes], { type: 'application/pdf' });
-        }
+        const probe = await buildPdfFromCanvases(pageCanvases, 0.01);
+        if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
 
-        function base64ToBytes(base64) {
-            const bin = atob(base64);
-            const len = bin.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = bin.charCodeAt(i);
-            }
-            return bytes;
-        }
-    </script>
+        if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
+    }
+
+    const finalBlob = bestUnder || smallestSeen;
+    const reached   = !!bestUnder;
+
+    setProgress(97, 'Saving PDF…');
+    const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
+    showResult(finalBlob, file.size, outName, reached);
+}
+
+async function buildPdfFromCanvases(canvases, quality) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    for (const canvas of canvases) {
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+        const jpegBytes   = base64ToBytes(jpegDataUrl.split(',')[1]);
+        const jpegImage   = await pdfDoc.embedJpg(jpegBytes);
+        const page        = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
+        page.drawImage(jpegImage, { x: 0, y: 0, width: jpegImage.width, height: jpegImage.height });
+    }
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    return new Blob([bytes], { type: 'application/pdf' });
+}
+
+function base64ToBytes(b64) {
+    const raw = atob(b64);
+    const buf = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return buf;
+}
+</script>
 </body>
 </html>
