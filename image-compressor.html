@@ -9,13 +9,11 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="PooreYouTuber">
 
-    <!-- Open Graph -->
     <meta property="og:title" content="Free Image Compressor - Compress Images Online">
     <meta property="og:description" content="Reduce image file size instantly. Compress JPG, PNG, WebP without quality loss. Free, fast, secure.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/">
     <meta property="og:type" content="website">
 
-    <!-- Schema Markup -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -42,7 +40,6 @@
     }
     </script>
 
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -51,10 +48,8 @@
         gtag('config', 'G-ZPMC525FGT');
     </script>
 
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -232,11 +227,7 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 25px;
-            display: none;
-        }
-
-        .compression-settings.show {
-            display: block;
+            display: block; /* Pehle se hi visible karne ke liye */
         }
 
         .setting-group {
@@ -305,6 +296,8 @@
         .compress-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .clear-btn {
@@ -351,7 +344,7 @@
             height: 8px;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 15px;
+            margin-top: 15px;
             display: none;
         }
 
@@ -527,7 +520,6 @@
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <div class="logo">
             <i class="fas fa-image"></i>
@@ -540,7 +532,6 @@
 
     <div class="container">
 
-        <!-- Ad Top -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -551,12 +542,10 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- Tool Section -->
         <div class="tool-section">
             <h1>🖼️ Image Compressor</h1>
             <p class="tool-subtitle">Reduce Image Size Without Losing Quality</p>
 
-            <!-- Preview Section -->
             <div class="preview-section" id="previewSection">
                 <img id="imagePreview" class="image-preview" alt="Preview">
                 <div class="size-info">
@@ -571,7 +560,6 @@
                 </div>
             </div>
 
-            <!-- Upload Area -->
             <div class="upload-area" id="uploadArea">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <p>Click to upload or drag and drop</p>
@@ -579,7 +567,6 @@
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
 
-            <!-- Compression Settings -->
             <div class="compression-settings" id="compressionSettings">
                 <div class="setting-group">
                     <label for="targetSize">Target Size (KB) *</label>
@@ -592,15 +579,12 @@
                 </div>
             </div>
 
-            <!-- Success Message -->
             <div class="success-message" id="successMessage">
                 ✅ Image compressed successfully! Click download to save.
             </div>
 
-            <!-- Warning Message -->
             <div class="warning-message" id="warningMessage"></div>
 
-            <!-- Buttons -->
             <div class="button-group">
                 <button class="compress-btn" id="compressBtn" disabled>
                     <i class="fas fa-compress"></i> Compress & Download
@@ -611,7 +595,6 @@
             </div>
         </div>
 
-        <!-- Ad Middle -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -622,7 +605,6 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- Description Section -->
         <div class="description-section">
             <h2>How to Use & Benefits</h2>
 
@@ -653,7 +635,6 @@
             <p>This tool intelligently adjusts compression quality to meet your target file size. Whether you need to compress a single image or optimize multiple images, Image Compressor handles everything instantly with zero complexity. Ideal for optimizing website images, reducing storage space, preparing images for social media, compressing email attachments, and much more.</p>
         </div>
 
-        <!-- Ad Middle 2 -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -664,7 +645,6 @@
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- FAQs Section -->
         <div class="faq-section">
             <h2>Frequently Asked Questions</h2>
 
@@ -729,7 +709,6 @@
             </div>
         </div>
 
-        <!-- Ad Bottom -->
         <div class="ad-container">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -741,13 +720,11 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2026 <a href="https://pooreyoutuber.github.io/">PooreYouTuber</a>. All Rights Reserved.</p>
         <p>Use of this tool is subject to our <a href="https://pooreyoutuber.github.io/disclaimer.html">terms of service</a>. Free forever, no login required, completely private.</p>
     </footer>
 
-    <!-- JavaScript -->
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -755,7 +732,6 @@
         const imagePreview = document.getElementById('imagePreview');
         const originalSizeEl = document.getElementById('originalSize');
         const compressedSizeEl = document.getElementById('compressedSize');
-        const compressionSettings = document.getElementById('compressionSettings');
         const targetSizeInput = document.getElementById('targetSize');
         const compressBtn = document.getElementById('compressBtn');
         const successMessage = document.getElementById('successMessage');
@@ -822,7 +798,6 @@
                 img.src = e.target.result;
 
                 previewSection.classList.add('show');
-                compressionSettings.classList.add('show');
                 uploadArea.style.opacity = '0.5';
                 compressedSizeEl.textContent = '0 KB';
                 progressBar.classList.remove('show');
@@ -1022,7 +997,6 @@
             loadedImage = null;
             fileInput.value = '';
             previewSection.classList.remove('show');
-            compressionSettings.classList.remove('show');
             successMessage.classList.remove('show');
             warningMessage.classList.remove('show');
             progressBar.classList.remove('show');
