@@ -3,7 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pooreyoutuber - All-in-One Financial Calculators</title>
+    <title>Pooreyoutuber - All-in-One Financial & Business Calculators</title>
+    <meta name="description" content="Free online financial and business calculators for ROI, Profit Margin, GST, Loan Payments, Break-even point, and more. Accurately calculate your business metrics instantly.">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZPMC525FGT');
+    </script>
+
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xz0usv8l2h");
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <!-- Google Funding Choices -->
+    <script async src="https://fundingchoicesmessages.google.com/i/pub-7020422718957281?ers=1"></script>
+
     <style>
         :root {
             --primary: #4f46e5;
@@ -14,6 +40,7 @@
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --accent: #22c55e;
+            --error-color: #ef4444;
         }
 
         * {
@@ -52,6 +79,22 @@
         }
 
         .brand span {
+            color: var(--text-color);
+        }
+
+        .currency-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .currency-selector select {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--card-bg);
             color: var(--text-color);
         }
 
@@ -130,14 +173,14 @@
             border-color: var(--primary);
         }
 
-        /* Modal / Active Tool View */
+        /* Active Tool View */
         .calculator-view {
             display: none;
             background-color: var(--card-bg);
             border-radius: 12px;
             border: 1px solid var(--border-color);
             padding: 2rem;
-            max-width: 600px;
+            max-width: 750px;
             margin: 0 auto;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
@@ -207,6 +250,11 @@
             display: none;
         }
 
+        .result-box.error {
+            border-left-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+
         .result-box h4 {
             margin-bottom: 0.5rem;
             color: var(--text-muted);
@@ -215,9 +263,41 @@
         }
 
         .result-box p {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Content Sections */
+        .page-content {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            line-height: 1.7;
+            color: var(--text-color);
+        }
+
+        .page-content h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .page-content h3 {
+            font-size: 1.2rem;
+            margin: 1.2rem 0 0.5rem 0;
+        }
+
+        .page-content p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .page-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
         }
 
         footer {
@@ -234,6 +314,15 @@
 
     <header>
         <a href="#" class="brand" onclick="showDashboard()">Poore<span>youtuber</span></a>
+        <div class="currency-selector">
+            <label for="currencySelect" style="font-size: 0.9rem; font-weight: 600;">Currency:</label>
+            <select id="currencySelect" onchange="updateCurrency()">
+                <option value="₹">INR (₹)</option>
+                <option value="$">USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+            </select>
+        </div>
     </header>
 
     <div class="container">
@@ -242,7 +331,7 @@
         <div id="dashboardView">
             <div class="dashboard-title">
                 <h1>Financial & Business Calculators</h1>
-                <p>Select a tool below to perform quick and accurate calculations.</p>
+                <p>Select a tool below to perform quick, error-free, and precise calculations.</p>
             </div>
 
             <div class="tool-grid">
@@ -334,6 +423,22 @@
                     <div class="btn-open">Open Calculator</div>
                 </div>
             </div>
+
+            <!-- Main Page Comprehensive Description -->
+            <div class="page-content">
+                <h2>Mastering Financial Calculations for Business Success</h2>
+                <p>Welcome to <strong>Pooreyoutuber’s All-in-One Financial Suite</strong>. Managing finances effectively is the backbone of any successful business, freelance venture, or content creation journey. Whether you are calculating the return on investment for a marketing campaign, estimating monthly loan payments, or configuring sales margins, accurate figures make all the difference.</p>
+                
+                <h3>Why Precise Calculators Matter</h3>
+                <p>In today's fast-paced digital economy, guessing numbers can lead to squeezed margins, unexpected tax bills, or underfunded projects. Our suite of financial tools eliminates guesswork by implementing validated mathematical algorithms to give you real-time answers instantly.</p>
+                
+                <h3>Key Features of Our Suite</h3>
+                <ul>
+                    <li><strong>Multi-Currency Support:</strong> Easily switch between global currencies like INR (₹), USD ($), EUR (€), and GBP (£) with a single click.</li>
+                    <li><strong>Edge-Case Validation:</strong> Handles unique scenarios like 0% loan interest, zero-cost entries, and invalid break-even inputs safely.</li>
+                    <li><strong>User-Centric Design:</strong> Responsive, fast-loading, and mobile-friendly interface designed for professionals on the go.</li>
+                </ul>
+            </div>
         </div>
 
         <!-- CALCULATOR CONTAINER -->
@@ -342,9 +447,12 @@
             <h2 id="calcTitle" style="margin-bottom: 1.5rem;">Calculator Title</h2>
             <div id="calcForm"></div>
             <div id="resultBox" class="result-box">
-                <h4>Result</h4>
+                <h4 id="resultHeader">Result</h4>
                 <div id="resultContent"></div>
             </div>
+
+            <!-- Dynamic Tool Description Container -->
+            <div class="page-content" id="toolDescription"></div>
         </div>
 
     </div>
@@ -354,160 +462,292 @@
     </footer>
 
     <script>
+        let curr = "₹";
+        let activeTool = "";
+
+        function updateCurrency() {
+            curr = document.getElementById('currencySelect').value;
+            if (activeTool) {
+                openTool(activeTool); // Refresh UI with updated currency symbols
+            }
+        }
+
         function showDashboard() {
+            activeTool = "";
             document.getElementById('dashboardView').style.display = 'block';
             document.getElementById('calculatorView').style.display = 'none';
             document.getElementById('resultBox').style.display = 'none';
         }
 
         function openTool(toolKey) {
+            activeTool = toolKey;
             document.getElementById('dashboardView').style.display = 'none';
             document.getElementById('calculatorView').style.display = 'block';
             document.getElementById('resultBox').style.display = 'none';
 
             const calcTitle = document.getElementById('calcTitle');
             const calcForm = document.getElementById('calcForm');
+            const toolDesc = document.getElementById('toolDescription');
 
             switch (toolKey) {
                 case 'profitMargin':
                     calcTitle.innerText = "Profit Margin Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Cost Price ($)</label><input type="number" id="cost" placeholder="e.g. 50"></div>
-                        <div class="form-group"><label>Selling Price ($)</label><input type="number" id="revenue" placeholder="e.g. 100"></div>
+                        <div class="form-group"><label>Cost Price (${curr})</label><input type="number" id="cost" placeholder="e.g. 50"></div>
+                        <div class="form-group"><label>Selling Price (${curr})</label><input type="number" id="revenue" placeholder="e.g. 100"></div>
                         <button class="calc-btn" onclick="calcProfitMargin()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Understanding Profit Margin</h2>
+                        <p>Profit margin measures how much out of every dollar or rupee in sales a company keeps in earnings. Expressed as a percentage, it indicates the percentage of sales that has turned into profits. There are two primary types of profit margin: gross margin and net margin.</p>
+                        <h3>Formula & How to Calculate</h3>
+                        <p>The gross profit margin formula is:</p>
+                        <p><strong>Margin (%) = [(Selling Price - Cost Price) / Selling Price] × 100</strong></p>
+                        <p>For example, if you produce an item for ${curr}50 and sell it for ${curr}100, your total profit is ${curr}50. Dividing ${curr}50 profit by ${curr}100 revenue gives a profit margin of 50%.</p>
+                        <h3>Why It Matters</h3>
+                        <p>Understanding profit margins helps business owners determine pricing strategies, assess product line viability, and manage overhead costs effectively.</p>
                     `;
                     break;
 
                 case 'markup':
                     calcTitle.innerText = "Markup Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Cost Price ($)</label><input type="number" id="mCost" placeholder="e.g. 40"></div>
+                        <div class="form-group"><label>Cost Price (${curr})</label><input type="number" id="mCost" placeholder="e.g. 40"></div>
                         <div class="form-group"><label>Markup Percentage (%)</label><input type="number" id="mPercent" placeholder="e.g. 25"></div>
                         <button class="calc-btn" onclick="calcMarkup()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Understanding Markup</h2>
+                        <p>Markup shows the percentage percentage added to the cost price of a product to determine its final selling price. While profit margin calculates earnings relative to revenue, markup calculates earnings relative to wholesale cost.</p>
+                        <h3>Formula & Example</h3>
+                        <p><strong>Selling Price = Cost Price + [Cost Price × (Markup / 100)]</strong></p>
+                        <p>If an article costs ${curr}40 and you apply a 25% markup, the markup amount is ${curr}10 (${curr}40 × 0.25). The resulting selling price will be ${curr}50.</p>
+                        <h3>Margin vs. Markup</h3>
+                        <p>A common mistake is treating markup and profit margin as identical figures. A 25% markup on cost results in a 20% profit margin on selling price.</p>
                     `;
                     break;
 
                 case 'gst':
                     calcTitle.innerText = "GST Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Amount ($)</label><input type="number" id="gstAmount" placeholder="e.g. 1000"></div>
+                        <div class="form-group"><label>Amount (${curr})</label><input type="number" id="gstAmount" placeholder="e.g. 1000"></div>
                         <div class="form-group"><label>GST Rate (%)</label><input type="number" id="gstRate" placeholder="e.g. 18"></div>
                         <div class="form-group">
-                            <label>Type</label>
-                            <select id="gstType"><option value="add">Exclusive (Add GST)</option><option value="sub">Inclusive (Remove GST)</option></select>
+                            <label>Calculation Type</label>
+                            <select id="gstType">
+                                <option value="add">GST Exclusive (Add GST)</option>
+                                <option value="sub">GST Inclusive (Remove GST)</option>
+                            </select>
                         </div>
                         <button class="calc-btn" onclick="calcGST()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Understanding Goods and Services Tax (GST)</h2>
+                        <p>GST is an indirect value-added tax levied on the supply of goods and services. Whether you are an entrepreneur billing clients or a buyer evaluating invoices, estimating tax amounts quickly is essential.</p>
+                        <h3>Exclusive vs. Inclusive Calculations</h3>
+                        <p><strong>GST Exclusive:</strong> Tax is added on top of the base product price. <br><em>Formula: GST = Amount × (Rate / 100)</em></p>
+                        <p><strong>GST Inclusive:</strong> The total price already includes tax. This option removes the tax component to show net value.<br><em>Formula: Base Amount = Price / (1 + Rate / 100)</em></p>
                     `;
                     break;
 
                 case 'discount':
                     calcTitle.innerText = "Discount Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Original Price ($)</label><input type="number" id="discPrice" placeholder="e.g. 80"></div>
-                        <div class="form-group"><label>Discount (%)</label><input type="number" id="discRate" placeholder="e.g. 20"></div>
+                        <div class="form-group"><label>Original Price (${curr})</label><input type="number" id="discPrice" placeholder="e.g. 80"></div>
+                        <div class="form-group"><label>Discount Percentage (%)</label><input type="number" id="discRate" placeholder="e.g. 20"></div>
                         <button class="calc-btn" onclick="calcDiscount()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>How Discount Calculation Works</h2>
+                        <p>Discount calculators allow buyers and sales teams to figure out savings and reduced prices during promotional periods, clearance sales, or deal negotiations.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Savings = Original Price × (Discount / 100)</strong><br>
+                        <strong>Final Price = Original Price - Savings</strong></p>
+                        <p>For example, a product priced at ${curr}80 with a 20% discount yields ${curr}16 in savings, resulting in a net cost of ${curr}64.</p>
                     `;
                     break;
 
                 case 'commission':
                     calcTitle.innerText = "Commission Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Total Sale Amount ($)</label><input type="number" id="commSale" placeholder="e.g. 5000"></div>
+                        <div class="form-group"><label>Total Sale Amount (${curr})</label><input type="number" id="commSale" placeholder="e.g. 5000"></div>
                         <div class="form-group"><label>Commission Rate (%)</label><input type="number" id="commRate" placeholder="e.g. 5"></div>
                         <button class="calc-btn" onclick="calcCommission()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Calculating Sales Commissions</h2>
+                        <p>Commission calculations are fundamental for sales professionals, affiliate marketers, and agency owners who earn performance-based compensation per closed deal.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Earned Commission = Total Sales × (Commission Rate / 100)</strong></p>
+                        <p>Closing a deal worth ${curr}5,000 at a 5% commission rate returns earnings of ${curr}250 instantly.</p>
                     `;
                     break;
 
                 case 'salary':
                     calcTitle.innerText = "Salary Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Gross Monthly Salary ($)</label><input type="number" id="salMonthly" placeholder="e.g. 4000"></div>
-                        <div class="form-group"><label>Deductions (%)</label><input type="number" id="salTax" placeholder="e.g. 10"></div>
+                        <div class="form-group"><label>Gross Monthly Salary (${curr})</label><input type="number" id="salMonthly" placeholder="e.g. 4000"></div>
+                        <div class="form-group"><label>Estimated Deductions/Tax (%)</label><input type="number" id="salTax" placeholder="e.g. 10"></div>
                         <button class="calc-btn" onclick="calcSalary()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Gross to Net Salary Estimation</h2>
+                        <p>Take-home pay often differs significantly from gross salary offers. Deductions such as payroll taxes, social security contributions, and healthcare plans reduce overall compensation.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Net Pay = Gross Monthly Salary × [1 - (Deduction Rate / 100)]</strong></p>
+                        <p>Use this tool to plan personal budgets accurately before accepting contract offers.</p>
                     `;
                     break;
 
                 case 'hourly':
                     calcTitle.innerText = "Hourly Rate Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Desired Annual Income ($)</label><input type="number" id="hrIncome" placeholder="e.g. 60000"></div>
+                        <div class="form-group"><label>Target Annual Income (${curr})</label><input type="number" id="hrIncome" placeholder="e.g. 60000"></div>
                         <div class="form-group"><label>Hours Worked Per Week</label><input type="number" id="hrHours" value="40"></div>
                         <div class="form-group"><label>Weeks Worked Per Year</label><input type="number" id="hrWeeks" value="52"></div>
                         <button class="calc-btn" onclick="calcHourly()">Calculate</button>
                     `;
+                    toolDesc.innerHTML = `
+                        <h2>Setting Your Professional Hourly Rate</h2>
+                        <p>Freelancers, consultants, and contractors often struggle with rate setting. This calculator reverse-engineers your hourly requirement based on targeted yearly income and billable working hours.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Hourly Rate = Desired Annual Income / (Weekly Hours × Annual Weeks)</strong></p>
+                        <p>Aiming for ${curr}60,000 yearly while working 40 hours per week for 52 weeks translates to a target rate of ${curr}28.85 per hour.</p>
+                    `;
                     break;
 
                 case 'roi':
-                    calcTitle.innerText = "ROI Calculator";
+                    calcTitle.innerText = "Return on Investment (ROI) Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Amount Invested ($)</label><input type="number" id="roiInv" placeholder="e.g. 1000"></div>
-                        <div class="form-group"><label>Amount Returned ($)</label><input type="number" id="roiRet" placeholder="e.g. 1500"></div>
+                        <div class="form-group"><label>Amount Invested (${curr})</label><input type="number" id="roiInv" placeholder="e.g. 1000"></div>
+                        <div class="form-group"><label>Amount Returned (${curr})</label><input type="number" id="roiRet" placeholder="e.g. 1500"></div>
                         <button class="calc-btn" onclick="calcROI()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Evaluating Investment Return</h2>
+                        <p>ROI evaluates the efficiency and profitability of an investment. It measures the amount of return relative to the initial cost invested.</p>
+                        <h3>Formula</h3>
+                        <p><strong>ROI (%) = [(Total Return - Initial Investment) / Initial Investment] × 100</strong></p>
+                        <p>An investment of ${curr}1,000 returning ${curr}1,500 generates a net return of ${curr}500, or a 50% ROI.</p>
                     `;
                     break;
 
                 case 'breakeven':
                     calcTitle.innerText = "Break-even Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Fixed Costs ($)</label><input type="number" id="beFixed" placeholder="e.g. 2000"></div>
-                        <div class="form-group"><label>Price Per Unit ($)</label><input type="number" id="bePrice" placeholder="e.g. 50"></div>
-                        <div class="form-group"><label>Variable Cost Per Unit ($)</label><input type="number" id="beVar" placeholder="e.g. 30"></div>
+                        <div class="form-group"><label>Total Fixed Costs (${curr})</label><input type="number" id="beFixed" placeholder="e.g. 2000"></div>
+                        <div class="form-group"><label>Selling Price Per Unit (${curr})</label><input type="number" id="bePrice" placeholder="e.g. 50"></div>
+                        <div class="form-group"><label>Variable Cost Per Unit (${curr})</label><input type="number" id="beVar" placeholder="e.g. 30"></div>
                         <button class="calc-btn" onclick="calcBreakeven()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Finding Your Break-even Point</h2>
+                        <p>The break-even point is the point at which total revenues equal total costs, resulting in zero profit and zero loss. It tells you how many units must be sold to cover overheads.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Break-even Units = Fixed Costs / (Price Per Unit - Variable Cost Per Unit)</strong></p>
+                        <p>If fixed expenses are ${curr}2,000 and net revenue per unit is ${curr}20 (${curr}50 price - ${curr}30 cost), you must sell 100 units to reach break-even.</p>
                     `;
                     break;
 
                 case 'loan':
                     calcTitle.innerText = "Loan Payment Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Loan Amount ($)</label><input type="number" id="lnAmount" placeholder="e.g. 10000"></div>
+                        <div class="form-group"><label>Loan Amount (${curr})</label><input type="number" id="lnAmount" placeholder="e.g. 10000"></div>
                         <div class="form-group"><label>Annual Interest Rate (%)</label><input type="number" id="lnRate" placeholder="e.g. 5"></div>
                         <div class="form-group"><label>Loan Term (Years)</label><input type="number" id="lnTerm" placeholder="e.g. 3"></div>
                         <button class="calc-btn" onclick="calcLoan()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Loan & Mortgages Amortization</h2>
+                        <p>Understanding monthly debt commitments helps prevent financial distress. Our loan calculator handles standard interest rates alongside interest-free 0% promotional loans effortlessly.</p>
+                        <h3>Formula</h3>
+                        <p>For standard loans with interest: <br><strong>PMT = [P × r × (1+r)^n] / [(1+r)^n - 1]</strong><br><em>Where P = Principal, r = Monthly Rate, n = Total Months.</em></p>
                     `;
                     break;
 
                 case 'invoiceTax':
                     calcTitle.innerText = "Invoice Tax Calculator";
                     calcForm.innerHTML = `
-                        <div class="form-group"><label>Subtotal ($)</label><input type="number" id="invSub" placeholder="e.g. 500"></div>
+                        <div class="form-group"><label>Subtotal Amount (${curr})</label><input type="number" id="invSub" placeholder="e.g. 500"></div>
                         <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="invTax" placeholder="e.g. 10"></div>
                         <button class="calc-btn" onclick="calcInvoiceTax()">Calculate</button>
+                    `;
+                    toolDesc.innerHTML = `
+                        <h2>Invoice Tax Breakdown</h2>
+                        <p>Adding appropriate local or sales tax to client billing ensures compliant accounting. This tool helps compute tax liability and total billing amounts cleanly.</p>
+                        <h3>Formula</h3>
+                        <p><strong>Tax Amount = Subtotal × (Tax Rate / 100)</strong><br>
+                        <strong>Total Amount = Subtotal + Tax Amount</strong></p>
                     `;
                     break;
             }
         }
 
-        function displayResult(htmlContent) {
+        function displayResult(htmlContent, isError = false) {
             const resBox = document.getElementById('resultBox');
+            const resHeader = document.getElementById('resultHeader');
             const resContent = document.getElementById('resultContent');
+
+            if (isError) {
+                resBox.classList.add('error');
+                resHeader.innerText = "Error";
+            } else {
+                resBox.classList.remove('error');
+                resHeader.innerText = "Result";
+            }
+
             resContent.innerHTML = htmlContent;
             resBox.style.display = 'block';
         }
 
-        /* Calculations Logic */
+        /* Validated Calculation Logics */
+
         function calcProfitMargin() {
             const cost = parseFloat(document.getElementById('cost').value);
             const revenue = parseFloat(document.getElementById('revenue').value);
-            if (!cost || !revenue) return;
+            
+            if (isNaN(cost) || isNaN(revenue)) {
+                return displayResult("Please enter valid numeric values for both fields.", true);
+            }
+            if (cost < 0 || revenue < 0) {
+                return displayResult("Price values cannot be negative.", true);
+            }
+            if (revenue === 0) {
+                return displayResult("Selling Price must be greater than zero to calculate margin.", true);
+            }
+
             const profit = revenue - cost;
             const margin = (profit / revenue) * 100;
-            displayResult(`Profit: $${profit.toFixed(2)}<br>Profit Margin: ${margin.toFixed(2)}%`);
+            displayResult(`Profit: ${curr}${profit.toFixed(2)}<br>Profit Margin: ${margin.toFixed(2)}%`);
         }
 
         function calcMarkup() {
             const cost = parseFloat(document.getElementById('mCost').value);
             const percent = parseFloat(document.getElementById('mPercent').value);
-            if (!cost || !percent) return;
+
+            if (isNaN(cost) || isNaN(percent)) {
+                return displayResult("Please enter valid numeric inputs.", true);
+            }
+            if (cost < 0 || percent < 0) {
+                return displayResult("Values cannot be negative.", true);
+            }
+
             const sellingPrice = cost + (cost * (percent / 100));
             const profit = sellingPrice - cost;
-            displayResult(`Selling Price: $${sellingPrice.toFixed(2)}<br>Profit: $${profit.toFixed(2)}`);
+            displayResult(`Selling Price: ${curr}${sellingPrice.toFixed(2)}<br>Profit: ${curr}${profit.toFixed(2)}`);
         }
 
         function calcGST() {
             const amount = parseFloat(document.getElementById('gstAmount').value);
             const rate = parseFloat(document.getElementById('gstRate').value);
             const type = document.getElementById('gstType').value;
-            if (!amount || !rate) return;
+
+            if (isNaN(amount) || isNaN(rate)) {
+                return displayResult("Please fill in all input fields.", true);
+            }
+            if (amount < 0 || rate < 0) {
+                return displayResult("Values cannot be negative.", true);
+            }
 
             let gstAmount, total;
             if (type === 'add') {
@@ -517,83 +757,153 @@
                 gstAmount = amount - (amount * (100 / (100 + rate)));
                 total = amount;
             }
-            displayResult(`GST Amount: $${gstAmount.toFixed(2)}<br>Total Amount: $${total.toFixed(2)}`);
+            displayResult(`GST Amount: ${curr}${gstAmount.toFixed(2)}<br>Total Amount: ${curr}${total.toFixed(2)}`);
         }
 
         function calcDiscount() {
             const price = parseFloat(document.getElementById('discPrice').value);
             const rate = parseFloat(document.getElementById('discRate').value);
-            if (!price || !rate) return;
+
+            if (isNaN(price) || isNaN(rate)) {
+                return displayResult("Please enter valid figures.", true);
+            }
+            if (price < 0 || rate < 0) {
+                return displayResult("Inputs cannot be negative.", true);
+            }
+            if (rate > 100) {
+                return displayResult("Discount percentage cannot exceed 100%.", true);
+            }
+
             const savings = price * (rate / 100);
             const finalPrice = price - savings;
-            displayResult(`Final Price: $${finalPrice.toFixed(2)}<br>You Save: $${savings.toFixed(2)}`);
+            displayResult(`Final Price: ${curr}${finalPrice.toFixed(2)}<br>You Save: ${curr}${savings.toFixed(2)}`);
         }
 
         function calcCommission() {
             const sale = parseFloat(document.getElementById('commSale').value);
             const rate = parseFloat(document.getElementById('commRate').value);
-            if (!sale || !rate) return;
+
+            if (isNaN(sale) || isNaN(rate)) {
+                return displayResult("Please fill in both fields.", true);
+            }
+            if (sale < 0 || rate < 0) {
+                return displayResult("Values cannot be negative.", true);
+            }
+
             const comm = sale * (rate / 100);
-            displayResult(`Commission Earned: $${comm.toFixed(2)}`);
+            displayResult(`Commission Earned: ${curr}${comm.toFixed(2)}`);
         }
 
         function calcSalary() {
             const monthly = parseFloat(document.getElementById('salMonthly').value);
             const tax = parseFloat(document.getElementById('salTax').value) || 0;
-            if (!monthly) return;
+
+            if (isNaN(monthly) || monthly <= 0) {
+                return displayResult("Please enter a valid monthly salary.", true);
+            }
+            if (tax < 0 || tax > 100) {
+                return displayResult("Deduction percentage must be between 0% and 100%.", true);
+            }
+
             const netMonthly = monthly - (monthly * (tax / 100));
             const netAnnual = netMonthly * 12;
-            displayResult(`Net Monthly Salary: $${netMonthly.toFixed(2)}<br>Net Annual Salary: $${netAnnual.toFixed(2)}`);
+            displayResult(`Net Monthly Salary: ${curr}${netMonthly.toFixed(2)}<br>Net Annual Salary: ${curr}${netAnnual.toFixed(2)}`);
         }
 
         function calcHourly() {
             const income = parseFloat(document.getElementById('hrIncome').value);
             const hours = parseFloat(document.getElementById('hrHours').value);
             const weeks = parseFloat(document.getElementById('hrWeeks').value);
-            if (!income || !hours || !weeks) return;
+
+            if (isNaN(income) || isNaN(hours) || isNaN(weeks)) {
+                return displayResult("Please fill in all parameters.", true);
+            }
+            if (income <= 0 || hours <= 0 || weeks <= 0) {
+                return displayResult("Inputs must be positive non-zero numbers.", true);
+            }
+
             const rate = income / (hours * weeks);
-            displayResult(`Required Hourly Rate: $${rate.toFixed(2)} / hr`);
+            displayResult(`Required Hourly Rate: ${curr}${rate.toFixed(2)} / hr`);
         }
 
         function calcROI() {
             const inv = parseFloat(document.getElementById('roiInv').value);
             const ret = parseFloat(document.getElementById('roiRet').value);
-            if (!inv || !ret) return;
+
+            if (isNaN(inv) || isNaN(ret)) {
+                return displayResult("Please enter valid numerical amounts.", true);
+            }
+            if (inv <= 0) {
+                return displayResult("Initial investment must be greater than zero.", true);
+            }
+
             const gain = ret - inv;
             const roi = (gain / inv) * 100;
-            displayResult(`Total Gain: $${gain.toFixed(2)}<br>ROI: ${roi.toFixed(2)}%`);
+            displayResult(`Total Gain/Loss: ${curr}${gain.toFixed(2)}<br>ROI: ${roi.toFixed(2)}%`);
         }
 
         function calcBreakeven() {
             const fixed = parseFloat(document.getElementById('beFixed').value);
             const price = parseFloat(document.getElementById('bePrice').value);
             const variable = parseFloat(document.getElementById('beVar').value);
-            if (!fixed || !price || !variable || price <= variable) return;
+
+            if (isNaN(fixed) || isNaN(price) || isNaN(variable)) {
+                return displayResult("Please enter all required costs and price.", true);
+            }
+            if (fixed < 0 || price < 0 || variable < 0) {
+                return displayResult("Cost and price values cannot be negative.", true);
+            }
+            if (price <= variable) {
+                return displayResult("Selling price per unit must be greater than variable cost per unit.", true);
+            }
+
             const units = fixed / (price - variable);
             displayResult(`Break-even Quantity: ${Math.ceil(units)} units`);
         }
 
+        /* LOAN CALCULATOR WITH FIXED 0% INTEREST BUG */
         function calcLoan() {
             const principal = parseFloat(document.getElementById('lnAmount').value);
             const annualRate = parseFloat(document.getElementById('lnRate').value);
             const years = parseFloat(document.getElementById('lnTerm').value);
-            if (!principal || !annualRate || !years) return;
 
-            const monthlyRate = (annualRate / 100) / 12;
+            if (isNaN(principal) || isNaN(annualRate) || isNaN(years)) {
+                return displayResult("Please fill in all loan fields.", true);
+            }
+            if (principal <= 0 || years <= 0 || annualRate < 0) {
+                return displayResult("Loan amount and term must be greater than zero.", true);
+            }
+
             const totalPayments = years * 12;
-            const monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
-            const totalCost = monthlyPayment * totalPayments;
+            let monthlyPayment;
 
-            displayResult(`Monthly Payment: $${monthlyPayment.toFixed(2)}<br>Total Payment: $${totalCost.toFixed(2)}`);
+            // Handle 0% interest rate explicitly to prevent NaN
+            if (annualRate === 0) {
+                monthlyPayment = principal / totalPayments;
+            } else {
+                const monthlyRate = (annualRate / 100) / 12;
+                monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
+                                 (Math.pow(1 + monthlyRate, totalPayments) - 1);
+            }
+
+            const totalCost = monthlyPayment * totalPayments;
+            displayResult(`Monthly Payment: ${curr}${monthlyPayment.toFixed(2)}<br>Total Payment: ${curr}${totalCost.toFixed(2)}`);
         }
 
         function calcInvoiceTax() {
             const sub = parseFloat(document.getElementById('invSub').value);
             const tax = parseFloat(document.getElementById('invTax').value);
-            if (!sub || !tax) return;
+
+            if (isNaN(sub) || isNaN(tax)) {
+                return displayResult("Please enter subtotal and tax percentage.", true);
+            }
+            if (sub < 0 || tax < 0) {
+                return displayResult("Values cannot be negative.", true);
+            }
+
             const taxAmt = sub * (tax / 100);
             const total = sub + taxAmt;
-            displayResult(`Tax Amount: $${taxAmt.toFixed(2)}<br>Total Invoice Amount: $${total.toFixed(2)}`);
+            displayResult(`Tax Amount: ${curr}${taxAmt.toFixed(2)}<br>Total Invoice Amount: ${curr}${total.toFixed(2)}`);
         }
     </script>
 </body>
