@@ -12,30 +12,24 @@
     <meta name="author" content="PooreYoutuber">
     <meta name="robots" content="index, follow">
 
-    <!-- Canonical Tag -->
     <link rel="canonical" href="https://pooreyoutuber.github.io/pdf-compress.html">
 
-    <!-- Open Graph Metadata -->
     <meta property="og:title" content="PDF & Image Compressor Online – Compress Files to KB or MB">
     <meta property="og:description" content="Compress PDF, JPG, PNG, and WEBP files online to a target size in KB or MB cleanly inside your browser.">
     <meta property="og:url" content="https://pooreyoutuber.github.io/pdf-compress.html">
     <meta property="og:type" content="website">
 
-    <!-- Twitter Card Metadata -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="PDF & Image Compressor Online">
     <meta name="twitter:description" content="Free browser-based tool to compress PDF documents and images to your target size.">
 
-    <!-- Font Preconnects -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- PDF.js & pdf-lib Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -45,7 +39,6 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
-    <!-- Schema Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -199,9 +192,9 @@
         .file-info p { margin-bottom: 3px; }
         .file-info strong { color: var(--text); }
 
-        /* Controls */
+        /* Controls: Always Visible Now */
         .controls {
-            display: none;
+            display: grid;
             margin-top: 18px;
             align-items: flex-end;
             gap: 12px;
@@ -274,7 +267,7 @@
         }
         .btn-dl:hover { opacity: .88; }
 
-        /* SEO Article Styling Fix */
+        /* SEO Editorial Article Styling Fix */
         .seo-content { 
             background: var(--card); 
             border-radius: 16px; 
@@ -338,8 +331,7 @@
 <body>
 <div class="container">
 
-     <!-- Top Navigation: Left (Brand Logo), Right (Home Button) -->
-    <nav class="top-navbar">
+     <nav class="top-navbar">
         <span class="brand-logo">PooreYoutuber</span>
         <a href="https://pooreyoutuber.github.io/" class="home-btn">
             🏠 Home
@@ -354,7 +346,6 @@
 
     <main>
         <div class="card">
-            <!-- Upload Drop Zone -->
             <div class="drop-zone" id="dropZone" onclick="fileInput.click()">
                 <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -366,14 +357,12 @@
                 <input type="file" id="fileInput" accept="image/*,application/pdf">
             </div>
 
-            <!-- File Info -->
             <div class="file-info" id="fileInfo">
                 <p><strong>Name:</strong> <span id="fileName"></span></p>
                 <p><strong>Type:</strong> <span id="fileType"></span></p>
                 <p><strong>Current Size:</strong> <span id="currentSize" style="color:var(--red);font-weight:600;"></span></p>
             </div>
 
-            <!-- Controls -->
             <div class="controls" id="controlBox">
                 <div>
                     <label class="ctrl-label" for="targetSize">Target Size:</label>
@@ -388,7 +377,6 @@
                 <button class="btn-primary" id="compressBtn">Compress File</button>
             </div>
 
-            <!-- Progress -->
             <div class="progress-wrap" id="progressWrap">
                 <div class="progress-text" id="progressText">Processing…</div>
                 <div class="progress-track">
@@ -396,7 +384,6 @@
                 </div>
             </div>
 
-            <!-- Result -->
             <div class="result-box" id="resultBox">
                 <h3 id="resultTitle"></h3>
                 <div class="size-row">
@@ -408,7 +395,6 @@
             </div>
         </div>
 
-        <!-- SEO Editorial Article -->
         <article class="seo-content">
             <h2>How to Compress a PDF or Image</h2>
             <p>Handling large file sizes can be difficult when submitting official applications, uploading documents to web portals, or optimizing media assets for websites. Our browser-based File Compressor helps adjust document and image sizes toward your required target in KB or MB.</p>
@@ -439,7 +425,6 @@
             <p>Reducing file dimensions helps improve webpage rendering times and lower bandwidth usage for web managers and content publishers.</p>
         </article>
 
-        <!-- Visible FAQ Section matching Structured Data -->
         <section class="faq-container">
             <h2>Frequently Asked Questions</h2>
             <div class="faq-item">
@@ -456,7 +441,6 @@
             </div>
         </section>
 
-        <!-- Relevant Internal Links Grid -->
         <section class="internal-tools">
             <h3>Explore Related Media Tools</h3>
             <div class="tools-grid">
@@ -544,13 +528,17 @@ function handleFile(file) {
     fileType.textContent    = file.type || 'Unknown';
     currentSize.textContent = fmt(file.size);
     fileInfo.style.display  = 'block';
-    controlBox.style.display= 'grid';
     resultBox.style.display = 'none';
     progressWrap.style.display = 'none';
 }
 
 // Compression Trigger
 compressBtn.addEventListener('click', async () => {
+    if (!selectedFile) {
+        alert('Please select a PDF or Image file first.');
+        return;
+    }
+
     const val  = parseFloat(document.getElementById('targetSize').value);
     const unit = document.getElementById('sizeUnit').value;
     if (!val || val <= 0) { alert('Please enter a valid target size.'); return; }
