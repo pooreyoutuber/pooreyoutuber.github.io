@@ -137,6 +137,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
         }
 
         .tool-card:hover {
@@ -196,6 +198,7 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             font-size: 1rem;
+            text-decoration: none;
         }
 
         .form-group {
@@ -313,7 +316,7 @@
 <body>
 
     <header>
-        <a href="#" class="brand" onclick="showDashboard()">Poore<span>youtuber</span></a>
+        <a href="/" class="brand" onclick="showDashboard(event)">Poore<span>youtuber</span></a>
         <div class="currency-selector">
             <label for="currencySelect" style="font-size: 0.9rem; font-weight: 600;">Currency:</label>
             <select id="currencySelect" onchange="updateCurrency()">
@@ -335,93 +338,93 @@
             </div>
 
             <div class="tool-grid">
-                <div class="tool-card" onclick="openTool('profitMargin')">
+                <a href="/profit-margin-calculator" class="tool-card" onclick="openTool('profitMargin', event)">
                     <div>
                         <h3>Profit Margin Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('markup')">
+                <a href="/markup-calculator" class="tool-card" onclick="openTool('markup', event)">
                     <div>
                         <h3>Markup Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('gst')">
+                <a href="/gst-calculator" class="tool-card" onclick="openTool('gst', event)">
                     <div>
                         <h3>GST Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('discount')">
+                <a href="/discount-calculator" class="tool-card" onclick="openTool('discount', event)">
                     <div>
                         <h3>Discount Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('commission')">
+                <a href="/commission-calculator" class="tool-card" onclick="openTool('commission', event)">
                     <div>
                         <h3>Commission Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('salary')">
+                <a href="/salary-calculator" class="tool-card" onclick="openTool('salary', event)">
                     <div>
-                        <h3>Salary Calculator</h3>
+                        <h3>Gross to Net Salary Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('hourly')">
+                <a href="/hourly-rate-calculator" class="tool-card" onclick="openTool('hourly', event)">
                     <div>
                         <h3>Hourly Rate Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('roi')">
+                <a href="/roi-calculator" class="tool-card" onclick="openTool('roi', event)">
                     <div>
                         <h3>ROI Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('breakeven')">
+                <a href="/break-even-calculator" class="tool-card" onclick="openTool('breakeven', event)">
                     <div>
                         <h3>Break-even Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('loan')">
+                <a href="/loan-payment-calculator" class="tool-card" onclick="openTool('loan', event)">
                     <div>
                         <h3>Loan Payment Calculator</h3>
                         <div class="rating">★★★★★</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
 
-                <div class="tool-card" onclick="openTool('invoiceTax')">
+                <a href="/invoice-tax-calculator" class="tool-card" onclick="openTool('invoiceTax', event)">
                     <div>
                         <h3>Invoice Tax Calculator</h3>
                         <div class="rating">★★★★☆</div>
                     </div>
                     <div class="btn-open">Open Calculator</div>
-                </div>
+                </a>
             </div>
 
             <!-- Main Page Comprehensive Description -->
@@ -434,7 +437,7 @@
                 
                 <h3>Key Features of Our Suite</h3>
                 <ul>
-                    <li><strong>Multi-Currency Support:</strong> Easily switch between global currencies like INR (₹), USD ($), EUR (€), and GBP (£) with a single click.</li>
+                    <li><strong>Multiple Currency Display:</strong> Switch between INR, USD, EUR and GBP.</li>
                     <li><strong>Edge-Case Validation:</strong> Handles unique scenarios like 0% loan interest, zero-cost entries, and invalid break-even inputs safely.</li>
                     <li><strong>User-Centric Design:</strong> Responsive, fast-loading, and mobile-friendly interface designed for professionals on the go.</li>
                 </ul>
@@ -443,7 +446,7 @@
 
         <!-- CALCULATOR CONTAINER -->
         <div id="calculatorView" class="calculator-view">
-            <button class="back-btn" onclick="showDashboard()">← Back to Dashboard</button>
+            <a href="/" class="back-btn" onclick="showDashboard(event)">← Back to Dashboard</a>
             <h2 id="calcTitle" style="margin-bottom: 1.5rem;">Calculator Title</h2>
             <div id="calcForm"></div>
             <div id="resultBox" class="result-box">
@@ -465,22 +468,44 @@
         let curr = "₹";
         let activeTool = "";
 
+        const routes = {
+            'profitMargin': '/profit-margin-calculator',
+            'markup': '/markup-calculator',
+            'gst': '/gst-calculator',
+            'discount': '/discount-calculator',
+            'commission': '/commission-calculator',
+            'salary': '/salary-calculator',
+            'hourly': '/hourly-rate-calculator',
+            'roi': '/roi-calculator',
+            'breakeven': '/break-even-calculator',
+            'loan': '/loan-payment-calculator',
+            'invoiceTax': '/invoice-tax-calculator'
+        };
+
         function updateCurrency() {
             curr = document.getElementById('currencySelect').value;
             if (activeTool) {
-                openTool(activeTool); // Refresh UI with updated currency symbols
+                openTool(activeTool, null, false);
             }
         }
 
-        function showDashboard() {
+        function showDashboard(e) {
+            if (e) e.preventDefault();
             activeTool = "";
+            window.history.pushState({}, "", "/");
             document.getElementById('dashboardView').style.display = 'block';
             document.getElementById('calculatorView').style.display = 'none';
             document.getElementById('resultBox').style.display = 'none';
         }
 
-        function openTool(toolKey) {
+        function openTool(toolKey, e, pushState = true) {
+            if (e) e.preventDefault();
             activeTool = toolKey;
+
+            if (pushState && routes[toolKey]) {
+                window.history.pushState({}, "", routes[toolKey]);
+            }
+
             document.getElementById('dashboardView').style.display = 'none';
             document.getElementById('calculatorView').style.display = 'block';
             document.getElementById('resultBox').style.display = 'none';
@@ -499,7 +524,7 @@
                     `;
                     toolDesc.innerHTML = `
                         <h2>Understanding Profit Margin</h2>
-                        <p>Profit margin measures how much out of every dollar or rupee in sales a company keeps in earnings. Expressed as a percentage, it indicates the percentage of sales that has turned into profits. There are two primary types of profit margin: gross margin and net margin.</p>
+                        <p>Profit margin measures how much out of every dollar or rupee of sales a company keeps in earnings. Expressed as a percentage, it indicates the percentage of sales that has turned into profits. There are two primary types of profit margin: gross margin and net margin.</p>
                         <h3>Formula & How to Calculate</h3>
                         <p>The gross profit margin formula is:</p>
                         <p><strong>Margin (%) = [(Selling Price - Cost Price) / Selling Price] × 100</strong></p>
@@ -518,7 +543,7 @@
                     `;
                     toolDesc.innerHTML = `
                         <h2>Understanding Markup</h2>
-                        <p>Markup shows the percentage percentage added to the cost price of a product to determine its final selling price. While profit margin calculates earnings relative to revenue, markup calculates earnings relative to wholesale cost.</p>
+                        <p>Markup shows the percentage added to the cost price of a product to determine its final selling price. While profit margin calculates earnings relative to revenue, markup calculates earnings relative to wholesale cost.</p>
                         <h3>Formula & Example</h3>
                         <p><strong>Selling Price = Cost Price + [Cost Price × (Markup / 100)]</strong></p>
                         <p>If an article costs ${curr}40 and you apply a 25% markup, the markup amount is ${curr}10 (${curr}40 × 0.25). The resulting selling price will be ${curr}50.</p>
@@ -584,7 +609,7 @@
                     break;
 
                 case 'salary':
-                    calcTitle.innerText = "Salary Calculator";
+                    calcTitle.innerText = "Gross to Net Salary Calculator";
                     calcForm.innerHTML = `
                         <div class="form-group"><label>Gross Monthly Salary (${curr})</label><input type="number" id="salMonthly" placeholder="e.g. 4000"></div>
                         <div class="form-group"><label>Estimated Deductions/Tax (%)</label><input type="number" id="salTax" placeholder="e.g. 10"></div>
@@ -658,7 +683,7 @@
                         <button class="calc-btn" onclick="calcLoan()">Calculate</button>
                     `;
                     toolDesc.innerHTML = `
-                        <h2>Loan & Mortgages Amortization</h2>
+                        <h2>Loan Payment & Amortization</h2>
                         <p>Understanding monthly debt commitments helps prevent financial distress. Our loan calculator handles standard interest rates alongside interest-free 0% promotional loans effortlessly.</p>
                         <h3>Formula</h3>
                         <p>For standard loans with interest: <br><strong>PMT = [P × r × (1+r)^n] / [(1+r)^n - 1]</strong><br><em>Where P = Principal, r = Monthly Rate, n = Total Months.</em></p>
@@ -682,6 +707,21 @@
                     break;
             }
         }
+
+        // Handle URL Routing on Page Load & Back/Forward Navigation
+        function handleRouting() {
+            const path = window.location.pathname;
+            const toolKey = Object.keys(routes).find(key => routes[key] === path);
+
+            if (toolKey) {
+                openTool(toolKey, null, false);
+            } else {
+                showDashboard();
+            }
+        }
+
+        window.onpopstate = handleRouting;
+        window.onload = handleRouting;
 
         function displayResult(htmlContent, isError = false) {
             const resBox = document.getElementById('resultBox');
@@ -861,7 +901,6 @@
             displayResult(`Break-even Quantity: ${Math.ceil(units)} units`);
         }
 
-        /* LOAN CALCULATOR WITH FIXED 0% INTEREST BUG */
         function calcLoan() {
             const principal = parseFloat(document.getElementById('lnAmount').value);
             const annualRate = parseFloat(document.getElementById('lnRate').value);
@@ -871,13 +910,12 @@
                 return displayResult("Please fill in all loan fields.", true);
             }
             if (principal <= 0 || years <= 0 || annualRate < 0) {
-                return displayResult("Loan amount and term must be greater than zero.", true);
+                return displayResult("Loan amount and term must be greater than zero, and interest rate cannot be negative.", true);
             }
 
             const totalPayments = years * 12;
             let monthlyPayment;
 
-            // Handle 0% interest rate explicitly to prevent NaN
             if (annualRate === 0) {
                 monthlyPayment = principal / totalPayments;
             } else {
