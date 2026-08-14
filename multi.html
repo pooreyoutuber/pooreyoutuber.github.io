@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pooreyoutuber - Digital Marketing & Technical SEO Suite</title>
-    <meta name="description" content="Free online technical SEO & digital marketing tools. Generate Meta Tags, Schema Markup, Robots.txt, Sitemaps, UTM links, Open Graph tags, QR Codes, and preview SERP listings instantly.">
-
+    <title>Pooreyoutuber - All-in-One Creator Stream Dashboard</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
+            --bg-main: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
             --accent: #22c55e;
-            --error-color: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
         }
 
         * {
@@ -27,1008 +25,483 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg-main);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
+        /* Top Bar */
         header {
             background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding: 0.8rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .brand {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary);
             text-decoration: none;
+        }
+
+        .brand span { color: var(--text-main); }
+
+        .top-stats {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .stat-badge {
+            background: rgba(255,255,255,0.05);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .brand span {
-            color: var(--text-color);
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            width: 100%;
-            flex: 1;
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        .dashboard-title {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .dashboard-title h1 {
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .dashboard-title p {
-            color: var(--text-muted);
-        }
-
-        /* Tool Grid */
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .tool-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary);
-        }
-
-        .tool-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .rating {
-            color: #f59e0b;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .btn-open {
-            background-color: var(--bg-color);
-            color: var(--primary);
-            border: 1px solid var(--border-color);
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
             padding: 0.5rem 1rem;
             border-radius: 6px;
+            cursor: pointer;
             font-weight: 600;
-            text-align: center;
             transition: all 0.2s;
         }
 
-        .tool-card:hover .btn-open {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
 
-        /* Active Tool View */
-        .calculator-view {
-            display: none;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            max-width: 850px;
+        /* Main Studio Layout Grid */
+        .studio-grid {
+            display: grid;
+            grid-template-columns: 2.2fr 1.2fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            flex: 1;
+            max-width: 1600px;
             margin: 0 auto;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-            text-decoration: none;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .panel-title {
             font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Teleprompter */
+        .prompter-box {
+            height: 250px;
+            overflow-y: auto;
+            background: #090d16;
+            border-radius: 6px;
+            padding: 1rem;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #f1f5f9;
+            scroll-behavior: smooth;
+        }
+
+        /* Chat Container */
+        .chat-box {
+            height: 380px;
+            overflow-y: auto;
+            background: #090d16;
+            border-radius: 6px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .chat-msg {
+            background: rgba(255,255,255,0.03);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        .chat-user {
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 0.4rem;
+        }
+
+        /* Goals Bar */
+        .progress-bar-bg {
+            background: #090d16;
+            border-radius: 8px;
+            height: 20px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* Input Controls */
+        input[type="text"], input[type="number"], textarea {
+            background: #090d16;
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 6px;
             outline: none;
-            transition: border-color 0.2s;
+            width: 100%;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        input:focus, textarea:focus {
             border-color: var(--primary);
         }
 
-        .calc-btn {
-            width: 100%;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 1rem;
-            transition: background-color 0.2s;
+        textarea { resize: vertical; }
+
+        .flex-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
 
-        .calc-btn:hover {
-            background-color: var(--primary-hover);
+        .link-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
         }
 
-        .result-box {
-            margin-top: 1.5rem;
-            padding: 1.2rem;
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
-            display: none;
-        }
-
-        .result-box.error {
-            border-left-color: var(--error-color);
-            background-color: #fef2f2;
-        }
-
-        .result-box h4 {
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .code-output {
-            background: #0f172a;
-            color: #f8fafc;
-            padding: 1rem;
-            border-radius: 6px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .preview-card {
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: 8px;
-            background: #ffffff;
-            margin-top: 0.5rem;
-        }
-
-        /* SERP Specific Styles */
-        .serp-title {
-            color: #1a0dab;
-            font-size: 18px;
+        .link-list a {
+            color: #38bdf8;
             text-decoration: none;
-            cursor: pointer;
-        }
-        .serp-url {
-            color: #202124;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-        .serp-desc {
-            color: #4d5156;
-            font-size: 14px;
-            line-height: 1.58;
-        }
-
-        /* Content Sections */
-        .page-content {
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            line-height: 1.7;
-            color: var(--text-color);
-        }
-
-        .page-content h2 {
-            font-size: 1.6rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .page-content h3 {
-            font-size: 1.2rem;
-            margin: 1.2rem 0 0.5rem 0;
-        }
-
-        .page-content p {
-            margin-bottom: 1rem;
-            color: var(--text-muted);
-        }
-
-        .page-content ul {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-muted);
-        }
-
-        footer {
-            text-align: center;
-            padding: 1.5rem;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-muted);
             font-size: 0.9rem;
-            margin-top: auto;
+        }
+
+        .link-list a:hover { text-decoration: underline; }
+
+        /* Responsive Breakpoint */
+        @media (max-width: 1100px) {
+            .studio-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- TOP HEADER -->
     <header>
-        <a href="/" class="brand" onclick="showDashboard(event)">Poore<span>youtuber</span></a>
+        <a href="#" class="brand">Stream<span>Studio</span></a>
+        <div class="top-stats">
+            <div class="stat-badge">
+                <span class="live-dot"></span>
+                <strong>LIVE VIEWERS:</strong> <span id="viewerCount">0</span>
+            </div>
+            <div class="stat-badge">
+                <strong>STREAM TIMER:</strong> <span id="streamTimer">00:00:00</span>
+            </div>
+            <button id="toggleStreamBtn" class="btn" onclick="toggleStream()">Start Stream</button>
+        </div>
     </header>
 
-    <div class="container">
-        
-        <!-- DASHBOARD VIEW -->
-        <div id="dashboardView">
-            <div class="dashboard-title">
-                <h1>Digital Marketing & Technical SEO Suite</h1>
-                <p>Powerful, free tools to optimize search performance, build markup, and streamline online campaigns.</p>
+    <!-- DASHBOARD VIEWPORT -->
+    <div class="studio-grid">
+
+        <!-- COLUMN 1: TELEPROMPTER & NOTES -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Teleprompter Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>📜 Teleprompter / Script</span>
+                    <div class="flex-row">
+                        <button class="btn btn-sm" onclick="togglePrompter()">Play/Pause</button>
+                        <button class="btn btn-sm" onclick="resetPrompter()">Reset</button>
+                    </div>
+                </div>
+                <div class="prompter-box" id="prompterBox">
+                    Welcome to today's stream! Today we are discussing exciting tech updates, playing community matches, and giving away special rewards to viewers. Stay tuned and don't forget to like and subscribe!
+                </div>
+                <div class="flex-row">
+                    <label style="font-size:0.8rem; color:var(--text-muted);">Script Text:</label>
+                    <textarea id="scriptInput" rows="2" placeholder="Paste script text here..." oninput="updateScript()"></textarea>
+                </div>
             </div>
 
-            <div class="tool-grid">
-                <a href="/utm-builder" class="tool-card" onclick="openTool('utmBuilder', event)">
-                    <div>
-                        <h3>UTM Builder</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/meta-tag-generator" class="tool-card" onclick="openTool('metaTagGen', event)">
-                    <div>
-                        <h3>Meta Tag Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/serp-preview" class="tool-card" onclick="openTool('serpPreview', event)">
-                    <div>
-                        <h3>SERP Preview</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/open-graph-preview" class="tool-card" onclick="openTool('ogPreview', event)">
-                    <div>
-                        <h3>Open Graph Preview</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/twitter-card-preview" class="tool-card" onclick="openTool('twitterPreview', event)">
-                    <div>
-                        <h3>Twitter/X Card Preview</h3>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/robots-txt-generator" class="tool-card" onclick="openTool('robotsGen', event)">
-                    <div>
-                        <h3>Robots.txt Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/sitemap-generator" class="tool-card" onclick="openTool('sitemapGen', event)">
-                    <div>
-                        <h3>XML Sitemap Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/schema-generator" class="tool-card" onclick="openTool('schemaGen', event)">
-                    <div>
-                        <h3>Schema Generator (JSON-LD)</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/htaccess-redirect-generator" class="tool-card" onclick="openTool('htaccessGen', event)">
-                    <div>
-                        <h3>.htaccess Redirect Generator</h3>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/qr-code-generator" class="tool-card" onclick="openTool('qrGen', event)">
-                    <div>
-                        <h3>QR Code Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/favicon-generator" class="tool-card" onclick="openTool('faviconGen', event)">
-                    <div>
-                        <h3>Favicon HTML Generator</h3>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/url-slug-generator" class="tool-card" onclick="openTool('slugGen', event)">
-                    <div>
-                        <h3>URL Slug Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/keyword-grouping-tool" class="tool-card" onclick="openTool('keywordGroup', event)">
-                    <div>
-                        <h3>Keyword Grouping Tool</h3>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
-
-                <a href="/canonical-url-generator" class="tool-card" onclick="openTool('canonicalGen', event)">
-                    <div>
-                        <h3>Canonical URL Generator</h3>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                    <div class="btn-open">Open Tool</div>
-                </a>
+            <!-- Notes Panel -->
+            <div class="panel" style="flex:1;">
+                <div class="panel-title">📝 Quick Notes / Talking Points</div>
+                <textarea id="streamNotes" style="flex:1; min-height:120px;" placeholder="- Intro (5 mins)&#10;- Topic 1: Product Review&#10;- Viewer Q&A session&#10;- Giveaway Announcement"></textarea>
             </div>
 
-            <!-- Main Page Comprehensive Description -->
-            <div class="page-content">
-                <h2>Mastering Search Engine Optimization & Campaign Tracking</h2>
-                <p>Welcome to <strong>Pooreyoutuber’s Digital Marketing & Technical SEO Suite</strong>. Driving organic traffic and measuring digital marketing ROI requires precise code implementation, clean structured data, and flawless tracking parameters.</p>
-                
-                <h3>Why Use Technical SEO Tools?</h3>
-                <p>Search engines like Google reliance heavily on structured metadata, clean URL structures, precise crawl instructions, and valid JSON-LD schema. Our tools help webmasters and digital marketers avoid manual syntax mistakes, build compliant SEO markup, and preview social media shares in real-time.</p>
-
-                <h3>Key Benefits</h3>
-                <ul>
-                    <li><strong>Error-Free Code Output:</strong> Instant generation of standard-compliant HTML, JSON-LD, XML, and Apache .htaccess directives.</li>
-                    <li><strong>Real-Time Visual Previews:</strong> Inspect your Google SERP listings, Facebook Open Graph, and Twitter/X Cards before publishing.</li>
-                    <li><strong>Clean Campaign Attribution:</strong> Build standardized UTM parameters to analyze traffic accurately in Google Analytics 4 (GA4).</li>
-                    <li><strong>Fast & Private:</strong> Runs 100% in your client-side browser—no server storage or tracking of your sensitive site data.</li>
-                </ul>
-            </div>
         </div>
 
-        <!-- CALCULATOR CONTAINER -->
-        <div id="calculatorView" class="calculator-view">
-            <a href="/" class="back-btn" onclick="showDashboard(event)">← Back to Dashboard</a>
-            <h2 id="calcTitle" style="margin-bottom: 1.5rem;">Tool Title</h2>
-            <div id="calcForm"></div>
-            <div id="resultBox" class="result-box">
-                <h4 id="resultHeader">Result / Code Preview</h4>
-                <div id="resultContent"></div>
+        <!-- COLUMN 2: CHAT BOX & GIVEAWAY -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Chat Box Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>💬 Stream Chat Simulation</span>
+                    <button class="btn btn-sm btn-danger" onclick="clearChat()">Clear</button>
+                </div>
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg"><span class="chat-user">System:</span> Chat room initialized.</div>
+                </div>
+                <div class="flex-row">
+                    <input type="text" id="chatInput" placeholder="Send test chat..." onkeydown="if(event.key==='Enter') sendChat()">
+                    <button class="btn btn-sm" onclick="sendChat()">Send</button>
+                </div>
             </div>
 
-            <!-- Dynamic Tool Description Container -->
-            <div class="page-content" id="toolDescription"></div>
+            <!-- Giveaway Picker Panel -->
+            <div class="panel">
+                <div class="panel-title">🎁 Random Giveaway Picker</div>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Picks a random winner from active chat messages:</p>
+                <button class="btn" onclick="pickGiveawayWinner()">Pick Winner</button>
+                <div id="giveawayResult" style="font-weight: bold; color: var(--accent); font-size: 1.1rem; text-align: center; margin-top: 0.3rem;"></div>
+            </div>
+
+        </div>
+
+        <!-- COLUMN 3: GOALS & IMPORTANT LINKS -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Goals Tracker Panel -->
+            <div class="panel">
+                <div class="panel-title">🎯 Stream Goal Tracker</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Subscriber Goal</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="goalBar"></div>
+                    <span class="progress-text" id="goalText">0 / 100</span>
+                </div>
+                <div class="flex-row" style="margin-top: 0.5rem;">
+                    <input type="number" id="currentGoalInput" value="45" placeholder="Current" oninput="updateGoal()">
+                    <input type="number" id="targetGoalInput" value="100" placeholder="Target" oninput="updateGoal()">
+                </div>
+            </div>
+
+            <!-- Important Links Panel -->
+            <div class="panel" style="flex:1;">
+                <div class="panel-title">🔗 Important Links / Resources</div>
+                <ul class="link-list" id="linkList">
+                    <li><a href="https://youtube.com" target="_blank">YouTube Studio Dashboard</a></li>
+                    <li><a href="https://discord.com" target="_blank">Community Discord Server</a></li>
+                    <li><a href="#" target="_blank">Sponsorship Media Kit</a></li>
+                </ul>
+                <div class="flex-row" style="margin-top:0.5rem;">
+                    <input type="text" id="linkTitle" placeholder="Title">
+                    <input type="text" id="linkUrl" placeholder="https://">
+                </div>
+                <button class="btn btn-sm" onclick="addCustomLink()">Add Link</button>
+            </div>
+
         </div>
 
     </div>
 
-    <footer>
-        &copy; 2026 Pooreyoutuber. All rights reserved.
-    </footer>
-
     <script>
-        let activeTool = "";
+        /* 1. Stream Timer & Viewers Counter */
+        let isLive = false;
+        let timerInterval = null;
+        let viewerInterval = null;
+        let secondsElapsed = 0;
+        let activeChatUsers = ["Alex", "TechPro", "GamingGamer", "Sam99", "Sara_Stream"];
 
-        const routes = {
-            'utmBuilder': '/utm-builder',
-            'metaTagGen': '/meta-tag-generator',
-            'serpPreview': '/serp-preview',
-            'ogPreview': '/open-graph-preview',
-            'twitterPreview': '/twitter-card-preview',
-            'robotsGen': '/robots-txt-generator',
-            'sitemapGen': '/sitemap-generator',
-            'schemaGen': '/schema-generator',
-            'htaccessGen': '/htaccess-redirect-generator',
-            'qrGen': '/qr-code-generator',
-            'faviconGen': '/favicon-generator',
-            'slugGen': '/url-slug-generator',
-            'keywordGroup': '/keyword-grouping-tool',
-            'canonicalGen': '/canonical-url-generator'
-        };
+        function toggleStream() {
+            const btn = document.getElementById('toggleStreamBtn');
+            if (!isLive) {
+                isLive = true;
+                btn.innerText = "End Stream";
+                btn.classList.add('btn-danger');
+                
+                // Start Timer
+                timerInterval = setInterval(() => {
+                    secondsElapsed++;
+                    const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                    const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                    const secs = String(secondsElapsed % 60).padStart(2, '0');
+                    document.getElementById('streamTimer').innerText = `${hrs}:${mins}:${secs}`;
+                }, 1000);
 
-        function showDashboard(e) {
-            if (e) e.preventDefault();
-            activeTool = "";
-            window.history.pushState({}, "", "/");
-            document.getElementById('dashboardView').style.display = 'block';
-            document.getElementById('calculatorView').style.display = 'none';
-            document.getElementById('resultBox').style.display = 'none';
-        }
+                // Simulate Live Viewers fluctuation
+                document.getElementById('viewerCount').innerText = "124";
+                viewerInterval = setInterval(() => {
+                    const current = parseInt(document.getElementById('viewerCount').innerText);
+                    const change = Math.floor(Math.random() * 9) - 4;
+                    document.getElementById('viewerCount').innerText = Math.max(10, current + change);
+                }, 3000);
 
-        function openTool(toolKey, e, pushState = true) {
-            if (e) e.preventDefault();
-            activeTool = toolKey;
-
-            if (pushState && routes[toolKey]) {
-                window.history.pushState({}, "", routes[toolKey]);
-            }
-
-            document.getElementById('dashboardView').style.display = 'none';
-            document.getElementById('calculatorView').style.display = 'block';
-            document.getElementById('resultBox').style.display = 'none';
-
-            const calcTitle = document.getElementById('calcTitle');
-            const calcForm = document.getElementById('calcForm');
-            const toolDesc = document.getElementById('toolDescription');
-
-            switch (toolKey) {
-                case 'utmBuilder':
-                    calcTitle.innerText = "UTM Campaign Builder";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Website URL *</label><input type="url" id="utmUrl" placeholder="https://example.com/page"></div>
-                        <div class="form-group"><label>Campaign Source * (utm_source)</label><input type="text" id="utmSource" placeholder="google, newsletter, facebook"></div>
-                        <div class="form-group"><label>Campaign Medium * (utm_medium)</label><input type="text" id="utmMedium" placeholder="cpc, email, social"></div>
-                        <div class="form-group"><label>Campaign Name * (utm_campaign)</label><input type="text" id="utmName" placeholder="summer_sale, launch"></div>
-                        <div class="form-group"><label>Campaign Term (utm_term)</label><input type="text" id="utmTerm" placeholder="running+shoes"></div>
-                        <div class="form-group"><label>Campaign Content (utm_content)</label><input type="text" id="utmContent" placeholder="logolink, banner_ad"></div>
-                        <button class="calc-btn" onclick="buildUTM()">Generate Tracking URL</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About UTM Builder</h2>
-                        <p>UTM parameters are custom tags appended to URLs to accurately track marketing campaign traffic in Google Analytics 4 (GA4) and other analytics suites.</p>
-                        <h3>Key Benefits</h3>
-                        <ul>
-                            <li><strong>Accurate Attribution:</strong> Identify exactly which traffic sources drive conversions.</li>
-                            <li><strong>Campaign Comparison:</strong> Test different marketing channels and ad copies cleanly.</li>
-                        </ul>
-                    `;
-                    break;
-
-                case 'metaTagGen':
-                    calcTitle.innerText = "Meta Tag Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Site Title *</label><input type="text" id="mtTitle" placeholder="My Awesome Website"></div>
-                        <div class="form-group"><label>Site Description *</label><textarea id="mtDesc" placeholder="Brief description for search engines..."></textarea></div>
-                        <div class="form-group"><label>Keywords (Comma separated)</label><input type="text" id="mtKeywords" placeholder="seo, marketing, business"></div>
-                        <div class="form-group"><label>Author</label><input type="text" id="mtAuthor" placeholder="John Doe"></div>
-                        <div class="form-group"><label>Robots Directive</label>
-                            <select id="mtRobots">
-                                <option value="index, follow">index, follow</option>
-                                <option value="noindex, follow">noindex, follow</option>
-                                <option value="index, nofollow">index, nofollow</option>
-                                <option value="noindex, nofollow">noindex, nofollow</option>
-                            </select>
-                        </div>
-                        <button class="calc-btn" onclick="generateMetaTags()">Generate Meta HTML</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Meta Tag Generator</h2>
-                        <p>Meta tags provide metadata about an HTML document to search engines and web crawlers, controlling indexing policies and search snippet representations.</p>
-                    `;
-                    break;
-
-                case 'serpPreview':
-                    calcTitle.innerText = "SERP Simulator & Preview";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>SEO Title</label><input type="text" id="spTitle" placeholder="Best Business Calculators - Free Online Suite" oninput="updateSERP()"></div>
-                        <div class="form-group"><label>Target URL</label><input type="text" id="spUrl" placeholder="https://pooreyoutuber.com/calculators" oninput="updateSERP()"></div>
-                        <div class="form-group"><label>Meta Description</label><textarea id="spDesc" placeholder="Free online financial and business calculators for ROI, Profit Margin, and GST..." oninput="updateSERP()"></textarea></div>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About SERP Preview Tool</h2>
-                        <p>Simulates how your web page title, URL, and meta description will render on Google desktop search results, helping you avoid title truncation.</p>
-                    `;
-                    setTimeout(updateSERP, 100);
-                    break;
-
-                case 'ogPreview':
-                    calcTitle.innerText = "Open Graph Meta Tag Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>OG Title</label><input type="text" id="ogTitle" placeholder="Pooreyoutuber Business Tools"></div>
-                        <div class="form-group"><label>OG Site Name</label><input type="text" id="ogSite" placeholder="Pooreyoutuber"></div>
-                        <div class="form-group"><label>OG Page URL</label><input type="url" id="ogUrl" placeholder="https://example.com"></div>
-                        <div class="form-group"><label>OG Image URL</label><input type="url" id="ogImage" placeholder="https://example.com/og-image.jpg"></div>
-                        <div class="form-group"><label>OG Description</label><textarea id="ogDesc" placeholder="Complete digital marketing suite..."></textarea></div>
-                        <button class="calc-btn" onclick="generateOG()">Generate Open Graph HTML</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Open Graph Preview</h2>
-                        <p>Open Graph meta tags control how links display when shared across social platforms like Facebook, LinkedIn, WhatsApp, and Pinterest.</p>
-                    `;
-                    break;
-
-                case 'twitterPreview':
-                    calcTitle.innerText = "Twitter/X Card Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Card Type</label>
-                            <select id="twType">
-                                <option value="summary_large_image">Summary Card with Large Image</option>
-                                <option value="summary">Summary Card</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label>Site Twitter @Username</label><input type="text" id="twSite" placeholder="@pooreyoutuber"></div>
-                        <div class="form-group"><label>Title</label><input type="text" id="twTitle" placeholder="Awesome Digital Tools"></div>
-                        <div class="form-group"><label>Description</label><textarea id="twDesc" placeholder="Short preview text for Twitter/X..."></textarea></div>
-                        <div class="form-group"><label>Image URL</label><input type="url" id="twImage" placeholder="https://example.com/card.jpg"></div>
-                        <button class="calc-btn" onclick="generateTwitterCard()">Generate Twitter Tags</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Twitter/X Card Generator</h2>
-                        <p>Generates specialized markup to attach rich media previews to X (Twitter) posts linking to your site.</p>
-                    `;
-                    break;
-
-                case 'robotsGen':
-                    calcTitle.innerText = "Robots.txt Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Default Robot Access</label>
-                            <select id="rbDefault">
-                                <option value="allow">Allow All Robots</option>
-                                <option value="disallow">Disallow All Robots</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label>Sitemap URL</label><input type="url" id="rbSitemap" placeholder="https://example.com/sitemap.xml"></div>
-                        <div class="form-group"><label>Restricted Folders (One per line)</label><textarea id="rbDisallow" placeholder="/admin/\n/private/"></textarea></div>
-                        <button class="calc-btn" onclick="generateRobots()">Generate Robots.txt</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Robots.txt Generator</h2>
-                        <p>Robots.txt gives web crawlers instructions on which pages or files they can or cannot request from your site.</p>
-                    `;
-                    break;
-
-                case 'sitemapGen':
-                    calcTitle.innerText = "XML Sitemap Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>URLs (One full URL per line)</label><textarea id="smUrls" style="min-height:120px;" placeholder="https://example.com/\nhttps://example.com/about\nhttps://example.com/contact"></textarea></div>
-                        <button class="calc-btn" onclick="generateSitemap()">Build XML Sitemap</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About XML Sitemap Generator</h2>
-                        <p>An XML sitemap lists a website's essential URLs, making sure search engines can find and crawl them efficiently.</p>
-                    `;
-                    break;
-
-                case 'schemaGen':
-                    calcTitle.innerText = "JSON-LD Schema Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Schema Type</label>
-                            <select id="scType">
-                                <option value="Organization">Organization</option>
-                                <option value="Article">Article</option>
-                                <option value="Product">Product</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label>Name / Headline *</label><input type="text" id="scName" placeholder="Pooreyoutuber"></div>
-                        <div class="form-group"><label>URL *</label><input type="url" id="scUrl" placeholder="https://pooreyoutuber.com"></div>
-                        <div class="form-group"><label>Logo / Image URL</label><input type="url" id="scImage" placeholder="https://example.com/logo.png"></div>
-                        <button class="calc-btn" onclick="generateSchema()">Generate JSON-LD Code</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Schema Generator</h2>
-                        <p>Structured data (JSON-LD) enables search engines to understand page content and display rich results in SERPs.</p>
-                    `;
-                    break;
-
-                case 'htaccessGen':
-                    calcTitle.innerText = ".htaccess Redirect Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Redirect Type</label>
-                            <select id="htType">
-                                <option value="301">301 Permanent Redirect</option>
-                                <option value="302">302 Temporary Redirect</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label>Old Relative Path</label><input type="text" id="htOld" placeholder="/old-page"></div>
-                        <div class="form-group"><label>New Full URL or Path</label><input type="text" id="htNew" placeholder="https://example.com/new-page"></div>
-                        <button class="calc-btn" onclick="generateHtaccess()">Generate .htaccess Rule</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About .htaccess Redirect Generator</h2>
-                        <p>Creates Apache server rewrite rules to handle page migrations without losing SEO link equity.</p>
-                    `;
-                    break;
-
-                case 'qrGen':
-                    calcTitle.innerText = "QR Code Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Target URL or Text</label><input type="text" id="qrText" placeholder="https://pooreyoutuber.com"></div>
-                        <button class="calc-btn" onclick="generateQR()">Generate QR Code Image</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About QR Code Generator</h2>
-                        <p>Generates quick response barcode images suitable for print media, business cards, and digital sharing.</p>
-                    `;
-                    break;
-
-                case 'faviconGen':
-                    calcTitle.innerText = "Favicon HTML Tag Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Favicon Base Path / Domain</label><input type="text" id="favPath" placeholder="https://example.com"></div>
-                        <button class="calc-btn" onclick="generateFaviconTags()">Generate Favicon HTML</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Favicon Generator</h2>
-                        <p>Generates complete standard HTML link tags for browser favicons, Apple touch icons, and Android app icons.</p>
-                    `;
-                    break;
-
-                case 'slugGen':
-                    calcTitle.innerText = "URL Slug Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Raw Page Title / String</label><input type="text" id="slugInput" placeholder="How to Calculate Profit Margin in 2026!"></div>
-                        <button class="calc-btn" onclick="generateSlug()">Create Clean Slug</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About URL Slug Generator</h2>
-                        <p>Converts titles into lowercase, hyphenated, URL-safe strings stripped of illegal characters.</p>
-                    `;
-                    break;
-
-                case 'keywordGroup':
-                    calcTitle.innerText = "Keyword Grouping Tool";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Paste Keywords (One per line)</label><textarea id="kgInput" style="min-height:120px;" placeholder="profit margin calculator\nbest profit margin tool\ngst tax calculator\ngst percentage tool"></textarea></div>
-                        <button class="calc-btn" onclick="groupKeywords()">Group Keywords</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Keyword Grouping Tool</h2>
-                        <p>Clusters raw keyword lists by shared root terms to streamline content cluster planning.</p>
-                    `;
-                    break;
-
-                case 'canonicalGen':
-                    calcTitle.innerText = "Canonical URL Generator";
-                    calcForm.innerHTML = `
-                        <div class="form-group"><label>Master Canonical URL</label><input type="url" id="canUrl" placeholder="https://example.com/canonical-page"></div>
-                        <button class="calc-btn" onclick="generateCanonical()">Generate Canonical Tag</button>
-                    `;
-                    toolDesc.innerHTML = `
-                        <h2>About Canonical URL Generator</h2>
-                        <p>Prevents duplicate content issues by telling search engines which URL represents the master copy of a page.</p>
-                    `;
-                    break;
-            }
-        }
-
-        // Handle URL Routing
-        function handleRouting() {
-            const path = window.location.pathname;
-            const toolKey = Object.keys(routes).find(key => routes[key] === path);
-
-            if (toolKey) {
-                openTool(toolKey, null, false);
             } else {
-                showDashboard();
+                isLive = false;
+                btn.innerText = "Start Stream";
+                btn.classList.remove('btn-danger');
+                clearInterval(timerInterval);
+                clearInterval(viewerInterval);
             }
         }
 
-        window.onpopstate = handleRouting;
-        window.onload = handleRouting;
+        /* 2. Teleprompter Controls */
+        let prompterInterval = null;
+        let isPrompterRunning = false;
 
-        function displayResult(htmlContent, isError = false) {
-            const resBox = document.getElementById('resultBox');
-            const resHeader = document.getElementById('resultHeader');
-            const resContent = document.getElementById('resultContent');
-
-            if (isError) {
-                resBox.classList.add('error');
-                resHeader.innerText = "Error";
+        function togglePrompter() {
+            const box = document.getElementById('prompterBox');
+            if (!isPrompterRunning) {
+                isPrompterRunning = true;
+                prompterInterval = setInterval(() => {
+                    box.scrollTop += 1;
+                }, 40);
             } else {
-                resBox.classList.remove('error');
-                resHeader.innerText = "Output / Result";
+                isPrompterRunning = false;
+                clearInterval(prompterInterval);
             }
-
-            resContent.innerHTML = htmlContent;
-            resBox.style.display = 'block';
-            resBox.scrollIntoView({ behavior: 'smooth' });
         }
 
-        /* TOOL LOGIC FUNCTIONS */
+        function resetPrompter() {
+            isPrompterRunning = false;
+            clearInterval(prompterInterval);
+            document.getElementById('prompterBox').scrollTop = 0;
+        }
 
-        function buildUTM() {
-            const url = document.getElementById('utmUrl').value.trim();
-            const source = document.getElementById('utmSource').value.trim();
-            const medium = document.getElementById('utmMedium').value.trim();
-            const campaign = document.getElementById('utmName').value.trim();
-            const term = document.getElementById('utmTerm').value.trim();
-            const content = document.getElementById('utmContent').value.trim();
-
-            if (!url || !source || !medium || !campaign) {
-                return displayResult("Please fill in URL, Source, Medium, and Campaign fields.", true);
+        function updateScript() {
+            const text = document.getElementById('scriptInput').value;
+            if (text.trim() !== "") {
+                document.getElementById('prompterBox').innerText = text;
             }
-
-            let fullUrl = `${url}${url.includes('?') ? '&' : '?'}utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_campaign=${encodeURIComponent(campaign)}`;
-            if (term) fullUrl += `&utm_term=${encodeURIComponent(term)}`;
-            if (content) fullUrl += `&utm_content=${encodeURIComponent(content)}`;
-
-            displayResult(`
-                <p><strong>Tagged Campaign URL:</strong></p>
-                <div class="code-output">${fullUrl}</div>
-            `);
         }
 
-        function generateMetaTags() {
-            const title = document.getElementById('mtTitle').value.trim();
-            const desc = document.getElementById('mtDesc').value.trim();
-            const keywords = document.getElementById('mtKeywords').value.trim();
-            const author = document.getElementById('mtAuthor').value.trim();
-            const robots = document.getElementById('mtRobots').value;
-
-            if (!title || !desc) {
-                return displayResult("Please enter both Title and Description.", true);
+        /* 3. Chat Simulation */
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (msg !== "") {
+                addChatMessage("You", msg);
+                input.value = "";
             }
-
-            let code = `<!-- Primary Meta Tags -->\n<title>${title}</title>\n<meta name="title" content="${title}">\n<meta name="description" content="${desc}">\n<meta name="robots" content="${robots}">`;
-            if (keywords) code += `\n<meta name="keywords" content="${keywords}">`;
-            if (author) code += `\n<meta name="author" content="${author}">`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
         }
 
-        function updateSERP() {
-            const title = document.getElementById('spTitle').value.trim() || 'Your Page Title Preview';
-            const url = document.getElementById('spUrl').value.trim() || 'https://example.com/page';
-            const desc = document.getElementById('spDesc').value.trim() || 'This is how your meta description will look in Google search results. Make it compelling and keep it under 160 characters.';
+        function addChatMessage(user, message) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            div.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-            const html = `
-                <div class="preview-card">
-                    <div class="serp-url">${url}</div>
-                    <div class="serp-title">${title}</div>
-                    <div class="serp-desc">${desc}</div>
-                </div>
-            `;
-            displayResult(html);
-        }
-
-        function generateOG() {
-            const title = document.getElementById('ogTitle').value.trim();
-            const site = document.getElementById('ogSite').value.trim();
-            const url = document.getElementById('ogUrl').value.trim();
-            const image = document.getElementById('ogImage').value.trim();
-            const desc = document.getElementById('ogDesc').value.trim();
-
-            if (!title || !url) {
-                return displayResult("Title and URL are required.", true);
+            if (!activeChatUsers.includes(user) && user !== "You" && user !== "System") {
+                activeChatUsers.push(user);
             }
-
-            let code = `<!-- Open Graph / Facebook -->\n<meta property="og:type" content="website">\n<meta property="og:url" content="${url}">\n<meta property="og:title" content="${title}">`;
-            if (site) code += `\n<meta property="og:site_name" content="${site}">`;
-            if (desc) code += `\n<meta property="og:description" content="${desc}">`;
-            if (image) code += `\n<meta property="og:image" content="${image}">`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
         }
 
-        function generateTwitterCard() {
-            const type = document.getElementById('twType').value;
-            const site = document.getElementById('twSite').value.trim();
-            const title = document.getElementById('twTitle').value.trim();
-            const desc = document.getElementById('twDesc').value.trim();
-            const image = document.getElementById('twImage').value.trim();
-
-            let code = `<!-- Twitter / X -->\n<meta name="twitter:card" content="${type}">`;
-            if (site) code += `\n<meta name="twitter:site" content="${site}">`;
-            if (title) code += `\n<meta name="twitter:title" content="${title}">`;
-            if (desc) code += `\n<meta name="twitter:description" content="${desc}">`;
-            if (image) code += `\n<meta name="twitter:image" content="${image}">`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
+        function clearChat() {
+            document.getElementById('chatBox').innerHTML = '<div class="chat-msg"><span class="chat-user">System:</span> Chat cleared.</div>';
         }
 
-        function generateRobots() {
-            const def = document.getElementById('rbDefault').value;
-            const sitemap = document.getElementById('rbSitemap').value.trim();
-            const disallow = document.getElementById('rbDisallow').value.trim();
+        /* 4. Giveaway Winner Picker */
+        function pickGiveawayWinner() {
+            const res = document.getElementById('giveawayResult');
+            if (activeChatUsers.length === 0) {
+                res.innerText = "No active users found!";
+                return;
+            }
+            res.innerText = "Picking...";
+            setTimeout(() => {
+                const winner = activeChatUsers[Math.floor(Math.random() * activeChatUsers.length)];
+                res.innerText = `🎉 Winner: ${winner}!`;
+            }, 1000);
+        }
 
-            let code = `User-agent: *\n`;
-            if (def === 'disallow') {
-                code += `Disallow: /\n`;
-            } else {
-                if (disallow) {
-                    const lines = disallow.split('\n');
-                    lines.forEach(l => { if(l.trim()) code += `Disallow: ${l.trim()}\n`; });
-                } else {
-                    code += `Allow: /\n`;
+        /* 5. Stream Goal Tracker */
+        function updateGoal() {
+            const current = parseFloat(document.getElementById('currentGoalInput').value) || 0;
+            const target = parseFloat(document.getElementById('targetGoalInput').value) || 1;
+            const percentage = Math.min(100, Math.max(0, (current / target) * 100));
+
+            document.getElementById('goalBar').style.width = percentage + '%';
+            document.getElementById('goalText').innerText = `${current} / ${target} (${percentage.toFixed(0)}%)`;
+        }
+
+        /* 6. Custom Links Addition */
+        function addCustomLink() {
+            const title = document.getElementById('linkTitle').value.trim();
+            let url = document.getElementById('linkUrl').value.trim();
+
+            if (title && url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
                 }
+                const list = document.getElementById('linkList');
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="${url}" target="_blank">${title}</a>`;
+                list.appendChild(li);
+
+                document.getElementById('linkTitle').value = "";
+                document.getElementById('linkUrl').value = "";
             }
-            if (sitemap) code += `\nSitemap: ${sitemap}\n`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
         }
 
-        function generateSitemap() {
-            const input = document.getElementById('smUrls').value.trim();
-            if (!input) {
-                return displayResult("Please enter at least one URL.", true);
-            }
-
-            const urls = input.split('\n').map(u => u.trim()).filter(u => u.length > 0);
-            let code = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-
-            urls.forEach(u => {
-                code += `  <url>\n    <loc>${u}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n  </url>\n`;
-            });
-            code += `</urlset>`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
-        }
-
-        function generateSchema() {
-            const type = document.getElementById('scType').value;
-            const name = document.getElementById('scName').value.trim();
-            const url = document.getElementById('scUrl').value.trim();
-            const image = document.getElementById('scImage').value.trim();
-
-            if (!name || !url) {
-                return displayResult("Name and URL are required.", true);
-            }
-
-            const schema = {
-                "@context": "https://schema.org",
-                "@type": type,
-                "name": name,
-                "url": url
-            };
-            if (image) schema["image"] = image;
-
-            const code = `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n<\/script>`;
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
-        }
-
-        function generateHtaccess() {
-            const type = document.getElementById('htType').value;
-            const oldPath = document.getElementById('htOld').value.trim();
-            const newPath = document.getElementById('htNew').value.trim();
-
-            if (!oldPath || !newPath) {
-                return displayResult("Both old and new paths are required.", true);
-            }
-
-            const code = `Redirect ${type} ${oldPath} ${newPath}`;
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
-        }
-
-        function generateQR() {
-            const text = document.getElementById('qrText').value.trim();
-            if (!text) {
-                return displayResult("Please enter text or a URL.", true);
-            }
-
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(text)}`;
-            displayResult(`
-                <p><strong>Generated QR Code:</strong></p>
-                <div style="margin-top:1rem; text-align:center;">
-                    <img src="${qrApiUrl}" alt="QR Code" style="border:1px solid var(--border-color); padding:10px; background:white; border-radius:8px;">
-                </div>
-            `);
-        }
-
-        function generateFaviconTags() {
-            let path = document.getElementById('favPath').value.trim() || 'https://example.com';
-            if (path.endsWith('/')) path = path.slice(0, -1);
-
-            const code = `<!-- Favicon & Touch Icons -->\n<link rel="icon" type="image/x-icon" href="${path}/favicon.ico">\n<link rel="icon" type="image/png" sizes="32x32" href="${path}/favicon-32x32.png">\n<link rel="icon" type="image/png" sizes="16x16" href="${path}/favicon-16x16.png">\n<link rel="apple-touch-icon" sizes="180x180" href="${path}/apple-touch-icon.png">`;
-
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
-        }
-
-        function generateSlug() {
-            const input = document.getElementById('slugInput').value.trim();
-            if (!input) {
-                return displayResult("Please enter text to format.", true);
-            }
-
-            const slug = input.toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/[\s_-]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-
-            displayResult(`
-                <p><strong>Generated URL Slug:</strong></p>
-                <div class="code-output">${slug}</div>
-            `);
-        }
-
-        function groupKeywords() {
-            const input = document.getElementById('kgInput').value.trim();
-            if (!input) {
-                return displayResult("Please enter keywords.", true);
-            }
-
-            const keywords = input.split('\n').map(k => k.trim()).filter(k => k.length > 0);
-            const groups = {};
-
-            keywords.forEach(kw => {
-                const words = kw.toLowerCase().split(' ');
-                const root = words[0] || 'other';
-                if (!groups[root]) groups[root] = [];
-                groups[root].push(kw);
-            });
-
-            let outputHtml = '';
-            for (const [group, list] of Object.entries(groups)) {
-                outputHtml += `<p style="margin-top:0.8rem;"><strong>Group [${group}]:</strong></p><ul>`;
-                list.forEach(item => { outputHtml += `<li>${item}</li>`; });
-                outputHtml += `</ul>`;
-            }
-
-            displayResult(outputHtml);
-        }
-
-        function generateCanonical() {
-            const url = document.getElementById('canUrl').value.trim();
-            if (!url) {
-                return displayResult("Please enter a valid URL.", true);
-            }
-
-            const code = `<link rel="canonical" href="${url}" />`;
-            displayResult(`<div class="code-output">${escapeHtml(code)}</div>`);
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
+        // Initialize Goal State on Load
+        updateGoal();
     </script>
 </body>
 </html>
