@@ -3,505 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pooreyoutuber - All-in-One Creator Stream Dashboard</title>
+    <title>Low-Poly Battle Royale Prototype</title>
     <style>
-        :root {
-            --bg-main: #0f172a;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent: #22c55e;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --danger: #ef4444;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
         }
 
-        /* Top Bar */
-        header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--card-border);
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .brand span { color: var(--text-main); }
-
-        .top-stats {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .stat-badge {
-            background: rgba(255,255,255,0.05);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            border: 1px solid var(--card-border);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .live-dot {
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 10px;
             height: 10px;
-            background-color: var(--danger);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid black;
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .btn {
-            background-color: var(--primary);
+        #ui {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 18px;
+            pointer-events: none;
         }
 
-        .btn:hover { background-color: var(--primary-hover); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-danger:hover { background-color: #dc2626; }
-        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-
-        /* Main Studio Layout Grid */
-        .studio-grid {
-            display: grid;
-            grid-template-columns: 2.2fr 1.2fr 1fr;
-            gap: 1rem;
-            padding: 1rem;
-            flex: 1;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .panel {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .panel-title {
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 0.4rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Teleprompter */
-        .prompter-box {
-            height: 250px;
-            overflow-y: auto;
-            background: #090d16;
-            border-radius: 6px;
-            padding: 1rem;
-            font-size: 1.4rem;
-            line-height: 1.8;
-            color: #f1f5f9;
-            scroll-behavior: smooth;
-        }
-
-        /* Chat Container */
-        .chat-box {
-            height: 380px;
-            overflow-y: auto;
-            background: #090d16;
-            border-radius: 6px;
-            padding: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-            font-size: 0.9rem;
-        }
-
-        .chat-msg {
-            background: rgba(255,255,255,0.03);
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            word-break: break-word;
-        }
-
-        .chat-user {
-            font-weight: 700;
-            color: var(--primary);
-            margin-right: 0.4rem;
-        }
-
-        /* Goals Bar */
-        .progress-bar-bg {
-            background: #090d16;
-            border-radius: 8px;
-            height: 20px;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar-fill {
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
+        #instructions {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.75rem;
-            font-weight: bold;
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 40px;
+            border-radius: 10px;
+            cursor: pointer;
         }
 
-        /* Input Controls */
-        input[type="text"], input[type="number"], textarea {
-            background: #090d16;
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            padding: 0.5rem;
-            border-radius: 6px;
-            outline: none;
+        #health-bar-container {
+            width: 200px;
+            height: 20px;
+            background-color: #333;
+            border: 2px solid #fff;
+            margin-top: 5px;
+        }
+
+        #health-bar {
             width: 100%;
-        }
-
-        input:focus, textarea:focus {
-            border-color: var(--primary);
-        }
-
-        textarea { resize: vertical; }
-
-        .flex-row {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .link-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .link-list a {
-            color: #38bdf8;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .link-list a:hover { text-decoration: underline; }
-
-        /* Responsive Breakpoint */
-        @media (max-width: 1100px) {
-            .studio-grid {
-                grid-template-columns: 1fr;
-            }
+            height: 100%;
+            background-color: #2ecc71;
+            transition: width 0.1s;
         }
     </style>
 </head>
 <body>
 
-    <!-- TOP HEADER -->
-    <header>
-        <a href="#" class="brand">Stream<span>Studio</span></a>
-        <div class="top-stats">
-            <div class="stat-badge">
-                <span class="live-dot"></span>
-                <strong>LIVE VIEWERS:</strong> <span id="viewerCount">0</span>
-            </div>
-            <div class="stat-badge">
-                <strong>STREAM TIMER:</strong> <span id="streamTimer">00:00:00</span>
-            </div>
-            <button id="toggleStreamBtn" class="btn" onclick="toggleStream()">Start Stream</button>
+    <div id="crosshair"></div>
+    <div id="ui">
+        <div>Alive: <span id="alive-count">1</span></div>
+        <div>Kills: <span id="kill-count">0</span></div>
+        <div>Health:</div>
+        <div id="health-bar-container">
+            <div id="health-bar"></div>
         </div>
-    </header>
-
-    <!-- DASHBOARD VIEWPORT -->
-    <div class="studio-grid">
-
-        <!-- COLUMN 1: TELEPROMPTER & NOTES -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            
-            <!-- Teleprompter Panel -->
-            <div class="panel">
-                <div class="panel-title">
-                    <span>📜 Teleprompter / Script</span>
-                    <div class="flex-row">
-                        <button class="btn btn-sm" onclick="togglePrompter()">Play/Pause</button>
-                        <button class="btn btn-sm" onclick="resetPrompter()">Reset</button>
-                    </div>
-                </div>
-                <div class="prompter-box" id="prompterBox">
-                    Welcome to today's stream! Today we are discussing exciting tech updates, playing community matches, and giving away special rewards to viewers. Stay tuned and don't forget to like and subscribe!
-                </div>
-                <div class="flex-row">
-                    <label style="font-size:0.8rem; color:var(--text-muted);">Script Text:</label>
-                    <textarea id="scriptInput" rows="2" placeholder="Paste script text here..." oninput="updateScript()"></textarea>
-                </div>
-            </div>
-
-            <!-- Notes Panel -->
-            <div class="panel" style="flex:1;">
-                <div class="panel-title">📝 Quick Notes / Talking Points</div>
-                <textarea id="streamNotes" style="flex:1; min-height:120px;" placeholder="- Intro (5 mins)&#10;- Topic 1: Product Review&#10;- Viewer Q&A session&#10;- Giveaway Announcement"></textarea>
-            </div>
-
-        </div>
-
-        <!-- COLUMN 2: CHAT BOX & GIVEAWAY -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            
-            <!-- Chat Box Panel -->
-            <div class="panel">
-                <div class="panel-title">
-                    <span>💬 Stream Chat Simulation</span>
-                    <button class="btn btn-sm btn-danger" onclick="clearChat()">Clear</button>
-                </div>
-                <div class="chat-box" id="chatBox">
-                    <div class="chat-msg"><span class="chat-user">System:</span> Chat room initialized.</div>
-                </div>
-                <div class="flex-row">
-                    <input type="text" id="chatInput" placeholder="Send test chat..." onkeydown="if(event.key==='Enter') sendChat()">
-                    <button class="btn btn-sm" onclick="sendChat()">Send</button>
-                </div>
-            </div>
-
-            <!-- Giveaway Picker Panel -->
-            <div class="panel">
-                <div class="panel-title">🎁 Random Giveaway Picker</div>
-                <p style="font-size:0.8rem; color:var(--text-muted);">Picks a random winner from active chat messages:</p>
-                <button class="btn" onclick="pickGiveawayWinner()">Pick Winner</button>
-                <div id="giveawayResult" style="font-weight: bold; color: var(--accent); font-size: 1.1rem; text-align: center; margin-top: 0.3rem;"></div>
-            </div>
-
-        </div>
-
-        <!-- COLUMN 3: GOALS & IMPORTANT LINKS -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            
-            <!-- Goals Tracker Panel -->
-            <div class="panel">
-                <div class="panel-title">🎯 Stream Goal Tracker</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Subscriber Goal</div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="goalBar"></div>
-                    <span class="progress-text" id="goalText">0 / 100</span>
-                </div>
-                <div class="flex-row" style="margin-top: 0.5rem;">
-                    <input type="number" id="currentGoalInput" value="45" placeholder="Current" oninput="updateGoal()">
-                    <input type="number" id="targetGoalInput" value="100" placeholder="Target" oninput="updateGoal()">
-                </div>
-            </div>
-
-            <!-- Important Links Panel -->
-            <div class="panel" style="flex:1;">
-                <div class="panel-title">🔗 Important Links / Resources</div>
-                <ul class="link-list" id="linkList">
-                    <li><a href="https://youtube.com" target="_blank">YouTube Studio Dashboard</a></li>
-                    <li><a href="https://discord.com" target="_blank">Community Discord Server</a></li>
-                    <li><a href="#" target="_blank">Sponsorship Media Kit</a></li>
-                </ul>
-                <div class="flex-row" style="margin-top:0.5rem;">
-                    <input type="text" id="linkTitle" placeholder="Title">
-                    <input type="text" id="linkUrl" placeholder="https://">
-                </div>
-                <button class="btn btn-sm" onclick="addCustomLink()">Add Link</button>
-            </div>
-
-        </div>
-
     </div>
 
+    <div id="instructions">
+        <h1>Click to Play</h1>
+        <p>WASD = Move | Space = Jump | Shift = Sprint</p>
+        <p>Mouse = Aim | Left Click = Shoot</p>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+
     <script>
-        /* 1. Stream Timer & Viewers Counter */
-        let isLive = false;
-        let timerInterval = null;
-        let viewerInterval = null;
-        let secondsElapsed = 0;
-        let activeChatUsers = ["Alex", "TechPro", "GamingGamer", "Sam99", "Sara_Stream"];
+        // --- Game Engine Setup ---
+        let scene, camera, renderer, world;
+        let clock = new THREE.Clock();
+        
+        // --- Entities & Controls ---
+        let playerBody, playerMesh;
+        let cameraOffset = new THREE.Vector3(0, 2.5, 4.5);
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, isSprinting = false;
+        let yaw = 0, pitch = 0;
+        let isLocked = false;
+        
+        // --- Player State ---
+        let health = 100;
+        let kills = 0;
+        let bullets = [];
+        let cannonBullets = [];
 
-        function toggleStream() {
-            const btn = document.getElementById('toggleStreamBtn');
-            if (!isLive) {
-                isLive = true;
-                btn.innerText = "End Stream";
-                btn.classList.add('btn-danger');
-                
-                // Start Timer
-                timerInterval = setInterval(() => {
-                    secondsElapsed++;
-                    const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
-                    const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
-                    const secs = String(secondsElapsed % 60).padStart(2, '0');
-                    document.getElementById('streamTimer').innerText = `${hrs}:${mins}:${secs}`;
-                }, 1000);
+        const instructions = document.getElementById('instructions');
 
-                // Simulate Live Viewers fluctuation
-                document.getElementById('viewerCount').innerText = "124";
-                viewerInterval = setInterval(() => {
-                    const current = parseInt(document.getElementById('viewerCount').innerText);
-                    const change = Math.floor(Math.random() * 9) - 4;
-                    document.getElementById('viewerCount').innerText = Math.max(10, current + change);
-                }, 3000);
+        init();
+        animate();
 
-            } else {
-                isLive = false;
-                btn.innerText = "Start Stream";
-                btn.classList.remove('btn-danger');
-                clearInterval(timerInterval);
-                clearInterval(viewerInterval);
-            }
-        }
+        function init() {
+            // 1. Scene & Physics World
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb); // Sky blue
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.015);
 
-        /* 2. Teleprompter Controls */
-        let prompterInterval = null;
-        let isPrompterRunning = false;
+            world = new CANNON.World();
+            world.gravity.set(0, -19.62, 0); // Natural falling speed
 
-        function togglePrompter() {
-            const box = document.getElementById('prompterBox');
-            if (!isPrompterRunning) {
-                isPrompterRunning = true;
-                prompterInterval = setInterval(() => {
-                    box.scrollTop += 1;
-                }, 40);
-            } else {
-                isPrompterRunning = false;
-                clearInterval(prompterInterval);
-            }
-        }
+            // 2. Camera & Renderer
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-        function resetPrompter() {
-            isPrompterRunning = false;
-            clearInterval(prompterInterval);
-            document.getElementById('prompterBox').scrollTop = 0;
-        }
+            // 3. Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
 
-        function updateScript() {
-            const text = document.getElementById('scriptInput').value;
-            if (text.trim() !== "") {
-                document.getElementById('prompterBox').innerText = text;
-            }
-        }
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            sunLight.position.set(50, 100, 50);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            scene.add(sunLight);
 
-        /* 3. Chat Simulation */
-        function sendChat() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (msg !== "") {
-                addChatMessage("You", msg);
-                input.value = "";
-            }
-        }
+            // 4. Ground Environment
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x557a2b });
+            const groundGeo = new THREE.PlaneGeometry(300, 300);
+            const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+            groundMesh.rotation.x = -Math.PI / 2;
+            groundMesh.receiveShadow = true;
+            scene.add(groundMesh);
 
-        function addChatMessage(user, message) {
-            const chatBox = document.getElementById('chatBox');
-            const div = document.createElement('div');
-            div.className = 'chat-msg';
-            div.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            const groundBody = new CANNON.Body({
+                mass: 0, // Static
+                shape: new CANNON.Plane()
+            });
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(groundBody);
 
-            if (!activeChatUsers.includes(user) && user !== "You" && user !== "System") {
-                activeChatUsers.push(user);
-            }
-        }
+            // Populate Map Environment (Trees/Obstacles)
+            generateMapDecorations();
 
-        function clearChat() {
-            document.getElementById('chatBox').innerHTML = '<div class="chat-msg"><span class="chat-user">System:</span> Chat cleared.</div>';
-        }
+            // 5. Player Creation
+            createPlayer();
 
-        /* 4. Giveaway Winner Picker */
-        function pickGiveawayWinner() {
-            const res = document.getElementById('giveawayResult');
-            if (activeChatUsers.length === 0) {
-                res.innerText = "No active users found!";
-                return;
-            }
-            res.innerText = "Picking...";
-            setTimeout(() => {
-                const winner = activeChatUsers[Math.floor(Math.random() * activeChatUsers.length)];
-                res.innerText = `🎉 Winner: ${winner}!`;
-            }, 1000);
-        }
+            // 6. Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mousedown', shoot);
 
-        /* 5. Stream Goal Tracker */
-        function updateGoal() {
-            const current = parseFloat(document.getElementById('currentGoalInput').value) || 0;
-            const target = parseFloat(document.getElementById('targetGoalInput').value) || 1;
-            const percentage = Math.min(100, Math.max(0, (current / target) * 100));
+            instructions.addEventListener('click', () => {
+                document.body.requestPointerLock();
+            });
 
-            document.getElementById('goalBar').style.width = percentage + '%';
-            document.getElementById('goalText').innerText = `${current} / ${target} (${percentage.toFixed(0)}%)`;
-        }
-
-        /* 6. Custom Links Addition */
-        function addCustomLink() {
-            const title = document.getElementById('linkTitle').value.trim();
-            let url = document.getElementById('linkUrl').value.trim();
-
-            if (title && url) {
-                if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                    url = 'https://' + url;
+            document.addEventListener('pointerlockchange', () => {
+                if (document.pointerLockElement === document.body) {
+                    isLocked = true;
+                    instructions.style.display = 'none';
+                } else {
+                    isLocked = false;
+                    instructions.style.display = 'block';
                 }
-                const list = document.getElementById('linkList');
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="${url}" target="_blank">${title}</a>`;
-                list.appendChild(li);
+            });
+        }
 
-                document.getElementById('linkTitle').value = "";
-                document.getElementById('linkUrl').value = "";
+        function createPlayer() {
+            // Physics Body (Capsule replacement using Cylinder/Sphere combo)
+            const radius = 0.5;
+            const height = 1.8;
+            const playerShape = new CANNON.Cylinder(radius, radius, height, 8);
+            
+            playerBody = new CANNON.Body({
+                mass: 70,
+                shape: playerShape,
+                fixedRotation: true
+            });
+            playerBody.position.set(0, 5, 0);
+            world.addBody(playerBody);
+
+            // Visual Mesh (Low-Poly Character Placeholder)
+            const group = new THREE.Group();
+            
+            // Body
+            const bodyGeo = new THREE.CylinderGeometry(radius, radius, height, 8);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+            const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+            bodyMesh.castShadow = true;
+            group.add(bodyMesh);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.35, 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c });
+            const headMesh = new THREE.Mesh(headGeo, headMat);
+            headMesh.position.y = 1.1;
+            headMesh.castShadow = true;
+            group.add(headMesh);
+
+            // Gun Placeholder
+            const gunGeo = new THREE.BoxGeometry(0.1, 0.1, 0.6);
+            const gunMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            const gunMesh = new THREE.Mesh(gunGeo, gunMat);
+            gunMesh.position.set(0.4, 0.2, -0.4);
+            group.add(gunMesh);
+
+            playerMesh = group;
+            scene.add(playerMesh);
+        }
+
+        function generateMapDecorations() {
+            const treeGeo = new THREE.ConeGeometry(2, 6, 5);
+            const treeMat = new THREE.MeshStandardMaterial({ color: 0x1e824c });
+            const trunkGeo = new THREE.CylinderGeometry(0.4, 0.4, 2, 5);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7d5fff });
+
+            for (let i = 0; i < 60; i++) {
+                const x = (Math.random() - 0.5) * 250;
+                const z = (Math.random() - 0.5) * 250;
+
+                const treeGroup = new THREE.Group();
+                const leaves = new THREE.Mesh(treeGeo, treeMat);
+                leaves.position.y = 4;
+                leaves.castShadow = true;
+
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.y = 1;
+                trunk.castShadow = true;
+
+                treeGroup.add(leaves);
+                treeGroup.add(trunk);
+                treeGroup.position.set(x, 0, z);
+                scene.add(treeGroup);
+
+                // Simple collision for trees
+                const treeBody = new CANNON.Body({
+                    mass: 0,
+                    shape: new CANNON.Cylinder(0.5, 0.5, 6, 8)
+                });
+                treeBody.position.set(x, 3, z);
+                world.addBody(treeBody);
             }
         }
 
-        // Initialize Goal State on Load
-        updateGoal();
+        // --- Controls Handling ---
+        function onKeyDown(e) {
+            switch (e.code) {
+                case 'KeyW': moveForward = true; break;
+                case 'KeyS': moveBackward = true; break;
+                case 'KeyA': moveLeft = true; break;
+                case 'KeyD': moveRight = true; break;
+                case 'ShiftLeft': isSprinting = true; break;
+                case 'Space': 
+                    // Jump check (simple velocity check)
+                    if (Math.abs(playerBody.velocity.y) < 0.05) {
+                        playerBody.velocity.y = 8;
+                    }
+                    break;
+            }
+        }
+
+        function onKeyUp(e) {
+            switch (e.code) {
+                case 'KeyW': moveForward = false; break;
+                case 'KeyS': moveBackward = false; break;
+                case 'KeyA': moveLeft = false; break;
+                case 'KeyD': moveRight = false; break;
+                case 'ShiftLeft': isSprinting = false; break;
+            }
+        }
+
+        function onMouseMove(e) {
+            if (!isLocked) return;
+            
+            const sensitivity = 0.002;
+            yaw -= e.movementX * sensitivity;
+            pitch -= e.movementY * sensitivity;
+
+            // Clamp pitch to avoid camera flipping
+            pitch = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, pitch));
+        }
+
+        // --- Combat System ---
+        function shoot(e) {
+            if (!isLocked || e.button !== 0) return; // Primary click only
+
+            // Create Visual Bullet
+            const bulletGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xf1c40f });
+            const bulletMesh = new THREE.Mesh(bulletGeo, bulletMat);
+            
+            // Spawn position (Front of player)
+            const spawnPos = new THREE.Vector3();
+            playerMesh.getWorldPosition(spawnPos);
+            spawnPos.y += 0.2; // Gun level
+            
+            bulletMesh.position.copy(spawnPos);
+            scene.add(bulletMesh);
+
+            // Cannon Physics Body for Bullet
+            const bulletShape = new CANNON.Sphere(0.1);
+            const bulletBody = new CANNON.Body({
+                mass: 0.1,
+                shape: bulletShape
+            });
+            bulletBody.position.copy(spawnPos);
+
+            // Direct bullet vector based on current orientation
+            const speed = 70;
+            const shootDir = new THREE.Vector3(0, 0, -1);
+            shootDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+            
+            bulletBody.velocity.set(
+                shootDir.x * speed,
+                shootDir.y * speed + (pitch * 10), // Pitch influence
+                shootDir.z * speed
+            );
+
+            world.addBody(bulletBody);
+
+            bullets.push(bulletMesh);
+            cannonBullets.push(bulletBody);
+
+            // Clean up old bullets after 2 seconds
+            setTimeout(() => {
+                scene.remove(bulletMesh);
+                world.remove(bulletBody);
+                bullets.shift();
+                cannonBullets.shift();
+            }, 2000);
+        }
+
+        // --- Core Loop & Logic ---
+        function updatePlayerMovement() {
+            if (!isLocked) return;
+
+            const speed = isSprinting ? 12 : 6;
+            let inputVector = new THREE.Vector3();
+
+            if (moveForward) inputVector.z -= 1;
+            if (moveBackward) inputVector.z += 1;
+            if (moveLeft) inputVector.x -= 1;
+            if (moveRight) inputVector.x += 1;
+
+            inputVector.normalize();
+
+            // Rotate input direction according to camera yaw
+            const moveDir = inputVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+
+            // Update Velocity
+            playerBody.velocity.x = moveDir.x * speed;
+            playerBody.velocity.z = moveDir.z * speed;
+
+            // Sync visual mesh orientation with camera yaw
+            playerMesh.rotation.y = yaw;
+        }
+
+        function updateCamera() {
+            // Position camera behind player based on offset and orientation
+            const rotatedOffset = cameraOffset.clone().applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+            rotatedOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+
+            camera.position.copy(playerMesh.position).add(rotatedOffset);
+            
+            // Camera looks at player chest level
+            const targetPos = playerMesh.position.clone().add(new THREE.Vector3(0, 1, 0));
+            camera.lookAt(targetPos);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+
+            // Step Physics World
+            world.step(1 / 60, delta, 3);
+
+            // Update Mechanics
+            updatePlayerMovement();
+
+            // Sync Visual Player Mesh with Cannon Body
+            playerMesh.position.copy(playerBody.position);
+
+            // Sync Visual Bullets with Physics Bodies
+            for (let i = 0; i < bullets.length; i++) {
+                bullets[i].position.copy(cannonBullets[i].position);
+            }
+
+            updateCamera();
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
     </script>
 </body>
 </html>
