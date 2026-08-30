@@ -1046,6 +1046,58 @@ app.post('/api/export', express.json(), async (req, res) => {
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ===================================================================
+// NEW TOOL: PRINTIFY SHOP PRODUCTS TOOL (/shop)
+// ===================================================================
+app.get('/shop', async (req, res) => {
+    const printifyToken = process.env.pooreyoutuber;
+
+    if (!printifyToken) {
+        return res.status(500).json({ 
+            success: false, 
+            error: "Printify API Token missing! Please set 'pooreyoutuber' key in Render Environment Variables." 
+        });
+    }
+
+    try {
+        // Step 1: Fetch user's shops from Printify API
+        const shopsResponse = await axios.get('https://api.printify.com/v1/shops.json', {
+            headers: {
+                'Authorization': `Bearer ${printifyToken}`
+            }
+        });
+
+        const shops = shopsResponse.data;
+
+        if (!shops || shops.length === 0) {
+            return res.status(404).json({ success: false, error: "No shop found in this Printify account." });
+        }
+
+        // Use first shop ID dynamically
+        const shopId = shops[0].id;
+
+        // Step 2: Fetch products of the shop
+        const productsResponse = await axios.get(`https://api.printify.com/v1/shops/${shopId}/products.json`, {
+            headers: {
+                'Authorization': `Bearer ${printifyToken}`
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            shopId: shopId,
+            products: productsResponse.data.data || []
+        });
+
+    } catch (error) {
+        console.error("Printify Shop API Error:", error.response ? error.response.data : error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: "Failed to fetch Printify products.",
+            details: error.response ? error.response.data : error.message 
+        });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
