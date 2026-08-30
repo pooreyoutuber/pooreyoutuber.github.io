@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printify Shop Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+    h1 { color: #333; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
+    button:hover { background-color: #218838; }
+    #productsContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+    .product-card { background: white; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
+    .product-card img { max-width: 100%; height: auto; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>Printify Shop Products</h1>
+  <button onclick="fetchShopData()">Fetch Shop Products</button>
+
+  <div id="productsContainer"></div>
+
+  <script>
+    async function fetchShopData() {
+      const container = document.getElementById('productsContainer');
+      container.innerHTML = 'Loading products...';
+
+      try {
+        const response = await fetch('https://pooreyoutuber-github-io-luly.onrender.com/shop');
+        const data = await response.json();
+
+        if (data.success) {
+          container.innerHTML = '';
+          if (data.products && data.products.length > 0) {
+            data.products.forEach(product => {
+              const card = document.createElement('div');
+              card.className = 'product-card';
+              
+              const imgUrl = product.images && product.images.length > 0 ? product.images[0].src : '';
+              
+              card.innerHTML = `
+                ${imgUrl ? `<img src="${imgUrl}" alt="${product.title}">` : ''}
+                <h3>${product.title}</h3>
+                <p>ID: ${product.id}</p>
+              `;
+              container.appendChild(card);
+            });
+          } else {
+            container.innerHTML = '<p>No products found in shop.</p>';
+          }
+        } else {
+          container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+        }
+      } catch (err) {
+        console.error('Fetch Error:', err);
+        container.innerHTML = '<p style="color:red;">Failed to fetch data from backend server.</p>';
+      }
+    }
+  </script>
+
+</body>
+</html>
