@@ -134,25 +134,63 @@
         nav a { color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
         nav a:hover { opacity: 0.8; }
 
-           /* Skyblue Shop Button Style */
-        .shop-btn {
-            background-color: #00d2ff !important;
-            color: #000000 !important;
-            padding: 6px 14px;
+          /* Dropdown Menu & Sky Blue Capsule Button */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropbtn {
+            background-color: #00b4d8 !important;
+            color: #ffffff !important;
+            padding: 6px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
             border-radius: 20px;
-            font-weight: 700 !important;
+            cursor: pointer;
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transition: transform 0.2s ease, background-color 0.2s ease !important;
         }
-        .shop-btn:hover {
-            opacity: 1 !important;
-            background-color: #70e4ff !important;
+        .dropbtn:hover {
+            background-color: #0096c7 !important;
             transform: scale(1.05);
+            opacity: 1 !important;
         }
-          
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--yt-card);
+            min-width: 150px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
+            z-index: 100;
+            border-radius: 10px;
+            overflow: hidden;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid var(--yt-border);
+        }
+        .dropdown-content a {
+            color: var(--yt-text) !important;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .dropdown-content a:hover {
+            background-color: rgba(0, 180, 216, 0.15);
+            opacity: 1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
                  /* Buy Me A Coffee Style Button */
         .donate-coffee-btn {
             background-color: #ffdd00 !important;
@@ -309,8 +347,15 @@
                 <a href="contact.html">Contact</a>
                 <a href="disclaimer.html">Disclaimer</a>
                 <a href="Articals.html">Articles</a>
-                <a href="https://www.amazon.in/b?node=6637738031&ascsubtag=srctok-310ae5e9158407e6&btn_type=ss&btn_ref=srctok-310ae5e9158407e6&linkCode=ll2&tag=pooreyoutuber-21&linkId=c7bd2f2de7eeb6b5e77a631523e40acf&ref_=as_li_ss_tl" target="_blank" class="shop-btn">🛒 Shop</a>
-                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+                   <!-- Sky Blue Capsule Dropdown Shop Button -->
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/deals?&linkCode=ll2&tag=pooreyoutuber-21&linkId=d319f7c340c657f02c9f88a9daca2b18&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/events/labordaysale?&linkCode=ll2&tag=pooreyoutuber-20&linkId=cf87d9b7256218d855fff49508ccc100&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+               <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
             </nav>
             <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         </div>
