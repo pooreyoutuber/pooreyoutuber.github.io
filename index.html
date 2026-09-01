@@ -134,6 +134,44 @@
         nav a { color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
         nav a:hover { opacity: 0.8; }
 
+          /* Highlighted Articles Link with Glow & Notification Badge */
+        .article-btn {
+            position: relative;
+            padding: 6px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: bold !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        .article-btn .badge-new {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff0000;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+                transform: scale(1.03);
+            }
+        }
+          
           /* Dropdown Menu & Sky Blue Capsule Button */
         .dropdown {
             position: relative;
@@ -316,7 +354,7 @@
                 align-items: flex-start; 
                 gap: 10px; 
             }
-            .nav-controls { 
+           .nav-controls { 
                 flex-direction: column; 
                 gap: 10px;
                 width: 100%;
@@ -330,6 +368,7 @@
             .tool h3 { font-size: 1em; min-height: 3em; }
             .tool a { font-size: 0.9em; padding: 8px 10px; }
 
+
             .mobile-feed-ad { display: block; }
         }
     </style>
@@ -342,12 +381,7 @@
         </div>
         <div class="nav-controls">
             <nav>
-                <a href="about.html">About</a>
-                <a href="Privacy-Policy.html">Privacy Policy</a>
-                <a href="contact.html">Contact</a>
-                <a href="disclaimer.html">Disclaimer</a>
-                <a href="Articals.html">Articles</a>
-                   <!-- Sky Blue Capsule Dropdown Shop Button -->
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
                 <div class="dropdown">
                     <button class="dropbtn">🛒 Shop ▾</button>
                     <div class="dropdown-content">
@@ -500,6 +534,7 @@
     <footer>
         <p>&copy; 2025 PooreYouTuber. All Rights Reserved.</p>
         <p>
+            <a href="about.html">About</a>  | 
             <a href="Privacy-Policy.html">Privacy Policy</a> | 
              <a href="Terms.html">Terms of Use</a> | 
              <a href="Refund-&-Cancellation-Policy.html">Refund & Cancellation Policy</a> | 
