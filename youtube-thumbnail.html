@@ -128,34 +128,36 @@
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.3s ease;
-            overflow-x: hidden;
-        }
-
-        .header-nav {
+        /* Header & Navigation Styles */
+        header {
             width: 100%;
             max-width: 1400px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .theme-switch, .home-btn {
+        header .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .nav-controls nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .home-btn, .article-btn, .dropbtn, .donate-coffee-btn, .theme-switch {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
@@ -165,6 +167,52 @@
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
+        }
+
+        .badge-new {
+            background: #e53e3e;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        /* Dropdown CSS */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            z-index: 100;
+            top: 100%;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         /* Full Screen Responsive Layout Container */
@@ -360,8 +408,8 @@
 
         @media (max-width: 600px) {
             body { padding: 12px; }
-            .header-nav { flex-wrap: wrap; }
-            .theme-switch, .home-btn { font-size: 0.8rem; padding: 8px 14px; }
+            header { flex-direction: column; align-items: flex-start; }
+            .theme-switch, .home-btn, .article-btn, .dropbtn, .donate-coffee-btn { font-size: 0.8rem; padding: 8px 14px; }
             .container { padding: 16px; border-radius: 16px; }
             .tool-box { padding: 16px; border-radius: 16px; }
             .header-zone h1 { font-size: 1.6rem; }
@@ -373,11 +421,25 @@
     </style>
 </head>
 <body>
-
-    <div class="header-nav">
-        <a class="home-btn" href="https://pooreyoutuber.github.io/">🏠 Home</a>
-        <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
-    </div>
+      <header>
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+                <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
+            </nav>
+        </div>
+    </header>
+   
 
     <div class="container">
         <!-- Top Banner Ad Unit -->
