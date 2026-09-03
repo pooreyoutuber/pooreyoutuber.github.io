@@ -149,18 +149,169 @@
             min-height: 100vh;
             line-height: 1.6;
         }
-
-        .glass-header {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(15px);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--glass-border);
+           .header {
+            background: var(--card-bg);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border); 
+        }
+     
+
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-decoration: none; }
+
+         .nav-controls nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
+        .nav-controls a {
+            text-decoration: none;
+        }
+
+        /* Highlighted Articles Link with Glow & Notification Badge */
+        .article-btn {
+            position: relative;
+            padding: 6px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: bold !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            animation: pulse-glow 2s infinite alternate;
+            display: inline-block;
+        }
+
+        .article-btn .badge-new {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff0000;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+                transform: scale(1.03);
+            }
+        }
+          
+        /* Dropdown Menu & Sky Blue Capsule Button */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropbtn {
+            background-color: #00b4d8 !important;
+            color: #ffffff !important;
+            padding: 6px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+        }
+        .dropbtn:hover {
+            background-color: #0096c7 !important;
+            transform: scale(1.05);
+            opacity: 1 !important;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--yt-card);
+            min-width: 150px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
+            z-index: 100;
+            border-radius: 10px;
+            overflow: hidden;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid var(--yt-border);
+        }
+        .dropdown-content a {
+            color: var(--yt-text) !important;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .dropdown-content a:hover {
+            background-color: rgba(0, 180, 216, 0.15);
+            opacity: 1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Buy Me A Coffee Style Button */
+        .donate-coffee-btn {
+            background-color: #ffdd00 !important;
+            color: #000000 !important;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700 !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+        }
+        .donate-coffee-btn:hover {
+            opacity: 1 !important;
+            background-color: #ffea61 !important;
+            transform: scale(1.05);
+        }
+
+        /* Home Button with White Border */
+.home-btn {
+    padding: 6px 14px;
+    border: 2px solid #ffffff;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    font-weight: bold !important;
+    color: #ffffff !important;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.home-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+        
         .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; box-sizing: border-box; }
 
         .control-panel {
@@ -345,11 +496,23 @@
     </style>
 </head>
 <body>
-
-    <header class="glass-header">
-        <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:800; font-size:22px;">🚀 PooreYoutuber</a>
-    </header>
-    
+<header class="header">
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+    <div class="nav-controls">
+        <nav>
+<a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                </div>
+            </div>
+            <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+        </nav>
+    </div>
+</header>
     <div class="container">
         
         <div style="text-align: center; margin-bottom: 30px;">
