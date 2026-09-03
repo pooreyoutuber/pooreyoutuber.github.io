@@ -115,14 +115,19 @@
             --bg-body: #0f0f12;
             --bg-nav: #16161c;
             --bg-card: #1a1a22;
+            --yt-card: #1a1a22;
+            --yt-text: #ffffff;
+            --yt-border: #2e2e38;
             --text-main: #f1f1f5;
             --text-muted: #94a3b8;
             --border-color: #2e2e38;
+            --border: #2e2e38;
             --input-bg: #22222a;
             --radius: 12px;
             --shadow: 0 8px 32px rgba(0,0,0,0.5);
             --accent-green: #10b981;
             --accent-blue: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #ffffff 30%, #ff4d4d);
         }
 
         * {
@@ -133,70 +138,190 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-body);
+            margin: 0;
+            background: var(--bg-body);
             color: var(--text-main);
-            padding: 40px 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
             line-height: 1.6;
         }
 
-        
-        .ad-container { margin: 25px 0; overflow: hidden; }
-        .content-section {
-            text-align: left;
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-
-        /* Top Navbar Header */
-        .top-bar {
+        /* Header / Navigation Bar */
+        header {
+            background: rgba(22, 22, 28, 0.85); /* Dark Semi-transparent Navbar */
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            padding: 12px 18px;
-            background: var(--bg-nav);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
         }
 
-        .home-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--input-bg);
-            color: var(--text-main);
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
+        }
+
+        /* Home Button with Gradient Background & White Text */
+        .home-btn {
+            padding: 6px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+            font-weight: bold !important;
+            color: #ffffff !important;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s ease, opacity 0.2s ease;
         }
 
         .home-btn:hover {
-            border-color: var(--yt-red);
-            color: #ffffff;
-            box-shadow: 0 0 10px var(--yt-glow);
+            opacity: 0.9;
+            transform: scale(1.05);
         }
 
-        .brand-logo {
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #ffffff 30%, #ff4d4d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
+        /* Highlighted Articles Link with Glow & Notification Badge */
+        .article-btn {
+            position: relative;
+            padding: 6px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+            font-weight: bold !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            animation: pulse-glow 2s infinite alternate;
+            display: inline-block;
+            text-decoration: none !important;
         }
-        header {
+
+        .article-btn .badge-new {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff0000;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+                transform: scale(1.03);
+            }
+        }
+
+        /* Dropdown Menu & Sky Blue Capsule Button */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropbtn {
+            background-color: #00b4d8 !important;
+            color: #ffffff !important;
+            padding: 6px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+        }
+        .dropbtn:hover {
+            background-color: #0096c7 !important;
+            transform: scale(1.05);
+            opacity: 1 !important;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--yt-card);
+            min-width: 150px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
+            z-index: 100;
+            border-radius: 10px;
+            overflow: hidden;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid var(--yt-border);
+        }
+        .dropdown-content a {
+            color: var(--yt-text) !important;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .dropdown-content a:hover {
+            background-color: rgba(0, 180, 216, 0.15);
+            opacity: 1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Buy Me A Coffee Style Button */
+        .donate-coffee-btn {
+            background-color: #ffdd00 !important;
+            color: #000000 !important;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700 !important;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+        }
+        .donate-coffee-btn:hover {
+            opacity: 1 !important;
+            background-color: #ffea61 !important;
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .ad-container { margin: 25px 0; overflow: hidden; }
+        
+        .hero-title {
             text-align: center;
             margin-bottom: 40px;
         }
 
-        header h1 {
+        .hero-title h1 {
             font-size: 2.8rem;
             font-weight: 800;
             letter-spacing: -1px;
@@ -206,7 +331,7 @@
             -webkit-text-fill-color: transparent;
         }
 
-        header p {
+        .hero-title p {
             color: var(--text-muted);
             font-size: 1.1rem;
         }
@@ -245,7 +370,7 @@
             box-shadow: 0 0 12px var(--yt-glow);
         }
 
-        button {
+        button.search-btn {
             padding: 16px 32px;
             background: var(--yt-red);
             color: white;
@@ -258,7 +383,7 @@
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
         }
 
-        button:hover {
+        button.search-btn:hover {
             background: var(--yt-dark-red);
             transform: translateY(-1px);
         }
@@ -279,7 +404,7 @@
             .input-group {
                 flex-direction: column;
             }
-            button { width: 100%; }
+            button.search-btn { width: 100%; }
         }
 
         .card {
@@ -557,6 +682,7 @@
             font-size: 14px;
             line-height: 1.6;
         }
+
         .status-msg {
             color: var(--text-muted);
             font-style: italic;
@@ -581,19 +707,27 @@
 </head>
 <body>
 
+<!-- Header / Navigation Bar -->
+<header>
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+    <div class="nav-controls">
+        <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                </div>
+            </div>
+            <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+        </nav>
+    </div>
+</header>
+
 <div class="container">
 
-    <!-- Top Bar Navigation & Branding -->
-    <div class="top-bar">
-        <a href="https://pooreyoutuber.github.io/" class="home-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            Home
-        </a>
-        <div class="brand-logo">Pooreyoutuber</div>
-    </div>
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-client="ca-pub-7020422718957281"
@@ -602,16 +736,16 @@
          data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 
-    <header>
+    <div class="hero-title">
         <h1>YouTube Video Intelligence & SEO Audit Panel</h1>
         <p>Extract instant operational metrics, strategic channel data, and predictive seasonal retention cycles.</p>
-    </header>
+    </div>
 
     <!-- Search Box Component -->
     <div class="search-wrapper">
         <div class="input-group">
             <input type="text" id="videoLink" placeholder="Paste YouTube Video URL here (e.g., Shorts, Watch links, Embeds)...">
-            <button onclick="fetchVideoData()">Run Audit</button>
+            <button class="search-btn" onclick="fetchVideoData()">Run Audit</button>
         </div>
     </div>
 
@@ -698,12 +832,12 @@
         </div>
     </section>
 
-    <!-- Premium Standard Footer -->
-    <footer>
-        <p>&copy; 2026 Pooreyoutuber. Engineered for organic vertical media optimization.</p>
-    </footer>
-
 </div>
+
+<!-- Premium Standard Footer -->
+<footer>
+    <p>&copy; 2026 Pooreyoutuber. Engineered for organic vertical media optimization.</p>
+</footer>
 
 <script>
     // YouTube Data API Key Configuration
