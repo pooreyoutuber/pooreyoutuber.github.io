@@ -115,19 +115,14 @@
             --bg-body: #0f0f12;
             --bg-nav: #16161c;
             --bg-card: #1a1a22;
-            --yt-card: #1a1a22;
-            --yt-text: #ffffff;
-            --yt-border: #2e2e38;
             --text-main: #f1f1f5;
             --text-muted: #94a3b8;
             --border-color: #2e2e38;
-            --border: #2e2e38;
             --input-bg: #22222a;
             --radius: 12px;
             --shadow: 0 8px 32px rgba(0,0,0,0.5);
             --accent-green: #10b981;
             --accent-blue: #3b82f6;
-            --primary-gradient: linear-gradient(135deg, #ffffff 30%, #ff4d4d);
         }
 
         * {
@@ -138,11 +133,9 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0;
-            background: var(--bg-body);
+            background-color: var(--bg-body);
             color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+            padding: 40px 20px;
             line-height: 1.6;
         }
 
@@ -307,21 +300,53 @@
             background-color: #ffea61 !important;
             transform: scale(1.05);
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px 40px 20px;
+        .ad-container { margin: 25px 0; overflow: hidden; }
+        .content-section {
+            text-align: left;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
         }
 
-        .ad-container { margin: 25px 0; overflow: hidden; }
-        
-        .hero-title {
+
+       
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            border-color: var(--yt-red);
+            color: #ffffff;
+            box-shadow: 0 0 10px var(--yt-glow);
+        }
+
+        .brand-logo {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #ff4d4d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+        header {
             text-align: center;
             margin-bottom: 40px;
         }
 
-        .hero-title h1 {
+        header h1 {
             font-size: 2.8rem;
             font-weight: 800;
             letter-spacing: -1px;
@@ -331,7 +356,7 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .hero-title p {
+        header p {
             color: var(--text-muted);
             font-size: 1.1rem;
         }
@@ -370,7 +395,7 @@
             box-shadow: 0 0 12px var(--yt-glow);
         }
 
-        button.search-btn {
+        button {
             padding: 16px 32px;
             background: var(--yt-red);
             color: white;
@@ -383,7 +408,7 @@
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
         }
 
-        button.search-btn:hover {
+        button:hover {
             background: var(--yt-dark-red);
             transform: translateY(-1px);
         }
@@ -404,7 +429,7 @@
             .input-group {
                 flex-direction: column;
             }
-            button.search-btn { width: 100%; }
+            button { width: 100%; }
         }
 
         .card {
@@ -682,7 +707,6 @@
             font-size: 14px;
             line-height: 1.6;
         }
-
         .status-msg {
             color: var(--text-muted);
             font-style: italic;
@@ -706,7 +730,6 @@
     </style>
 </head>
 <body>
-
 <!-- Header / Navigation Bar -->
 <header>
     <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
@@ -725,7 +748,6 @@
         </nav>
     </div>
 </header>
-
 <div class="container">
 
     <ins class="adsbygoogle"
@@ -736,16 +758,16 @@
          data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 
-    <div class="hero-title">
+    <header>
         <h1>YouTube Video Intelligence & SEO Audit Panel</h1>
         <p>Extract instant operational metrics, strategic channel data, and predictive seasonal retention cycles.</p>
-    </div>
+    </header>
 
     <!-- Search Box Component -->
     <div class="search-wrapper">
         <div class="input-group">
             <input type="text" id="videoLink" placeholder="Paste YouTube Video URL here (e.g., Shorts, Watch links, Embeds)...">
-            <button class="search-btn" onclick="fetchVideoData()">Run Audit</button>
+            <button onclick="fetchVideoData()">Run Audit</button>
         </div>
     </div>
 
@@ -832,12 +854,12 @@
         </div>
     </section>
 
-</div>
+    <!-- Premium Standard Footer -->
+    <footer>
+        <p>&copy; 2026 Pooreyoutuber. Engineered for organic vertical media optimization.</p>
+    </footer>
 
-<!-- Premium Standard Footer -->
-<footer>
-    <p>&copy; 2026 Pooreyoutuber. Engineered for organic vertical media optimization.</p>
-</footer>
+</div>
 
 <script>
     // YouTube Data API Key Configuration
