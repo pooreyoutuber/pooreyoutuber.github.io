@@ -116,27 +116,133 @@
             --muted:        #a497bd;
             --radius:       14px;
             --radius-sm:    9px;
+            --card-bg:      #140e1f;
+            --text-main:    #f3effa;
+            --border-color: #2c1c45;
+            --shadow:       0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode {
+            --bg:           #f5f7fa;
+            --panel:        #ffffff;
+            --card:         #f8fafc;
+            --border:       #e2e8f0;
+            --border-light: #cbd5e1;
+            --text:         #2d3748;
+            --muted:        #718096;
+            --card-bg:      #ffffff;
+            --text-main:    #2d3748;
+            --border-color: #e2e8f0;
+            --shadow:       0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0; padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
             background: var(--bg);
             color: var(--text);
-            padding: 28px 16px 56px;
+            padding: 20px 24px 56px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* ─── HEADER & NAVIGATION STYLES ─── */
+        header.top-navbar {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header.top-navbar .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .nav-controls nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .home-btn, .article-btn, .dropbtn, .donate-coffee-btn, .theme-switch {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .badge-new {
+            background: #e53e3e;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        /* Dropdown CSS */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            z-index: 100;
+            top: 100%;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(225, 48, 108, 0.1);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         .container { width: 100%; max-width: 1200px; }
 
-        /* ─── HEADER PANEL ─── */
+        /* ─── TOOL PANEL ─── */
         .tool-panel {
             background: var(--panel);
             border: 1px solid var(--border);
@@ -146,7 +252,7 @@
             margin-bottom: 24px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px var(--border);
+            box-shadow: 0 8px 48px rgba(0,0,0,0.4), 0 0 0 1px var(--border);
         }
 
         /* top instagram bar */
@@ -171,35 +277,6 @@
         }
 
         .tool-panel > * { position: relative; z-index: 1; }
-
-        /* brand home button */
-        .home-brand-btn {
-            position: absolute;
-            top: 14px; right: 18px;
-            background: rgba(225, 48, 108, 0.08);
-            color: var(--insta-pink);
-            border: 1px solid rgba(225, 48, 108, 0.22);
-            padding: 6px 16px;
-            font-size: 0.77rem;
-            font-weight: 700;
-            border-radius: 30px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-            z-index: 20;
-        }
-
-        .home-brand-btn:hover {
-            background: var(--insta-pink);
-            color: #ffffff;
-            border-color: transparent;
-            box-shadow: 0 0 16px var(--insta-glow);
-            transform: translateY(-1px);
-        }
 
         /* insta logo pill */
         .kick-logo-pill {
@@ -233,7 +310,7 @@
             font-weight: 900;
             letter-spacing: -0.6px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #ffffff 30%, #e1306c 100%);
+            background: linear-gradient(135deg, var(--text-main) 30%, #e1306c 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -262,7 +339,7 @@
             flex: 1;
             min-width: 290px;
             padding: 14px 18px;
-            background: #09060e;
+            background: var(--card);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
             font-size: 0.95rem;
@@ -271,7 +348,7 @@
             transition: all 0.3s;
         }
 
-        .input-url::placeholder { color: #5c4480; }
+        .input-url::placeholder { color: var(--muted); opacity: 0.7; }
 
         .input-url:focus {
             border-color: var(--insta-pink);
@@ -289,7 +366,7 @@
         .input-count {
             width: 78px;
             padding: 14px 8px;
-            background: #09060e;
+            background: var(--card);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
             font-size: 0.95rem;
@@ -306,7 +383,7 @@
 
         .layout-select {
             padding: 14px 12px;
-            background: #09060e;
+            background: var(--card);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
             font-size: 0.88rem;
@@ -357,13 +434,13 @@
         }
 
         .btn-clear:hover {
-            background: rgba(255,255,255,0.04);
+            background: rgba(225, 48, 108, 0.08);
             color: var(--text);
-            border-color: #5c4480;
+            border-color: var(--insta-pink);
         }
 
         .input-hint {
-            color: #6e5494;
+            color: var(--muted);
             font-size: 0.79rem;
             margin-top: 6px;
             letter-spacing: 0.2px;
@@ -399,7 +476,7 @@
             position: relative;
             padding-top: 177.77%; /* 9:16 Ratio for Reels */
             border: 1px solid var(--border-light);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
@@ -454,7 +531,7 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 36px;
-            box-shadow: 0 6px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 32px rgba(0,0,0,0.2);
             margin-bottom: 26px;
         }
 
@@ -506,7 +583,7 @@
             font-size: 2.2rem;
             font-weight: 900;
             color: var(--insta-pink);
-            opacity: 0.25;
+            opacity: 0.4;
             line-height: 1;
             margin-bottom: 10px;
         }
@@ -634,7 +711,7 @@
         }
 
         .crossroads-card {
-            background: rgba(255,255,255,0.015);
+            background: var(--card);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
             padding: 18px;
@@ -685,12 +762,12 @@
             border-radius: var(--radius-sm);
             padding: 18px 22px;
             margin-top: 22px;
-            color: #9c627d;
+            color: var(--muted);
             font-size: 0.86rem;
             line-height: 1.7;
         }
 
-        .disclaimer-box strong { color: #cc6d9b; }
+        .disclaimer-box strong { color: var(--insta-pink); }
 
         /* ad */
         .ad-container { margin: 18px 0; width: 100%; }
@@ -719,8 +796,8 @@
         footer {
             text-align: center;
             margin-top: 40px;
-            font-size: 0.81rem;
-            color: #553e75;
+            font-size: 0.85rem;
+            color: var(--muted);
             letter-spacing: 0.3px;
         }
 
@@ -732,21 +809,40 @@
 
         /* responsive */
         @media (max-width: 720px) {
+            body { padding: 12px; }
+            header.top-navbar { flex-direction: column; align-items: flex-start; }
+            .theme-switch, .home-btn, .article-btn, .dropbtn, .donate-coffee-btn { font-size: 0.8rem; padding: 8px 14px; }
             .tool-panel { padding: 30px 18px 26px; }
             .tool-panel h1 { font-size: 1.6rem; }
             .content-panel { padding: 24px 18px; }
             .form-row { flex-direction: column; }
-            .home-brand-btn { font-size: 0.7rem; padding: 5px 10px; }
         }
     </style>
 </head>
 <body>
 
+    <header class="top-navbar">
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav>
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+                <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
+            </nav>
+        </div>
+    </header>
+
 <div class="container">
 
     <header class="tool-panel">
-        <a href="https://pooreyoutuber.github.io" target="_self" class="home-brand-btn">🏠 PooreYoutuber</a>
-
         <div class="ad-container">
             <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
@@ -959,7 +1055,6 @@
         url = url.trim();
         if (!url) return null;
 
-        // Enhanced regex matching mobile subdomains (m.instagram.com) & query parameters (?igsh=...)
         const regex = /(?:https?:\/\/)?(?:[a-zA-Z0-9_\-]+\.)?instagram\.com\/(?:p|reel|reels)\/([a-zA-Z0-9_\-]+)/i;
         const match = url.match(regex);
         
@@ -967,7 +1062,6 @@
             return match[1];
         }
         
-        // If raw shortcode is passed directly
         if (/^[a-zA-Z0-9_\-]{5,15}$/.test(url)) {
             return url;
         }
@@ -1004,14 +1098,13 @@
             label.className = 'video-box-label';
             label.textContent = `#${i + 1} · Slot`;
 
-            // Instagram secure iframe embed URL
             const src = `https://www.instagram.com/p/${shortcode}/embed/captioned/`;
 
             const iframe = document.createElement('iframe');
             iframe.src = src;
             iframe.setAttribute('scrolling', 'no');
             iframe.setAttribute('allowtransparency', 'true');
-            iframe.setAttribute('loading', 'lazy'); // Added performance optimization
+            iframe.setAttribute('loading', 'lazy');
             iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
 
             box.appendChild(label);
@@ -1032,6 +1125,10 @@
 
     function showEmpty(container, msg) {
         container.innerHTML = `<div class="empty-state"><div class="icon">🎬</div><p>${msg}</p></div>`;
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
     }
 
     document.getElementById('instaUrl').addEventListener('keydown', e => {
