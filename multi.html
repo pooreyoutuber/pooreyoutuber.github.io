@@ -258,6 +258,15 @@
             --border-color: #2f2f2f;
             --border-radius: 16px;
         }
+
+        /* Light Theme Alternate Variables */
+        body.light-mode {
+            --bg-color: #f4f5f7;
+            --panel-bg: #ffffff;
+            --text-main: #121212;
+            --text-muted: #555555;
+            --border-color: #e0e0e0;
+        }
         
         * {
             box-sizing: border-box;
@@ -269,16 +278,127 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 30px 15px;
+            padding: 0 0 30px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Navbar Header Styles */
+        .top-navbar {
+            width: 100%;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .top-navbar .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-controls nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-controls a, .dropbtn, .theme-switch {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-controls a:hover, .dropbtn:hover, .theme-switch:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--cyan-accent);
+        }
+
+        .badge-new {
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 800;
+            margin-left: 3px;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--panel-bg);
+            min-width: 150px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            z-index: 1001;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--cyan-accent);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .donate-coffee-btn {
+            background: rgba(255, 193, 7, 0.15) !important;
+            color: #ffc107 !important;
+            border: 1px solid rgba(ffc107, 0.3) !important;
+        }
+
+        .donate-coffee-btn:hover {
+            background: #ffc107 !important;
+            color: #000 !important;
         }
 
         .container {
             width: 100%;
             max-width: 1100px;
+            padding: 25px 15px 0 15px;
         }
 
         /* Sleek Modern UI Header & Input Panel */
@@ -310,7 +430,7 @@
             font-weight: 800;
             margin-bottom: 12px;
             letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #ffffff, #e0e0e0);
+            background: linear-gradient(90deg, var(--text-main), #a6a6a6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -335,11 +455,11 @@
             flex: 1;
             min-width: 290px;
             padding: 15px 20px;
-            background: #2a2a2a;
+            background: var(--bg-color);
             border: 1px solid var(--border-color);
             border-radius: 10px;
             font-size: 0.95rem;
-            color: #ffffff;
+            color: var(--text-main);
             outline: none;
             transition: all 0.3s ease;
         }
@@ -352,11 +472,11 @@
         .input-count {
             width: 85px;
             padding: 15px;
-            background: #2a2a2a;
+            background: var(--bg-color);
             border: 1px solid var(--border-color);
             border-radius: 10px;
             font-size: 0.95rem;
-            color: #ffffff;
+            color: var(--text-main);
             text-align: center;
             outline: none;
             transition: all 0.3s ease;
@@ -400,7 +520,7 @@
         /* Top Right Side Home Brand Button Style */
         .home-brand-btn {
             position: absolute;
-            top: 5px;
+            top: 15px;
             right: 20px;
             background: rgba(255, 255, 255, 0.04);
             color: var(--cyan-accent);
@@ -453,6 +573,11 @@
         @media (max-width: 768px) and (orientation: portrait) {
             .video-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .top-navbar {
+                flex-direction: column;
+                gap: 10px;
             }
         }
 
@@ -519,7 +644,7 @@
             border-radius: 12px;
             padding: 20px;
             margin: 25px 0;
-            border: 1px dashed #444;
+            border: 1px dashed var(--border-color);
         }
 
         .tip-box h3 {
@@ -561,13 +686,13 @@
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid var(--border-color);
-            color: #888888;
+            color: var(--text-muted);
             font-size: 0.9rem;
             line-height: 1.6;
         }
 
         .friendly-disclaimer strong {
-            color: #bbb;
+            color: var(--text-main);
         }
 
         /* --- UI FAQ Section Custom Styling --- */
@@ -595,7 +720,7 @@
             padding: 16px 20px;
             background: none;
             border: none;
-            color: #ffffff;
+            color: var(--text-main);
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -677,7 +802,7 @@
         .card-headline {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--text-main);
             margin-bottom: 8px;
         }
         .card-desc {
@@ -688,6 +813,26 @@
     </style>
 </head>
 <body>
+
+    <!-- Top Navbar Header -->
+    <header class="top-navbar">
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav>
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+                <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
+            </nav>
+        </div>
+    </header>
     
     <div class="container">
         <div class="tool-panel">
@@ -795,7 +940,7 @@
             <p>When producing short-form content for global audiences, maintaining consistent visual balance and audio framing is vital. A dedicated multi-instance video viewer helps editors compare different playback scaling properties, test frame synchronization, and evaluate overall presentation quality prior to launch.</p>
             <p>Our tool runs completely client-side in your web browser, ensuring fast page load speeds, low resource usage, and total privacy for your creative testing workflows.</p>
 
-            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed #444;">
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
                 <h3 style="color: var(--cyan-accent); font-size: 1.15rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
                     🚀 Explore More Free Premium Tools
                 </h3>
@@ -943,6 +1088,11 @@
     </footer>
 
     <script>
+        // Toggle Light/Dark Mode Logic
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
         // FAQ Accordion Toggle Logic
         function toggleFaq(button) {
             const item = button.parentElement;
