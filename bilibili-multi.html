@@ -94,8 +94,100 @@
             align-items: center;
             min-height: 100vh;
         }
+        /* ─── TOP NAVBAR STYLING ─── */
+        .top-navbar {
+            width: 100%;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-        .container { width: 100%; max-width: 1200px; }
+        .top-navbar .logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .top-navbar nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-navbar nav a, .top-navbar .dropbtn, .top-navbar .theme-switch {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .top-navbar nav a:hover, .top-navbar .dropbtn:hover {
+            color: var(--text);
+        }
+
+        .badge-new {
+            background: var(--bili-pink);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 800;
+            margin-left: 2px;
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card);
+            min-width: 140px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text);
+            padding: 10px 14px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--panel);
+            color: var(--bili-pink);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 1200px; 
+            padding: 28px 16px 0;
+        }
 
         /* ─── HEADER PANEL ─── */
         .tool-panel {
@@ -675,12 +767,28 @@
     </style>
 </head>
 <body>
-
+<!-- Top Navbar Added Here -->
+    <header class="top-navbar">
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav>
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+                <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Mode</button>
+            </nav>
+        </div>
+    </header>
 <div class="container">
 
     <div class="tool-panel">
-        <a href="https://pooreyoutuber.github.io" target="_self" class="home-brand-btn">🏠 PooreYoutuber</a>
-
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
             <div class="logo-pill">
                 <div class="b-icon">B</div>
@@ -690,7 +798,6 @@
 
         <h1>Bilibili Multi-Viewer & Grid Browser</h1>
         <p class="subtitle">Paste any Bilibili Video URL or BV/av ID, choose your slot count, and instantly compile a fully integrated responsive side-by-side stream grid in one unified window.</p>
-
         <div class="form-row">
             <input type="text" id="biliUrl" class="input-url" placeholder="e.g. https://www.bilibili.com/video/BV1GJ411x7h7/ or raw ID: BV1GJ411x7h7">
         </div>
