@@ -2,7 +2,7 @@
 <html lang="en">
 <head> 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1024">
+     <meta name="viewport" content="width=1024">
     <title>Bilibili Multi-Viewer | Boost & Analyze video Free</title>
     <meta name="description" content="Free BiliBili Multi Viewer tool for creators. Open and preview multiple BiliBili videos or Shorts simultaneously in a responsive multi-screen layout. Test video playback, compare content, and analyze viewing experience directly in your browser. No login required."> 
   
@@ -14,19 +14,19 @@
     <meta name="geo.placename" content="Worldwide">
     
     <link rel="canonical" href="https://pooreyoutuber.github.io/bilibili-multi.html">
-    <meta name="description" content="Free Bilibili Multi Viewer for videos and Shorts. Watch multiple Bilibili videos side by side, preview content across multiple screens, and test playback layouts directly in your browser. Fast, free, and no login required.">
+<meta name="description" content="Free Bilibili Multi Viewer for videos and Shorts. Watch multiple Bilibili videos side by side, preview content across multiple screens, and test playback layouts directly in your browser. Fast, free, and no login required.">
  
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://pooreyoutuber.github.io/bilibili-multi.html">
     <meta property="og:title" content="Bilibili Multi-Viewer Tool | Cross-Platform Video Grid Tester">
     <meta property="og:description" content="Free online Bilibili Multi Viewer tool. Watch multiple Bilibili videos simultaneously in a responsive layout. Great for layout testing and engagement tracking.">
-    <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg">
-    <meta property="twitter:card" content="summary_large_image">
+    <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg"> <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://pooreyoutuber.github.io/bilibili-multi.html">
     <meta property="twitter:title" content="Bilibili Multi-Viewer Tool | Cross-Platform Video Grid Tester">
     <meta property="twitter:description" content="Free online Bilibili Multi Viewer tool. Watch multiple Bilibili videos simultaneously in a responsive layout.">
     <meta property="twitter:image" content="https://pooreyoutuber.github.io/banner.jpg">
     <script type="application/ld+json">
+
     {
       "@context": "https://schema.org",
       "@graph": [
@@ -88,13 +88,12 @@
         body {
             background: var(--bg);
             color: var(--text);
-            padding: 0 0 56px;
+            padding: 28px 16px 56px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
-
         /* ─── TOP NAVBAR STYLING ─── */
         .top-navbar {
             width: 100%;
@@ -225,6 +224,35 @@
         }
 
         .tool-panel > * { position: relative; z-index: 1; }
+
+        /* Home button */
+        .home-brand-btn {
+            position: absolute;
+            top: 14px; right: 18px;
+            background: rgba(0, 174, 236, 0.08);
+            color: var(--bili-blue);
+            border: 1px solid rgba(0, 174, 236, 0.22);
+            padding: 6px 16px;
+            font-size: 0.77rem;
+            font-weight: 700;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            z-index: 20;
+        }
+
+        .home-brand-btn:hover {
+            background: var(--bili-blue);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 0 16px rgba(0, 174, 236, 0.4);
+            transform: translateY(-1px);
+        }
 
         /* Logo Pill */
         .logo-pill {
@@ -394,7 +422,7 @@
             letter-spacing: 0.2px;
         }
 
-        /* ─── VIDEO GRID ─── */
+        /* ─── VIDEO GRID (16:9 Standard Layout for Bilibili) ─── */
         .video-grid {
             display: grid;
             gap: 14px;
@@ -730,17 +758,16 @@
 
         /* Responsive */
         @media (max-width: 720px) {
-            .top-navbar { padding: 10px 14px; }
             .tool-panel { padding: 30px 18px 26px; }
             .tool-panel h1 { font-size: 1.6rem; }
             .content-panel { padding: 24px 18px; }
             .form-row { flex-direction: column; }
+            .home-brand-btn { font-size: 0.7rem; padding: 5px 10px; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Top Navbar Added Here -->
+<!-- Top Navbar Added Here -->
     <header class="top-navbar">
         <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
         <div class="nav-controls">
@@ -759,10 +786,8 @@
             </nav>
         </div>
     </header>
-
 <div class="container">
 
-    <div class="tool-panel">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
             <div class="logo-pill">
                 <div class="b-icon">B</div>
@@ -958,22 +983,26 @@
         url = url.trim();
         if (!url) return null;
 
+        // Regular expression to match standard Bilibili BV codes (e.g., BV1GJ411x7h7 or shortcodes)
         const bvRegex = /(BV[a-zA-Z0-9]{10})/i;
         const bvMatch = url.match(bvRegex);
         if (bvMatch && bvMatch[1]) {
             return bvMatch[1];
         }
 
+        // Regular expression to match older av numbers (e.g., av123456)
         const avRegex = /(av\d+)/i;
         const avMatch = url.match(avRegex);
         if (avMatch && avMatch[1]) {
             return avMatch[1];
         }
 
+        // Check if raw alphanumeric string resembles a BV code directly
         if (/^BV[a-zA-Z0-9]{10}$/i.test(url)) {
             return url;
         }
 
+        // Fallback check if it's a numeric value (treated as raw av ID)
         if (/^\d+$/.test(url)) {
             return 'av' + url;
         }
@@ -981,120 +1010,107 @@
         return null;
     }
 
-    function showEmpty(grid, message) {
-        grid.className = 'video-grid cols-auto';
-        grid.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">⚠️</div>
-                <p>${message}</p>
-            </div>
-        `;
-    }
-
-    function clearBilibili() {
-        const grid = document.getElementById('videoGridContainer');
-        showEmpty(grid, 'Your Bilibili video slots will compile here synchronously. Input a proper link above and trigger <strong>Launch Workspace</strong> to start rendering.');
-    }
-
-    function toggleTheme() {
-        // Theme toggle feature handler
-    }
-
     function launchBilibili() {
-        const rawInput = document.getElementById('biliUrl').value.trim();
-        const count = Math.min(Math.max(parseInt(document.getElementById('slotCount').value) || 4, 1), 20);
-        const layout = document.getElementById('layoutSelect').value;
-        const grid = document.getElementById('videoGridContainer');
+    const rawInput = document.getElementById('biliUrl').value.trim();
+    const count = Math.min(Math.max(parseInt(document.getElementById('slotCount').value) || 4, 1), 20);
+    const layout = document.getElementById('layoutSelect').value;
+    const grid = document.getElementById('videoGridContainer');
 
-        const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
-        const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value : "1";
+    const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
+    const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value : "1";
 
-        grid.innerHTML = '';
+    grid.innerHTML = '';
 
-        if (!rawInput) {
-            showEmpty(grid, 'Please paste a valid Bilibili video URL or standard BV ID to configure.');
-            return;
-        }
-
-        const videoId = extractBilibiliId(rawInput);
-        if (!videoId) {
-            showEmpty(grid, 'Failed to extract a valid Bilibili content ID. Please check the URL format and try again.');
-            return;
-        }
-
-        grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
-
-        const socialPlatforms = [
-            "https://www.facebook.com",
-            "https://l.facebook.com/",
-            "https://www.instagram.com",
-            "https://t.co",
-            "https://www.google.com",
-            "https://twitter.com"
-        ];
-
-        const otherPlatforms = [
-            "https://www.bilibili.com/v/trending/",
-            "https://m.bilibili.com/",
-            "https://www.baidu.com",
-            "https://www.bing.com",
-            "https://www.google.co.in"
-        ];
-
-        for (let i = 0; i < count; i++) {
-            setTimeout(() => {
-                const box = document.createElement('div');
-                box.className = 'video-box';
-
-                const label = document.createElement('div');
-                label.className = 'video-box-label';
-                label.textContent = `#${i + 1} · Slot`;
-
-                let randomRef;
-                let chance = Math.random() * 100;
-                
-                if (chance <= 70) {
-                    randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
-                } else {
-                    randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
-                }
-
-                const randomStart = Math.floor(Math.random() * 15);
-                const cacheBuster = Math.random().toString(36).substring(7); 
-
-                let embedSrc = '';
-                let baseParams = `page=1&high_quality=1&as_wide=1&autoplay=${autoPlayStatus}&muted=${isMuted ? 1 : 0}&t=${randomStart}&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
-
-                if (videoId.toLowerCase().startsWith('bv')) {
-                    embedSrc = `https://player.bilibili.com/player.html?bvid=${videoId}&${baseParams}`;
-                } else {
-                    const numericAid = videoId.replace('av', '');
-                    embedSrc = `https://player.bilibili.com/player.html?aid=${numericAid}&${baseParams}`;
-                }
-
-                const iframe = document.createElement('iframe');
-                iframe.src = embedSrc;
-                iframe.width = "100%";
-                iframe.height = "100%";
-                iframe.setAttribute('scrolling', 'no');
-                iframe.setAttribute('border', '0');
-                iframe.setAttribute('frameborder', 'no');
-                iframe.setAttribute('framespacing', '0');
-                
-                iframe.allow = 'autoplay; encrypted-media; fullscreen';
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.style.border = "none";
-                iframe.style.borderRadius = "12px";
-
-                box.appendChild(label);
-                box.appendChild(iframe);
-                grid.appendChild(box);
-
-            }, i * 1500); 
-        }
-
-        setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    if (!rawInput) {
+        showEmpty(grid, 'Please paste a valid Bilibili video URL or standard BV ID to configure.');
+        return;
     }
-</script>   
+
+    const videoId = extractBilibiliId(rawInput);
+    if (!videoId) {
+        showEmpty(grid, 'Failed to extract a valid Bilibili content ID. Please check the URL format and try again.');
+        return;
+    }
+
+    grid.className = `video-grid ${layout === 'auto' ? 'cols-auto' : layout}`;
+
+    const socialPlatforms = [
+        "https://www.facebook.com",
+        "https://l.facebook.com/",
+        "https://www.instagram.com",
+        "https://t.co", // X (Twitter)
+        "https://www.google.com",
+        "https://twitter.com"
+    ];
+
+    const otherPlatforms = [
+        "https://www.bilibili.com/v/trending/",
+        "https://m.bilibili.com/",
+        "https://www.baidu.com",
+        "https://www.bing.com",
+        "https://www.google.co.in"
+    ];
+
+   
+    for (let i = 0; i < count; i++) {
+
+        setTimeout(() => {
+            const box = document.createElement('div');
+            box.className = 'video-box';
+
+            const label = document.createElement('div');
+            label.className = 'video-box-label';
+            label.textContent = `#${i + 1} · Slot`;
+
+            // Logic for 70/30 Traffic Split
+            let randomRef;
+            let chance = Math.random() * 100;
+            
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
+            
+            const randomStart = Math.floor(Math.random() * 15);
+            const cacheBuster = Math.random().toString(36).substring(7); 
+
+          
+            let embedSrc = '';
+            let baseParams = `page=1&high_quality=1&as_wide=1&autoplay=${autoPlayStatus}&muted=${isMuted ? 1 : 0}&t=${randomStart}&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
+
+            if (videoId.toLowerCase().startsWith('bv')) {
+                embedSrc = `https://player.bilibili.com/player.html?bvid=${videoId}&${baseParams}`;
+            } else {
+                const numericAid = videoId.replace('av', '');
+                embedSrc = `https://player.bilibili.com/player.html?aid=${numericAid}&${baseParams}`;
+            }
+
+            const iframe = document.createElement('iframe');
+            iframe.src = embedSrc;
+            iframe.width = "100%";
+            iframe.height = "100%";
+            iframe.setAttribute('scrolling', 'no');
+            iframe.setAttribute('border', '0');
+            iframe.setAttribute('frameborder', 'no');
+            iframe.setAttribute('framespacing', '0');
+            
+        
+            iframe.allow = 'autoplay; encrypted-media; fullscreen';
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
+
+            box.appendChild(label);
+            box.appendChild(iframe);
+            grid.appendChild(box);
+
+        }, i * 1500); 
+    }
+
+    setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+}
+ </script>   
 </body>
 </html>
