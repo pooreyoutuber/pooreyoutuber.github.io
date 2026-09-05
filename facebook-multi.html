@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -118,7 +118,7 @@
     </script>
     
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-    
+  
     <style>
         :root {
             --bg: #f8fafc;
@@ -140,7 +140,8 @@
             line-height: 1.6;
         }
 
-        .navbar {
+        /* Header & Navigation Styles */
+        header {
             background: var(--card-bg);
             padding: 1rem 5%;
             display: flex;
@@ -157,6 +158,87 @@
             font-weight: 700;
             color: var(--fb-blue);
             text-decoration: none;
+        }
+
+        header nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        header nav a:hover {
+            background-color: #f1f5f9;
+        }
+
+        .badge-new {
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .dropbtn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 10px 16px;
+            display: block;
+            border-radius: 0;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f8fafc;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .donate-coffee-btn {
+            background-color: #ffdd00;
+            color: #000 !important;
+            border-radius: 20px !important;
+        }
+
+        .donate-coffee-btn:hover {
+            background-color: #facc15 !important;
         }
 
         .container {
@@ -324,6 +406,7 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
+            header { flex-direction: column; gap: 15px; }
             .input-wrapper { flex-direction: column; }
             input, button { width: 100%; }
             #video-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -333,10 +416,23 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="https://pooreyoutuber.github.io/facebook-multi.html" class="logo">Facebook Multi Viewer 2.0</a>
-    <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Free Creator Tools</div>
-</nav>
+<header>
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+    <div class="nav-controls">
+        <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                </div>
+            </div>
+            <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+        </nav>
+    </div>
+</header>
 
 <div class="container">
     <div class="ad-container-top">
@@ -525,9 +621,8 @@
         }
 
         // Facebook Embed URL conversion
-        // Format: https://www.facebook.com/plugins/video.php?href=[ENCODED_URL]
         const encodedUrl = encodeURIComponent(url);
-       const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
+        const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=500&autoplay=true&mute=1`;
         grid.innerHTML = '';
         grid.style.display = 'grid';
 
@@ -547,38 +642,30 @@
         // Scroll to players
         grid.scrollIntoView({ behavior: 'smooth' });
     }
+
     // FAQ Accordion JavaScript Logic
-    // FAQ Accordion
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".faq-question").forEach(item => {
+            item.addEventListener("click", function () {
+                const parent = this.parentElement;
+                const answer = this.nextElementSibling;
 
-    document.querySelectorAll(".faq-question").forEach(item => {
+                if (parent.classList.contains("active")) {
+                    parent.classList.remove("active");
+                    answer.style.maxHeight = null;
+                } else {
+                    document.querySelectorAll(".faq-item").forEach(faq => {
+                        faq.classList.remove("active");
+                        faq.querySelector(".faq-answer").style.maxHeight = null;
+                    });
 
-        item.addEventListener("click", function () {
-
-            const parent = this.parentElement;
-            const answer = this.nextElementSibling;
-
-            if (parent.classList.contains("active")) {
-                parent.classList.remove("active");
-                answer.style.maxHeight = null;
-            } else {
-
-                document.querySelectorAll(".faq-item").forEach(faq => {
-                    faq.classList.remove("active");
-                    faq.querySelector(".faq-answer").style.maxHeight = null;
-                });
-
-                parent.classList.add("active");
-                answer.style.maxHeight = answer.scrollHeight + "px";
-            }
-
+                    parent.classList.add("active");
+                    answer.style.maxHeight = answer.scrollHeight + "px";
+                }
+            });
         });
-
     });
-
-});
 </script>
 
 </body>
 </html>
-    
