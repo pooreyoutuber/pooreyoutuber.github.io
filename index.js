@@ -1045,7 +1045,49 @@ app.post('/api/export', express.json(), async (req, res) => {
 });
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// ===================================================================
+// NEW AI AGENT ENDPOINT: POOREYOUTUBER CHATBOT AGENT
+// ===================================================================
+app.post('/chatbot', async (req, res) => {
+    if (!GEMINI_KEY) {
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key missing hai.' });
+    }
 
+    const { message } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ error: 'Message input zaroori hai.' });
+    }
+
+    const systemPrompt = `You are "PooreYoutuber Agent", an intelligent, helpful, and friendly AI assistant created for the PooreYoutuber platform.
+Your job is to assist users with their content creation, YouTube growth strategies, Instagram Reels ideas, digital tools, and general queries.
+Always stay polite, direct, concise, and communicate in natural Hinglish or English based on user query language.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+                { role: "user", parts: [{ text: `${systemPrompt}\n\nUser Question: ${message}` }] }
+            ],
+            config: {
+                temperature: 0.7,
+            },
+        });
+
+        const replyText = response.text ? response.text.trim() : "Koi response generate nahi ho paya.";
+        
+        res.status(200).json({ 
+            success: true, 
+            reply: replyText 
+        });
+
+    } catch (error) {
+        console.error('PooreYoutuber Agent API Error:', error.message);
+        res.status(500).json({ 
+            error: `AI Agent Response Failed: ${error.message.substring(0, 80)}` 
+        });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
