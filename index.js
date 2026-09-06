@@ -32,7 +32,7 @@ try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
     // Fallback to environment variables
-    GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
+    GEMINI_KEY = process.env.GEMINI_KEY || process.env.GEMINI_KEY; 
 }
 // --- DYNAMIC IMPORT FIX ---
 let ai;
@@ -792,7 +792,7 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
         const spokenLanguage = req.body.language || 'en';
 
         // Aapki file me variable ka naam GEMINI_KEY hai ya process.env.GEMINI_API_KEY, use check kar lega
-        const activeGeminiKey = GEMINI_KEY || process.env.GEMINI_API_KEY;
+        const activeGeminiKey = GEMINI_KEY || process.env.GEMINI_KEY;
 
         if (!activeGeminiKey) {
             console.error("❌ CRITICAL: Gemini API Key is missing!");
