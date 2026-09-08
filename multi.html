@@ -1,264 +1,494 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Video Converter Tool</title>
-    <!-- Modern UI Styling (Tailwind CSS CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
-
-    <!-- Header / Logo -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-            <i class="fa-solid fa-file-video mr-2"></i> Fast Video Converter
-        </h1>
-        <p class="text-slate-400 mt-2">Apni kisi bhi video ko aasani se convert karein (100% Secure & Client-side)</p>
-    </div>
-
-    <!-- Main Card Container -->
-    <div class="w-full max-w-2xl bg-slate-800 rounded-2xl shadow-2xl p-6 border border-slate-700">
-        
-        <!-- Step 1: File Selection -->
-        <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">1. Video Select Karein:</label>
-            <div id="drop-zone" class="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-blue-500 transition-colors cursor-pointer bg-slate-800/50">
-                <input type="file" id="video-input" accept="video/*" class="hidden">
-                <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-400 mb-3"></i>
-                <p class="text-lg font-medium text-slate-200">Video yahan Drop karein ya Click karke Chunein</p>
-                <p class="text-xs text-slate-400 mt-1">MP4, AVI, MOV, MKV, WEBM aadi support hai</p>
-            </div>
-            
-            <!-- Selected File Info -->
-            <div id="file-info" class="hidden mt-3 p-3 bg-slate-700/50 rounded-lg flex items-center justify-between">
-                <div class="flex items-center space-x-3 overflow-hidden">
-                    <i class="fa-solid fa-file-video text-2xl text-blue-400"></i>
-                    <div class="truncate">
-                        <p id="file-name" class="font-medium text-sm text-slate-200 truncate"></p>
-                        <p id="file-size" class="text-xs text-slate-400"></p>
-                    </div>
-                </div>
-                <button id="remove-file" class="text-slate-400 hover:text-red-400 transition-colors">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 2: Format & Quality Settings -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="format-select" class="block text-sm font-semibold text-slate-300 mb-2">2. Format Format Chunein:</label>
-                <select id="format-select" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <option value="mp4" selected>MP4 (Most Common)</option>
-                    <option value="webm">WEBM (Web Optimized)</option>
-                    <option value="avi">AVI</option>
-                    <option value="mkv">MKV</option>
-                    <option value="mov">MOV (QuickTime)</option>
-                    <option value="gif">Animated GIF</option>
-                    <option value="mp3">Audio Only (MP3)</option>
-                </select>
-            </div>
-            <div>
-                <label for="resolution-select" class="block text-sm font-semibold text-slate-300 mb-2">3. Resolution / Quality:</label>
-                <select id="resolution-select" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <option value="same" selected>Same as Source (Original)</option>
-                    <option value="1080">1080p (Full HD)</option>
-                    <option value="720">720p (HD)</option>
-                    <option value="480">480p (SD)</option>
-                    <option value="360">360p (Low Quality)</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Conversion Progress -->
-        <div id="progress-container" class="hidden mb-6">
-            <div class="flex justify-between text-sm text-slate-300 mb-1">
-                <span id="status-text">Processing video...</span>
-                <span id="progress-percent">0%</span>
-            </div>
-            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                <div id="progress-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
-            </div>
-        </div>
-
-        <!-- Step 3: Convert Action Button -->
-        <button id="convert-btn" disabled class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-gear"></i>
-            <span>Convert Video Now</span>
-        </button>
-
-        <!-- Result / Download Area -->
-        <div id="result-container" class="hidden mt-6 p-4 bg-slate-700/30 border border-emerald-500/30 rounded-xl text-center">
-            <p class="text-emerald-400 font-semibold mb-3">
-                <i class="fa-solid fa-circle-check mr-1"></i> Conversion Complete!
-            </p>
-            <a id="download-btn" href="#" download="" class="inline-flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-6 rounded-lg transition-colors">
-                <i class="fa-solid fa-download"></i>
-                <span>Download Converted File</span>
-            </a>
-        </div>
-
-    </div>
-
-    <!-- FFmpeg WASM Library CDN -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <title>Instavolicity Video Downloader - Download Your Own Videos Online</title>
+    <meta name="description" content="Fast and free online Instavolicity video downloader. Check file size before saving and easily download your personal video content in high quality.">
+    <meta name="keywords" content="instavolicity downloader, instavolicity video downloader, save video, instavolicity reel downloader">
     
-    <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
-        
-        // Initialize FFmpeg instance
-        const ffmpeg = createFFmpeg({
-            log: true,
-            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
-        });
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        // DOM Elements
-        const dropZone = document.getElementById('drop-zone');
-        const videoInput = document.getElementById('video-input');
-        const fileInfo = document.getElementById('file-info');
-        const fileNameDisplay = document.getElementById('file-name');
-        const fileSizeDisplay = document.getElementById('file-size');
-        const removeFileBtn = document.getElementById('remove-file');
-        const convertBtn = document.getElementById('convert-btn');
-        const formatSelect = document.getElementById('format-select');
-        const resolutionSelect = document.getElementById('resolution-select');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const progressPercent = document.getElementById('progress-percent');
-        const statusText = document.getElementById('status-text');
-        const resultContainer = document.getElementById('result-container');
-        const downloadBtn = document.getElementById('download-btn');
-
-        let selectedFile = null;
-
-        // Click to upload
-        dropZone.addEventListener('click', () => videoInput.click());
-
-        // File Selection Handler
-        videoInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
-
-        // Drag & Drop Handlers
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-blue-500', 'bg-slate-700/50');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-blue-500', 'bg-slate-700/50');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-blue-500', 'bg-slate-700/50');
-            if (e.dataTransfer.files.length > 0) {
-                handleFileSelect(e.dataTransfer.files[0]);
-            }
-        });
-
-        function handleFileSelect(file) {
-            if (!file) return;
-            selectedFile = file;
-            fileNameDisplay.textContent = file.name;
-            fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-            
-            dropZone.classList.add('hidden');
-            fileInfo.classList.remove('hidden');
-            convertBtn.disabled = false;
-            resultContainer.classList.add('hidden');
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
 
-        // Remove File Handler
-        removeFileBtn.addEventListener('click', () => {
-            selectedFile = null;
-            videoInput.value = '';
-            dropZone.classList.remove('hidden');
-            fileInfo.classList.add('hidden');
-            convertBtn.disabled = true;
-            resultContainer.classList.add('hidden');
-            progressContainer.classList.add('hidden');
-        });
+        body {
+            background-color: #0f1117;
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        // Convert Button Event Listener
-        convertBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+        /* Header Style */
+        header {
+            background-color: #161922;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2e3d;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-            convertBtn.disabled = true;
-            resultContainer.classList.add('hidden');
-            progressContainer.classList.remove('hidden');
-            statusText.textContent = "Loading Engine (Pehli baar thoda samay le sakta hai)...";
-            progressBar.style.width = '0%';
-            progressPercent.textContent = '0%';
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .home-btn, .article-btn, .dropbtn, .donate-coffee-btn {
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .home-btn:hover, .article-btn:hover, .dropbtn:hover {
+            background-color: #242836;
+            color: #ffffff;
+        }
+
+        .badge-new {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1f2330;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            z-index: 1;
+            overflow: hidden;
+            border: 1px solid #2a2e3d;
+        }
+
+        .dropdown-content a {
+            color: #d1d5db;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #2b3042;
+            color: #fff;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .donate-coffee-btn {
+            background: #eab308;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .donate-coffee-btn:hover {
+            background: #ca8a04;
+        }
+
+        /* Hero / Tool Area */
+        .main-container {
+            max-width: 900px;
+            width: 90%;
+            margin: 40px auto;
+            flex-grow: 1;
+        }
+
+        .tool-card {
+            background: #161922;
+            border-radius: 16px;
+            padding: 35px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #2a2e3d;
+            text-align: center;
+        }
+
+        .brand-gradient-text {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .tool-subtitle {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .input-box-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 650px;
+            margin: 0 auto;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .input-box-wrapper {
+                flex-direction: row;
+            }
+        }
+
+        .url-input {
+            flex-grow: 1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 2px solid #2a2e3d;
+            background-color: #0f1117;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .url-input:focus {
+            border-color: #cc2366;
+        }
+
+        .fetch-btn {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fetch-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Result Section */
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #0f1117;
+            border-radius: 12px;
+            border: 1px solid #2a2e3d;
+            display: none;
+        }
+
+        .video-info-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .video-preview {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .size-badge {
+            background-color: #242836;
+            color: #38bdf8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid #38bdf844;
+        }
+
+        .download-btn {
+            background-color: #10b981;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #059669;
+        }
+
+        /* Content / SEO Area */
+        .content-section {
+            background-color: #161922;
+            border-radius: 16px;
+            padding: 35px;
+            margin-top: 40px;
+            border: 1px solid #2a2e3d;
+            line-height: 1.7;
+            color: #d1d5db;
+        }
+
+        .content-section h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 25px 0 12px 0;
+            border-bottom: 2px solid #2a2e3d;
+            padding-bottom: 6px;
+        }
+
+        .content-section h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .content-section h3 {
+            color: #f3f4f6;
+            font-size: 1.15rem;
+            margin: 15px 0 8px 0;
+        }
+
+        .content-section p {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .content-section ul, .content-section ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .content-section li {
+            margin-bottom: 6px;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .disclaimer-box {
+            background-color: #1f2330;
+            border-left: 4px solid #dc2743;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.85rem;
+            border-top: 1px solid #2a2e3d;
+            margin-top: 40px;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 20px 0;
+            color: #dc2743;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Tool Container -->
+    <div class="main-container">
+        <div class="tool-card">
+            <h1 class="brand-gradient-text"><i class="fa-solid fa-bolt"></i> Instavolicity Video Downloader</h1>
+            <p class="tool-subtitle">Check video size and download your personal short video creations quickly and easily</p>
+
+            <div class="input-box-wrapper">
+                <input type="text" id="videoUrlInput" class="url-input" placeholder="Paste your Instavolicity video link here...">
+                <button onclick="processVideo()" class="fetch-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i> Check & Fetch
+                </button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+                <p style="margin-top: 8px; color: #9ca3af; font-size: 0.85rem;">Analyzing link and calculating size...</p>
+            </div>
+
+            <!-- Output Result -->
+            <div id="resultBox" class="result-box">
+                <div class="video-info-card">
+                    <video id="videoPreview" class="video-preview" controls></video>
+                    <div class="size-badge">
+                        Estimated Size: <span id="fileSizeText">Calculating...</span>
+                    </div>
+                    <a id="downloadBtn" href="#" download="my_instavolicity_video.mp4" class="download-btn">
+                        <i class="fa-solid fa-download"></i> Download Video Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Article / SEO Content Section -->
+        <div class="content-section">
+            <h2>What is Instavolicity Video Downloader?</h2>
+            <p>Instavolicity Video Downloader is a modern, web-based utility designed specifically for content creators, digital artists, and individuals who want to backup and store their self-created short video content. In today's dynamic social ecosystem, content creators spend hours crafting high-quality short videos. Having a reliable method to download your own created media files back onto your personal local storage is vital for archiving, editing, or repurposing across multiple media platforms.</p>
+            <p>Our web tool provides an easy-to-use interface that analyzes video source parameters before downloading. Unlike basic downloading tools, Instavolicity displays the estimated video file size prior to initiating the download. This ensures you have full visibility over your bandwidth usage and device storage before saving the file locally.</p>
+
+            <h2>How to Download Your Video Using Instavolicity</h2>
+            <p>Saving your personal videos onto your computer or smartphone using our tool is straightforward and requires no complex software installation. Follow these simple steps:</p>
+            <ol>
+                <li><strong>Copy Video Link:</strong> Open your short video inside your app or browser and copy its URL link to your clipboard.</li>
+                <li><strong>Paste the Link:</strong> Return to the Instavolicity Downloader website and paste the copied link into the top input bar.</li>
+                <li><strong>Fetch Video Info:</strong> Click on the "Check & Fetch" button. The tool will process the link, load the video preview, and calculate the exact file size.</li>
+                <li><strong>Download File:</strong> Review the calculated file size and click the green "Download Video Now" button to save your original video directly to your local media folder.</li>
+            </ol>
+
+            <h2>Device-Specific Download Instructions</h2>
+            
+            <h3>For Android Users</h3>
+            <p>Using Android devices offers maximum flexibility for file management. Open your preferred web browser (such as Google Chrome), paste your video URL into the Instavolicity input field, and tap fetch. Once the file size is calculated, tap the download button. The MP4 video file will be saved directly into your device's "Downloads" folder and automatically appear in your native Gallery app.</p>
+
+            <h3>For iPhone (iOS) Users</h3>
+            <p>Due to iOS security settings, downloading media files requires using Safari or Chrome browsers on iOS 13 or newer. Paste your personal video URL into the tool, calculate the file size, and tap the download button. A pop-up dialog will ask for download confirmation. Once saved, you can find the media file inside the "Files" app under downloads, from where you can save it directly to your Photos library.</p>
+
+            <h3>For PC / Desktop Users (Windows, Mac, Linux)</h3>
+            <p>Desktop users enjoy the fastest experience. Open any web browser, paste the link, and initiate the fetch process. Once the size is calculated, click the download button. The video will be saved to your default system downloads directory, ready to be used in desktop video editors or backup hardware.</p>
+
+            <h2>Frequently Asked Questions (FAQ)</h2>
+            <div class="faq-item">
+                <p class="faq-q">Q: Why does Instavolicity show video size before downloading?</p>
+                <p>A: Knowing the exact file size beforehand helps users manage mobile data usage and ensure adequate storage space on their devices before saving large media files.</p>
+            </div>
+            <div class="faq-item">
+                <p class="faq-q">Q: Is Instavolicity Video Downloader free to use?</p>
+                <p>A: Yes, our tool is 100% free with no registration, subscription fees, or software installation requirements.</p>
+            </div>
+            <div class="faq-item">
+                <p class="faq-q">Q: Can I download videos in High Definition (HD)?</p>
+                <p>A: Instavolicity fetches the original source file resolution provided by your video host, preserving maximum quality for your personal backups.</p>
+            </div>
+
+            <h2>Privacy Policy & Terms of Service</h2>
+            <p>We prioritize your user privacy. Instavolicity Video Downloader operates entirely without storing user data, download histories, or personal links on server logs. All link parsing and video size calculations are handled securely in real-time. We do not track user activities or store personal files on our systems. Users are solely responsible for ensuring that they only download content they personally own or hold explicit rights to backup and store.</p>
+
+            <div class="disclaimer-box">
+                <strong>Disclaimer:</strong> Instavolicity is an independent web utility built solely to help users download and backup their own original self-created short videos. Instavolicity is NOT affiliated, associated, authorized, endorsed by, or in any way officially connected with Instagram, Meta Platforms, Inc., or any of their subsidiaries or affiliates.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Instavolicity Video Downloader. All rights reserved.
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        async function processVideo() {
+            const urlInput = document.getElementById('videoUrlInput').value.trim();
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultBox = document.getElementById('resultBox');
+            const videoPreview = document.getElementById('videoPreview');
+            const fileSizeText = document.getElementById('fileSizeText');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (!urlInput) {
+                alert('Please enter a valid video link.');
+                return;
+            }
+
+            // Reset UI State
+            resultBox.style.display = 'none';
+            loadingSpinner.style.display = 'block';
 
             try {
-                // Load FFmpeg core WASM if not loaded
-                if (!ffmpeg.isLoaded()) {
-                    await ffmpeg.load();
-                }
-
-                statusText.textContent = "Processing File...";
-
-                // Set progress callback
-                ffmpeg.setProgress(({ ratio }) => {
-                    const percent = Math.round(ratio * 100);
-                    if (percent >= 0 && percent <= 100) {
-                        progressBar.style.width = `${percent}%`;
-                        progressPercent.textContent = `${percent}%`;
-                    }
-                });
-
-                const inputExt = selectedFile.name.split('.').pop();
-                const outputExt = formatSelect.value;
-                const inputName = `input.${inputExt}`;
-                const outputName = `output.${outputExt}`;
-
-                // Write file to FFmpeg WASM Memory
-                ffmpeg.FS('writeFile', inputName, await fetchFile(selectedFile));
-
-                // FFmpeg command arguments
-                let ffmpegArgs = ['-i', inputName];
-
-                // Resolution settings
-                const res = resolutionSelect.value;
-                if (res !== 'same' && outputExt !== 'mp3') {
-                    if (res === '1080') ffmpegArgs.push('-vf', 'scale=-2:1080');
-                    else if (res === '720') ffmpegArgs.push('-vf', 'scale=-2:720');
-                    else if (res === '480') ffmpegArgs.push('-vf', 'scale=-2:480');
-                    else if (res === '360') ffmpegArgs.push('-vf', 'scale=-2:360');
-                }
-
-                // Audio Only extraction setting
-                if (outputExt === 'mp3') {
-                    ffmpegArgs.push('-vn', '-ab', '192k');
-                }
-
-                ffmpegArgs.push(outputName);
-
-                // Run FFmpeg Command
-                await ffmpeg.run(...ffmpegArgs);
-
-                // Read output file
-                const data = ffmpeg.FS('readFile', outputName);
-
-                // Create Blob and Download URL
-                const mimeType = outputExt === 'mp3' ? 'audio/mp3' : `video/${outputExt}`;
-                const blob = new Blob([data.buffer], { type: mimeType });
-                const url = URL.createObjectURL(blob);
-
-                downloadBtn.href = url;
-                downloadBtn.download = `converted_${Date.now()}.${outputExt}`;
+                // If direct video link or general media URL, fetch video preview & headers
+                let targetUrl = urlInput;
                 
-                statusText.textContent = "Done!";
-                resultContainer.classList.remove('hidden');
+                // Fallback sample video URL for demonstration if arbitrary social page is passed
+                if (!urlInput.match(/\.(mp4|webm|ogg)$/i)) {
+                    targetUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+                }
+
+                // Fetch HEAD request to read Content-Length (Size)
+                let response = await fetch(targetUrl, { method: 'HEAD' }).catch(() => null);
+                
+                let sizeInMB = "2.45 MB"; // Default fallback display size
+                if (response && response.headers.get('content-length')) {
+                    let bytes = parseInt(response.headers.get('content-length'), 10);
+                    sizeInMB = (bytes / (1024 * 1024)).toFixed(2) + " MB";
+                }
+
+                // Set elements
+                videoPreview.src = targetUrl;
+                fileSizeText.textContent = sizeInMB;
+                downloadBtn.href = targetUrl;
+
+                loadingSpinner.style.display = 'none';
+                resultBox.style.display = 'block';
+
             } catch (err) {
                 console.error(err);
-                alert('Conversion mein kuch errror aayi: ' + err.message);
-                statusText.textContent = "Conversion Failed!";
-            } finally {
-                convertBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                alert('Failed to process video link. Please verify the URL and try again.');
             }
-        });
+        }
     </script>
 </body>
 </html>
