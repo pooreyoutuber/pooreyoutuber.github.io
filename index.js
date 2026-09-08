@@ -1046,47 +1046,43 @@ app.post('/api/export', express.json(), async (req, res) => {
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ===================================================================
-// NEW AI AGENT ENDPOINT: POOREYOUTUBER CHATBOT AGENT
 // ===================================================================
-app.post('/chatbot', async (req, res) => {
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key missing hai.' });
+// NEW TOOL: INSTAGRAM REEL DOWNLOADER ENDPOINT (yt-dlp)
+// ===================================================================
+app.post('/insta', async (req, res) => {
+    const { url } = req.body;
+
+    if (!url) {
+        return res.status(400).json({ success: false, message: 'URL is required.' });
     }
 
-    const { message } = req.body;
+    // Command to get direct media URL & title using yt-dlp
+    const command = `yt-dlp -g -f "b[ext=mp4]/best[ext=mp4]/best" "${url}"`;
 
-    if (!message) {
-        return res.status(400).json({ error: 'Message input zaroori hai.' });
-    }
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error('yt-dlp Execution Error:', error.message);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to process video URL. Ensure yt-dlp is installed on server.'
+            });
+        }
 
-    const systemPrompt = `You are "PooreYoutuber Agent", an intelligent, helpful, and friendly AI assistant created for the PooreYoutuber platform.
-Your job is to assist users with their content creation, YouTube growth strategies, Instagram Reels ideas, digital tools, and general queries.
-Always stay polite, direct, concise, and communicate in natural Hinglish or English based on user query language.`;
+        const directLink = stdout.trim().split('\n')[0];
 
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: [
-                { role: "user", parts: [{ text: `${systemPrompt}\n\nUser Question: ${message}` }] }
-            ],
-            config: {
-                temperature: 0.7,
-            },
-        });
-
-        const replyText = response.text ? response.text.trim() : "Koi response generate nahi ho paya.";
-        
-        res.status(200).json({ 
-            success: true, 
-            reply: replyText 
-        });
-
-    } catch (error) {
-        console.error('PooreYoutuber Agent API Error:', error.message);
-        res.status(500).json({ 
-            error: `AI Agent Response Failed: ${error.message.substring(0, 80)}` 
-        });
-    }
+        if (directLink && directLink.startsWith('http')) {
+            return res.status(200).json({
+                success: true,
+                downloadUrl: directLink,
+                fileSize: 'Calculated dynamically'
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                message: 'Could not fetch a valid media stream URL.'
+            });
+        }
+    });
 });
 //==================================================
 // --- SERVER START ---
