@@ -1049,6 +1049,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ===================================================================
 // NEW TOOL: INSTAGRAM REEL DOWNLOADER ENDPOINT (yt-dlp)
 // ===================================================================
+// ===================================================================
+// NEW TOOL: INSTAGRAM REEL DOWNLOADER ENDPOINT (yt-dlp)
+// ===================================================================
 app.post('/insta', async (req, res) => {
     const { url } = req.body;
 
@@ -1083,6 +1086,33 @@ app.post('/insta', async (req, res) => {
             });
         }
     });
+});
+
+// ===================================================================
+// FORCE DOWNLOAD PROXY ROUTE (Direct Stream Download Fix)
+// ===================================================================
+app.get('/download-file', async (req, res) => {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
+        return res.status(400).send('Video URL is required.');
+    }
+
+    try {
+        const response = await fetch(videoUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch media stream: ${response.statusText}`);
+        }
+
+        // Force browser to download instead of playing
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', 'attachment; filename="instavolicity_reel.mp4"');
+
+        // Stream video to response
+        response.body.pipe(res);
+    } catch (err) {
+        console.error('Download proxy error:', err.message);
+        res.status(500).send('Failed to process video download.');
+    }
 });
 //==================================================
 // --- SERVER START ---
