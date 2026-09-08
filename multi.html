@@ -409,69 +409,70 @@
     </footer>
 
     <!-- Logic Script -->
-    <script>
-    async function processVideo() {
-        const urlInput = document.getElementById('videoUrlInput').value.trim();
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const resultBox = document.getElementById('resultBox');
-        const videoPreview = document.getElementById('videoPreview');
-        const fileSizeText = document.getElementById('fileSizeText');
-        const downloadBtn = document.getElementById('downloadBtn');
+   <script>
+async function processVideo() {
+    const urlInput = document.getElementById('videoUrlInput').value.trim();
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const resultBox = document.getElementById('resultBox');
+    const videoPreview = document.getElementById('videoPreview');
+    const fileSizeText = document.getElementById('fileSizeText');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-        if (!urlInput) {
-            alert('Please enter a valid Instagram Reel link.');
-            return;
-        }
+    if (!urlInput) {
+        alert('Please enter a valid Instagram Reel link.');
+        return;
+    }
 
-        // UI Reset
-        resultBox.style.display = 'none';
-        loadingSpinner.style.display = 'block';
+    // UI Reset
+    resultBox.style.display = 'none';
+    loadingSpinner.style.display = 'block';
 
-        try {
-            // Render Backend Server Call
-            const response = await fetch('https://pooreyoutuber-github-io-luly.onrender.com/insta', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ url: urlInput })
-            });
+    try {
+        // Render Backend Server Call
+        const response = await fetch('https://pooreyoutuber-github-io-luly.onrender.com/insta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: urlInput })
+        });
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (result.success && result.downloadUrl) {
-                const targetUrl = result.downloadUrl;
-                
-                // Fetch HEAD request for Size calculation
-                let sizeInMB = "N/A";
-                try {
-                    let headRes = await fetch(targetUrl, { method: 'HEAD' });
-                    if (headRes && headRes.headers.get('content-length')) {
-                        let bytes = parseInt(headRes.headers.get('content-length'), 10);
-                        sizeInMB = (bytes / (1024 * 1024)).toFixed(2) + " MB";
-                    }
-                } catch (e) {
-                    sizeInMB = result.fileSize || "1.85 MB"; // Fallback size
+        if (result.success && result.downloadUrl) {
+            const targetUrl = result.downloadUrl;
+            
+            // Fetch HEAD request for Size calculation
+            let sizeInMB = "N/A";
+            try {
+                let headRes = await fetch(targetUrl, { method: 'HEAD' });
+                if (headRes && headRes.headers.get('content-length')) {
+                    let bytes = parseInt(headRes.headers.get('content-length'), 10);
+                    sizeInMB = (bytes / (1024 * 1024)).toFixed(2) + " MB";
                 }
-
-                // UI Update
-                videoPreview.src = targetUrl;
-                fileSizeText.textContent = sizeInMB;
-                downloadBtn.href = targetUrl;
-
-downloadBtn.href = `https://pooreyoutuber-github-io-luly.onrender.com/download-file?url=${encodeURIComponent(targetUrl)}`;
-                loadingSpinner.style.display = 'none';
-                resultBox.style.display = 'block';
-            } else {
-                throw new Error(result.message || 'Unable to fetch video');
+            } catch (e) {
+                sizeInMB = result.fileSize || "1.85 MB"; // Fallback size
             }
 
-        } catch (err) {
-            console.error(err);
+            // UI Update
+            videoPreview.src = targetUrl; // Preview player direct URL par chalega
+            fileSizeText.textContent = sizeInMB;
+
+            // FIX: Download button ab Backend Proxy Route ko call karega force-download ke liye
+            downloadBtn.href = `https://pooreyoutuber-github-io-luly.onrender.com/download-file?url=${encodeURIComponent(targetUrl)}`;
+
             loadingSpinner.style.display = 'none';
-            alert('Failed to process video link. Please verify the URL or try again later.');
+            resultBox.style.display = 'block';
+        } else {
+            throw new Error(result.message || 'Unable to fetch video');
         }
+
+    } catch (err) {
+        console.error(err);
+        loadingSpinner.style.display = 'none';
+        alert('Failed to process video link. Please verify the URL or try again later.');
     }
-    </script>
+}
+</script>
 </body>
 </html>
