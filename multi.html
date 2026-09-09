@@ -86,7 +86,7 @@
             min-width: 160px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
             border-radius: 8px;
-            z-index: 1;
+            z-index: 1001;
             overflow: hidden;
             border: 1px solid #2a2e3d;
         }
@@ -142,6 +142,7 @@
             font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 8px;
+            word-wrap: break-word;
         }
 
         .tool-subtitle {
@@ -174,6 +175,7 @@
             font-size: 0.95rem;
             outline: none;
             transition: border-color 0.3s;
+            width: 100%;
         }
 
         .url-input:focus {
@@ -194,6 +196,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .fetch-btn:hover {
@@ -218,6 +221,7 @@
         }
 
         .video-preview {
+            width: 100%;
             max-width: 100%;
             max-height: 350px;
             border-radius: 10px;
@@ -243,8 +247,11 @@
             font-weight: 600;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             transition: background 0.3s;
+            width: 100%;
+            max-width: 300px;
         }
 
         .download-btn:hover {
@@ -328,6 +335,60 @@
             margin: 20px 0;
             color: #dc2743;
         }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 4%;
+            }
+
+            .nav-controls nav {
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .home-btn, .article-btn, .dropbtn, .donate-coffee-btn {
+                padding: 6px 10px;
+                font-size: 0.82rem;
+            }
+
+            .main-container {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .tool-card {
+                padding: 20px 15px;
+            }
+
+            .brand-gradient-text {
+                font-size: 1.6rem;
+            }
+
+            .tool-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 20px;
+            }
+
+            .content-section {
+                padding: 20px 15px;
+                margin-top: 25px;
+            }
+
+            .content-section h2 {
+                font-size: 1.25rem;
+            }
+
+            .content-section p, .content-section ul, .content-section ol {
+                font-size: 0.88rem;
+            }
+
+            .download-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -383,7 +444,8 @@
                 </div>
             </div>
         </div>
-<!-- SEO Content Section -->
+
+        <!-- SEO Content Section -->
         <div class="content-section">
             <h2>What is Instavolicity Video Downloader?</h2>
             <p>Instavolicity Video Downloader is a lightweight, web-based media archiving utility engineered specifically for content creators, vloggers, and digital artists. Managing video media across platforms requires creators to maintain local offline archives of their work. Instavolicity provides a streamlined mechanism to retrieve, preview, and store self-created short video assets directly onto your local drive.</p>
@@ -432,6 +494,7 @@
             </div>
         </div>
     </div>
+
     <!-- Footer -->
     <footer>
         &copy; 2026 Instavolicity Video Downloader. All rights reserved.
@@ -483,7 +546,7 @@ async function processVideo() {
                 sizeInMB = result.fileSize || "1.85 MB"; // Fallback size
             }
 
-            // UI Update
+              // UI Update
             videoPreview.src = targetUrl; // Preview player direct URL par chalega
             fileSizeText.textContent = sizeInMB;
 
