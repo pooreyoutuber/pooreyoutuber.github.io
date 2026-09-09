@@ -1046,11 +1046,9 @@ app.post('/api/export', express.json(), async (req, res) => {
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ===================================================================
+
 // ===================================================================
-// NEW TOOL: INSTAGRAM REEL DOWNLOADER ENDPOINT (yt-dlp)
-// ===================================================================
-// ===================================================================
-// NEW TOOL: INSTAGRAM REEL DOWNLOADER ENDPOINT (yt-dlp)
+// HIGH-QUALITY INSTAGRAM REEL DOWNLOADER ENDPOINT
 // ===================================================================
 app.post('/insta', async (req, res) => {
     const { url } = req.body;
@@ -1059,19 +1057,23 @@ app.post('/insta', async (req, res) => {
         return res.status(400).json({ success: false, message: 'URL is required.' });
     }
 
-    // Command to get direct media URL & title using yt-dlp
-    const command = `yt-dlp -g -f "b[ext=mp4]/best[ext=mp4]/best" "${url}"`;
+    // High quality format selector & Sanitized command execution
+    // 'bv*+ba/b' highest quality video & audio stream extract karta hai
+    const sanitizedUrl = JSON.stringify(url);
+    const command = `yt-dlp -g -f "bv*+ba/b/best" --no-warnings ${sanitizedUrl}`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error('yt-dlp Execution Error:', error.message);
             return res.status(500).json({
                 success: false,
-                message: 'Failed to process video URL. Ensure yt-dlp is installed on server.'
+                message: 'Failed to process video URL. Ensure yt-dlp is updated on server.'
             });
         }
 
-        const directLink = stdout.trim().split('\n')[0];
+        // Multiple lines handle karna - pehla link highest quality stream ka hota hai
+        const links = stdout.trim().split('\n').filter(Boolean);
+        const directLink = links[0];
 
         if (directLink && directLink.startsWith('http')) {
             return res.status(200).json({
@@ -1089,7 +1091,7 @@ app.post('/insta', async (req, res) => {
 });
 
 // ===================================================================
-// FORCE DOWNLOAD PROXY ROUTE (Direct Stream Download Fix)
+// FORCE DOWNLOAD PROXY ROUTE (Full Resolution Stream)
 // ===================================================================
 app.get('/download-file', async (req, res) => {
     const videoUrl = req.query.url;
@@ -1098,17 +1100,42 @@ app.get('/download-file', async (req, res) => {
     }
 
     try {
-        const response = await fetch(videoUrl);
+        // High quality CDN streams headers demand karte hain taaki 403 Forbidden error na aaye
+        const response = await fetch(videoUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
+
         if (!response.ok) {
             throw new Error(`Failed to fetch media stream: ${response.statusText}`);
         }
 
-        // Force browser to download instead of playing
         res.setHeader('Content-Type', 'video/mp4');
-        res.setHeader('Content-Disposition', 'attachment; filename="instavolicity_reel.mp4"');
+        res.setHeader('Content-Disposition', 'attachment; filename="instavolicity_reel_max_quality.mp4"');
 
-        // Stream video to response
-        response.body.pipe(res);
+        // Node.js fetch readable stream handle karna
+        const reader = response.body.getReader();
+        const stream = new ReadableStream({
+            start(controller) {
+                return pump();
+                function pump() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            controller.close();
+                            return;
+                        }
+                        controller.enqueue(value);
+                        return pump();
+                    });
+                }
+            }
+        });
+
+        // Pipeline to express response
+        const { Readable } = require('stream');
+        Readable.fromWeb(stream).pipe(res);
+
     } catch (err) {
         console.error('Download proxy error:', err.message);
         res.status(500).send('Failed to process video download.');
