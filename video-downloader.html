@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instavolicity Video Downloader - Download Your Own Videos Online</title>
+    <meta name="description" content="Fast and free online Instavolicity video downloader. Check file size before saving and easily download your personal video content in high quality.">
+    <meta name="keywords" content="instavolicity downloader, instavolicity video downloader, save video, instavolicity reel downloader">
+    
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #0f1117;
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Style */
+        header {
+            background-color: #161922;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2e3d;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .home-btn, .article-btn, .dropbtn, .donate-coffee-btn {
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .home-btn:hover, .article-btn:hover, .dropbtn:hover {
+            background-color: #242836;
+            color: #ffffff;
+        }
+
+        .badge-new {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1f2330;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            z-index: 1;
+            overflow: hidden;
+            border: 1px solid #2a2e3d;
+        }
+
+        .dropdown-content a {
+            color: #d1d5db;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #2b3042;
+            color: #fff;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .donate-coffee-btn {
+            background: #eab308;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .donate-coffee-btn:hover {
+            background: #ca8a04;
+        }
+
+        /* Hero / Tool Area */
+        .main-container {
+            max-width: 900px;
+            width: 90%;
+            margin: 40px auto;
+            flex-grow: 1;
+        }
+
+        .tool-card {
+            background: #161922;
+            border-radius: 16px;
+            padding: 35px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #2a2e3d;
+            text-align: center;
+        }
+
+        .brand-gradient-text {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .tool-subtitle {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .input-box-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 650px;
+            margin: 0 auto;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .input-box-wrapper {
+                flex-direction: row;
+            }
+        }
+
+        .url-input {
+            flex-grow: 1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 2px solid #2a2e3d;
+            background-color: #0f1117;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .url-input:focus {
+            border-color: #cc2366;
+        }
+
+        .fetch-btn {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fetch-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Result Section */
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #0f1117;
+            border-radius: 12px;
+            border: 1px solid #2a2e3d;
+            display: none;
+        }
+
+        .video-info-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .video-preview {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .size-badge {
+            background-color: #242836;
+            color: #38bdf8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid #38bdf844;
+        }
+
+        .download-btn {
+            background-color: #10b981;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #059669;
+        }
+
+        /* Content / SEO Area */
+        .content-section {
+            background-color: #161922;
+            border-radius: 16px;
+            padding: 35px;
+            margin-top: 40px;
+            border: 1px solid #2a2e3d;
+            line-height: 1.7;
+            color: #d1d5db;
+        }
+
+        .content-section h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 25px 0 12px 0;
+            border-bottom: 2px solid #2a2e3d;
+            padding-bottom: 6px;
+        }
+
+        .content-section h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .content-section h3 {
+            color: #f3f4f6;
+            font-size: 1.15rem;
+            margin: 15px 0 8px 0;
+        }
+
+        .content-section p {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .content-section ul, .content-section ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .content-section li {
+            margin-bottom: 6px;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .disclaimer-box {
+            background-color: #1f2330;
+            border-left: 4px solid #dc2743;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.85rem;
+            border-top: 1px solid #2a2e3d;
+            margin-top: 40px;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 20px 0;
+            color: #dc2743;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Tool Container -->
+    <div class="main-container">
+        <div class="tool-card">
+            <h1 class="brand-gradient-text"><i class="fa-solid fa-bolt"></i> Instavolicity Video Downloader</h1>
+            <p class="tool-subtitle">Check video size and download your personal short video creations quickly and easily</p>
+
+            <div class="input-box-wrapper">
+                <input type="text" id="videoUrlInput" class="url-input" placeholder="Paste your Instagram reel link here...">
+                <button onclick="processVideo()" class="fetch-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i> Check & Fetch
+                </button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+                <p style="margin-top: 8px; color: #9ca3af; font-size: 0.85rem;">Analyzing link and fetching video...</p>
+            </div>
+
+            <!-- Output Result -->
+            <div id="resultBox" class="result-box">
+                <div class="video-info-card">
+                    <video id="videoPreview" class="video-preview" controls></video>
+                    <div class="size-badge">
+                        Estimated Size: <span id="fileSizeText">Calculating...</span>
+                    </div>
+                    <a id="downloadBtn" href="#" target="_blank" download="instagram_reel.mp4" class="download-btn">
+                        <i class="fa-solid fa-download"></i> Download Video Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Content Section -->
+        <div class="content-section">
+            <h2>What is Instavolicity Video Downloader?</h2>
+            <p>Instavolicity Video Downloader is a modern, web-based utility designed specifically for content creators, digital artists, and individuals who want to backup and store their self-created short video content.</p>
+
+            <h2>How to Download Your Video Using Instavolicity</h2>
+            <ol>
+                <li><strong>Copy Video Link:</strong> Open your Instagram Reel and copy its URL.</li>
+                <li><strong>Paste the Link:</strong> Paste the copied link into the top input bar.</li>
+                <li><strong>Fetch Video Info:</strong> Click "Check & Fetch" to load preview and details.</li>
+                <li><strong>Download File:</strong> Click "Download Video Now" to save your video.</li>
+            </ol>
+
+            <div class="disclaimer-box">
+                <strong>Disclaimer:</strong> Instavolicity is an independent web utility built solely to help users download and backup their own original self-created short videos. Instavolicity is NOT affiliated, associated, authorized, endorsed by, or in any way officially connected with Instagram, Meta Platforms, Inc.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Instavolicity Video Downloader. All rights reserved.
+    </footer>
+
+    <!-- Logic Script -->
+   <script>
+async function processVideo() {
+    const urlInput = document.getElementById('videoUrlInput').value.trim();
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const resultBox = document.getElementById('resultBox');
+    const videoPreview = document.getElementById('videoPreview');
+    const fileSizeText = document.getElementById('fileSizeText');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    if (!urlInput) {
+        alert('Please enter a valid Instagram Reel link.');
+        return;
+    }
+
+    // UI Reset
+    resultBox.style.display = 'none';
+    loadingSpinner.style.display = 'block';
+
+    try {
+        // Render Backend Server Call
+        const response = await fetch('https://pooreyoutuber-github-io-luly.onrender.com/insta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: urlInput })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.downloadUrl) {
+            const targetUrl = result.downloadUrl;
+            
+            // Fetch HEAD request for Size calculation
+            let sizeInMB = "N/A";
+            try {
+                let headRes = await fetch(targetUrl, { method: 'HEAD' });
+                if (headRes && headRes.headers.get('content-length')) {
+                    let bytes = parseInt(headRes.headers.get('content-length'), 10);
+                    sizeInMB = (bytes / (1024 * 1024)).toFixed(2) + " MB";
+                }
+            } catch (e) {
+                sizeInMB = result.fileSize || "1.85 MB"; // Fallback size
+            }
+
+            // UI Update
+            videoPreview.src = targetUrl; // Preview player direct URL par chalega
+            fileSizeText.textContent = sizeInMB;
+
+            // FIX: Download button ab Backend Proxy Route ko call karega force-download ke liye
+            downloadBtn.href = `https://pooreyoutuber-github-io-luly.onrender.com/download-file?url=${encodeURIComponent(targetUrl)}`;
+
+            loadingSpinner.style.display = 'none';
+            resultBox.style.display = 'block';
+        } else {
+            throw new Error(result.message || 'Unable to fetch video');
+        }
+
+    } catch (err) {
+        console.error(err);
+        loadingSpinner.style.display = 'none';
+        alert('Failed to process video link. Please verify the URL or try again later.');
+    }
+}
+</script>
+</body>
+</html>
