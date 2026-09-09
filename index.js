@@ -1100,7 +1100,6 @@ app.get('/download-file', async (req, res) => {
     }
 
     try {
-        // High quality CDN streams headers demand karte hain taaki 403 Forbidden error na aaye
         const response = await fetch(videoUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -1112,33 +1111,16 @@ app.get('/download-file', async (req, res) => {
         }
 
         res.setHeader('Content-Type', 'video/mp4');
-        res.setHeader('Content-Disposition', 'attachment; filename="instavolicity_reel_max_quality.mp4"');
+        res.setHeader('Content-Disposition', 'attachment; filename="instavolicity_reel.mp4"');
 
-        // Node.js fetch readable stream handle karna
-        const reader = response.body.getReader();
-        const stream = new ReadableStream({
-            start(controller) {
-                return pump();
-                function pump() {
-                    return reader.read().then(({ done, value }) => {
-                        if (done) {
-                            controller.close();
-                            return;
-                        }
-                        controller.enqueue(value);
-                        return pump();
-                    });
-                }
-            }
-        });
-
-        // Pipeline to express response
-        const { Readable } = require('stream');
-        Readable.fromWeb(stream).pipe(res);
+        // Web Stream (response.body) ko Direct Node Stream me convert karke pipe karein
+        Readable.fromWeb(response.body).pipe(res);
 
     } catch (err) {
         console.error('Download proxy error:', err.message);
-        res.status(500).send('Failed to process video download.');
+        if (!res.headersSent) {
+            res.status(500).send('Failed to process video download.');
+        }
     }
 });
 //==================================================
