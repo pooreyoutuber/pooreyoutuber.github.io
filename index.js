@@ -1060,7 +1060,7 @@ app.post('/insta', async (req, res) => {
     }
 
     // Command to get direct media URL & title using yt-dlp
-const command = `yt-dlp -g -f "b/best" --S "res,ext:mp4:m4a" --no-playlist "${url}"`;
+const command = `yt-dlp -g -f "best[ext=mp4]/best" --format-sort "res:1080" --no-playlist "${url}"`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error('yt-dlp Execution Error:', error.message);
