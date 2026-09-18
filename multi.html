@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+     <meta name="viewport" content="width=1024">
     <title>Twitch Multi Viewer – Watch Multiple Streams Side by Side</title>
 
     <meta name="description" content="Free Twitch Multi Viewer to watch multiple Twitch streams side by side in your browser. Compare public streams, monitor live broadcasts, and use flexible grid layouts without installing software or creating an account.">
+    <meta name="keywords" content="twitch view increase, twitch view viral, twitch multi browser bot, increase twitch viewers free, twitch view booster tool, multi browser twitch stream, grow twitch viewers fast, twitch viewer bot free 2026, twitch live view counter increase, get twitch views instantly, twitch stream viral tool, twitch multi viewer exploit, twitch concurrent viewer boost, twitch viewer generator free, automated twitch viewer tool, twitch view multiplier, twitch multi tab viewer, push twitch stream to front page, twitch algorithm booster, twitch rank booster, twitch viewer retention tool, live stream view booster twitch, twitch multi session browser, boost twitch live viewers, twitch viral marketing tool, twitch viewer script 2026, twitch extension view booster, multi proxy twitch viewer, twitch viewer traffic generator, twitch view botting software free, twitch channel growth tool, artificial twitch viewer boost, how to get views on twitch, how to viral video twitch, how to increase twitch viewers for free, how to use multi browser for twitch, how to get 3 average viewers on twitch, how to bypass twitch concurrent viewer limit, how to boost twitch stream visibility, how to stream on twitch and get viewers fast, why am i getting 0 viewers on twitch, how to look like a top streamer on twitch, how to trick twitch viewer count, how to get twitch affiliate fast with tool, how to raid myself on twitch using multi browser, how to optimize twitch stream for views, how to get real viewers on twitch 2026, how to make twitch stream go viral, what is the best twitch multi viewer tool, how to setup multiple twitch accounts in one browser, how to get more live viewers on twitch, how to rank higher on twitch browse page, how to increase twitch clip views, how to drive traffic to twitch stream, how to get discovered on twitch easily, how to use twitch multi stream layout, how to get bot viewers on twitch safely, how to run multiple twitch streams without lag, how to double twitch viewer count, how to get active viewers on twitch, how to push twitch stream to viral status, how to maximize twitch stream reach, twitch view kaise badhaye, twitch me view viral kaise kare, twitch stream multi viewer tool gratis, twitch viewer bot 日本語, twitch 視聴者 増やす ツール, twitch 시청자 늘리기 프로그램, twitch view buster tools free, twitch viewer counter up extension, twitch views hack 2026, how to viral twitch stream in india, twitch view badhane wala app, twitch multi viewer online kostenlos, twitch viewer bot free download pc, twitch views expansion tool, viewer enhancement twitch free, twitch stream visibility booster global, multi window twitch viewer tool, automatic twitch view increaser, twitch layout bot multi stream, twitch clips viral simulator, twitch viewership growth software, twitch sub and view booster, twitch view booster hindi, twitch automation tool for views, twitch view bot chrome extension, twitch multi browser view bot free, twitch ranking algorithm tool, twitch viral views software, twitch live viewer booster global, twitch automated stream viewer tool.">
     <meta name="author" content="PooreYoutuber">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="theme-color" content="#9147ff">
@@ -856,6 +856,13 @@
             <li><strong>Esports Viewers & Event Managers:</strong> Watch multiple matches or viewpoints in a consolidated dashboard.</li>
         </ul>
 
+         <!-- AD -->
+        <div class="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        
         <h2>Twitch Multi Viewer Limitations</h2>
         <p>The tool relies on Twitch's embedded player, so playback availability can depend on the channel's public status, Twitch embed policies, browser restrictions, and network conditions. Opening many streams at once can also use significant CPU, memory, and bandwidth.</p>
 
@@ -884,6 +891,13 @@
             </a>
         </div>
 
+         <!-- AD -->
+        <div class="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="4272853316" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        
         <!-- VISIBLE FAQ SECTION -->
         <div class="faq-section">
             <h2 class="faq-title">Frequently Asked Questions</h2>
@@ -944,110 +958,120 @@
 <footer>
     © 2026 PooreYoutuber · Free Browser-Based Creator Tools
 </footer>
-
 <script>
-    let streamTimers = [];
-
+    
     function toggleFaq(button) {
         const item = button.parentElement;
         item.classList.toggle('active');
     }
-
     function extractChannel(input) {
         input = input.trim();
         if (!input) return null;
 
+        
         const urlMatch = input.match(/(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/i);
         if (urlMatch && urlMatch[1]) return urlMatch[1];
 
+        
         if (/^[a-zA-Z0-9_]{2,25}$/.test(input)) return input;
 
-        return null; 
+        return input; 
     }
 
-    function clearStreams() {
-        streamTimers.forEach(timer => clearTimeout(timer));
-        streamTimers = [];
+   function launchStreams() {
+    const rawInput = document.getElementById('twitchUrl').value.trim();
+    const countInput = parseInt(document.getElementById('streamCount').value) || 4;
+    const layoutValue = document.getElementById('layoutSelect').value;
+    const gridContainer = document.getElementById('videoGridContainer');
 
-        const gridContainer = document.getElementById('videoGridContainer');
-        gridContainer.className = 'video-grid cols-auto';
-        gridContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">📺</div>
-                <p>Your Twitch streams will appear here side by side. Paste a channel URL above and click <strong>Launch Streams</strong> to begin.</p>
-            </div>
-        `;
+    
+    const isMuted = document.getElementById('audioSetting') ? document.getElementById('audioSetting').value === "1" : true;
+    const autoPlayStatus = document.getElementById('autoplaySetting') ? document.getElementById('autoplaySetting').value === "1" : true;
+
+    gridContainer.innerHTML = '';
+
+    if (!rawInput) {
+        showEmptyState(gridContainer, 'Please paste a Twitch channel URL or enter a channel username above.');
+        return;
     }
 
-    function showEmptyState(container, message) {
-        container.className = 'video-grid cols-auto';
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">⚠️</div>
-                <p>${message}</p>
-            </div>
-        `;
+    const channel = extractChannel(rawInput);
+    if (!channel) {
+        showEmptyState(gridContainer, 'Could not recognize that Twitch URL. Try pasting the full URL like: https://www.twitch.tv/channelname');
+        return;
     }
 
-    function launchStreams() {
-        clearStreams();
+    const layoutClass = layoutValue === 'auto' ? 'cols-auto' : layoutValue;
+    gridContainer.className = `video-grid ${layoutClass}`;
 
-        const rawInput = document.getElementById('twitchUrl').value.trim();
-        const countInput = parseInt(document.getElementById('streamCount').value) || 4;
-        const layoutValue = document.getElementById('layoutSelect').value;
-        const gridContainer = document.getElementById('videoGridContainer');
+    const count = Math.min(Math.max(countInput, 1), 20);
 
-        if (!rawInput) {
-            showEmptyState(gridContainer, 'Please paste a Twitch channel URL or enter a channel username above.');
-            return;
-        }
+   
+    const socialPlatforms = [
+        "https://www.facebook.com",
+        "https://l.facebook.com/",
+        "https://www.instagram.com",
+        "https://t.co", // X (Twitter)
+        "https://www.google.com",
+        "https://twitter.com"
+    ];
 
-        const channel = extractChannel(rawInput);
-        if (!channel) {
-            showEmptyState(gridContainer, 'Could not recognize that Twitch URL. Try pasting the full URL like: https://www.twitch.tv/channelname');
-            return;
-        }
+ 
+    const otherPlatforms = [
+        "https://www.twitch.tv/directory",
+        "https://m.twitch.tv/",
+        "https://www.bing.com",
+        "https://www.google.co.in"
+    ];
 
-        gridContainer.innerHTML = '';
-        const layoutClass = layoutValue === 'auto' ? 'cols-auto' : layoutValue;
-        gridContainer.className = `video-grid ${layoutClass}`;
-
-        const count = Math.min(Math.max(countInput, 1), 20);
-        const parentDomain = window.location.hostname || 'localhost';
-
-        for (let i = 0; i < count; i++) {
-            const timer = setTimeout(() => {
-                const box = document.createElement('div');
-                box.className = 'video-box';
-
-                const label = document.createElement('div');
-                label.className = 'video-box-label';
-                label.textContent = `#${i + 1} · ${channel}`;
-
-                const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&autoplay=true&muted=true`;
-
-                const iframe = document.createElement('iframe');
-                iframe.src = src;
-                iframe.width = "100%";
-                iframe.height = "100%";
-                iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.setAttribute('loading', 'lazy');
-                iframe.style.border = "none";
-
-                box.appendChild(label);
-                box.appendChild(iframe);
-                gridContainer.appendChild(box);
-
-            }, i * 300);
-
-            streamTimers.push(timer);
-        }
+   
+    for (let i = 0; i < count; i++) {
 
         setTimeout(() => {
-            gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 150);
+            const box = document.createElement('div');
+            box.className = 'video-box';
+
+            const label = document.createElement('div');
+            label.className = 'video-box-label';
+            label.textContent = `#${i + 1} · ${channel}`;
+
+   
+            let randomRef;
+            let chance = Math.random() * 100;
+            
+            if (chance <= 70) {
+                randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+            } else {
+                randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+            }
+
+            
+            const cacheBuster = Math.random().toString(36).substring(7); 
+            const parentDomain = window.location.hostname || 'localhost';
+
+            
+            const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&autoplay=${autoPlayStatus}&muted=${isMuted}&cb=${cacheBuster}&referrer=${encodeURIComponent(randomRef)}`;
+
+            const iframe = document.createElement('iframe');
+            iframe.src = src;
+            iframe.width = "100%";
+            iframe.height = "100%";
+            iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
+
+            box.appendChild(label);
+            box.appendChild(iframe);
+            gridContainer.appendChild(box);
+
+        }, i * 1500); 
     }
-</script> 
+
+    setTimeout(() => {
+        gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+}
+   </script> 
 </body>
 </html>
