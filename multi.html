@@ -5,113 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Message Sandbox – Premium Client-Side AES-256 Utility</title>
     
-    <meta name="description" content="Encrypt and decrypt private messages directly in your browser using AES-256-GCM encryption. No server, no account, no uploads—100% client-side and privacy focused.">
-    <meta name="keywords" content="message encryptor, aes-gcm 256, pbkdf2, client-side encryption, secure text, text decryptor, text privacy tool, cryptography sandbox, private message, private text, secret message, encrypted text">
+    <meta name="description" content="Encrypt and decrypt private messages directly in your browser using AES-256-GCM encryption. No server, no account, 100% client-side privacy tool.">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="PooreYoutuber">
     <meta name="theme-color" content="#6366f1">
     <link rel="canonical" href="https://pooreyoutuber.github.io/private-message.html">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pooreyoutuber.github.io/private-message.html">
-    <meta property="og:title" content="Private Message Sandbox – Client-Side AES-256 Utility">
-    <meta property="og:description" content="Encrypt and decrypt private messages directly in your browser using AES-256-GCM encryption.">
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
-    </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent: #a855f7;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --panel-bg: rgba(30, 41, 59, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.12);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border-color: #334155;
-            --input-bg: #0f172a;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.35);
+            --card-bg: rgba(15, 23, 42, 0.65);
+            --input-bg: rgba(15, 23, 42, 0.85);
+            --input-border: rgba(255, 255, 255, 0.15);
             --success: #10b981;
             --error: #ef4444;
             --radius-lg: 16px;
             --radius-md: 10px;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
         [data-theme="light"] {
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(15, 23, 42, 0.1);
             --text-main: #0f172a;
             --text-muted: #475569;
-            --border-color: #cbd5e1;
-            --input-bg: #f8fafc;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-glow: rgba(79, 70, 229, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.6);
+            --input-bg: #ffffff;
+            --input-border: rgba(15, 23, 42, 0.18);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
         }
 
         body {
-            background-color: var(--bg);
+            background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
+            padding: 0 0 40px 0;
             display: flex;
             flex-direction: column;
-            line-height: 1.6;
+            align-items: center;
         }
 
         /* HEADER STYLES */
         .header {
-            background-color: #1e293b;
-            padding: 15px 30px;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 1000;
         }
 
-        .header .logo {
-            font-size: 1.4rem;
-            font-weight: 800;
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
             color: #ffffff;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .nav-controls nav {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .nav-controls a {
             color: #cbd5e1;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.2s ease;
+            font-size: 0.92rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .nav-controls a:hover { color: #ffffff; }
+        .nav-controls a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
 
         .badge-new {
             background: #ef4444;
             color: white;
             font-size: 0.65rem;
             padding: 2px 6px;
-            border-radius: 6px;
+            border-radius: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            font-weight: 800;
         }
 
         .dropdown {
@@ -120,101 +128,122 @@
         }
 
         .dropbtn {
-            background: none;
-            border: none;
+            background: transparent;
             color: #cbd5e1;
-            font-size: 0.95rem;
-            font-weight: 600;
+            padding: 6px 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border: none;
             cursor: pointer;
-            padding: 5px 0;
+            border-radius: 6px;
+        }
+
+        .dropdown:hover .dropbtn {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .dropdown-content {
             display: none;
             position: absolute;
+            right: 0;
             background-color: #1e293b;
             min-width: 160px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.4);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--panel-border);
             border-radius: 8px;
-            z-index: 10;
+            z-index: 1;
             overflow: hidden;
         }
 
         .dropdown-content a {
-            color: #cbd5e1;
-            padding: 12px 16px;
+            color: #f8fafc;
+            padding: 10px 14px;
+            text-decoration: none;
             display: block;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .dropdown-content a:hover {
-            background-color: #334155;
+            background-color: var(--accent);
             color: #ffffff;
         }
 
-        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
 
         .donate-coffee-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white !important;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: transform 0.2s !important;
+            background: rgba(245, 158, 11, 0.15) !important;
+            color: #f59e0b !important;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
-        .donate-coffee-btn:hover { transform: scale(1.05); }
+        .donate-coffee-btn:hover {
+            background: #f59e0b !important;
+            color: #000000 !important;
+        }
 
-        /* MAIN FULLSCREEN WRAPPER */
-        .main-wrapper {
-            flex: 1;
+        /* CONTAINER STYLES */
+        .container {
             width: 100%;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 960px;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
-        .tool-title-bar {
+        .page-title-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 16px 24px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
+            padding: 0 4px;
         }
 
-        .tool-title-bar h1 {
-            font-size: 1.5rem;
+        h1 {
+            font-size: 1.75rem;
             font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .theme-toggle {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
             color: var(--text-main);
             width: 40px;
             height: 40px;
             border-radius: 50%;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
         }
 
         .main-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
             border-radius: var(--radius-lg);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow);
             overflow: hidden;
         }
 
         .tabs-nav {
             display: flex;
             background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--panel-border);
         }
 
         .tab-btn {
@@ -223,23 +252,38 @@
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 0.98rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
         }
 
+        .tab-btn:hover { color: var(--text-main); }
         .tab-btn.active {
-            color: var(--primary);
+            color: var(--accent);
             background: rgba(255, 255, 255, 0.03);
-            border-bottom: 3px solid var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 -2px 10px var(--accent);
         }
 
         .tab-content {
             padding: 24px;
             display: none;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
 
         .tab-content.active { display: flex; }
@@ -248,11 +292,12 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            position: relative;
         }
 
         label {
             font-size: 0.85rem;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -261,446 +306,872 @@
         textarea, input[type="text"], input[type="password"] {
             width: 100%;
             background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--input-border);
             border-radius: var(--radius-md);
             color: var(--text-main);
-            padding: 14px;
+            padding: 12px 14px;
             font-size: 0.95rem;
             outline: none;
+            resize: vertical;
         }
 
-        textarea { min-height: 120px; resize: vertical; }
-
         textarea:focus, input:focus {
-            border-color: var(--primary);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        textarea {
+            min-height: 120px;
+            line-height: 1.5;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--input-border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+            background: rgba(0,0,0,0.1);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--text-main);
+        }
+
+        .char-counter {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: right;
         }
 
         .password-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
 
-        .password-wrapper { position: relative; }
+        .password-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
         .password-wrapper input { padding-right: 42px; }
 
         .toggle-pwd-btn {
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 10px;
+            top: 36px;
             background: transparent;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
-        .strength-container { margin-top: 6px; }
-        .strength-bar-bg { height: 6px; background: rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden; }
-        .strength-bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
-        .strength-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .strength-container {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
 
-        .drop-zone {
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            text-align: center;
-            background: rgba(0,0,0,0.1);
+        .strength-bar-bg {
+            height: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .strength-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--text-muted);
-            font-size: 0.9rem;
-            cursor: pointer;
         }
-
-        .drop-zone.dragover { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
 
         .actions-toolbar {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
+            margin-top: 6px;
         }
 
         .btn {
             padding: 12px 20px;
             border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: 0.92rem;
+            font-weight: 600;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             border: none;
-            transition: all 0.2s ease;
+            outline: none;
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--accent);
             color: #ffffff;
+            box-shadow: 0 4px 14px var(--accent-glow);
         }
 
-        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
         .btn-secondary {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--panel-border);
             color: var(--text-main);
         }
 
-        .btn-secondary:hover { background: var(--border-color); }
+        .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
 
         .output-box {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border: 1px solid var(--panel-border);
             border-radius: var(--radius-md);
-            padding: 20px;
+            padding: 18px;
             display: none;
             flex-direction: column;
             gap: 12px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease;
         }
+
         .output-box.show { display: flex; }
 
-        .toast-msg {
-            padding: 12px;
-            border-radius: var(--radius-md);
-            font-size: 0.9rem;
-            display: none;
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .output-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .output-title.error-title { color: var(--error); }
+
+        .toast-msg {
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
         .toast-success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: var(--success); }
         .toast-error { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--error); color: var(--error); }
-        .toast-info { background: rgba(99, 102, 241, 0.15); border: 1px solid var(--primary); color: var(--text-main); }
+        .toast-info { background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: var(--accent); line-height: 1.5; }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            cursor: pointer;
         }
 
-        .info-card, .faq-section, .document-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+        .checkbox-container input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* DOCUMENTATION & GUIDE SECTION */
+        .document-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 28px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            line-height: 1.7;
         }
 
-        .info-card h3, .faq-section h2, .document-panel h2 { margin-bottom: 12px; }
-        .info-card p, .faq-item p, .document-panel p { color: var(--text-muted); font-size: 0.95rem; }
+        .document-panel h2 {
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 8px;
+        }
+
+        .document-panel h3 {
+            font-size: 1.1rem;
+            margin: 18px 0 8px 0;
+            color: var(--accent);
+        }
+
+        .document-panel p {
+            font-size: 0.94rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .document-panel ul, .document-panel ol {
+            margin-left: 20px;
+            margin-bottom: 14px;
+            color: var(--text-muted);
+            font-size: 0.93rem;
+        }
+
+        .document-panel li { margin-bottom: 6px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         /* MOBILE RESPONSIVE FIXES */
-        @media (max-width: 900px) {
-            .header { flex-direction: column; gap: 15px; text-align: center; }
-            .nav-controls nav { flex-wrap: wrap; justify-content: center; gap: 12px; }
-            .info-grid { grid-template-columns: 1fr; }
-            .password-row { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 16px;
+            }
 
-        @media (max-width: 600px) {
-            .main-wrapper { padding: 10px; }
-            .tab-content { padding: 16px; }
-            .actions-toolbar .btn { width: 100%; }
+            .nav-controls nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .container { padding: 16px 10px; }
+            .tab-content { padding: 16px 12px; }
+            h1 { font-size: 1.35rem; }
+            
+            .actions-toolbar .btn {
+                width: 100%;
+            }
+
+            .password-row {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .password-wrapper {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .document-panel {
+                padding: 18px 14px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-        <div class="nav-controls">
-            <nav>
-                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
-                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-                <div class="dropdown">
-                    <button class="dropbtn">🛒 Shop ▾</button>
-                    <div class="dropdown-content">
-                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
-                    </div>
+<header class="header">
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀 Pooreyoutuber</a>
+    <div class="nav-controls">
+        <nav>
+            <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
                 </div>
-                <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
-            </nav>
-        </div>
-    </header>
+            </div>
+            <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
+        </nav>
+    </div>
+</header>
 
-    <div class="main-wrapper">
+<div class="container">
 
-        <div class="tool-title-bar">
-            <h1>🔐 Private Message Sandbox</h1>
-            <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌓</button>
-        </div>
+    <div class="page-title-row">
+        <h1>🔐 Private Message Sandbox</h1>
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌓</button>
+    </div>
 
-        <main class="main-panel">
-            <nav class="tabs-nav">
-                <button class="tab-btn active" id="encryptTabBtn" onclick="switchTab('encrypt')">🔒 Encrypt Plaintext</button>
-                <button class="tab-btn" id="decryptTabBtn" onclick="switchTab('decrypt')">🔓 Decrypt Ciphertext</button>
-            </nav>
+    <main class="main-panel">
+        <nav class="tabs-nav" role="tablist">
+            <button class="tab-btn active" id="encryptTabBtn" onclick="switchTab('encrypt')" role="tab">🔒 Encrypt Message</button>
+            <button class="tab-btn" id="decryptTabBtn" onclick="switchTab('decrypt')" role="tab">🔓 Decrypt Message</button>
+        </nav>
 
-            <!-- ENCRYPT TAB -->
-            <div class="tab-content active" id="encryptTab">
-                <div class="group">
-                    <label for="encMessage">Secret Message</label>
-                    <textarea id="encMessage" placeholder="Type or paste your sensitive message here..." oninput="onInputText(this, 'encCharCount')"></textarea>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); text-align: right;" id="encCharCount">0 characters</div>
-                </div>
+        <!-- ENCRYPT TAB -->
+        <div class="tab-content active" id="encryptTab" role="tabpanel">
+            <div class="group">
+                <label for="encMessage">Secret Message</label>
+                <textarea id="encMessage" placeholder="Type or paste your confidential text here..." oninput="onInputText(this, 'encCharCount')"></textarea>
+                <div class="char-counter" id="encCharCount">0 characters</div>
+            </div>
 
+            <div class="group">
                 <div class="password-row">
-                    <div class="group">
+                    <div class="password-wrapper">
                         <label for="encPassword">Secret Key / Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="encPassword" placeholder="Enter password..." oninput="onPasswordInput()">
-                            <button type="button" class="toggle-pwd-btn" id="toggleEncPwd" onclick="togglePasswordVisibility('encPassword', 'toggleEncPwd')">👁️</button>
-                        </div>
+                        <input type="password" id="encPassword" placeholder="Enter password..." oninput="onPasswordInput()">
+                        <button type="button" class="toggle-pwd-btn" id="toggleEncPwd" onclick="togglePasswordVisibility('encPassword', 'toggleEncPwd')">👁️</button>
+                        
                         <div class="strength-container">
-                            <div class="strength-bar-bg"><div class="strength-bar-fill" id="strengthBar"></div></div>
+                            <div class="strength-bar-bg">
+                                <div class="strength-bar-fill" id="strengthBar"></div>
+                            </div>
                             <div class="strength-text" id="strengthText">Strength: None</div>
                         </div>
                     </div>
 
-                    <div class="group">
+                    <div class="password-wrapper">
                         <label for="encPasswordConfirm">Confirm Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="encPasswordConfirm" placeholder="Re-enter password..." oninput="validateForm('encrypt')">
-                            <button type="button" class="toggle-pwd-btn" id="toggleEncConfirmPwd" onclick="togglePasswordVisibility('encPasswordConfirm', 'toggleEncConfirmPwd')">👁️</button>
-                        </div>
+                        <input type="password" id="encPasswordConfirm" placeholder="Re-enter password..." oninput="validateForm('encrypt')">
+                        <button type="button" class="toggle-pwd-btn" id="toggleEncConfirmPwd" onclick="togglePasswordVisibility('encPasswordConfirm', 'toggleEncConfirmPwd')">👁️</button>
                     </div>
                 </div>
-
-                <div>
+                <div style="margin-top: 6px;">
                     <button class="btn btn-secondary" onclick="generateSecurePassword()">⚡ Generate Strong Password</button>
                 </div>
-
-                <div class="actions-toolbar">
-                    <button class="btn btn-primary" id="encryptBtn" onclick="handleEncrypt()" disabled>Encrypt Message</button>
-                    <button class="btn btn-secondary" onclick="clearForm('encrypt')">Clear</button>
-                </div>
-
-                <div class="toast-msg" id="encToast"></div>
-
-                <div class="output-box" id="encOutputBox">
-                    <label>Encrypted Ciphertext Result</label>
-                    <textarea id="encResult" readonly placeholder="Encrypted payload..."></textarea>
-                    <div class="actions-toolbar">
-                        <button class="btn btn-secondary" id="encCopyBtn" onclick="copyToClipboard('encResult', 'encCopyBtn', 'encToast')">📋 Copy String</button>
-                        <button class="btn btn-secondary" onclick="downloadTxtFile('encResult')">💾 Download .TXT</button>
-                    </div>
-                </div>
             </div>
 
-            <!-- DECRYPT TAB -->
-            <div class="tab-content" id="decryptTab">
-                <div class="group">
-                    <label for="decCiphertext">Encrypted Ciphertext String</label>
-                    <div class="drop-zone" id="dropZone">Drag & Drop Encrypted .TXT File Here</div>
-                    <textarea id="decCiphertext" placeholder="Paste Base64 JSON cipher payload here..." oninput="onInputText(this, null); validateForm('decrypt');"></textarea>
-                </div>
+            <div class="group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="selfDestructCheck">
+                    <span>Mark as One Time Message (Informational Flag)</span>
+                </label>
+            </div>
 
-                <div class="group">
-                    <label for="decPassword">Decryption Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="decPassword" placeholder="Enter original password..." oninput="validateForm('decrypt')">
-                        <button type="button" class="toggle-pwd-btn" id="toggleDecPwd" onclick="togglePasswordVisibility('decPassword', 'toggleDecPwd')">👁️</button>
-                    </div>
-                </div>
+            <div class="actions-toolbar">
+                <button class="btn btn-primary" id="encryptBtn" onclick="handleEncrypt()" disabled>Encrypt Message</button>
+                <button class="btn btn-secondary" onclick="clearForm('encrypt')">Clear</button>
+            </div>
 
+            <div class="toast-msg" id="encToast"></div>
+
+            <div class="output-box" id="encOutputBox">
+                <div class="output-header">
+                    <span class="output-title" id="encSuccessHeader">✓ Encryption Success</span>
+                </div>
+                <textarea id="encResult" readonly placeholder="Encrypted payload..."></textarea>
+                
                 <div class="actions-toolbar">
-                    <button class="btn btn-primary" id="decryptBtn" onclick="handleDecrypt()" disabled>Decrypt Message</button>
-                    <button class="btn btn-secondary" onclick="clearForm('decrypt')">Clear</button>
-                </div>
-
-                <div class="toast-msg" id="decToast"></div>
-
-                <div class="output-box" id="decOutputBox">
-                    <label>Decrypted Plaintext Output</label>
-                    <textarea id="decResult" readonly placeholder="Original message will appear here..."></textarea>
-                    <div class="actions-toolbar" id="decOutputActions">
-                        <button class="btn btn-secondary" id="decCopyBtn" onclick="copyToClipboard('decResult', 'decCopyBtn', 'decToast')">📋 Copy Text</button>
-                    </div>
+                    <button class="btn btn-secondary" id="encCopyBtn" onclick="copyToClipboard('encResult', 'encCopyBtn', 'encToast')">📋 Copy Payload</button>
+                    <button class="btn btn-secondary" onclick="downloadTxtFile('encResult', 'encrypted')">💾 Download .TXT</button>
+                    <button class="btn btn-secondary" onclick="sharePayload()">🔗 Share Payload</button>
                 </div>
             </div>
-        </main>
-
-        <div class="info-grid">
-            <section class="info-card">
-                <h3>🔒 Privacy First</h3>
-                <p>Runs 100% client-side in your browser. No server storage or network tracking is involved.</p>
-            </section>
-            <section class="info-card">
-                <h3>⚙️ High Security</h3>
-                <p>Uses hardware-native AES-256-GCM encryption with PBKDF2 (600,000 iterations) key derivation.</p>
-            </section>
         </div>
 
-    </div>
+        <!-- DECRYPT TAB -->
+        <div class="tab-content" id="decryptTab" role="tabpanel">
+            <div class="group">
+                <label for="decCiphertext">Encrypted Payload Block</label>
+                <div class="drop-zone" id="dropZone">
+                    Drag & Drop Encrypted .TXT File Here or Paste Below
+                </div>
+                <textarea id="decCiphertext" placeholder="Paste Base64 JSON encrypted block here..." oninput="onInputText(this, null); validateForm('decrypt');"></textarea>
+                <div style="margin-top: 4px;">
+                    <button class="btn btn-secondary" onclick="pasteFromClipboard('decCiphertext')">📋 Paste from Clipboard</button>
+                </div>
+            </div>
 
-    <script>
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-        });
+            <div class="group">
+                <label for="decPassword">Decryption Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="decPassword" placeholder="Enter original password..." oninput="validateForm('decrypt')">
+                    <button type="button" class="toggle-pwd-btn" id="toggleDecPwd" onclick="togglePasswordVisibility('decPassword', 'toggleDecPwd')">👁️</button>
+                </div>
+            </div>
 
-        function switchTab(target) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            <div class="actions-toolbar">
+                <button class="btn btn-primary" id="decryptBtn" onclick="handleDecrypt()" disabled>Decrypt Message</button>
+                <button class="btn btn-secondary" onclick="clearForm('decrypt')">Clear</button>
+            </div>
 
-            if (target === 'encrypt') {
-                document.getElementById('encryptTabBtn').classList.add('active');
-                document.getElementById('encryptTab').classList.add('active');
-            } else {
-                document.getElementById('decryptTabBtn').classList.add('active');
-                document.getElementById('decryptTab').classList.add('active');
-            }
+            <div class="toast-msg" id="decToast"></div>
+
+            <div class="output-box" id="decOutputBox">
+                <div class="output-header">
+                    <span class="output-title" id="decOutputTitle">Decrypted Message</span>
+                </div>
+                
+                <div id="destructWarningBox" class="toast-msg toast-info" style="margin-bottom: 10px; display: none;">
+                    ℹ️ <strong>Notice:</strong> This payload was flagged as a One-Time Message by the sender.
+                </div>
+
+                <textarea id="decResult" readonly placeholder="Original cleartext..."></textarea>
+                <div class="actions-toolbar" id="decOutputActions">
+                    <button class="btn btn-secondary" id="decCopyBtn" onclick="copyToClipboard('decResult', 'decCopyBtn', 'decToast')">📋 Copy Cleartext</button>
+                    <button class="btn btn-secondary" onclick="downloadTxtFile('decResult', 'decrypted')">💾 Download .TXT</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- DETAILED USER GUIDE & ADVANTAGES (600+ WORDS CONTENT) -->
+    <article class="document-panel">
+        <h2>Private Message Sandbox: Secure Client-Side Text Encryption Tool</h2>
+        <p>Aj ke digital daur mein online privacy aur data security sabse badi zaroorat ban chuki hai. Chahe aap confidential passwords, personal notes, banking details, ya private chat logs kisi ke sath share kar rahe ho, unhe standard text ya unencrypted format mein bhejna risk se bhara hota hai. <strong>Private Message Sandbox</strong> ek modern, ultra-secure aur fast browser-based cryptographic web app hai jo aapke messages ko completely secure baseline par convert karta hai.</p>
+
+        <h3>Is Tool Ko Kaise Use Karein? (Step-by-step How to Use Guide)</h3>
+        <p>Is tool ko use karna behad aasan hai aur isme kisi bhi tarah ke sign-up ya account creation ki zaroorat nahi hai. Niche diye gaye aasan steps ko follow karein:</p>
+        
+        <p><strong>1. Message Enerypt Karne Ke Liye (Lock Text):</strong></p>
+        <ol>
+            <li><strong>Encrypt Tab Select Karein:</strong> Web tool open karte hi aap standard Encrypt Panel par honge.</li>
+            <li><strong>Message Write Karein:</strong> "Secret Message" box mein apna confidential message, password ya secret details type karein ya paste karein.</li>
+            <li><strong>Password Set Karein:</strong> Ek strong "Secret Key / Password" daalein aur confirm karein. Aap hamare built-in <em>"Generate Strong Password"</em> button par click karke automatic 32-character high-entropy secure password bhi create kar sakte hain.</li>
+            <li><strong>Encrypt Button Par Click Karein:</strong> "Encrypt Message" button dabayein. Aapka original message instantly ek safe, unreadable Base64 JSON code block mein badal jayega.</li>
+            <li><strong>Share Karein:</strong> "Copy Payload" par click karke code copy karein ya ".TXT file" download karke apne friend ya colleague ko kisi bhi messaging app (WhatsApp, Telegram, Email, etc.) se bhej dein.</li>
+        </ol>
+
+        <p><strong>2. Message Decrypt Karne Ke Liye (Unlock Text):</strong></p>
+        <ol>
+            <li><strong>Decrypt Tab Par Jayein:</strong> Tool ke upar diye gaye "Decrypt Message" tab par switch karein.</li>
+            <li><strong>Encrypted Payload Insert Karein:</strong> Received encrypted text block ko box mein paste karein ya download ki gayi .TXT file ko Drag & Drop karein.</li>
+            <li><strong>Correct Password Daalein:</strong> Message bhejne wale dwara bataya gaya password "Decryption Password" field mein fill karein.</li>
+            <li><strong>Decrypt Button Par Click Karein:</strong> "Decrypt Message" dabate hi aapka original plaintext message turant unlock ho jayega.</li>
+        </ol>
+
+        <h3>Is Encryption Tool Ke Mukhya Fayde (Key Benefits)</h3>
+        <p>Yeh utility standard online text hiders se bilkul alag hai. Iske mukhya fayde niche darshaye gaye hain:</p>
+        <ul>
+            <li><strong>100% Client-Side Privacy (Zero Server Logs):</strong> Yeh tool aapke browser ke native <em>Web Crypto API</em> engine ka istemal karta hai. Aapka message, cleartext ya password kisi bhi external server ya database par upload nahi hota. Internet disconnect karke bhi yeh tool perfectamente kaam karta hai.</li>
+            <li><strong>Military-Grade Encryption Standard (AES-256-GCM):</strong> Isme world-standard AES-GCM (256-bit) algorithm ka upyog hota hai, jise aaj tak brute-force attack se break nahi kiya ja saka.</li>
+            <li><strong>PBKDF2 Key Derivation with 600,000 Iterations:</strong> Passwords ko direct key ki tarah use karne ke bajaye system 600,000 SHA-256 rounds ke sath key derive karta hai, jisse hacker ke brute-force tools fail ho jaate hain.</li>
+            <li><strong>Full Mobile & Cross-Device Compatibility:</strong> Responsive glassmorphism interface ke karan yeh desktop, tablet aur mobile screens par seamlessly perform karta hai.</li>
+            <li><strong>No Tracking & Ad-Free Privacy Architecture:</strong> Isme user behavior track nahi kiya jata, jo isko professional developers aur privacy enthusiasts ke liye ideal banata hai.</li>
+        </ul>
+    </article>
+
+</div>
+
+<script>
+    // Theme Management Engine
+    const themeToggle = document.getElementById('themeToggle');
+    const initTheme = () => {
+        const saved = localStorage.getItem('pm-crypto-theme');
+        if (saved) {
+            document.documentElement.setAttribute('data-theme', saved);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
         }
+    };
+    
+    themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('pm-crypto-theme', next);
+    });
+    initTheme();
 
-        function onInputText(textarea, counterId) {
-            if (counterId) {
-                document.getElementById(counterId).textContent = `${textarea.value.length} characters`;
-            }
-            validateForm(counterId ? 'encrypt' : 'decrypt');
+    function switchTab(target) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        if (target === 'encrypt') {
+            document.getElementById('encryptTabBtn').classList.add('active');
+            document.getElementById('encryptTab').classList.add('active');
+        } else {
+            document.getElementById('decryptTabBtn').classList.add('active');
+            document.getElementById('decryptTab').classList.add('active');
         }
+    }
 
-        function onPasswordInput() {
-            const val = document.getElementById('encPassword').value;
-            const bar = document.getElementById('strengthBar');
-            const txt = document.getElementById('strengthText');
-            
-            if (!val) {
-                bar.style.width = '0%';
-                txt.textContent = "Strength: None";
-            } else if (val.length < 8) {
-                bar.style.width = '30%';
-                bar.style.backgroundColor = 'var(--error)';
-                txt.textContent = "Strength: Weak";
-            } else if (val.length < 14) {
-                bar.style.width = '65%';
-                bar.style.backgroundColor = '#f59e0b';
-                txt.textContent = "Strength: Medium";
-            } else {
-                bar.style.width = '100%';
-                bar.style.backgroundColor = 'var(--success)';
-                txt.textContent = "Strength: Strong";
-            }
+    function onInputText(textarea, counterId) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        
+        if (counterId) {
+            document.getElementById(counterId).textContent = `${textarea.value.length} characters`;
+        }
+        validateForm(counterId ? 'encrypt' : 'decrypt');
+    }
+
+    function calculatePasswordEntropy(pwd) {
+        if (!pwd) return 0;
+        let poolSize = 0;
+        if (/[a-z]/.test(pwd)) poolSize += 26;
+        if (/[A-Z]/.test(pwd)) poolSize += 26;
+        if (/[0-9]/.test(pwd)) poolSize += 10;
+        if (/[^A-Za-z0-9]/.test(pwd)) poolSize += 32;
+        return poolSize === 0 ? 0 : Math.floor(pwd.length * Math.log2(poolSize));
+    }
+
+    function onPasswordInput() {
+        const val = document.getElementById('encPassword').value;
+        const bar = document.getElementById('strengthBar');
+        const txt = document.getElementById('strengthText');
+        
+        if (!val) {
+            bar.style.width = '0%';
+            txt.textContent = "Strength: None";
             validateForm('encrypt');
+            return;
         }
 
-        function validateForm(mode) {
-            if (mode === 'encrypt') {
-                const msg = document.getElementById('encMessage').value;
-                const pwd = document.getElementById('encPassword').value;
-                const confirmPwd = document.getElementById('encPasswordConfirm').value;
-                document.getElementById('encryptBtn').disabled = (!msg || !pwd || pwd !== confirmPwd);
-            } else {
-                const cipher = document.getElementById('decCiphertext').value;
-                const pwd = document.getElementById('decPassword').value;
-                document.getElementById('decryptBtn').disabled = (!cipher || !pwd);
-            }
-        }
+        const entropy = calculatePasswordEntropy(val);
 
-        function togglePasswordVisibility(inputId, btnId) {
-            const field = document.getElementById(inputId);
-            field.type = field.type === 'password' ? 'text' : 'password';
+        if (entropy < 40) {
+            bar.style.width = '25%';
+            bar.style.backgroundColor = 'var(--error)';
+            txt.textContent = `Strength: Weak (${entropy} Bits Entropy)`;
+        } else if (entropy >= 40 && entropy < 65) {
+            bar.style.width = '50%';
+            bar.style.backgroundColor = '#f59e0b';
+            txt.textContent = `Strength: Medium (${entropy} Bits Entropy)`;
+        } else if (entropy >= 65 && entropy < 85) {
+            bar.style.width = '75%';
+            bar.style.backgroundColor = '#3b82f6';
+            txt.textContent = `Strength: Strong (${entropy} Bits Entropy)`;
+        } else {
+            bar.style.width = '100%';
+            bar.style.backgroundColor = 'var(--success)';
+            txt.textContent = `Strength: Excellent (${entropy} Bits Entropy)`;
         }
+        validateForm('encrypt');
+    }
 
-        function generateSecurePassword() {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-            let pwd = "";
-            const bytes = new Uint32Array(24);
-            window.crypto.getRandomValues(bytes);
-            for (let i = 0; i < 24; i++) {
-                pwd += chars[bytes[i] % chars.length];
-            }
-            document.getElementById('encPassword').value = pwd;
-            document.getElementById('encPasswordConfirm').value = pwd;
+    function validateForm(mode) {
+        if (mode === 'encrypt') {
+            const msg = document.getElementById('encMessage').value;
+            const pwd = document.getElementById('encPassword').value;
+            const confirmPwd = document.getElementById('encPasswordConfirm').value;
+            document.getElementById('encryptBtn').disabled = (!msg || !pwd || pwd !== confirmPwd);
+        } else {
+            const cipher = document.getElementById('decCiphertext').value;
+            const pwd = document.getElementById('decPassword').value;
+            document.getElementById('decryptBtn').disabled = (!cipher || !pwd);
+        }
+    }
+
+    function togglePasswordVisibility(inputId, btnId) {
+        const field = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        if (field.type === 'password') {
+            field.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            field.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+
+    function generateSecurePassword() {
+        const len = 32;
+        const upper = "ABCDEFGHCJKMNPQRSTUVWXYZ";
+        const lower = "abcdefghijkmnopqrstuvwxyz";
+        const nums = "0123456789";
+        const syms = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+        const all = upper + lower + nums + syms;
+        
+        let pwd = "";
+        const bytes = new Uint32Array(len);
+        window.crypto.getRandomValues(bytes);
+        
+        pwd += upper[bytes[0] % upper.length];
+        pwd += lower[bytes[1] % lower.length];
+        pwd += nums[bytes[2] % nums.length];
+        pwd += syms[bytes[3] % syms.length];
+        
+        for (let i = 4; i < len; i++) {
+            pwd += all[bytes[i] % all.length];
+        }
+        
+        const pwdArr = pwd.split('');
+        for (let i = pwdArr.length - 1; i > 0; i--) {
+            const rByte = new Uint32Array(1);
+            window.crypto.getRandomValues(rByte);
+            const j = rByte[0] % (i + 1);
+            [pwdArr[i], pwdArr[j]] = [pwdArr[j], pwdArr[i]];
+        }
+        
+        const generated = pwdArr.join('');
+        document.getElementById('encPassword').value = generated;
+        document.getElementById('encPasswordConfirm').value = generated;
+        
+        onPasswordInput();
+        showNotification('encToast', 'Generated strong 32-character password!', 'success');
+    }
+
+    async function pasteFromClipboard(targetTextAreaId) {
+        try {
+            const text = await navigator.clipboard.readText();
+            const el = document.getElementById(targetTextAreaId);
+            el.value = text;
+            onInputText(el, null);
+            showNotification('decToast', 'Content pasted from clipboard!', 'success');
+        } catch (err) {
+            showNotification('decToast', 'Clipboard permissions denied.', 'error');
+        }
+    }
+
+    function copyToClipboard(textareaId, btnId, toastId) {
+        const el = document.getElementById(textareaId);
+        const btn = document.getElementById(btnId);
+        const origText = btn.textContent;
+        
+        el.select();
+        navigator.clipboard.writeText(el.value).then(() => {
+            btn.textContent = "Copied ✓";
+            showNotification(toastId, 'Text copied to clipboard!', 'success');
+            setTimeout(() => { btn.textContent = origText; }, 2000);
+        }).catch(() => {
+            showNotification(toastId, 'Copy failed.', 'error');
+        });
+    }
+
+    function downloadTxtFile(textareaId, basePrefix) {
+        const val = document.getElementById(textareaId).value;
+        if (!val) return;
+        
+        const d = new Date();
+        const dateString = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const filename = `${basePrefix}-message-${dateString}.txt`;
+
+        const blob = new Blob([val], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    async function sharePayload() {
+        const textVal = document.getElementById('encResult').value;
+        if (!textVal) return;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Encrypted Message Payload',
+                    text: textVal
+                });
+            } catch (err) { console.log('Share canceled.'); }
+        } else {
+            showNotification('encToast', 'Web Share is not supported on this device.', 'error');
+        }
+    }
+
+    // Drag & Drop Handling
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); }, false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const textEl = document.getElementById('decCiphertext');
+                textEl.value = evt.target.result.trim();
+                onInputText(textEl, null);
+                showNotification('decToast', 'Encrypted file loaded successfully!', 'success');
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    function clearForm(mode) {
+        if (mode === 'encrypt') {
+            document.getElementById('encMessage').value = '';
+            document.getElementById('encPassword').value = '';
+            document.getElementById('encPasswordConfirm').value = '';
+            document.getElementById('encResult').value = '';
+            document.getElementById('encCharCount').textContent = '0 characters';
+            document.getElementById('encOutputBox').classList.remove('show');
             onPasswordInput();
+        } else {
+            document.getElementById('decCiphertext').value = '';
+            document.getElementById('decPassword').value = '';
+            document.getElementById('decResult').value = '';
+            document.getElementById('decOutputBox').classList.remove('show');
+            document.getElementById('destructWarningBox').style.display = 'none';
+            validateForm('decrypt');
         }
+        hideNotification(mode === 'encrypt' ? 'encToast' : 'decToast');
+    }
 
-        async function deriveKey(password, salt) {
+    function showNotification(targetId, msg, type) {
+        const box = document.getElementById(targetId);
+        box.textContent = msg;
+        box.className = `toast-msg toast-${type}`;
+        box.style.display = 'block';
+    }
+
+    function hideNotification(targetId) {
+        document.getElementById(targetId).style.display = 'none';
+    }
+
+    /* CRYPTOGRAPHIC ENGINE LOGIC */
+    async function deriveKey(password, salt) {
+        const enc = new TextEncoder();
+        const baseKey = await window.crypto.subtle.importKey(
+            "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+        );
+        return window.crypto.subtle.deriveKey(
+            { name: "PBKDF2", salt: salt, iterations: 600000, hash: "SHA-256" },
+            baseKey,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["encrypt", "decrypt"]
+        );
+    }
+
+    async function handleEncrypt() {
+        try {
+            hideNotification('encToast');
+            const plaintext = document.getElementById('encMessage').value;
+            const password = document.getElementById('encPassword').value;
+            const selfDestruct = document.getElementById('selfDestructCheck').checked;
+            
+            if (!plaintext || !password) return;
+
+            const encoder = new TextEncoder();
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            
+            const derivedKey = await deriveKey(password, salt);
+            const cipherBuffer = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv }, derivedKey, encoder.encode(plaintext)
+            );
+
+            const payload = {
+                v: 1,
+                alg: "AES-256-GCM",
+                kdf: "PBKDF2-SHA256",
+                iter: 600000,
+                created: new Date().toISOString(),
+                expire: selfDestruct ? "1time" : "never",
+                salt: btoa(String.fromCharCode(...salt)),
+                iv: btoa(String.fromCharCode(...iv)),
+                ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherBuffer)))
+            };
+
+            const base64PayloadString = btoa(JSON.stringify(payload));
+            
+            const outputBox = document.getElementById('encOutputBox');
+            const resultArea = document.getElementById('encResult');
+            
+            resultArea.value = base64PayloadString;
+            outputBox.classList.add('show');
+            resultArea.style.height = 'auto';
+            resultArea.style.height = resultArea.scrollHeight + 'px';
+            
+            showNotification('encToast', 'Message encrypted successfully using AES-256-GCM!', 'success');
+        } catch (e) {
+            showNotification('encToast', 'Encryption failed.', 'error');
+            console.error(e);
+        }
+    }
+
+    async function handleDecrypt() {
+        try {
+            hideNotification('decToast');
+            document.getElementById('destructWarningBox').style.display = 'none';
+            const base64Input = document.getElementById('decCiphertext').value.trim();
+            const password = document.getElementById('decPassword').value;
+            
+            const outputBox = document.getElementById('decOutputBox');
+            const resultArea = document.getElementById('decResult');
+            const outTitle = document.getElementById('decOutputTitle');
+            const outActions = document.getElementById('decOutputActions');
+
+            if (!base64Input || !password) return;
+
+            let parsedData;
+            try {
+                parsedData = JSON.parse(atob(base64Input));
+            } catch (err) {
+                throw new Error("Invalid structure.");
+            }
+
+            if (!parsedData.salt || !parsedData.iv || !parsedData.ciphertext) {
+                throw new Error("Missing crypto components.");
+            }
+
+            const salt = new Uint8Array([...atob(parsedData.salt)].map(c => c.charCodeAt(0)));
+            const iv = new Uint8Array([...atob(parsedData.iv)].map(c => c.charCodeAt(0)));
+            const ciphertext = new Uint8Array([...atob(parsedData.ciphertext)].map(c => c.charCodeAt(0)));
+            const encKeyIterations = parsedData.iter || 600000;
+            
             const enc = new TextEncoder();
-            const baseKey = await window.crypto.subtle.importKey(
-                "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+            const baseKey = await window.crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+            const derivedKey = await window.crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: salt, iterations: encKeyIterations, hash: "SHA-256" },
+                baseKey,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["decrypt"]
             );
-            return window.crypto.subtle.deriveKey(
-                { name: "PBKDF2", salt: salt, iterations: 600000, hash: "SHA-256" },
-                baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
-            );
-        }
-
-        async function handleEncrypt() {
+            
+            let decryptedBuffer;
             try {
-                const plaintext = document.getElementById('encMessage').value;
-                const password = document.getElementById('encPassword').value;
-                const encoder = new TextEncoder();
-                const salt = window.crypto.getRandomValues(new Uint8Array(16));
-                const iv = window.crypto.getRandomValues(new Uint8Array(12));
-                
-                const derivedKey = await deriveKey(password, salt);
-                const cipherBuffer = await window.crypto.subtle.encrypt(
-                    { name: "AES-GCM", iv: iv }, derivedKey, encoder.encode(plaintext)
-                );
-
-                const payload = {
-                    v: 1,
-                    salt: btoa(String.fromCharCode(...salt)),
-                    iv: btoa(String.fromCharCode(...iv)),
-                    ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherBuffer)))
-                };
-
-                document.getElementById('encResult').value = btoa(JSON.stringify(payload));
-                document.getElementById('encOutputBox').classList.add('show');
-            } catch (e) {
-                alert("Encryption failed.");
+                decryptedBuffer = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, derivedKey, ciphertext);
+            } catch (cipherErr) {
+                outTitle.textContent = "Processing Failure";
+                outTitle.className = "output-title error-title";
+                resultArea.value = "Incorrect password or corrupted text.";
+                outActions.style.display = 'none';
+                outputBox.classList.add('show');
+                showNotification('decToast', 'Decryption failed: Incorrect Password.', 'error');
+                return;
             }
-        }
 
-        async function handleDecrypt() {
-            try {
-                const base64Input = document.getElementById('decCiphertext').value.trim();
-                const password = document.getElementById('decPassword').value;
-                
-                const parsedData = JSON.parse(atob(base64Input));
-                const salt = new Uint8Array([...atob(parsedData.salt)].map(c => c.charCodeAt(0)));
-                const iv = new Uint8Array([...atob(parsedData.iv)].map(c => c.charCodeAt(0)));
-                const ciphertext = new Uint8Array([...atob(parsedData.ciphertext)].map(c => c.charCodeAt(0)));
+            const originalPlaintext = new TextDecoder().decode(decryptedBuffer);
 
-                const derivedKey = await deriveKey(password, salt);
-                const decryptedBuffer = await window.crypto.subtle.decrypt(
-                    { name: "AES-GCM", iv: iv }, derivedKey, ciphertext
-                );
-
-                document.getElementById('decResult').value = new TextDecoder().decode(decryptedBuffer);
-                document.getElementById('decOutputBox').classList.add('show');
-            } catch (e) {
-                alert("Decryption failed! Incorrect password or corrupted text.");
+            outTitle.textContent = "Decrypted Message";
+            outTitle.className = "output-title";
+            resultArea.value = originalPlaintext;
+            outActions.style.display = 'flex';
+            outputBox.classList.add('show');
+            resultArea.style.height = 'auto';
+            resultArea.style.height = resultArea.scrollHeight + 'px';
+            
+            if (parsedData.expire === "1time") {
+                document.getElementById('destructWarningBox').style.display = 'block';
             }
+            
+            showNotification('decToast', 'Message decrypted successfully!', 'success');
+        } catch (e) {
+            outTitle.textContent = "Processing Failure";
+            outTitle.className = "output-title error-title";
+            resultArea.value = "Invalid payload format.";
+            outActions.style.display = 'none';
+            outputBox.classList.add('show');
+            showNotification('decToast', 'Parsing failed.', 'error');
+            console.error(e);
         }
-
-        function copyToClipboard(textareaId, btnId, toastId) {
-            const el = document.getElementById(textareaId);
-            navigator.clipboard.writeText(el.value).then(() => {
-                alert("Copied to clipboard!");
-            });
-        }
-
-        function downloadTxtFile(textareaId) {
-            const val = document.getElementById(textareaId).value;
-            if (!val) return;
-            const blob = new Blob([val], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.revokeObjectURL(blob);
-            link.download = 'encrypted-message.txt';
-            link.click();
-        }
-
-        function clearForm(mode) {
-            if (mode === 'encrypt') {
-                document.getElementById('encMessage').value = '';
-                document.getElementById('encPassword').value = '';
-                document.getElementById('encPasswordConfirm').value = '';
-                document.getElementById('encResult').value = '';
-                document.getElementById('encOutputBox').classList.remove('show');
-            } else {
-                document.getElementById('decCiphertext').value = '';
-                document.getElementById('decPassword').value = '';
-                document.getElementById('decResult').value = '';
-                document.getElementById('decOutputBox').classList.remove('show');
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
