@@ -555,13 +555,14 @@
     </div>
 
     <script>
+        // Initialize QR Code JS Instance
         let qrcode = new QRCode(document.getElementById("qrcode"), {
-            width: 240,
-            height: 240,
-            correctLevel : QRCode.CorrectLevel.H
+            width: 220,
+            height: 220,
+            correctLevel : QRCode.CorrectLevel.M
         });
 
-        let selectedFileBase64 = "";
+        let currentFile = null;
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -609,13 +610,14 @@
         }
 
         function processFile(file) {
-            document.getElementById('file-info').innerText = `Selected File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                selectedFileBase64 = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            currentFile = file;
+            let sizeFormatted = (file.size / (1024 * 1024)).toFixed(2);
+            let unit = "MB";
+            if(file.size < 1024 * 1024) {
+                sizeFormatted = (file.size / 1024).toFixed(1);
+                unit = "KB";
+            }
+            document.getElementById('file-info').innerText = `📄 Ready: ${file.name} (${sizeFormatted} ${unit})`;
         }
 
         function generateURLQR() {
@@ -625,7 +627,6 @@
                 return;
             }
             
-            // Format URL if missing protocol
             if (!input.startsWith("http://") && !input.startsWith("https://") && input.includes(".")) {
                 input = "https://" + input;
             }
@@ -633,21 +634,53 @@
             qrcode.clear();
             qrcode.makeCode(input);
             document.getElementById("download-btn").style.display = "block";
+            document.getElementById("status-msg").innerText = "✅ QR Code generated for URL";
         }
 
-        function generateFileQR() {
-            if (!selectedFileBase64) {
+        async function generateFileQR() {
+            if (!currentFile) {
                 alert("Please select or drop a file first!");
                 return;
             }
 
-            if (selectedFileBase64.length > 3000) {
-                alert("Notice: Large file selected. The generated QR code will be dense. Ensure good camera focus when scanning.");
-            }
+            const btn = document.getElementById("file-btn");
+            const status = document.getElementById("status-msg");
+            
+            btn.disabled = true;
+            btn.innerText = "⏳ Uploading & Processing File...";
+            status.innerText = "Creating cloud download link for your file...";
 
-            qrcode.clear();
-            qrcode.makeCode(selectedFileBase64);
-            document.getElementById("download-btn").style.display = "block";
+            try {
+                // Upload file to reliable temporary CDN (tmpfiles.org)
+                let formData = new FormData();
+                formData.append("file", currentFile);
+
+                let response = await fetch("https://tmpfiles.org/api/v1/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let result = await response.json();
+
+                if (result.status === "success") {
+                    // Convert URL format to direct link for mobile download
+                    let fileUrl = result.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+                    
+                    qrcode.clear();
+                    qrcode.makeCode(fileUrl);
+                    
+                    document.getElementById("download-btn").style.display = "block";
+                    status.innerText = "✅ 100% Scannable File QR Generated!";
+                } else {
+                    throw new Error("Upload failed");
+                }
+            } catch (err) {
+                alert("Error generating file QR Code. Please check internet connection or try again.");
+                status.innerText = "❌ Upload failed. Try a smaller file or try again.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Generate File QR Code";
+            }
         }
 
         function downloadQR() {
@@ -668,6 +701,5 @@
             }
         }
     </script>
-
 </body>
 </html>
