@@ -3,759 +3,476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadoras Online - Pooreyoutuber</title>
+    <title>Calculadoras más populares</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --accent: #f59e0b;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #6366f1;
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--textSamajh gaya! Aapko ek clean, modern HTML/CSS Home Page chahiye jisme saare tools ke cards grid format me arrange hon, aur har card ka ek HTML link ho (jaise `calculadora-iva.html`). Aap andar ka logic baad me khud likhna chahte hain.
+
+Ye raha aapke diye gaye saare tools ke saath **Home Page ka complete HTML aur CSS code**:
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadoras Más Populares</title>
+    <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
         }
 
-        /* Header Styles */
-        .header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-controls nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .nav-controls a {
-            text-decoration: none;
-            color: var(--text);
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        .badge-new {
-            background-color: #ef4444;
-            color: white;
-            font-size: 0.7rem;
-            padding: 0.15rem 0.4rem;
-            border-radius: 9999px;
-            font-weight: bold;
-            vertical-align: super;
-        }
-
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropbtn {
-            background: none;
-            border: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text);
-            cursor: pointer;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: var(--card-bg);
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            z-index: 1;
-            right: 0;
-        }
-
-        .dropdown-content a {
-            color: var(--text);
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-
-        .dropdown-content a:hover {
-            background-color: var(--bg);
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .lang-select {
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.375rem;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* Container & Layout */
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
         }
 
-        .hero {
+        header {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 30px;
         }
 
-        .hero h1 {
-            font-size: 2.25rem;
-            margin-bottom: 0.5rem;
+        header h1 {
+            font-size: 2rem;
+            color: #1a252f;
+            margin-bottom: 8px;
         }
 
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
+        header p {
+            color: #666;
+            font-size: 1rem;
         }
 
-        /* Calculators Grid */
-        .grid {
+        .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, min-min(280px, 1fr));
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
+        .tool-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
         .card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 0.75rem;
-        }
-
-        .card-icon-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            margin-bottom: 10px;
         }
 
         .icon {
-            font-size: 1.5rem;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.8rem;
         }
 
         .badge {
             font-size: 0.75rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.25rem;
-            font-weight: 600;
-        }
-
-        .badge-top { background-color: #fee2e2; color: #dc2626; }
-        .badge-nuevo { background-color: #fef3c7; color: #d97706; }
-        .badge-autonomo { background-color: #e0e7ff; color: #4338ca; }
-
-        .card-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            flex-grow: 1;
-            margin-bottom: 1.25rem;
-        }
-
-        .btn-calc {
-            background-color: var(--bg);
-            color: var(--primary);
-            border: 1px solid var(--border);
-            padding: 0.6rem 1rem;
-            border-radius: 0.375rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .btn-calc:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Modal / Active Calculator View */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 200;
-            overflow-y: auto;
-            padding: 2rem 1rem;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            max-width: 800px;
-            margin: 0 auto;
-            border-radius: 0.75rem;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        /* IVA Calculator Specific UI */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-        }
-
-        .tab {
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-        }
-
-        .tab.active {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-size: 1rem;
-        }
-
-        .rate-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .rate-btn {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            border-radius: 0.375rem;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .rate-btn.active {
-            border-color: var(--primary);
-            background-color: #eff6ff;
-            color: var(--primary);
-        }
-
-        .result-box {
-            background-color: #f1f5f9;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-row.total {
+            padding: 4px 8px;
+            border-radius: 20px;
             font-weight: bold;
+        }
+
+        .badge.top {
+            background-color: #ffebe6;
+            color: #ff5630;
+        }
+
+        .badge.nuevo {
+            background-color: #e3fcef;
+            color: #36b37e;
+        }
+
+        .badge.autonomos {
+            background-color: #deebff;
+            color: #0052cc;
+        }
+
+        .tool-card h3 {
             font-size: 1.2rem;
-            border-top: 1px solid var(--border);
-            padding-top: 0.5rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
         }
 
-        /* SEO Content & Tables inside Modal */
-        .info-section {
-            margin-top: 2rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1.5rem;
+        .tool-card p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            flex-grow: 1;
         }
 
-        .info-section h3 {
-            margin-bottom: 1rem;
+        .tool-card a {
+            text-decoration: none;
+            color: #0066cc;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-block;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
-
-        th, td {
-            border: 1px solid var(--border);
-            padding: 0.5rem;
-            text-align: left;
-        }
-
-        th {
-            background-color: var(--bg);
+        .tool-card a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-    <div class="nav-controls">
-        <nav>
-            <a href="https://pooreyoutuber.github.io/" class="home-btn" data-key="nav_home">Home</a>
-            <a href="Articals.html" class="article-btn"><span data-key="nav_articles">Articles</span> <span class="badge-new">NEW</span></a>
-            <div class="dropdown">
-                <button class="dropbtn" data-key="nav_shop">🛒 Shop ▾</button>
-                <div class="dropdown-content">
-                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
-                </div>
-            </div>
-            <a href="donation.html" class="donate-coffee-btn" data-key="nav_coffee">☕ Buy me a coffee</a>
-            <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)">
-                <option value="es" selected>Español</option>
-                <option value="en">English</option>
-            </select>
-        </nav>
-    </div>
-</header>
-
 <div class="container">
-    <div class="hero">
-        <h1 data-key="hero_title">Calculadoras más populares</h1>
-        <p data-key="hero_subtitle">Las herramientas que más utilizan los españoles cada día.</p>
-    </div>
+    <header>
+        <h1>Calculadoras más populares</h1>
+        <p>Las herramientas que más utilizan los españoles cada día.</p>
+    </header>
 
-    <!-- Cards Grid -->
-    <div class="grid" id="calculatorGrid">
-        <!-- Calculators will be generated dynamically -->
-    </div>
-</div>
+    <div class="tools-grid">
 
-<!-- Modal Container for Calculator View -->
-<div class="modal" id="calcModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal()">&times;</button>
-        <div id="modalBody"></div>
-    </div>
-</div>
-
-<script>
-// Translations Dictionary
-const translations = {
-    es: {
-        nav_home: "Inicio",
-        nav_articles: "Artículos",
-        nav_shop: "🛒 Tienda ▾",
-        nav_coffee: "☕ Invítame a un café",
-        hero_title: "Calculadoras más populares",
-        hero_subtitle: "Las herramientas que más utilizan los españoles cada día.",
-        use_calc: "Usar calculadora →",
-        badge_top: "🔥 Top",
-        badge_nuevo: "✨ Nuevo",
-        badge_autonomo: "💼 Autónomos",
-        
-        // Calculators Metadata
-        c_iva_title: "Calculadora de IVA",
-        c_iva_desc: "Añade o quita IVA al 21%, 10% y 4%. Calcula base imponible, cuota y total al instante.",
-        c_sueldo_title: "Sueldo Neto",
-        c_sueldo_desc: "Convierte salario bruto a neto. Descuenta IRPF y Seguridad Social con retenciones 2026.",
-        c_hipoteca_title: "Hipoteca",
-        c_hipoteca_desc: "Calcula cuota mensual, total de intereses y tabla de amortización de tu hipoteca.",
-        c_irpf_title: "IRPF",
-        c_irpf_desc: "Estima tu retención de IRPF según tramos 2026 y situación personal.",
-        c_ahorro_title: "Ahorro",
-        c_ahorro_desc: "Simula tu plan de ahorro con interés compuesto. Capital inicial, aportaciones mensuales y rentabilidad.",
-        c_revolving_title: "Tarjeta Revolving",
-        c_revolving_desc: "Descubre el coste real de tu tarjeta revolving: meses para liquidarla y total de intereses pagados.",
-        c_coche_title: "Coste del Coche",
-        c_coche_desc: "Coste real anual de tu vehículo: combustible, seguro, ITV, IVTM, mantenimiento y coste por km.",
-        c_imc_title: "IMC",
-        c_imc_desc: "Calcula tu Índice de Masa Corporal según criterios OMS. Clasificación SEEDO incluida.",
-        c_calorias_title: "Calorías diarias",
-        c_calorias_desc: "Calcula tu TDEE y necesidades calóricas diarias según objetivo: adelgazar, mantener o ganar músculo.",
-        c_embarazo_title: "Embarazo",
-        c_embarazo_desc: "Calcula fecha probable de parto, semanas de gestación y fechas clave del embarazo.",
-        c_peso_title: "Peso Ideal",
-        c_peso_desc: "5 fórmulas científicas (Lorentz, Broca, OMS, Devine, Hamwi) con ajuste por complexión.",
-        c_tmb_title: "TMB",
-        c_tmb_desc: "Tasa Metabólica Basal con Mifflin y Harris-Benedict. TDEE por nivel de actividad.",
-        c_agua_title: "Agua Diaria",
-        c_agua_desc: "Calcula cuánta agua necesitas al día según peso, actividad física y clima.",
-        c_1rm_title: "1RM",
-        c_1rm_desc: "Calcula tu repetición máxima con Epley, Brzycki y Lander. Tabla de intensidades incluida.",
-        c_alcoholemia_title: "Alcoholemia",
-        c_alcoholemia_desc: "Estima tu tasa de alcohol en sangre (fórmula Widmark). Límites DGT 2026. Solo orientativa.",
-        c_porcentajes_title: "Porcentajes",
-        c_porcentajes_desc: "Calcula porcentajes en todos los modos: de un número, qué %, número original y variación.",
-        c_fracciones_title: "Fracciones",
-        c_fracciones_desc: "Suma, resta, multiplica y divide fracciones. Simplificación, fracciones mixtas y decimales.",
-        c_regla3_title: "Regla de Tres",
-        c_regla3_desc: "Resuelve proporciones simples directas e inversas y regla de tres compuesta paso a paso.",
-        c_ecuaciones_title: "Ecuaciones",
-        c_ecuaciones_desc: "Ecuaciones de 1.º y 2.º grado con discriminante, fórmula cuadrática y verificación.",
-        c_area_title: "Área y Volumen",
-        c_area_desc: "Área de figuras planas y volumen de sólidos: círculo, triángulo, esfera, cilindro y más.",
-        c_potencias_title: "Potencias y Raíces",
-        c_potencias_desc: "Potencias enteras, fraccionarias, raíces n-ésimas y logaritmos. Con procedimiento paso a paso.",
-        c_descuentos_title: "Descuentos",
-        c_descuentos_desc: "4 modos: precio con descuento, % de ahorro, precio original y descuentos acumulados.",
-        c_unidades_title: "Convertidor de Unidades",
-        c_unidades_desc: "Métrico ↔ Imperial: longitud, peso, temperatura, volumen, área, velocidad y energía.",
-        c_fechas_title: "Tiempo entre Fechas",
-        c_fechas_desc: "Calcula días, meses y años entre dos fechas. Días hábiles, sumar/restar días y edad exacta.",
-        c_ivainverso_title: "IVA Inverso",
-        c_ivainverso_desc: "Extrae base imponible e IVA de un precio final. Incluye factura autónomo con IRPF.",
-        c_propina_title: "Propina",
-        c_propina_desc: "Calcula cuánto dejar de propina según la calidad del servicio. Divide entre comensales y guía por país.",
-        c_consumo_title: "Consumo Eléctrico",
-        c_consumo_desc: "Coste de cualquier electrodoméstico al día, mes y año. 18 aparatos preconfigurados."
-    },
-    en: {
-        nav_home: "Home",
-        nav_articles: "Articles",
-        nav_shop: "🛒 Shop ▾",
-        nav_coffee: "☕ Buy me a coffee",
-        hero_title: "Most Popular Calculators",
-        hero_subtitle: "The tools used most by people every day.",
-        use_calc: "Use calculator →",
-        badge_top: "🔥 Top",
-        badge_nuevo: "✨ New",
-        badge_autonomo: "💼 Freelance",
-
-        // Calculators Metadata
-        c_iva_title: "VAT Calculator",
-        c_iva_desc: "Add or remove VAT at 21%, 10%, and 4%. Instantly calculate tax base, quota, and total.",
-        c_sueldo_title: "Net Salary",
-        c_sueldo_desc: "Convert gross salary to net. Deduct tax and Social Security with 2026 rates.",
-        c_hipoteca_title: "Mortgage",
-        c_hipoteca_desc: "Calculate monthly payment, total interest, and amortization schedule.",
-        c_irpf_title: "Income Tax (IRPF)",
-        c_irpf_desc: "Estimate income tax withholding based on 2026 brackets and personal situation.",
-        c_ahorro_title: "Savings",
-        c_ahorro_desc: "Simulate compound interest savings plan. Initial capital, monthly deposits, and returns.",
-        c_revolving_title: "Revolving Card",
-        c_revolving_desc: "Discover the real cost of your revolving card: months to payoff and total interest.",
-        c_coche_title: "Car Cost",
-        c_coche_desc: "Real annual cost of your vehicle: fuel, insurance, inspection, tax, maintenance, and cost/km.",
-        c_imc_title: "BMI",
-        c_imc_desc: "Calculate your Body Mass Index according to WHO criteria. Full classification included.",
-        c_calorias_title: "Daily Calories",
-        c_calorias_desc: "Calculate TDEE and daily calorie needs based on goal: lose, maintain, or gain weight.",
-        c_embarazo_title: "Pregnancy",
-        c_embarazo_desc: "Calculate estimated due date, gestation weeks, and key milestone dates.",
-        c_peso_title: "Ideal Weight",
-        c_peso_desc: "5 scientific formulas (Lorentz, Broca, WHO, Devine, Hamwi) adjusted by frame size.",
-        c_tmb_title: "BMR",
-        c_tmb_desc: "Basal Metabolic Rate using Mifflin and Harris-Benedict. TDEE by activity level.",
-        c_agua_title: "Daily Water",
-        c_agua_desc: "Calculate daily water intake based on body weight, physical activity, and weather.",
-        c_1rm_title: "1RM",
-        c_1rm_desc: "Calculate one-rep max with Epley, Brzycki, and Lander. Intensity table included.",
-        c_alcoholemia_title: "Blood Alcohol",
-        c_alcoholemia_desc: "Estimate blood alcohol concentration (Widmark formula). Legal limits guide.",
-        c_porcentajes_title: "Percentages",
-        c_porcentajes_desc: "Calculate percentages in all modes: % of a number, percentage ratio, original value.",
-        c_fracciones_title: "Fractions",
-        c_fracciones_desc: "Add, subtract, multiply, and divide fractions. Simplification and decimals.",
-        c_regla3_title: "Rule of Three",
-        c_regla3_desc: "Solve simple direct, inverse, and compound rule of three step by step.",
-        c_ecuaciones_title: "Equations",
-        c_ecuaciones_desc: "1st and 2nd degree equations with discriminant, quadratic formula, and verification.",
-        c_area_title: "Area & Volume",
-        c_area_desc: "Area of 2D shapes and volume of 3D solids: circle, triangle, sphere, cylinder, etc.",
-        c_potencias_title: "Powers & Roots",
-        c_potencias_desc: "Integer/fractional powers, n-th roots, and logarithms step-by-step.",
-        c_descuentos_title: "Discounts",
-        c_descuentos_desc: "4 modes: discounted price, savings %, original price, and stacked discounts.",
-        c_unidades_title: "Unit Converter",
-        c_unidades_desc: "Metric ↔ Imperial: length, weight, temperature, volume, area, speed, and energy.",
-        c_fechas_title: "Date Interval",
-        c_fechas_desc: "Calculate days, months, and years between dates. Business days and exact age.",
-        c_ivainverso_title: "Reverse VAT",
-        c_ivainverso_desc: "Extract tax base and VAT from a final price. Includes freelance invoice calculator.",
-        c_propina_title: "Tip Calculator",
-        c_propina_desc: "Calculate tip based on service quality. Split bills among diners.",
-        c_consumo_title: "Electricity Consumption",
-        c_consumo_desc: "Cost of running appliances daily, monthly, and yearly. 18 presets included."
-    }
-};
-
-const calculatorsData = [
-    { id: 'iva', icon: '💶', key: 'c_iva', badge: 'badge_top' },
-    { id: 'sueldo', icon: '💼', key: 'c_sueldo', badge: 'badge_top' },
-    { id: 'hipoteca', icon: '🏠', key: 'c_hipoteca' },
-    { id: 'irpf', icon: '📋', key: 'c_irpf' },
-    { id: 'ahorro', icon: '🏦', key: 'c_ahorro', badge: 'badge_nuevo' },
-    { id: 'revolving', icon: '💳', key: 'c_revolving', badge: 'badge_nuevo' },
-    { id: 'coche', icon: '🚗', key: 'c_coche', badge: 'badge_nuevo' },
-    { id: 'imc', icon: '⚖️', key: 'c_imc', badge: 'badge_top' },
-    { id: 'calorias', icon: '🍎', key: 'c_calorias' },
-    { id: 'embarazo', icon: '🤰', key: 'c_embarazo' },
-    { id: 'peso', icon: '💪', key: 'c_peso' },
-    { id: 'tmb', icon: '🔥', key: 'c_tmb' },
-    { id: 'agua', icon: '💧', key: 'c_agua' },
-    { id: '1rm', icon: '🏋️', key: 'c_1rm', badge: 'badge_nuevo' },
-    { id: 'alcoholemia', icon: '🍺', key: 'c_alcoholemia', badge: 'badge_nuevo' },
-    { id: 'porcentajes', icon: '%', key: 'c_porcentajes', badge: 'badge_top' },
-    { id: 'fracciones', icon: '½', key: 'c_fracciones' },
-    { id: 'regla3', icon: '⚖️', key: 'c_regla3' },
-    { id: 'ecuaciones', icon: '🔣', key: 'c_ecuaciones' },
-    { id: 'area', icon: '📐', key: 'c_area', badge: 'badge_nuevo' },
-    { id: 'potencias', icon: '🔢', key: 'c_potencias', badge: 'badge_nuevo' },
-    { id: 'descuentos', icon: '🏷️', key: 'c_descuentos', badge: 'badge_top' },
-    { id: 'unidades', icon: '📐', key: 'c_unidades' },
-    { id: 'fechas', icon: '📅', key: 'c_fechas' },
-    { id: 'ivainverso', icon: '🧾', key: 'c_ivainverso', badge: 'badge_autonomo' },
-    { id: 'propina', icon: '🍽️', key: 'c_propina' },
-    { id: 'consumo', icon: '⚡', key: 'c_consumo', badge: 'badge_nuevo' }
-];
-
-let currentLang = 'es';
-
-function renderGrid() {
-    const grid = document.getElementById('calculatorGrid');
-    grid.innerHTML = '';
-    
-    calculatorsData.forEach(calc => {
-        const title = translations[currentLang][`${calc.key}_title`];
-        const desc = translations[currentLang][`${calc.key}_desc`];
-        const badgeText = calc.badge ? translations[currentLang][calc.badge] : '';
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <div class="card-header">
-                <div class="card-icon-title">
-                    <span class="icon">${calc.icon}</span>
-                    <span class="card-title">${title}</span>
+        <!-- Finanzas / Economía -->
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">💶</span>
+                    <span class="badge top">🔥 Top</span>
                 </div>
-                ${calc.badge ? `<span class="badge ${calc.badge}">${badgeText}</span>` : ''}
+                <h3>Calculadora de IVA</h3>
+                <p>Añade o quita IVA al 21%, 10% y 4%. Calcula base imponible, cuota y total al instante.</p>
             </div>
-            <p class="card-desc">${desc}</p>
-            <button class="btn-calc" onclick="openCalculator('${calc.id}')">${translations[currentLang].use_calc}</button>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-function changeLanguage(lang) {
-    currentLang = lang;
-    document.querySelectorAll('[data-key]').forEach(el => {
-        const key = el.getAttribute('data-key');
-        if (translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
-    });
-    renderGrid();
-}
-
-// Modal open logic
-function openCalculator(id) {
-    const modal = document.getElementById('calcModal');
-    const modalBody = document.getElementById('modalBody');
-    
-    if (id === 'iva') {
-        modalBody.innerHTML = getIVACalculatorHTML();
-        initIVACalculator();
-    } else {
-        modalBody.innerHTML = `<h2>${translations[currentLang][`c_${id}_title`]}</h2><p style="margin-top:1rem;">Tool dynamic UI component ready.</p>`;
-    }
-    
-    modal.style.display = 'block';
-}
-
-function closeModal() {
-    document.getElementById('calcModal').style.display = 'none';
-}
-
-// Full 100% Functional IVA Calculator Implementation
-let selectedIvaRate = 21;
-let currentIvaMode = 'add';
-
-function getIVACalculatorHTML() {
-    return `
-        <h2>Calculadora de IVA Online Gratis 2026</h2>
-        <p style="color:var(--text-muted); margin-bottom: 1rem;">Añade o quita el IVA al 21%, 10% y 4% al instante.</p>
-        
-        <div class="tabs">
-            <div class="tab active" onclick="setIvaMode('add', this)">➕ Añadir IVA</div>
-            <div class="tab" onclick="setIvaMode('remove', this)">➖ Quitar IVA (inverso)</div>
+            <a href="calculadora-iva.html">Usar calculadora →</a>
         </div>
 
-        <div class="form-group">
-            <label id="priceLabel">Precio sin IVA (€)</label>
-            <input type="number" id="ivaAmount" placeholder="100" value="100" oninput="calculateIVA()">
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">💼</span>
+                    <span class="badge top">🔥 Top</span>
+                </div>
+                <h3>Sueldo Neto</h3>
+                <p>Convierte salario bruto a neto. Descuenta IRPF y Seguridad Social con retenciones 2026.</p>
+            </div>
+            <a href="sueldo-neto.html">Usar calculadora →</a>
         </div>
 
-        <div class="form-group">
-            <label>Tipo de IVA</label>
-            <div class="rate-buttons">
-                <button class="rate-btn active" onclick="setIvaRate(21, this)">21%<br><small>General</small></button>
-                <button class="rate-btn" onclick="setIvaRate(10, this)">10%<br><small>Reducido</small></button>
-                <button class="rate-btn" onclick="setIvaRate(4, this)">4%<br><small>Superreducido</small></button>
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🏠</span>
+                </div>
+                <h3>Hipoteca</h3>
+                <p>Calcula cuota mensual, total de intereses y tabla de amortización de tu hipoteca.</p>
             </div>
+            <a href="hipoteca.html">Usar calculadora →</a>
         </div>
 
-        <div class="result-box">
-            <div class="result-row">
-                <span>Base Imponible:</span>
-                <span id="resBase">100.00 €</span>
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">📋</span>
+                </div>
+                <h3>IRPF</h3>
+                <p>Estima tu retención de IRPF según tramos 2026 y situación personal.</p>
             </div>
-            <div class="result-row">
-                <span>Cuota IVA (<span id="resRateText">21</span>%):</span>
-                <span id="resCuota">21.00 €</span>
-            </div>
-            <div class="result-row total">
-                <span>Total:</span>
-                <span id="resTotal">121.00 €</span>
-            </div>
+            <a href="irpf.html">Usar calculadora →</a>
         </div>
 
-        <div class="info-section">
-            <h3>Tabla de referencia rápida</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Base imponible</th>
-                        <th>IVA 21% → Total</th>
-                        <th>IVA 10% → Total</th>
-                        <th>IVA 4% → Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>10,00 €</td><td>12,10 €</td><td>11,00 €</td><td>10,40 €</td></tr>
-                    <tr><td>50,00 €</td><td>60,50 €</td><td>55,00 €</td><td>52,00 €</td></tr>
-                    <tr><td>100,00 €</td><td>121,00 €</td><td>110,00 €</td><td>104,00 €</td></tr>
-                    <tr><td>1000,00 €</td><td>1210,00 €</td><td>1100,00 €</td><td>1040,00 €</td></tr>
-                </tbody>
-            </table>
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🏦</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Ahorro</h3>
+                <p>Simula tu plan de ahorro con interés compuesto. Capital inicial, aportaciones mensuales y rentabilidad.</p>
+            </div>
+            <a href="ahorro.html">Usar calculadora →</a>
         </div>
-    `;
-}
 
-function setIvaMode(mode, el) {
-    currentIvaMode = mode;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('priceLabel').textContent = mode === 'add' ? 'Precio sin IVA (€)' : 'Precio con IVA (€)';
-    calculateIVA();
-}
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">💳</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Tarjeta Revolving</h3>
+                <p>Descubre el coste real de tu tarjeta revolving: meses para liquidarla y total de intereses pagados.</p>
+            </div>
+            <a href="tarjeta-revolving.html">Usar calculadora →</a>
+        </div>
 
-function setIvaRate(rate, el) {
-    selectedIvaRate = rate;
-    document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    calculateIVA();
-}
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🚗</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Coste del Coche</h3>
+                <p>Coste real anual de tu vehículo: combustible, seguro, ITV, IVTM, mantenimiento y coste por km.</p>
+            </div>
+            <a href="coste-coche.html">Usar calculadora →</a>
+        </div>
 
-function initIVACalculator() {
-    calculateIVA();
-}
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🏷️</span>
+                    <span class="badge top">🔥 Top</span>
+                </div>
+                <h3>Descuentos</h3>
+                <p>4 modos: precio con descuento, % de ahorro, precio original y descuentos acumulados.</p>
+            </div>
+            <a href="descuentos.html">Usar calculadora →</a>
+        </div>
 
-function calculateIVA() {
-    const val = parseFloat(document.getElementById('ivaAmount').value) || 0;
-    let base = 0;
-    let cuota = 0;
-    let total = 0;
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🧾</span>
+                    <span class="badge autonomos">💼 Autónomos</span>
+                </div>
+                <h3>IVA Inverso</h3>
+                <p>Extrae base imponible e IVA de un precio final. Incluye factura autónomo con IRPF.</p>
+            </div>
+            <a href="iva-inverso.html">Usar calculadora →</a>
+        </div>
 
-    if (currentIvaMode === 'add') {
-        base = val;
-        cuota = base * (selectedIvaRate / 100);
-        total = base + cuota;
-    } else {
-        total = val;
-        base = total / (1 + selectedIvaRate / 100);
-        cuota = total - base;
-    }
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">⚡</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Consumo Eléctrico</h3>
+                <p>Coste de cualquier electrodoméstico al día, mes y año. 18 aparatos preconfigurados.</p>
+            </div>
+            <a href="consumo-electrico.html">Usar calculadora →</a>
+        </div>
 
-    document.getElementById('resBase').textContent = base.toFixed(2) + ' €';
-    document.getElementById('resCuota').textContent = cuota.toFixed(2) + ' €';
-    document.getElementById('resTotal').textContent = total.toFixed(2) + ' €';
-    document.getElementById('resRateText').textContent = selectedIvaRate;
-}
+        <!-- Salud y Fitness -->
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">⚖️</span>
+                    <span class="badge top">🔥 Top</span>
+                </div>
+                <h3>IMC</h3>
+                <p>Calcula tu Índice de Masa Corporal según criterios OMS. Clasificación SEEDO incluida.</p>
+            </div>
+            <a href="imc.html">Usar calculadora →</a>
+        </div>
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('calcModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🍎</span>
+                </div>
+                <h3>Calorías diarias</h3>
+                <p>Calcula tu TDEE y necesidades calóricas diarias según objetivo: adelgazar, mantener o ganar músculo.</p>
+            </div>
+            <a href="calorias-diarias.html">Usar calculadora →</a>
+        </div>
 
-// Initial render
-renderGrid();
-</script>
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🤰</span>
+                </div>
+                <h3>Embarazo</h3>
+                <p>Calcula fecha probable de parto, semanas de gestación y fechas clave del embarazo.</p>
+            </div>
+            <a href="embarazo.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">💪</span>
+                </div>
+                <h3>Peso Ideal</h3>
+                <p>5 fórmulas científicas (Lorentz, Broca, OMS, Devine, Hamwi) con ajuste por complexión.</p>
+            </div>
+            <a href="peso-ideal.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🔥</span>
+                </div>
+                <h3>TMB</h3>
+                <p>Tasa Metabólica Basal con Mifflin y Harris-Benedict. TDEE por nivel de actividad.</p>
+            </div>
+            <a href="tmb.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">💧</span>
+                </div>
+                <h3>Agua Diaria</h3>
+                <p>Calcula cuánta agua necesitas al día según peso, actividad física y clima.</p>
+            </div>
+            <a href="agua-diaria.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🏋️</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>1RM</h3>
+                <p>Calcula tu repetición máxima con Epley, Brzycki y Lander. Tabla de intensidades incluida.</p>
+            </div>
+            <a href="1rm.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🍺</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Alcoholemia</h3>
+                <p>Estima tu tasa de alcohol en sangre (fórmula Widmark). Límites DGT. Solo orientativa.</p>
+            </div>
+            <a href="alcoholemia.html">Usar calculadora →</a>
+        </div>
+
+        <!-- Matemáticas y Conversión -->
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">%</span>
+                    <span class="badge top">🔥 Top</span>
+                </div>
+                <h3>Porcentajes</h3>
+                <p>Calcula porcentajes en todos los modos: de un número, qué %, número original y variación.</p>
+            </div>
+            <a href="porcentajes.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">½</span>
+                </div>
+                <h3>Fracciones</h3>
+                <p>Suma, resta, multiplica y divide fracciones. Simplificación, fracciones mixtas y decimales.</p>
+            </div>
+            <a href="fracciones.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">⚖️</span>
+                </div>
+                <h3>Regla de Tres</h3>
+                <p>Resuelve proporciones simples directas e inversas y regla de tres compuesta paso a paso.</p>
+            </div>
+            <a href="regla-de-tres.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🔣</span>
+                </div>
+                <h3>Ecuaciones</h3>
+                <p>Ecuaciones de 1.º y 2.º grado con discriminante, fórmula cuadrática y verificación.</p>
+            </div>
+            <a href="ecuaciones.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">📐</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Área y Volumen</h3>
+                <p>Área de figuras planas y volumen de sólidos: círculo, triángulo, esfera, cilindro y más.</p>
+            </div>
+            <a href="area-y-volumen.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🔢</span>
+                    <span class="badge nuevo">✨ Nuevo</span>
+                </div>
+                <h3>Potencias y Raíces</h3>
+                <p>Potencias enteras, fraccionarias, raíces n-ésimas y logaritmos. Con procedimiento paso a paso.</p>
+            </div>
+            <a href="potencias-y-raices.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">📐</span>
+                </div>
+                <h3>Convertidor de Unidades</h3>
+                <p>Métrico ↔ Imperial: longitud, peso, temperatura, volumen, área, velocidad y energía.</p>
+            </div>
+            <a href="convertidor-unidades.html">Usar calculadora →</a>
+        </div>
+
+        <!-- Varios -->
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">📅</span>
+                </div>
+                <h3>Tiempo entre Fechas</h3>
+                <p>Calcula días, meses y años entre dos fechas. Días hábiles, sumar/restar días y edad exacta.</p>
+            </div>
+            <a href="tiempo-entre-fechas.html">Usar calculadora →</a>
+        </div>
+
+        <div class="tool-card">
+            <div>
+                <div class="card-header">
+                    <span class="icon">🍽️</span>
+                </div>
+                <h3>Propina</h3>
+                <p>Calcula cuánto dejar de propina según la calidad del servicio. Divide entre comensales y guía por país.</p>
+            </div>
+            <a href="propina.html">Usar calculadora →</a>
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>
