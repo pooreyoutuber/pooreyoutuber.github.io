@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Sueldo Neto 2026-2027</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+            background: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Spinner */
+        .spinner-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .spinner {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .spinner button {
+            background: var(--bg);
+            border: none;
+            padding: 0.5rem 0.8rem;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+
+        .spinner button:hover {
+            background: #e2e8f0;
+        }
+
+        .spinner input {
+            border: none;
+            text-align: center;
+            width: 60px;
+            padding: 0.8rem;
+        }
+
+        .spinner input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .kids-label {
+            flex: 0 0 auto;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Results */
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            font-size: 1rem;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-monthly {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+            font-size: 1rem;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .info-box a {
+            color: #92400e;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 2px solid #92400e;
+        }
+
+        /* Guide Section */
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Breakdown Section */
+        .breakdown {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            color: var(--text-light);
+        }
+
+        .breakdown-value {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+                padding-bottom: 0.8rem;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .guide-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🧮 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <h1 data-es="Calculadora de Sueldo Neto 2026-2027" data-en="Net Salary Calculator 2026-2027">Calculadora de Sueldo Neto 2026-2027</h1>
+    <p class="subtitle" data-es="Convierte tu salario bruto a neto o neto a bruto al instante. Con IRPF 2026 real por tramos, cotizaciones SS, MEI y situación familiar." data-en="Convert your gross salary to net or net to gross instantly. With real 2026 IRPF by brackets, SS contributions, MEI and family situation.">Convierte tu salario bruto a neto o neto a bruto al instante. Con IRPF 2026 real por tramos, cotizaciones SS, MEI y situación familiar.</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(0)" data-es="💼 Bruto → Neto" data-en="💼 Gross → Net">💼 Bruto → Neto</button>
+        <button class="tab-btn" onclick="switchTab(1)" data-es="💰 Neto → Bruto" data-en="💰 Net → Gross">💰 Neto → Bruto</button>
+    </div>
+
+    <!-- Tab 1: Bruto → Neto -->
+    <div class="tab-content active">
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-es="Bruto → Neto" data-en="Gross → Net">Bruto → Neto</h2>
+                
+                <div class="form-group">
+                    <label data-es="Salario bruto anual (€)" data-en="Annual gross salary (€)">Salario bruto anual (€)</label>
+                    <input type="number" id="bruto1" placeholder="30000" step="100" min="0" value="30000">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
+                    <select id="ccaa1">
+                        <option value="madrid" data-es="Comunidad de Madrid" data-en="Community of Madrid">Comunidad de Madrid</option>
+                        <option value="andalucia" data-es="Andalucía" data-en="Andalusia">Andalucía</option>
+                        <option value="aragon" data-es="Aragón" data-en="Aragon">Aragón</option>
+                        <option value="asturias" data-es="Asturias" data-en="Asturias">Asturias</option>
+                        <option value="baleares" data-es="Baleares" data-en="Balearic Islands">Baleares</option>
+                        <option value="canarias" data-es="Canarias" data-en="Canary Islands">Canarias</option>
+                        <option value="cantabria" data-es="Cantabria" data-en="Cantabria">Cantabria</option>
+                        <option value="castilla-la-mancha" data-es="Castilla-La Mancha" data-en="Castilla-La Mancha">Castilla-La Mancha</option>
+                        <option value="castilla-leon" data-es="Castilla y León" data-en="Castilla y León">Castilla y León</option>
+                        <option value="valencia" data-es="Comunidad Valenciana" data-en="Valencian Community">Comunidad Valenciana</option>
+                        <option value="extremadura" data-es="Extremadura" data-en="Extremadura">Extremadura</option>
+                        <option value="galicia" data-es="Galicia" data-en="Galicia">Galicia</option>
+                        <option value="rioja" data-es="La Rioja" data-en="La Rioja">La Rioja</option>
+                        <option value="murcia" data-es="Murcia" data-en="Murcia">Murcia</option>
+                        <option value="navarra" data-es="Navarra (régimen foral)" data-en="Navarra (foral regime)">Navarra (régimen foral)</option>
+                        <option value="pais-vasco" data-es="País Vasco (régimen foral)" data-en="Basque Country (foral regime)">País Vasco (régimen foral)</option>
+                        <option value="cataluna" data-es="Cataluña" data-en="Catalonia">Cataluña</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Estado civil" data-en="Marital Status">Estado civil</label>
+                    <select id="married1">
+                        <option value="single" data-es="Soltero/a" data-en="Single">Soltero/a</option>
+                        <option value="married" data-es="Casado/a" data-en="Married">Casado/a</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de contrato" data-en="Contract Type">Tipo de contrato</label>
+                    <select id="contract1">
+                        <option value="indefinido" data-es="Indefinido" data-en="Permanent">Indefinido</option>
+                        <option value="temporal" data-es="Temporal" data-en="Temporary">Temporal</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Número de hijos" data-en="Number of children">Número de hijos</label>
+                    <div class="spinner-group">
+                        <div class="spinner">
+                            <button onclick="updateKids(1, -1)">−</button>
+                            <input type="number" id="kids1" value="0" min="0" readonly>
+                            <button onclick="updateKids(1, 1)">+</button>
+                        </div>
+                        <span class="kids-label" data-es="menores de 25 años" data-en="under 25 years">menores de 25 años</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Número de pagas" data-en="Number of payments">Número de pagas</label>
+                    <select id="pagas1">
+                        <option value="12" data-es="12 pagas" data-en="12 payments">12 pagas</option>
+                        <option value="14" data-es="14 pagas" data-en="14 payments">14 pagas</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculateNettoGross()" data-es="📊 Calcular sueldo neto" data-en="📊 Calculate net salary">📊 Calcular sueldo neto</button>
+
+                <div id="result1" class="result-box" style="display: none;">
+                    <div class="result-row">
+                        <span class="result-label" data-es="Salario bruto anual" data-en="Annual gross salary">Salario bruto anual</span>
+                        <span class="result-value" id="bruto1-result">€0,00</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label" data-es="Cotización SS" data-en="SS Contribution">Cotización SS</span>
+                        <span class="result-value" id="ss1-result" style="color: #ef4444;">-€0,00</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label" data-es="Retención IRPF" data-en="IRPF Withholding">Retención IRPF</span>
+                        <span class="result-value" id="irpf1-result" style="color: #ef4444;">-€0,00</span>
+                    </div>
+                    <div class="result-row" style="border-bottom: 2px solid rgba(99, 102, 241, 0.3); padding: 1rem 0; margin: 0.5rem 0;">
+                        <span class="result-label" data-es="Salario neto anual" data-en="Annual net salary">Salario neto anual</span>
+                        <div style="text-align: right;">
+                            <span class="result-value" id="neto1-result">€0,00</span>
+                            <div class="result-monthly" id="neto1-monthly"></div>
+                        </div>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label" data-es="Tipo efectivo" data-en="Effective rate">Tipo efectivo</span>
+                        <span class="result-value" id="effective1-result">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div>
+                <div class="info-box">
+                    <h3>⚠️ <span data-es="Importante" data-en="Important">Importante</span></h3>
+                    <p><span data-es="Los resultados son orientativos. El IRPF exacto depende de muchos factores personales. Para mayor precisión usa el simulador oficial de la" data-en="Results are for guidance only. Exact IRPF depends on many personal factors. For greater accuracy use the official simulator from the"></span> <a href="https://sede.agenciatributaria.gob.es/" target="_blank" data-es="Agencia Tributaria" data-en="Tax Agency">Agencia Tributaria</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Neto → Bruto -->
+    <div class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-es="Neto → Bruto" data-en="Net → Gross">Neto → Bruto</h2>
+                
+                <div class="form-group">
+                    <label data-es="Salario NETO anual deseado (€)" data-en="Desired annual NET salary (€)">Salario NETO anual deseado (€)</label>
+                    <input type="number" id="neto2" placeholder="25000" step="100" min="0" value="25000">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
+                    <select id="ccaa2">
+                        <option value="madrid" data-es="Comunidad de Madrid" data-en="Community of Madrid">Comunidad de Madrid</option>
+                        <option value="andalucia" data-es="Andalucía" data-en="Andalusia">Andalucía</option>
+                        <option value="aragon" data-es="Aragón" data-en="Aragon">Aragón</option>
+                        <option value="asturias" data-es="Asturias" data-en="Asturias">Asturias</option>
+                        <option value="baleares" data-es="Baleares" data-en="Balearic Islands">Baleares</option>
+                        <option value="canarias" data-es="Canarias" data-en="Canary Islands">Canarias</option>
+                        <option value="cantabria" data-es="Cantabria" data-en="Cantabria">Cantabria</option>
+                        <option value="castilla-la-mancha" data-es="Castilla-La Mancha" data-en="Castilla-La Mancha">Castilla-La Mancha</option>
+                        <option value="castilla-leon" data-es="Castilla y León" data-en="Castilla y León">Castilla y León</option>
+                        <option value="valencia" data-es="Comunidad Valenciana" data-en="Valencian Community">Comunidad Valenciana</option>
+                        <option value="extremadura" data-es="Extremadura" data-en="Extremadura">Extremadura</option>
+                        <option value="galicia" data-es="Galicia" data-en="Galicia">Galicia</option>
+                        <option value="rioja" data-es="La Rioja" data-en="La Rioja">La Rioja</option>
+                        <option value="murcia" data-es="Murcia" data-en="Murcia">Murcia</option>
+                        <option value="navarra" data-es="Navarra (régimen foral)" data-en="Navarra (foral regime)">Navarra (régimen foral)</option>
+                        <option value="pais-vasco" data-es="País Vasco (régimen foral)" data-en="Basque Country (foral regime)">País Vasco (régimen foral)</option>
+                        <option value="cataluna" data-es="Cataluña" data-en="Catalonia">Cataluña</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Estado civil" data-en="Marital Status">Estado civil</label>
+                    <select id="married2">
+                        <option value="single" data-es="Soltero/a" data-en="Single">Soltero/a</option>
+                        <option value="married" data-es="Casado/a" data-en="Married">Casado/a</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de contrato" data-en="Contract Type">Tipo de contrato</label>
+                    <select id="contract2">
+                        <option value="indefinido" data-es="Indefinido" data-en="Permanent">Indefinido</option>
+                        <option value="temporal" data-es="Temporal" data-en="Temporary">Temporal</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Número de hijos" data-en="Number of children">Número de hijos</label>
+                    <div class="spinner-group">
+                        <div class="spinner">
+                            <button onclick="updateKids(2, -1)">−</button>
+                            <input type="number" id="kids2" value="0" min="0" readonly>
+                            <button onclick="updateKids(2, 1)">+</button>
+                        </div>
+                        <span class="kids-label" data-es="menores de 25 años" data-en="under 25 years">menores de 25 años</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Número de pagas" data-en="Number of payments">Número de pagas</label>
+                    <select id="pagas2">
+                        <option value="12" data-es="12 pagas" data-en="12 payments">12 pagas</option>
+                        <option value="14" data-es="14 pagas" data-en="14 payments">14 pagas</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculateGrossToNet()" data-es="📊 Calcular salario bruto" data-en="📊 Calculate gross salary">📊 Calcular salario bruto</button>
+
+                <div id="result2" class="result-box" style="display: none;">
+                    <div class="result-row">
+                        <span class="result-label" data-es="Salario neto anual" data-en="Annual net salary">Salario neto anual</span>
+                        <span class="result-value" id="neto2-result">€0,00</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label" data-es="Cotización SS" data-en="SS Contribution">Cotización SS</span>
+                        <span class="result-value" id="ss2-result" style="color: #ef4444;">-€0,00</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label" data-es="Retención IRPF" data-en="IRPF Withholding">Retención IRPF</span>
+                        <span class="result-value" id="irpf2-result" style="color: #ef4444;">-€0,00</span>
+                    </div>
+                    <div class="result-row" style="border-bottom: 2px solid rgba(99, 102, 241, 0.3); padding: 1rem 0; margin: 0.5rem 0;">
+                        <span class="result-label" data-es="Salario bruto anual necesario" data-en="Required annual gross salary">Salario bruto anual necesario</span>
+                        <div style="text-align: right;">
+                            <span class="result-value" id="bruto2-result">€0,00</span>
+                            <div class="result-monthly" id="bruto2-monthly"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="info-box">
+                    <h3>💡 <span data-es="Nota" data-en="Note">Nota</span></h3>
+                    <p data-es="Calcula el salario bruto necesario para conseguir el salario neto deseado. Útil si sabes cuánto necesitas después de impuestos." data-en="Calculates the required gross salary to achieve your desired net salary. Useful if you know how much you need after taxes.">Calcula el salario bruto necesario para conseguir el salario neto deseado. Útil si sabes cuánto necesitas después de impuestos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="Cómo se calcula el sueldo neto en España 2026-2027" data-en="How net salary is calculated in Spain 2026-2027">Cómo se calcula el sueldo neto en España 2026-2027</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="¿Qué es el sueldo neto?" data-en="What is net salary?">¿Qué es el sueldo neto?</h3>
+                <p data-es="El sueldo neto es el dinero que realmente recibes en tu cuenta bancaria cada mes. Para calcularlo, se parte del salario bruto y se restan dos deducciones obligatorias: cotizaciones a la Seguridad Social (~6,47%) e IRPF (variable según tu situación)." data-en="Net salary is the money you actually receive in your bank account each month. It is calculated by subtracting two mandatory deductions from gross salary: Social Security contributions (~6.47%) and IRPF (variable depending on your situation).">El sueldo neto es el dinero que realmente recibes en tu cuenta bancaria cada mes. Para calcularlo, se parte del salario bruto y se restan dos deducciones obligatorias: cotizaciones a la Seguridad Social (~6,47%) e IRPF (variable según tu situación).</p>
+                <p data-es="Fórmula básica: Neto = Bruto − SS − IRPF" data-en="Basic formula: Net = Gross − SS − IRPF"><strong>Fórmula básica: Neto = Bruto − SS − IRPF</strong></p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Cotizaciones Seguridad Social 2026" data-en="Social Security Contributions 2026">Cotizaciones Seguridad Social 2026</h3>
+                <ul>
+                    <li data-es="4,70% - Contingencias comunes" data-en="4.70% - Common contingencies">4,70% - Contingencias comunes</li>
+                    <li data-es="1,55% - Desempleo (indefinido)" data-en="1.55% - Unemployment (permanent)">1,55% - Desempleo (indefinido)</li>
+                    <li data-es="1,60% - Desempleo (temporal)" data-en="1.60% - Unemployment (temporary)">1,60% - Desempleo (temporal)</li>
+                    <li data-es="0,10% - Formación profesional" data-en="0.10% - Vocational training">0,10% - Formación profesional</li>
+                    <li data-es="0,12% - MEI (Mecanismo Equidad Intergeneracional)" data-en="0.12% - MEI (Intergenerational Equity)">0,12% - MEI 2026</li>
+                </ul>
+                <p style="margin-top: 1rem; font-weight: 600;" data-es="Total: ~6,47% con tope máximo de €4.909,50/mes" data-en="Total: ~6.47% with maximum cap of €4,909.50/month">Total: ~6,47% con tope máximo de €4.909,50/mes</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="¿Qué es el IRPF?" data-en="What is IRPF?">¿Qué es el IRPF?</h3>
+                <p data-es="El IRPF (Impuesto sobre la Renta de las Personas Físicas) es un impuesto progresivo. La empresa descuenta cada mes de tu nómina una retención de IRPF como anticipo del impuesto anual. Cuando haces la declaración de la renta, si te han retenido más, Hacienda te devuelve; si menos, debes pagar." data-en="IRPF (Income Tax on Natural Persons) is a progressive tax. Your employer deducts an IRPF withholding each month as an advance on your annual tax. When you file your tax return, if you've had too much withheld, you get a refund; if too little, you pay the difference.">El IRPF (Impuesto sobre la Renta de las Personas Físicas) es un impuesto progresivo. La empresa descuenta cada mes de tu nómina una retención de IRPF como anticipo del impuesto anual. Cuando haces la declaración de la renta, si te han retenido más, Hacienda te devuelve; si menos, debes pagar.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Diferencia por Comunidad Autónoma" data-en="Difference by Autonomous Community">Diferencia por Comunidad Autónoma</h3>
+                <p data-es="El IRPF tiene una parte estatal (igual en toda España) y una parte autonómica que cada CCAA establece libremente. Por eso, con el mismo salario bruto, el neto puede variar entre Madrid (con bonificación) y Cataluña (con tipos más altos). La diferencia puede llegar a varios cientos de euros anuales." data-en="IRPF has a state portion (same across Spain) and an autonomous portion that each region sets freely. That's why, with the same gross salary, net pay can vary between Madrid (with tax relief) and Catalonia (with higher rates). The difference can be hundreds of euros annually.">El IRPF tiene una parte estatal (igual en toda España) y una parte autonómica que cada CCAA establece libremente. Por eso, con el mismo salario bruto, el neto puede variar entre Madrid (con bonificación) y Cataluña (con tipos más altos). La diferencia puede llegar a varios cientos de euros anuales.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="¿Qué es el MEI?" data-en="What is MEI?">¿Qué es el MEI 2026?</h3>
+                <p data-es="Mecanismo de Equidad Intergeneracional: cotización adicional a la SS aprobada en 2023 para reforzar el sistema de pensiones. En 2026: 0,12% trabajador + 0,58% empresa. Sube cada año hasta 2029." data-en="Intergenerational Equity Mechanism: additional Social Security contribution approved in 2023 to strengthen the pension system. In 2026: 0.12% employee + 0.58% employer. Increases annually until 2029.">Mecanismo de Equidad Intergeneracional: cotización adicional a la SS aprobada en 2023 para reforzar el sistema de pensiones. En 2026: 0,12% trabajador + 0,58% empresa. Sube cada año hasta 2029.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="12 pagas vs 14 pagas" data-en="12 vs 14 payments">12 pagas vs 14 pagas</h3>
+                <p data-es="A efectos del neto anual total, el resultado es prácticamente el mismo. La diferencia está en la distribución: con 14 pagas, las mensualidades ordinarias son más pequeñas pero recibes dos pagas extras (junio y diciembre). Con 12 pagas, el importe mensual es mayor porque las extras están prorrateadas." data-en="For total annual net salary, the result is practically the same. The difference is in distribution: with 14 payments, monthly installments are smaller but you receive two extra payments (June and December). With 12 payments, the monthly amount is higher because extras are prorated.">A efectos del neto anual total, el resultado es prácticamente el mismo. La diferencia está en la distribución: con 14 pagas, las mensualidades ordinarias son más pequeñas pero recibes dos pagas extras (junio y diciembre). Con 12 pagas, el importe mensual es mayor porque las extras están prorrateadas.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Table -->
+    <div class="guide-section">
+        <h2 data-es="Tabla de referencia: Bruto → Neto 2026-2027" data-en="Reference Table: Gross → Net 2026-2027">Tabla de referencia: Bruto → Neto 2026-2027</h2>
+        <p data-es="Estimaciones para trabajador soltero sin hijos, 14 pagas, Comunidad de Madrid. Valores orientativos." data-en="Estimates for single worker with no children, 14 payments, Community of Madrid. Guidance values.">Estimaciones para trabajador soltero sin hijos, 14 pagas, Comunidad de Madrid. Valores orientativos.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Salario bruto" data-en="Gross salary">Salario bruto</th>
+                    <th data-es="SS trabajador" data-en="SS worker">SS trabajador</th>
+                    <th data-es="IRPF retenido" data-en="IRPF withheld">IRPF retenido</th>
+                    <th data-es="Neto anual" data-en="Annual net">Neto anual</th>
+                    <th data-es="Neto/mes (14p)" data-en="Net/month (14p)">Neto/mes (14p)</th>
+                    <th data-es="Tipo efectivo" data-en="Effective rate">Tipo efectivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>€14.000,00</td>
+                    <td>−€905,80</td>
+                    <td>−€0,00</td>
+                    <td><span class="amount">€13.094,20</span></td>
+                    <td><span class="amount">€935,30</span></td>
+                    <td>0,0%</td>
+                </tr>
+                <tr>
+                    <td>€18.000,00</td>
+                    <td>−€1.164,60</td>
+                    <td>−€1.071,17</td>
+                    <td><span class="amount">€15.764,23</span></td>
+                    <td><span class="amount">€1.126,02</span></td>
+                    <td>6,0%</td>
+                </tr>
+                <tr>
+                    <td>€22.000,00</td>
+                    <td>−€1.423,40</td>
+                    <td>−€2.520,85</td>
+                    <td><span class="amount">€18.055,75</span></td>
+                    <td><span class="amount">€1.289,70</span></td>
+                    <td>11,5%</td>
+                </tr>
+                <tr>
+                    <td>€25.000,00</td>
+                    <td>−€1.617,50</td>
+                    <td>−€3.209,10</td>
+                    <td><span class="amount">€20.173,40</span></td>
+                    <td><span class="amount">€1.440,96</span></td>
+                    <td>12,8%</td>
+                </tr>
+                <tr>
+                    <td>€30.000,00</td>
+                    <td>−€1.941,00</td>
+                    <td>−€4.518,52</td>
+                    <td><span class="amount">€23.540,48</span></td>
+                    <td><span class="amount">€1.681,46</span></td>
+                    <td>15,1%</td>
+                </tr>
+                <tr>
+                    <td>€35.000,00</td>
+                    <td>−€2.264,50</td>
+                    <td>−€5.827,94</td>
+                    <td><span class="amount">€26.907,56</span></td>
+                    <td><span class="amount">€1.921,97</span></td>
+                    <td>16,7%</td>
+                </tr>
+                <tr>
+                    <td>€40.000,00</td>
+                    <td>−€2.588,00</td>
+                    <td>−€7.152,20</td>
+                    <td><span class="amount">€30.259,80</span></td>
+                    <td><span class="amount">€2.161,41</span></td>
+                    <td>17,9%</td>
+                </tr>
+                <tr>
+                    <td>€50.000,00</td>
+                    <td>−€3.235,00</td>
+                    <td>−€10.425,75</td>
+                    <td><span class="amount">€36.339,25</span></td>
+                    <td><span class="amount">€2.595,66</span></td>
+                    <td>20,9%</td>
+                </tr>
+                <tr>
+                    <td>€60.000,00</td>
+                    <td>−€3.811,74</td>
+                    <td>−€13.723,89</td>
+                    <td><span class="amount">€42.464,37</span></td>
+                    <td><span class="amount">€3.033,17</span></td>
+                    <td>22,9%</td>
+                </tr>
+                <tr>
+                    <td>€80.000,00</td>
+                    <td>−€3.811,74</td>
+                    <td>−€21.858,95</td>
+                    <td><span class="amount">€54.329,31</span></td>
+                    <td><span class="amount">€3.880,67</span></td>
+                    <td>27,3%</td>
+                </tr>
+                <tr>
+                    <td>€100.000,00</td>
+                    <td>−€3.811,74</td>
+                    <td>−€30.458,95</td>
+                    <td><span class="amount">€65.729,31</span></td>
+                    <td><span class="amount">€4.694,95</span></td>
+                    <td>30,5%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    const ccaaIRPF = {
+        madrid: 0.21,
+        andalucia: 0.23,
+        aragon: 0.22,
+        asturias: 0.22,
+        baleares: 0.22,
+        canarias: 0.22,
+        cantabria: 0.22,
+        'castilla-la-mancha': 0.22,
+        'castilla-leon': 0.22,
+        valencia: 0.23,
+        extremadura: 0.22,
+        galicia: 0.22,
+        rioja: 0.22,
+        murcia: 0.22,
+        navarra: 0.22,
+        'pais-vasco': 0.21,
+        cataluna: 0.245
+    };
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+        
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'A' || el.tagName === 'SPAN') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P') {
+                el.textContent = text;
+            } else if (el.tagName === 'TH') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchTab(index) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content')[index].classList.add('active');
+        document.querySelectorAll('.tab-btn')[index].classList.add('active');
+    }
+
+    function updateKids(tab, change) {
+        const elem = document.getElementById(`kids${tab}`);
+        elem.value = Math.max(0, parseInt(elem.value) + change);
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function getIRPFBrackets(baseAfterSS, ccaa, married, kids) {
+        let minusKids = kids * 2400;
+        let baseAfterKids = Math.max(0, baseAfterSS - minusKids);
+        
+        const brackets = [
+            { limit: 12450, rate: 0.19 },
+            { limit: 20200, rate: 0.24 },
+            { limit: 35200, rate: 0.30 },
+            { limit: 60000, rate: 0.37 },
+            { limit: 300000, rate: 0.45 },
+            { limit: Infinity, rate: 0.47 }
+        ];
+
+        let irpf = 0;
+        let prevLimit = 0;
+
+        for (let bracket of brackets) {
+            if (baseAfterKids > prevLimit) {
+                let taxableInBracket = Math.min(baseAfterKids, bracket.limit) - prevLimit;
+                irpf += taxableInBracket * bracket.rate;
+                prevLimit = bracket.limit;
+            } else {
+                break;
+            }
+        }
+
+        return Math.max(0, irpf);
+    }
+
+    function calculateNettoGross() {
+        const bruto = parseFloat(document.getElementById('bruto1').value) || 0;
+        const ccaa = document.getElementById('ccaa1').value;
+        const married = document.getElementById('married1').value === 'married';
+        const contract = document.getElementById('contract1').value;
+        const kids = parseInt(document.getElementById('kids1').value) || 0;
+        const pagas = parseInt(document.getElementById('pagas1').value) || 12;
+
+        const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
+        const ss = bruto * ssRate;
+        
+        const baseAfterSS = bruto - ss;
+        const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+        const neto = bruto - ss - irpf;
+        const effective = (ss + irpf) / bruto * 100;
+        const netoMensual = neto / pagas;
+
+        document.getElementById('bruto1-result').textContent = formatCurrency(bruto);
+        document.getElementById('ss1-result').textContent = formatCurrency(ss);
+        document.getElementById('irpf1-result').textContent = formatCurrency(irpf);
+        document.getElementById('neto1-result').textContent = formatCurrency(neto);
+        document.getElementById('neto1-monthly').textContent = currentLang === 'es' ? `(${formatCurrency(netoMensual)}/mes con ${pagas} pagas)` : `(${formatCurrency(netoMensual)}/month with ${pagas} payments)`;
+        document.getElementById('effective1-result').textContent = effective.toFixed(1) + '%';
+        document.getElementById('result1').style.display = 'block';
+    }
+
+    function calculateGrossToNet() {
+        const neto = parseFloat(document.getElementById('neto2').value) || 0;
+        const ccaa = document.getElementById('ccaa2').value;
+        const married = document.getElementById('married2').value === 'married';
+        const contract = document.getElementById('contract2').value;
+        const kids = parseInt(document.getElementById('kids2').value) || 0;
+        const pagas = parseInt(document.getElementById('pagas2').value) || 12;
+
+        let bruto = neto;
+        let prevBruto = 0;
+
+        for (let i = 0; i < 20; i++) {
+            const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
+            const ss = bruto * ssRate;
+            const baseAfterSS = bruto - ss;
+            const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+            const netoCalc = bruto - ss - irpf;
+
+            if (Math.abs(netoCalc - neto) < 1) break;
+
+            const ratio = neto / netoCalc;
+            bruto = bruto * ratio;
+
+            if (Math.abs(bruto - prevBruto) < 1) break;
+            prevBruto = bruto;
+        }
+
+        const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
+        const ss = bruto * ssRate;
+        const baseAfterSS = bruto - ss;
+        const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+        const bruMensual = bruto / pagas;
+
+        document.getElementById('neto2-result').textContent = formatCurrency(neto);
+        document.getElementById('ss2-result').textContent = formatCurrency(ss);
+        document.getElementById('irpf2-result').textContent = formatCurrency(irpf);
+        document.getElementById('bruto2-result').textContent = formatCurrency(bruto);
+        document.getElementById('bruto2-monthly').textContent = currentLang === 'es' ? `(${formatCurrency(bruMensual)}/mes con ${pagas} pagas)` : `(${formatCurrency(bruMensual)}/month with ${pagas} payments)`;
+        document.getElementById('result2').style.display = 'block';
+    }
+
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const activeTab = document.querySelector('.tab-content.active');
+            const buttons = activeTab.querySelectorAll('.btn');
+            if (buttons.length > 0) buttons[0].click();
+        }
+    });
+</script>
+
+</body>
+</html>
