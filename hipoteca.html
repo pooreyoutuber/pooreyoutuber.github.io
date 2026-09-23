@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Hipotecas 2026-2027</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .euribor-banner {
+            background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+            border-left: 4px solid var(--warning);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .financing-info {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .financing-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+        }
+
+        .financing-row strong {
+            color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 1rem 0;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            margin-bottom: 1rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-row-label {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .result-row-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .ratio-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .ratio-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .ratio-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+            transition: width 0.3s;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cost-item {
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .cost-item-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .cost-item-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .result-value {
+                font-size: 1.5rem;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.6rem;
+            }
+
+            .cost-breakdown {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🏠 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Hipotecas 2026-2027" data-en="Mortgage Calculator 2026-2027">Calculadora de Hipotecas 2026-2027</h1>
+    <p class="subtitle" data-es="Sistema Francés · Ley 5/2019 · Gastos reales por CCAA" data-en="French System · Law 5/2019 · Real costs by CCAA">Sistema Francés · Ley 5/2019 · Gastos reales por CCAA</p>
+
+    <div class="euribor-banner">
+        📊 <span data-es="Euríbor 12 meses (abril 2026): 2,565% · TIN hipoteca variable típica: Euríbor + 0,5-1%" data-en="12-month Euribor (April 2026): 2.565% · Typical variable mortgage TIN: Euribor + 0.5-1%">Euríbor 12 meses (abril 2026): 2,565% · TIN hipoteca variable típica: Euríbor + 0,5-1%</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(0)" data-es="🔒 Hipoteca Fija" data-en="🔒 Fixed Rate">🔒 Hipoteca Fija</button>
+        <button class="tab-btn" onclick="switchTab(1)" data-es="📈 Hipoteca Variable" data-en="📈 Variable Rate">📈 Hipoteca Variable</button>
+        <button class="tab-btn" onclick="switchTab(2)" data-es="🔀 Hipoteca Mixta" data-en="🔀 Mixed Rate">🔀 Hipoteca Mixta</button>
+    </div>
+
+    <!-- Tab 1: Fixed Rate -->
+    <div class="tab-content active">
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-es="Hipoteca Fija" data-en="Fixed Rate Mortgage">Hipoteca Fija</h2>
+
+                <div class="form-group">
+                    <label data-es="Precio del inmueble (€)" data-en="Property price (€)">Precio del inmueble (€)</label>
+                    <input type="number" id="price1" placeholder="200000" step="1000" min="0" value="200000" onchange="updateFinancing(1)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ahorros aportados / entrada (€)" data-en="Savings / down payment (€)">Ahorros aportados / entrada (€)</label>
+                    <input type="number" id="downpay1" placeholder="40000" step="1000" min="0" value="40000" onchange="updateFinancing(1)">
+                </div>
+
+                <div class="financing-info">
+                    <div class="financing-row">
+                        <span data-es="Financiación:" data-en="Financing:">Financiación:</span>
+                        <strong id="percentage1">80%</strong>
+                    </div>
+                    <div class="financing-row">
+                        <span data-es="Hipoteca:" data-en="Mortgage:">Hipoteca:</span>
+                        <strong id="mortgage1">€160.000</strong>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Plazo de amortización" data-en="Amortization period">Plazo de amortización</label>
+                    <select id="years1" onchange="calculateMortgage(1)">
+                        <option value="10" data-es="10 años" data-en="10 years">10 años</option>
+                        <option value="15" data-es="15 años" data-en="15 years">15 años</option>
+                        <option value="20" data-es="20 años" data-en="20 years">20 años</option>
+                        <option value="25" data-es="25 años" data-en="25 years" selected>25 años</option>
+                        <option value="30" data-es="30 años" data-en="30 years">30 años</option>
+                        <option value="35" data-es="35 años" data-en="35 years">35 años</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de interés TIN (%)" data-en="Interest rate TIN (%)">Tipo de interés TIN (%)</label>
+                    <input type="number" id="rate1" placeholder="3.2" step="0.01" min="0" value="3.2" onchange="calculateMortgage(1)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
+                    <select id="ccaa1" onchange="calculateMortgage(1)">
+                        <option value="0.07" data-es="Andalucía (ITP 7%)" data-en="Andalusia (ITP 7%)">Andalucía (ITP 7%)</option>
+                        <option value="0.08" data-es="Aragón (ITP 8%)" data-en="Aragon (ITP 8%)">Aragón (ITP 8%)</option>
+                        <option value="0.06" data-es="Madrid (ITP 6%)" data-en="Madrid (ITP 6%)" selected>Madrid (ITP 6%)</option>
+                        <option value="0.10" data-es="Cataluña (ITP 10%)" data-en="Catalonia (ITP 10%)">Cataluña (ITP 10%)</option>
+                        <option value="0.10" data-es="C. Valenciana (ITP 10%)" data-en="Valencian Community (ITP 10%)">C. Valenciana (ITP 10%)</option>
+                        <option value="0.04" data-es="País Vasco (ITP 4%)" data-en="Basque Country (ITP 4%)">País Vasco (ITP 4%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de vivienda" data-en="Property type">Tipo de vivienda</label>
+                    <select id="type1" onchange="calculateMortgage(1)">
+                        <option value="used" data-es="2ª mano (ITP)" data-en="2nd hand (ITP)" selected>2ª mano (ITP)</option>
+                        <option value="new" data-es="Obra nueva (IVA 10% + AJD)" data-en="New build (VAT 10% + AJD)">Obra nueva (IVA 10% + AJD)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ingresos netos mensuales (para ratio deuda)" data-en="Monthly net income (for debt ratio)">Ingresos netos mensuales</label>
+                    <input type="number" id="income1" placeholder="3000" step="100" min="0" value="3000" onchange="calculateMortgage(1)">
+                </div>
+
+                <button class="btn" onclick="calculateMortgage(1)" data-es="🏠 Calcular hipoteca" data-en="🏠 Calculate mortgage">🏠 Calcular hipoteca</button>
+
+                <div id="result1" class="result-box" style="display: none;">
+                    <div class="result-main">
+                        <span class="result-label" data-es="Cuota mensual" data-en="Monthly payment">Cuota mensual</span>
+                        <span class="result-value" id="payment1">€0</span>
+                    </div>
+
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Capital prestado" data-en="Loan amount">Capital prestado</span>
+                        <span class="result-row-value" id="capital1">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Total intereses" data-en="Total interest">Total intereses</span>
+                        <span class="result-row-value" id="interest1">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Coste total préstamo" data-en="Total loan cost">Coste total préstamo</span>
+                        <span class="result-row-value" id="totalcost1">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="TIN / TAE aprox." data-en="TIN / APR approx.">TIN / TAE aprox.</span>
+                        <span class="result-row-value" id="tae1">0% / 0%</span>
+                    </div>
+
+                    <div class="ratio-box">
+                        <div data-es="Ratio de endeudamiento" data-en="Debt ratio">Ratio de endeudamiento</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-fill" id="ratio1" style="width: 0%"></div>
+                        </div>
+                        <div id="ratio-text1">0% (recomendado: &lt; 35%)</div>
+                    </div>
+
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Tasación" data-en="Appraisal">Tasación</div>
+                            <div class="cost-item-value" id="tasacion1">€400</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="ITP / IVA" data-en="ITP / VAT">ITP / IVA</div>
+                            <div class="cost-item-value" id="itp1">€0</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Notaría" data-en="Notary">Notaría</div>
+                            <div class="cost-item-value" id="notary1">€800</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Registro" data-en="Registry">Registro</div>
+                            <div class="cost-item-value" id="registry1">€400</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="info-box">
+                    <h3>🔒 <span data-es="Hipoteca Fija" data-en="Fixed Rate">Hipoteca Fija</span></h3>
+                    <p data-es="La cuota no cambia nunca. Más seguridad pero generalmente TIN inicial más alto que variable." data-en="Payment never changes. More security but typically higher initial TIN than variable.">La cuota no cambia nunca. Más seguridad pero generalmente TIN inicial más alto que variable.</p>
+                    <p data-es="Ideal si los tipos están bajos o valoras la estabilidad y poder planificar tus gastos mensuales sin sorpresas." data-en="Ideal if rates are low or you value stability and being able to plan monthly expenses without surprises.">Ideal si los tipos están bajos o valoras la estabilidad y poder planificar tus gastos mensuales sin sorpresas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Variable Rate -->
+    <div class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-es="Hipoteca Variable" data-en="Variable Rate Mortgage">Hipoteca Variable</h2>
+
+                <div class="form-group">
+                    <label data-es="Precio del inmueble (€)" data-en="Property price (€)">Precio del inmueble (€)</label>
+                    <input type="number" id="price2" placeholder="200000" step="1000" min="0" value="200000" onchange="updateFinancing(2)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ahorros aportados / entrada (€)" data-en="Savings / down payment (€)">Ahorros aportados / entrada (€)</label>
+                    <input type="number" id="downpay2" placeholder="40000" step="1000" min="0" value="40000" onchange="updateFinancing(2)">
+                </div>
+
+                <div class="financing-info">
+                    <div class="financing-row">
+                        <span data-es="Financiación:" data-en="Financing:">Financiación:</span>
+                        <strong id="percentage2">80%</strong>
+                    </div>
+                    <div class="financing-row">
+                        <span data-es="Hipoteca:" data-en="Mortgage:">Hipoteca:</span>
+                        <strong id="mortgage2">€160.000</strong>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Plazo de amortización" data-en="Amortization period">Plazo de amortización</label>
+                    <select id="years2" onchange="calculateMortgage(2)">
+                        <option value="10" data-es="10 años" data-en="10 years">10 años</option>
+                        <option value="15" data-es="15 años" data-en="15 years">15 años</option>
+                        <option value="20" data-es="20 años" data-en="20 years">20 años</option>
+                        <option value="25" data-es="25 años" data-en="25 years">25 años</option>
+                        <option value="30" data-es="30 años" data-en="30 years">30 años</option>
+                        <option value="34" data-es="34 años" data-en="34 years" selected>34 años</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Euríbor actual + diferencial (%)" data-en="Current Euribor + spread (%)">Euríbor actual + diferencial (%)</label>
+                    <input type="number" id="rate2" placeholder="3.065" step="0.01" min="0" value="3.065" onchange="calculateMortgage(2)">
+                    <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Euríbor 2,565% + 0,5% diferencial típico" data-en="Euribor 2.565% + 0.5% typical spread">Euríbor 2,565% + 0,5% diferencial típico</small>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
+                    <select id="ccaa2" onchange="calculateMortgage(2)">
+                        <option value="0.07" data-es="Andalucía (ITP 7%)" data-en="Andalusia (ITP 7%)">Andalucía (ITP 7%)</option>
+                        <option value="0.08" data-es="Aragón (ITP 8%)" data-en="Aragon (ITP 8%)">Aragón (ITP 8%)</option>
+                        <option value="0.06" data-es="Madrid (ITP 6%)" data-en="Madrid (ITP 6%)" selected>Madrid (ITP 6%)</option>
+                        <option value="0.10" data-es="Cataluña (ITP 10%)" data-en="Catalonia (ITP 10%)">Cataluña (ITP 10%)</option>
+                        <option value="0.10" data-es="C. Valenciana (ITP 10%)" data-en="Valencian Community (ITP 10%)">C. Valenciana (ITP 10%)</option>
+                        <option value="0.04" data-es="País Vasco (ITP 4%)" data-en="Basque Country (ITP 4%)">País Vasco (ITP 4%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de vivienda" data-en="Property type">Tipo de vivienda</label>
+                    <select id="type2" onchange="calculateMortgage(2)">
+                        <option value="used" data-es="2ª mano (ITP)" data-en="2nd hand (ITP)" selected>2ª mano (ITP)</option>
+                        <option value="new" data-es="Obra nueva (IVA 10% + AJD)" data-en="New build (VAT 10% + AJD)">Obra nueva (IVA 10% + AJD)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ingresos netos mensuales" data-en="Monthly net income">Ingresos netos mensuales</label>
+                    <input type="number" id="income2" placeholder="3000" step="100" min="0" value="3000" onchange="calculateMortgage(2)">
+                </div>
+
+                <button class="btn" onclick="calculateMortgage(2)" data-es="🏠 Calcular hipoteca" data-en="🏠 Calculate mortgage">🏠 Calcular hipoteca</button>
+
+                <div id="result2" class="result-box" style="display: none;">
+                    <div class="result-main">
+                        <span class="result-label" data-es="Cuota mensual" data-en="Monthly payment">Cuota mensual</span>
+                        <span class="result-value" id="payment2">€0</span>
+                    </div>
+
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Capital prestado" data-en="Loan amount">Capital prestado</span>
+                        <span class="result-row-value" id="capital2">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Total intereses (estimado)" data-en="Total interest (estimated)">Total intereses (estimado)</span>
+                        <span class="result-row-value" id="interest2">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Coste total préstamo" data-en="Total loan cost">Coste total préstamo</span>
+                        <span class="result-row-value" id="totalcost2">€0</span>
+                    </div>
+
+                    <div class="ratio-box">
+                        <div data-es="Ratio de endeudamiento" data-en="Debt ratio">Ratio de endeudamiento</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-fill" id="ratio2" style="width: 0%"></div>
+                        </div>
+                        <div id="ratio-text2">0% (recomendado: &lt; 35%)</div>
+                    </div>
+
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Tasación" data-en="Appraisal">Tasación</div>
+                            <div class="cost-item-value" id="tasacion2">€400</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="ITP / IVA" data-en="ITP / VAT">ITP / IVA</div>
+                            <div class="cost-item-value" id="itp2">€0</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Notaría" data-en="Notary">Notaría</div>
+                            <div class="cost-item-value" id="notary2">€800</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Registro" data-en="Registry">Registro</div>
+                            <div class="cost-item-value" id="registry2">€400</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="info-box">
+                    <h3>📈 <span data-es="Hipoteca Variable" data-en="Variable Rate">Hipoteca Variable</span></h3>
+                    <p data-es="La cuota varía con el Euríbor cada 6 o 12 meses. Puede ser más barata cuando bajan los tipos, pero sube el riesgo si suben." data-en="Payment varies with Euribor every 6 or 12 months. Can be cheaper when rates drop, but rises risk if they increase.">La cuota varía con el Euríbor cada 6 o 12 meses. Puede ser más barata cuando bajan los tipos, pero sube el riesgo si suben.</p>
+                    <p data-es="Fórmula: Euríbor + diferencial (normalmente 0,5%-1%). Ideal si tienes ingresos variables o esperas que bajen los tipos." data-en="Formula: Euribor + spread (typically 0.5%-1%). Ideal if you have variable income or expect rates to fall.">Fórmula: Euríbor + diferencial (normalmente 0,5%-1%). Ideal si tienes ingresos variables o esperas que bajen los tipos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Mixed Rate -->
+    <div class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-es="Hipoteca Mixta" data-en="Mixed Rate Mortgage">Hipoteca Mixta</h2>
+
+                <div class="form-group">
+                    <label data-es="Precio del inmueble (€)" data-en="Property price (€)">Precio del inmueble (€)</label>
+                    <input type="number" id="price3" placeholder="200000" step="1000" min="0" value="200000" onchange="updateFinancing(3)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ahorros aportados / entrada (€)" data-en="Savings / down payment (€)">Ahorros aportados / entrada (€)</label>
+                    <input type="number" id="downpay3" placeholder="40000" step="1000" min="0" value="40000" onchange="updateFinancing(3)">
+                </div>
+
+                <div class="financing-info">
+                    <div class="financing-row">
+                        <span data-es="Financiación:" data-en="Financing:">Financiación:</span>
+                        <strong id="percentage3">80%</strong>
+                    </div>
+                    <div class="financing-row">
+                        <span data-es="Hipoteca:" data-en="Mortgage:">Hipoteca:</span>
+                        <strong id="mortgage3">€160.000</strong>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Plazo de amortización" data-en="Amortization period">Plazo de amortización</label>
+                    <select id="years3" onchange="calculateMortgage(3)">
+                        <option value="10" data-es="10 años" data-en="10 years">10 años</option>
+                        <option value="15" data-es="15 años" data-en="15 years">15 años</option>
+                        <option value="20" data-es="20 años" data-en="20 years">20 años</option>
+                        <option value="25" data-es="25 años" data-en="25 years">25 años</option>
+                        <option value="30" data-es="30 años" data-en="30 years">30 años</option>
+                        <option value="34" data-es="34 años" data-en="34 years" selected>34 años</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Años a tipo fijo inicial" data-en="Years at fixed rate">Años a tipo fijo inicial</label>
+                    <select id="fixedyears3" onchange="calculateMortgage(3)">
+                        <option value="3">3 años</option>
+                        <option value="5" selected>5 años</option>
+                        <option value="7">7 años</option>
+                        <option value="10">10 años</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="TIN fase fija (%)" data-en="Fixed phase TIN (%)">TIN fase fija (%)</label>
+                    <input type="number" id="fixedrate3" placeholder="2.9" step="0.01" min="0" value="2.9" onchange="calculateMortgage(3)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="TIN fase variable (Euríbor + diferencial %) aprox." data-en="Variable phase TIN (Euribor + spread %) approx.">TIN fase variable (%)</label>
+                    <input type="number" id="varrate3" placeholder="3.065" step="0.01" min="0" value="3.065" onchange="calculateMortgage(3)">
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
+                    <select id="ccaa3" onchange="calculateMortgage(3)">
+                        <option value="0.07" data-es="Andalucía (ITP 7%)" data-en="Andalusia (ITP 7%)">Andalucía (ITP 7%)</option>
+                        <option value="0.08" data-es="Aragón (ITP 8%)" data-en="Aragon (ITP 8%)">Aragón (ITP 8%)</option>
+                        <option value="0.06" data-es="Madrid (ITP 6%)" data-en="Madrid (ITP 6%)" selected>Madrid (ITP 6%)</option>
+                        <option value="0.10" data-es="Cataluña (ITP 10%)" data-en="Catalonia (ITP 10%)">Cataluña (ITP 10%)</option>
+                        <option value="0.10" data-es="C. Valenciana (ITP 10%)" data-en="Valencian Community (ITP 10%)">C. Valenciana (ITP 10%)</option>
+                        <option value="0.04" data-es="País Vasco (ITP 4%)" data-en="Basque Country (ITP 4%)">País Vasco (ITP 4%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Tipo de vivienda" data-en="Property type">Tipo de vivienda</label>
+                    <select id="type3" onchange="calculateMortgage(3)">
+                        <option value="used" data-es="2ª mano (ITP)" data-en="2nd hand (ITP)" selected>2ª mano (ITP)</option>
+                        <option value="new" data-es="Obra nueva (IVA 10% + AJD)" data-en="New build (VAT 10% + AJD)">Obra nueva (IVA 10% + AJD)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-es="Ingresos netos mensuales" data-en="Monthly net income">Ingresos netos mensuales</label>
+                    <input type="number" id="income3" placeholder="3000" step="100" min="0" value="3000" onchange="calculateMortgage(3)">
+                </div>
+
+                <button class="btn" onclick="calculateMortgage(3)" data-es="🏠 Calcular hipoteca" data-en="🏠 Calculate mortgage">🏠 Calcular hipoteca</button>
+
+                <div id="result3" class="result-box" style="display: none;">
+                    <div class="result-main">
+                        <span class="result-label" data-es="Cuota mensual" data-en="Monthly payment">Cuota mensual</span>
+                        <span class="result-value" id="payment3">€0</span>
+                    </div>
+
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Cuota estimada en fase variable" data-en="Est. payment in variable phase">Cuota en fase variable</span>
+                        <span class="result-row-value" id="payment3var">€0</span>
+                    </div>
+
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Capital prestado" data-en="Loan amount">Capital prestado</span>
+                        <span class="result-row-value" id="capital3">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Total intereses (estimado)" data-en="Total interest (estimated)">Total intereses (estimado)</span>
+                        <span class="result-row-value" id="interest3">€0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-row-label" data-es="Coste total préstamo" data-en="Total loan cost">Coste total préstamo</span>
+                        <span class="result-row-value" id="totalcost3">€0</span>
+                    </div>
+
+                    <div class="ratio-box">
+                        <div data-es="Ratio de endeudamiento (fase fija)" data-en="Debt ratio (fixed phase)">Ratio de endeudamiento (fase fija)</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-fill" id="ratio3" style="width: 0%"></div>
+                        </div>
+                        <div id="ratio-text3">0% (recomendado: &lt; 35%)</div>
+                    </div>
+
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Tasación" data-en="Appraisal">Tasación</div>
+                            <div class="cost-item-value" id="tasacion3">€400</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="ITP / IVA" data-en="ITP / VAT">ITP / IVA</div>
+                            <div class="cost-item-value" id="itp3">€0</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Notaría" data-en="Notary">Notaría</div>
+                            <div class="cost-item-value" id="notary3">€800</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-item-label" data-es="Registro" data-en="Registry">Registro</div>
+                            <div class="cost-item-value" id="registry3">€400</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="info-box">
+                    <h3>🔀 <span data-es="Hipoteca Mixta" data-en="Mixed Rate">Hipoteca Mixta</span></h3>
+                    <p data-es="Combina lo mejor de ambas: tipo fijo los primeros años (3-10) para tener seguridad, luego variable para flexibilidad." data-en="Combines the best of both: fixed rate for initial years (3-10) for security, then variable for flexibility.">Combina lo mejor de ambas: tipo fijo los primeros años (3-10) para tener seguridad, luego variable para flexibilidad.</p>
+                    <p data-es="Muy popular en 2026-2027. Ofrece estabilidad inicial mientras esperas que bajen los tipos. El riesgo es menor que en variable pura." data-en="Very popular in 2026-2027. Offers initial stability while waiting for rates to fall. Risk is lower than pure variable.">Muy popular en 2026-2027. Ofrece estabilidad inicial mientras esperas que bajen los tipos. El riesgo es menor que en variable pura.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="Conceptos clave sobre hipotecas" data-en="Key mortgage concepts">Conceptos clave sobre hipotecas</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="Sistema Francés" data-en="French System">Sistema Francés</h3>
+                <p data-es="Método estándar en España. Cuotas iguales durante todo el préstamo. Al principio pagas más intereses, al final más capital. La amortización es decreciente en intereses y creciente en capital." data-en="Standard method in Spain. Equal installments throughout the loan. At first you pay more interest, at the end more principal. Amortization decreases in interest and increases in principal.">Método estándar en España. Cuotas iguales durante todo el préstamo. Al principio pagas más intereses, al final más capital. La amortización es decreciente en intereses y creciente en capital.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Gastos de compraventa" data-en="Purchase costs">Gastos de compraventa (Ley 5/2019)</h3>
+                <p data-es="Tasación (250-600€), ITP/IVA por CCAA, Notaría, Registro. El banco paga la notaría de hipoteca e IAJD. El comprador paga el resto." data-en="Appraisal (€250-600), ITP/VAT by region, Notary, Registry. Bank pays mortgage notary and IAJD. Buyer pays the rest.">Tasación (250-600€), ITP/IVA por CCAA, Notaría, Registro. El banco paga la notaría de hipoteca e IAJD. El comprador paga el resto.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Ratio de endeudamiento" data-en="Debt ratio">Ratio de endeudamiento</h3>
+                <p data-es="La cuota no debe superar el 30-35% de tus ingresos netos. Más del 35% es riesgo elevado. Los bancos suelen rechazar hipotecas por encima de este umbral." data-en="Monthly payment should not exceed 30-35% of your net income. Above 35% is high risk. Banks typically reject mortgages above this threshold.">La cuota no debe superar el 30-35% de tus ingresos netos. Más del 35% es riesgo elevado. Los bancos suelen rechazar hipotecas por encima de este umbral.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Euríbor y tipos" data-en="Euribor and rates">Euríbor y tipos</h3>
+                <p data-es="Euríbor 12 meses es el índice de referencia para hipotecas variables. Se revisa cada enero (aunque algunos bancos lo hacen cada 6 meses). El diferencial típico es 0,5-1%." data-en="12-month Euribor is the reference index for variable mortgages. Reviewed each January (though some banks do it every 6 months). Typical spread is 0.5-1%.">Euríbor 12 meses es el índice de referencia para hipotecas variables. Se revisa cada enero (aunque algunos bancos lo hacen cada 6 meses). El diferencial típico es 0,5-1%.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Entrada mínima (20%)" data-en="Minimum down payment (20%)">Entrada mínima (20%)</h3>
+                <p data-es="Los bancos financian máximo el 80% del valor de tasación. Necesitas 20% de entrada + 10-15% para gastos = 30-35% de ahorro propio." data-en="Banks finance max 80% of appraised value. You need 20% down + 10-15% for costs = 30-35% of your own savings.">Los bancos financian máximo el 80% del valor de tasación. Necesitas 20% de entrada + 10-15% para gastos = 30-35% de ahorro propio.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Comisión de apertura" data-en="Opening commission">Comisión de apertura</h3>
+                <p data-es="Varía entre 0% y 2% del capital prestado. Algunos bancos no cobran si negocias bien. Es deducible en la declaración si tienes deuda hipotecaria." data-en="Ranges from 0% to 2% of borrowed capital. Some banks waive it if you negotiate well. It's deductible on your tax return if you have mortgage debt.">Varía entre 0% y 2% del capital prestado. Algunos bancos no cobran si negocias bien. Es deducible en la declaración si tienes deuda hipotecaria.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'DIV') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P') {
+                el.textContent = text;
+            } else if (el.tagName === 'TH') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchTab(index) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content')[index].classList.add('active');
+        document.querySelectorAll('.tab-btn')[index].classList.add('active');
+    }
+
+    function updateFinancing(tab) {
+        const price = parseFloat(document.getElementById(`price${tab}`).value) || 0;
+        const downpay = parseFloat(document.getElementById(`downpay${tab}`).value) || 0;
+        const mortgage = price - downpay;
+        const percentage = price > 0 ? ((mortgage / price) * 100).toFixed(0) : 0;
+
+        document.getElementById(`percentage${tab}`).textContent = percentage + '%';
+        document.getElementById(`mortgage${tab}`).textContent = '€' + mortgage.toLocaleString('es-ES', {maximumFractionDigits: 0});
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function calculateMortgage(tab) {
+        const price = parseFloat(document.getElementById(`price${tab}`).value) || 0;
+        const downpay = parseFloat(document.getElementById(`downpay${tab}`).value) || 0;
+        const capital = price - downpay;
+        const years = parseInt(document.getElementById(`years${tab}`).value) || 25;
+        const rate = parseFloat(document.getElementById(`rate${tab}` || `fixedrate${tab}` || `varrate${tab}`).value) || 3.2;
+        const ccaa = parseFloat(document.getElementById(`ccaa${tab}`).value) || 0.06;
+        const type = document.getElementById(`type${tab}`).value;
+        const income = parseFloat(document.getElementById(`income${tab}`).value) || 3000;
+
+        const months = years * 12;
+        const monthlyRate = rate / 100 / 12;
+        const monthlyPayment = capital * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+        const totalPayment = monthlyPayment * months;
+        const totalInterest = totalPayment - capital;
+        const debtRatio = (monthlyPayment / income) * 100;
+
+        const tasacion = 400;
+        const notary = 800;
+        const registry = 400;
+        const itp = type === 'used' ? price * ccaa : price * 0.10;
+
+        const resultBox = document.getElementById(`result${tab}`);
+        document.getElementById(`payment${tab}`).textContent = monthlyPayment.toFixed(2).replace('.', ',') + '€/mes';
+        document.getElementById(`capital${tab}`).textContent = formatCurrency(capital);
+        document.getElementById(`interest${tab}`).textContent = formatCurrency(totalInterest);
+        document.getElementById(`totalcost${tab}`).textContent = formatCurrency(capital + totalInterest);
+        document.getElementById(`tae${tab}`).textContent = rate.toFixed(2) + '% / ~' + (rate + 0.15).toFixed(2) + '%';
+
+        const ratioPercentage = Math.min(100, debtRatio);
+        document.getElementById(`ratio${tab}`).style.width = ratioPercentage + '%';
+        document.getElementById(`ratio-text${tab}`).textContent = debtRatio.toFixed(1) + '% (recomendado: < 35%)';
+
+        document.getElementById(`tasacion${tab}`).textContent = formatCurrency(tasacion);
+        document.getElementById(`itp${tab}`).textContent = formatCurrency(itp);
+        document.getElementById(`notary${tab}`).textContent = formatCurrency(notary);
+        document.getElementById(`registry${tab}`).textContent = formatCurrency(registry);
+
+        if (tab === 3) {
+            const fixedYears = parseInt(document.getElementById('fixedyears3').value) || 5;
+            const fixedRate = parseFloat(document.getElementById('fixedrate3').value) || 2.9;
+            const varRate = parseFloat(document.getElementById('varrate3').value) || 3.065;
+
+            const fixedMonths = fixedYears * 12;
+            const varMonths = months - fixedMonths;
+
+            const fixedMonthlyRate = fixedRate / 100 / 12;
+            const fixedPayment = capital * (fixedMonthlyRate * Math.pow(1 + fixedMonthlyRate, months)) / (Math.pow(1 + fixedMonthlyRate, months) - 1);
+
+            const varMonthlyRate = varRate / 100 / 12;
+            let remainingCapital = capital;
+            for (let i = 0; i < fixedMonths; i++) {
+                remainingCapital -= (fixedPayment - remainingCapital * fixedMonthlyRate);
+            }
+            const varPayment = remainingCapital * (varMonthlyRate * Math.pow(1 + varMonthlyRate, varMonths)) / (Math.pow(1 + varMonthlyRate, varMonths) - 1);
+
+            const totalInterestMixed = (fixedPayment * fixedMonths) + (varPayment * varMonths) - capital;
+
+            document.getElementById('payment3').textContent = fixedPayment.toFixed(2).replace('.', ',') + '€/mes';
+            document.getElementById('payment3var').textContent = varPayment.toFixed(2).replace('.', ',') + '€/mes';
+            document.getElementById('interest3').textContent = formatCurrency(totalInterestMixed);
+            document.getElementById('totalcost3').textContent = formatCurrency(capital + totalInterestMixed);
+        }
+
+        resultBox.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
