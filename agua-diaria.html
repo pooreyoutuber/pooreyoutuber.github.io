@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Agua Diaria 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0ea5e9; /* Blue theme for water/hydration */
+            --primary-dark: #0284c7;
+            --bg: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #bae6fd;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+        header { background: var(--card-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary-dark); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; font-weight: 500; }
+        
+        .grid-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-dark); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
+        
+        .checkbox-group { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .checkbox-btn { flex: 1; min-width: 140px; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; background: white; transition: all 0.3s; font-size: 0.85rem; }
+        .checkbox-btn input { margin-right: 5px; }
+        .checkbox-btn.selected { border-color: var(--primary); background: rgba(14, 165, 233, 0.1); color: var(--primary-dark); }
+
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #2563eb); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(14, 165, 233, 0.3); }
+
+        .result-box { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; text-align: center; }
+        .result-label { font-size: 0.9rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem; }
+        .result-value { font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); line-height: 1.1; margin-bottom: 0.5rem; }
+        .result-sub { font-size: 0.9rem; color: var(--text-dark); font-weight: 500; }
+
+        .schedule-list { margin-top: 1rem; display: grid; gap: 0.5rem; text-align: left; font-size: 0.9rem; }
+        .schedule-item { background: white; padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+
+        .info-box { background: #fef3c7; border-left: 4px solid var(--warning); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box h3 { margin-bottom: 0.5rem; color: #92400e; font-size: 1rem; }
+        .info-box p { color: #b45309; font-size: 0.9rem; margin-bottom: 0; }
+
+        .text-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .text-section h3 { color: var(--primary-dark); margin-top: 1.5rem; }
+        .text-section p { margin-bottom: 1rem; color: #475569; }
+
+        /* Urine guide table */
+        .urine-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        .urine-table th, .urine-table td { padding: 0.8rem; border: 1px solid #e2e8f0; text-align: left; }
+        .urine-table th { background: #f8fafc; color: var(--text-dark); }
+        .badge { padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; }
+        .badge.success { background: #d1fae5; color: #065f46; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.danger { background: #fee2e2; color: #991b1b; }
+
+        ul { margin-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        li { margin-bottom: 0.5rem; }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .checkbox-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="💧 HidraMX Agua" data-en="💧 HydrateMX Water">💧 HidraMX Agua</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Agua Diaria 2026 — ¿Cuánta Agua Debo Beber?" data-en="Daily Water Calculator 2026 — How Much Water Should I Drink?">Calculadora de Agua Diaria 2026 — ¿Cuánta Agua Debo Beber?</h1>
+    <p class="subtitle" data-es="💧 Fórmula OMS · Actividad física · Clima · Embarazo · 2026" data-en="💧 WHO Formula · Physical Activity · Climate · Pregnancy · 2026">💧 Fórmula OMS · Actividad física · Clima · Embarazo · 2026</p>
+
+    <div class="grid-layout">
+        <!-- FORM COLUMN -->
+        <div class="card">
+            <h2 data-es="💧 Introduce tus datos" data-en="💧 Enter your details">💧 Introduce tus datos</h2>
+            
+            <div class="form-group">
+                <label data-es="Peso corporal (kg)" data-en="Body weight (kg)">Peso corporal (kg)</label>
+                <input type="number" id="weight" placeholder="Ej. 70" step="0.1" min="30" max="250">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Nivel de actividad física" data-en="Physical activity level">Nivel de actividad física</label>
+                <select id="activity">
+                    <option value="0" data-es="Sedentario (sin ejercicio habitual)" data-en="Sedentary (no regular exercise)">Sedentario (sin ejercicio habitual)</option>
+                    <option value="350" data-es="Moderado (ejercicio <1 h/día)" data-en="Moderate (exercise <1 h/day)">Moderado (ejercicio &lt;1 h/día)</option>
+                    <option value="700" data-es="Intenso (ejercicio >1 h/día)" data-en="Intense (exercise &gt;1 h/day)">Intenso (ejercicio &gt;1 h/día)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Clima o temperatura habitual" data-en="Climate or usual temperature">Clima o temperatura habitual</label>
+                <select id="climate">
+                    <option value="0" data-es="Frío o templado (<20 °C)" data-en="Cold or mild (&lt;20 °C)">Frío o templado (&lt;20 °C)</option>
+                    <option value="200" data-es="Templado (20-25 °C)" data-en="Mild (20-25 °C)">Templado (20-25 °C)</option>
+                    <option value="400" data-es="Cálido (25-30 °C)" data-en="Warm (25-30 °C)">Cálido (25-30 °C)</option>
+                    <option value="600" data-es="Muy caluroso (>30 °C)" data-en="Very hot (&gt;30 °C)">Muy caluroso (&gt;30 °C)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Condición especial (opcional)" data-en="Special condition (optional)">Condición especial (opcional)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-btn" onclick="toggleCondition(this)">
+                        <input type="checkbox" id="pregnant" value="300"> <span data-es="🤰 Embarazada (+300 ml)" data-en="🤰 Pregnant (+300 ml)">🤰 Embarazada (+300 ml)</span>
+                    </label>
+                    <label class="checkbox-btn" onclick="toggleCondition(this)">
+                        <input type="checkbox" id="lactating" value="500"> <span data-es="🤱 Lactancia (+500 ml)" data-en="🤱 Lactation (+500 ml)">🤱 Lactancia (+500 ml)</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculateWater()" data-es="💧 Calcular mi hidratación" data-en="💧 Calculate my hydration">💧 Calcular mi hidratación</button>
+
+            <!-- RESULTS -->
+            <div id="results-container" style="display: none;">
+                <div class="result-box">
+                    <div class="result-label" data-es="Agua recomendada al día" data-en="Recommended daily water">Agua recomendada al día</div>
+                    <div class="result-value"><span id="res-total">--</span> Litros</div>
+                    <div class="result-sub" id="res-ml">(-- ml)</div>
+                </div>
+
+                <h3 style="margin-top: 1.5rem; font-size: 1rem;" data-es="🕐 Horario sugerido de hidratación" data-en="🕐 Suggested hydration schedule">🕐 Horario sugerido de hidratación</h3>
+                <div class="schedule-list">
+                    <div class="schedule-item"><span data-es="🌅 Al despertar (08:00)" data-en="🌅 Upon waking (08:00)">🌅 Al despertar (08:00)</span> <strong>500 ml</strong></div>
+                    <div class="schedule-item"><span data-es=" morning Mañana (10:00 - 13:00)" data-en="🌅 Morning (10:00 - 13:00)">Morning (10:00 - 13:00)</span> <strong id="sched-morning">-- ml</strong></div>
+                    <div class="schedule-item"><span data-es="🍽️ Comida y Tarde (14:00 - 18:00)" data-en="🍽️ Lunch & Afternoon (14:00 - 18:00)">🍽️ Comida y Tarde (14:00 - 18:00)</span> <strong id="sched-afternoon">-- ml</strong></div>
+                    <div class="schedule-item"><span data-es="🌙 Noche (19:00 - 22:00)" data-en="🌙 Evening (19:00 - 22:00)">🌙 Noche (19:00 - 22:00)</span> <strong id="sched-evening">-- ml</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO COLUMN -->
+        <div>
+            <div class="info-box">
+                <h3 data-es="⚠️ Aviso médico" data-en="⚠️ Medical Notice">⚠️ Aviso médico</h3>
+                <p data-es="Esta calculadora ofrece estimaciones orientativas. Las necesidades de hidratación individuales pueden variar según el estado de salud, la medicación y otros factores. Consulta con tu médico o dietista ante cualquier duda, especialmente durante el embarazo, la lactancia o en presencia de enfermedades renales o cardíacas." data-en="This calculator offers general estimates. Individual hydration needs may vary depending on health status, medication, and other factors. Consult your doctor or dietitian if you have any questions, especially during pregnancy, lactation, or in the presence of kidney or heart disease.">Esta calculadora ofrece estimaciones orientativas. Las necesidades de hidratación individuales pueden variar según el estado de salud, la medicación y otros factores. Consulta con tu médico o dietista ante cualquier duda, especialmente durante el embarazo, la lactancia o en presencia de enfermedades renales o cardíacas.</p>
+            </div>
+
+            <div class="text-section" style="padding: 1.5rem;">
+                <h2 style="margin-top:0;" data-es="🔍 La guía del color de la orina" data-en="🔍 Urine Color Guide">🔍 La guía del color de la orina — el mejor indicador de hidratación</h2>
+                <table class="urine-table">
+                    <tr>
+                        <th data-es="Color" data-en="Color">Color</th>
+                        <th data-es="Estado" data-en="Status">Estado</th>
+                    </tr>
+                    <tr>
+                        <td data-es="Amarillo muy pálido o transparente" data-en="Very pale yellow or clear">Amarillo muy pálido o transparente</td>
+                        <td><span class="badge success" data-es="Bien hidratado ✓" data-en="Well hydrated ✓">Bien hidratado ✓</span></td>
+                    </tr>
+                    <tr>
+                        <td data-es="Amarillo pálido" data-en="Pale yellow">Amarillo pálido</td>
+                        <td><span class="badge success" data-es="Óptimo ✓" data-en="Optimal ✓">Óptimo ✓</span></td>
+                    </tr>
+                    <tr>
+                        <td data-es="Amarillo" data-en="Yellow">Amarillo</td>
+                        <td><span class="badge success" data-es="Aceptable ✓" data-en="Acceptable ✓">Aceptable ✓</span></td>
+                    </tr>
+                    <tr>
+                        <td data-es="Amarillo intenso" data-en="Dark yellow">Amarillo intenso</td>
+                        <td><span class="badge warning" data-es="Beber más ⚠️" data-en="Drink more ⚠️">Beber más ⚠️</span></td>
+                    </tr>
+                    <tr>
+                        <td data-es="Ámbar o naranja" data-en="Amber or orange">Ámbar o naranja</td>
+                        <td><span class="badge danger" data-es="Deshidratado ✗" data-en="Dehydrated ✗">Deshidratado ✗</span></td>
+                    </tr>
+                    <tr>
+                        <td data-es="Marrón oscuro" data-en="Dark brown">Marrón oscuro</td>
+                        <td><span class="badge danger" data-es="Urgente ✗✗" data-en="Urgent ✗✗">Urgente ✗✗</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL TEXT SECTIONS -->
+    <div class="text-section">
+        <h2 data-es="💧 ¿Cuánta agua debo beber al día? La ciencia detrás del cálculo" data-en="💧 How much water should I drink daily? The science behind the calculation">💧 ¿Cuánta agua debo beber al día? La ciencia detrás del cálculo</h2>
+        <p data-es="La fórmula más utilizada en nutrición clínica es <strong>35 ml por kilogramo de peso corporal</strong> al día. Esta referencia proviene del Manual de Fórmulas y Tablas para la Intervención Nutriológica y está alineada con las guías de la Organización Mundial de la Salud. Es más precisa que la popular 'regla de los 8 vasos', que ignora el peso, la talla y el nivel de actividad de cada persona." data-en="The most widely used formula in clinical nutrition is <strong>35 ml per kilogram of body weight</strong> per day. This reference comes from the Manual of Formulas and Tables for Nutritional Intervention and aligns with WHO guidelines. It is much more precise than the popular '8 glasses rule', which ignores individual weight, height, and activity level.">La fórmula más utilizada en nutrición clínica es <strong>35 ml por kilogramo de peso corporal</strong> al día. Esta referencia proviene del Manual de Fórmulas y Tablas para la Intervención Nutriológica y está alineada con las guías de la Organización Mundial de la Salud. Es más precisa que la popular "regla de los 8 vasos", que ignora el peso, la talla y el nivel de actividad de cada persona.</p>
+        <p data-es="La EFSA (Autoridad Europea de Seguridad Alimentaria) establece como referencia general 2 litros/día para mujeres y 2,5 litros/día para hombres como ingesta total de líquidos (incluyendo agua de los alimentos). Estas cifras se corresponden bien con la fórmula de 35 ml/kg para personas de peso medio, pero divergen significativamente en personas con mucho o poco peso." data-en="EFSA (European Food Safety Authority) establishes a general reference of 2 liters/day for women and 2.5 liters/day for men as total fluid intake (including water from food). These figures match well with the 35 ml/kg formula for average weight individuals, but diverge significantly for underweight or overweight people.">La EFSA (Autoridad Europea de Seguridad Alimentaria) establece como referencia general 2 litros/día para mujeres y 2,5 litros/día para hombres como ingesta total de líquidos (incluyendo agua de los alimentos). Estas cifras se corresponden bien con la fórmula de 35 ml/kg para personas de peso medio, pero divergen significativamente en personas con mucho o poco peso.</p>
+
+        <h3 data-es="Factores que aumentan la necesidad de agua" data-en="Factors that increase water needs">Factores que aumentan la necesidad de agua</h3>
+        <ul>
+            <li><strong data-es="Ejercicio físico:" data-en="Physical exercise:">Ejercicio físico:</strong> <span data-es="con cada hora de actividad se pierde entre 0,5 y 1,5 litros de agua por el sudor, dependiendo de la intensidad y la temperatura. Las personas activas también tienen una tasa metabólica basal (TMB) más alta, lo que aumenta el gasto total de agua." data-en="with each hour of activity, between 0.5 and 1.5 liters of water are lost through sweat, depending on intensity and temperature. Active people also have a higher basal metabolic rate (BMR), increasing total water expenditure.">con cada hora de actividad se pierde entre 0,5 y 1,5 litros de agua por el sudor, dependiendo de la intensidad y la temperatura. Las personas activas también tienen una tasa metabólica basal (TMB) más alta, lo que aumenta el gasto total de agua.</span></li>
+            <li><strong data-es="Clima cálido:" data-en="Warm climate:">Clima cálido:</strong> <span data-es="el calor activa los mecanismos de termorregulación (sudoración) incluso en reposo. En verano español o zonas mediterráneas, las necesidades aumentan notablemente." data-en="heat activates thermoregulation mechanisms (sweating) even at rest. During Spanish summers or Mediterranean zones, needs increase markedly.">el calor activa los mecanismos de termorregulación (sudoración) incluso en reposo. En verano español o zonas mediterráneas, las necesidades aumentan notablemente.</span></li>
+            <li><strong data-es="Altitud elevada:" data-en="High altitude:">Altitud elevada:</strong> <span data-es="por encima de los 2.500 m, la respiración se acelera y se pierde más agua por la vía pulmonar." data-en="above 2,500 m, breathing accelerates and more water is lost via the lungs.">por encima de los 2.500 m, la respiración se acelera y se pierde más agua por la vía pulmonar.</span></li>
+            <li><strong data-es="Embarazo y lactancia:" data-en="Pregnancy and lactation:">Embarazo y lactancia:</strong> <span data-es="el organismo requiere más agua para la síntesis de líquido amniótico, el mayor volumen sanguíneo y la producción de leche materna." data-en="the body requires more water for amniotic fluid synthesis, higher blood volume, and breast milk production.">el organismo requiere más agua para la síntesis de líquido amniótico, el mayor volumen sanguíneo y la producción de leche materna.</span></li>
+            <li><strong data-es="Fiebre, vómitos o diarrea:" data-en="Fever, vomiting, or diarrhea:">Fiebre, vómitos o diarrea:</strong> <span data-es="situaciones que incrementan considerablemente las pérdidas hídricas y pueden requerir rehidratación específica." data-en="situations that considerably increase fluid losses and may require specific rehydration.">situaciones que incrementan considerablemente las pérdidas hídricas y pueden requerir rehidratación específica.</span></li>
+        </ul>
+
+        <h3 data-es="¿Cuenta el café, el té o los zumos?" data-en="Does coffee, tea, or juice count?">¿Cuenta el café, el té o los zumos?</h3>
+        <p data-es="Sí. Aunque la cafeína tiene un leve efecto diurético, el volumen de agua que aporta el café o el té es muy superior a esa pérdida. Los estudios actuales confirman que el café con cafeína contribuye positivamente al balance hídrico. Los zumos y bebidas deportivas también cuentan, aunque aportan calorías adicionales a tener en cuenta." data-en="Yes. Although caffeine has a mild diuretic effect, the volume of water provided by coffee or tea is much greater than that loss. Current studies confirm that caffeinated coffee contributes positively to fluid balance. Juices and sports drinks also count, although they provide additional calories to keep in mind.">Sí. Aunque la cafeína tiene un leve efecto diurético, el volumen de agua que aporta el café o el té es muy superior a esa pérdida. Los estudios actuales confirman que el café con cafeína contribuye positivamente al balance hídrico. Los zumos y bebidas deportivas también cuentan, aunque aportan calorías adicionales a tener en cuenta.</p>
+
+        <h3 data-es="🕐 Por qué importa cuándo bebes, no solo cuánto" data-en="🕐 Why when you drink matters, not just how much">🕐 Por qué importa cuándo bebes, no solo cuánto</h3>
+        <p data-es="Distribuir la ingesta de agua a lo largo del día es tan importante como la cantidad total. Beber grandes volúmenes de golpe supera la capacidad de absorción renal (máximo ~800-1.000 ml/hora) y puede diluir los electrolitos plasmáticos. El horario de hidratación recomendado en España se adapta a los ritmos habituales de comidas y descanso." data-en="Distributing water intake throughout the day is as important as the total amount. Drinking large volumes at once exceeds renal absorption capacity (maximum ~800-1,000 ml/hour) and can dilute plasma electrolytes. The recommended hydration schedule in Spain adapts to usual meal and rest rhythms.">Distribuir la ingesta de agua a lo largo del día es tan importante como la cantidad total. Beber grandes volúmenes de golpe supera la capacidad de absorción renal (máximo ~800-1.000 ml/hora) y puede diluir los electrolitos plasmáticos. El horario de hidratación recomendado en España se adapta a los ritmos habituales de comidas y descanso.</p>
+
+        <h3 data-es="Señales de deshidratación que a menudo se ignoran" data-en="Signs of dehydration that are often ignored">Señales de deshidratación que a menudo se ignoran</h3>
+        <ul>
+            <li data-es="Dolor de cabeza sin causa aparente (primer síntoma frecuente)" data-en="Headache without apparent cause (frequent early symptom)">Dolor de cabeza sin causa aparente (primer síntoma frecuente)</li>
+            <li data-es="Dificultad para concentrarse o fatiga mental" data-en="Difficulty concentrating or mental fatigue">Dificultad para concentrarse o fatiga mental</li>
+            <li data-es="Boca o labios secos" data-en="Dry mouth or lips">Boca o labios secos</li>
+            <li data-es="Estreñimiento o digestiones pesadas" data-en="Constipation or heavy digestion">Estreñimiento o digestiones pesadas</li>
+            <li data-es="Piel menos elástica o turgente" data-en="Less elastic or turgid skin">Piel menos elástica o turgente</li>
+            <li data-es="Orina escasa y de color oscuro (ver guía de colores arriba)" data-en="Scanty, dark-colored urine (see color guide above)">Orina escasa y de color oscuro (ver guía de colores arriba)</li>
+        </ul>
+        <p data-es="Una deshidratación de tan solo el 1-2% del peso corporal ya reduce el rendimiento cognitivo, la capacidad de concentración y la resistencia física, incluso antes de que aparezca la sensación de sed — especialmente en personas mayores, donde el mecanismo de la sed se embota con los años." data-en="Dehydration of just 1-2% of body weight already reduces cognitive performance, concentration capacity, and physical endurance, even before thirst sets in — especially in older adults, where the thirst mechanism blunts over time.">Una deshidratación de tan solo el 1-2% del peso corporal ya reduce el rendimiento cognitivo, la capacidad de concentración y la resistencia física, incluso antes de que aparezca la sensación de sed — especialmente en personas mayores, donde el mecanismo de la sed se embota con los años.</p>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if(el.children.length === 0 || el.tagName === 'OPTION' || el.tagName === 'SPAN') {
+                el.innerHTML = text; 
+            } else {
+                Array.from(el.childNodes).forEach(node => {
+                    if (node.nodeType === 3 && node.nodeValue.trim() !== '') {
+                        node.nodeValue = text;
+                    }
+                });
+            }
+        });
+
+        if(document.getElementById('results-container').style.display === 'block') {
+            calculateWater();
+        }
+    }
+
+    function toggleCondition(element) {
+        const checkbox = element.querySelector('input');
+        checkbox.checked = !checkbox.checked;
+        if(checkbox.checked) {
+            element.classList.add('selected');
+        } else {
+            element.classList.remove('selected');
+        }
+    }
+
+    function calculateWater() {
+        const weight = parseFloat(document.getElementById('weight').value);
+        const activity = parseFloat(document.getElementById('activity').value);
+        const climate = parseFloat(document.getElementById('climate').value);
+        
+        let extra = 0;
+        if(document.getElementById('pregnant').checked) extra += parseFloat(document.getElementById('pregnant').value);
+        if(document.getElementById('lactating').checked) extra += parseFloat(document.getElementById('lactating').value);
+
+        if (!weight || weight < 30) {
+            alert(currentLang === 'es' ? "Por favor ingresa un peso corporal válido." : "Please enter a valid body weight.");
+            return;
+        }
+
+        // Base formula: 35 ml per kg + activity + climate + special conditions
+        let totalMl = (weight * 35) + activity + climate + extra;
+        let totalLiters = (totalMl / 1000).toFixed(2);
+
+        document.getElementById('res-total').innerText = totalLiters;
+        document.getElementById('res-ml').innerText = `(${Math.round(totalMl)} ml)`;
+
+        // Schedule distribution breakdown
+        let remaining = totalMl - 500; // 500ml upon waking
+        if(remaining < 0) remaining = 0;
+
+        let morning = Math.round(remaining * 0.35);
+        let afternoon = Math.round(remaining * 0.45);
+        let evening = Math.round(remaining * 0.20);
+
+        document.getElementById('sched-morning').innerText = morning + ' ml';
+        document.getElementById('sched-afternoon').innerText = afternoon + ' ml';
+        document.getElementById('sched-evening').innerText = evening + ' ml';
+
+        document.getElementById('results-container').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
