@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Peso Ideal 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; /* Blue theme for weight/health */
+            --primary-dark: #2563eb;
+            --bg: #eff6ff;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #bfdbfe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+        header { background: var(--card-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; }
+        
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-dark); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        .radio-group { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .radio-btn { flex: 1; min-width: 100px; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; background: white; transition: all 0.3s; font-size: 0.9rem; }
+        .radio-btn input { display: none; }
+        .radio-btn.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+        
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #06b6d4); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3); }
+
+        .result-box { background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%); border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; text-align: center; }
+        .result-label { font-size: 0.9rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem; }
+        .result-value { font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); line-height: 1.1; }
+        .result-range { font-size: 1.1rem; color: var(--text-dark); margin-top: 0.5rem; font-weight: 500; }
+        
+        .formula-list { margin-top: 1.5rem; display: grid; gap: 0.8rem; }
+        .formula-item { display: flex; justify-content: space-between; padding: 0.8rem; background: white; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .formula-item strong { color: var(--text-dark); }
+        .formula-item span { color: var(--primary-dark); font-weight: 700; }
+
+        .info-box { background: #fef3c7; border-left: 4px solid var(--warning); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box h3 { margin-bottom: 0.5rem; color: #92400e; font-size: 1rem; }
+        .info-box p { color: #b45309; font-size: 0.9rem; margin-bottom: 0; }
+
+        .text-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .text-section h3 { color: var(--primary-dark); margin-top: 1.5rem; }
+        .text-section p { margin-bottom: 1rem; color: #475569; }
+        
+        .formula-desc { border-left: 3px solid var(--border); padding-left: 1rem; margin-bottom: 1.5rem; }
+        .formula-desc h4 { color: var(--text-dark); font-size: 1.05rem; }
+        .formula-desc .tag { font-size: 0.8rem; background: var(--bg); color: var(--primary-dark); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; margin-left: 0.5rem; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.8rem; border-bottom: 1px solid var(--border); }
+        th { background-color: var(--bg); color: var(--primary-dark); font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .diff-badge { display: inline-block; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; margin-top: 1rem; }
+        .diff-good { background: #d1fae5; color: #065f46; }
+        .diff-warn { background: #fee2e2; color: #991b1b; }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .radio-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="⚖️ NutriMX Peso" data-en="⚖️ NutriMX Weight">⚖️ NutriMX Peso</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Peso Ideal 2026" data-en="Ideal Weight Calculator 2026">Calculadora de Peso Ideal 2026</h1>
+    <p class="subtitle" data-es="💪 5 Fórmulas Científicas · Complexión corporal · Rango saludable" data-en="💪 5 Scientific Formulas · Body Frame · Healthy Range">💪 5 Fórmulas Científicas · Complexión corporal · Rango saludable</p>
+
+    <div class="grid-layout">
+        <!-- FORM COLUMN -->
+        <div class="card">
+            <h2 data-es="⚖️ Introduce tus datos" data-en="⚖️ Enter your details">⚖️ Introduce tus datos</h2>
+            
+            <div class="form-group">
+                <label data-es="Sexo biológico" data-en="Biological Sex">Sexo biológico</label>
+                <div class="radio-group" id="sex-group">
+                    <label class="radio-btn selected" onclick="selectRadio('sex-group', this)">
+                        <input type="radio" name="sex" value="male" checked> <span data-es="♂ Hombre" data-en="♂ Male">♂ Hombre</span>
+                    </label>
+                    <label class="radio-btn" onclick="selectRadio('sex-group', this)">
+                        <input type="radio" name="sex" value="female"> <span data-es="♀ Mujer" data-en="♀ Female">♀ Mujer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Altura (cm)" data-en="Height (cm)">Altura (cm)</label>
+                <input type="number" id="height" placeholder="Ej. 175" min="100" max="250">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Peso actual (kg) — opcional" data-en="Current weight (kg) — optional">Peso actual (kg) — opcional</label>
+                <input type="number" id="weight" placeholder="Ej. 70" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Complexión corporal" data-en="Body Frame">Complexión corporal</label>
+                <div class="radio-group" id="frame-group">
+                    <label class="radio-btn" onclick="selectRadio('frame-group', this)">
+                        <input type="radio" name="frame" value="small"> 🦴 <span data-es="Pequeña (-10%)" data-en="Small (-10%)">Pequeña (-10%)</span>
+                    </label>
+                    <label class="radio-btn selected" onclick="selectRadio('frame-group', this)">
+                        <input type="radio" name="frame" value="medium" checked> 🧍 <span data-es="Media (Estándar)" data-en="Medium (Std)">Media (Estándar)</span>
+                    </label>
+                    <label class="radio-btn" onclick="selectRadio('frame-group', this)">
+                        <input type="radio" name="frame" value="large"> 💪 <span data-es="Grande (+10%)" data-en="Large (+10%)">Grande (+10%)</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculateWeight()" data-es="💪 Calcular mi peso ideal" data-en="💪 Calculate my ideal weight">💪 Calcular mi peso ideal</button>
+
+            <!-- RESULTS -->
+            <div id="results-container" style="display: none;">
+                <div class="result-box">
+                    <div class="result-label" data-es="Peso Ideal Promedio" data-en="Average Ideal Weight">Peso Ideal Promedio</div>
+                    <div class="result-value"><span id="res-avg">--</span> kg</div>
+                    <div class="result-range" id="res-range">Rango saludable OMS: -- a -- kg</div>
+                    <div id="weight-diff"></div>
+                </div>
+
+                <div class="formula-list">
+                    <div class="formula-item">
+                        <strong data-es="Lorentz (1929)" data-en="Lorentz (1929)">Lorentz (1929)</strong> <span id="res-lorentz">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Broca (1871)" data-en="Broca (1871)">Broca (1871)</strong> <span id="res-broca">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Devine (1974)" data-en="Devine (1974)">Devine (1974)</strong> <span id="res-devine">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Hamwi (1964)" data-en="Hamwi (1964)">Hamwi (1964)</strong> <span id="res-hamwi">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="OMS (IMC 22)" data-en="WHO (BMI 22)">OMS (IMC 22)</strong> <span id="res-oms">-- kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO COLUMN -->
+        <div>
+            <div class="info-box">
+                <h3 data-es="⚠️ Aviso médico" data-en="⚠️ Medical Notice">⚠️ Aviso médico</h3>
+                <p data-es="Las fórmulas de peso ideal son referencias estadísticas orientativas. No tienen en cuenta la composición corporal (porcentaje de grasa vs. músculo), la salud metabólica ni otros factores individuales. Consulta siempre con un médico o dietista-nutricionista." data-en="Ideal weight formulas are orientative statistical references. They do not take into account body composition (fat vs. muscle percentage), metabolic health, or other individual factors. Always consult a doctor or dietitian.">Las fórmulas de peso ideal son referencias estadísticas orientativas. No tienen en cuenta la composición corporal (porcentaje de grasa vs. músculo), la salud metabólica ni otros factores individuales. Consulta siempre con un médico o dietista-nutricionista.</p>
+            </div>
+
+            <div class="text-section" style="padding: 1.5rem;">
+                <h2 style="margin-top:0;" data-es="🔬 Las 5 fórmulas explicadas" data-en="🔬 The 5 formulas explained">🔬 Las 5 fórmulas explicadas</h2>
+                <p style="font-size: 0.9rem;" data-es="Ninguna fórmula es universalmente correcta. Usarlas juntas ofrece la estimación más equilibrada." data-en="No single formula is universally correct. Using them together provides the most balanced estimate.">Ninguna fórmula es universalmente correcta. Usarlas juntas ofrece la estimación más equilibrada.</p>
+
+                <div class="formula-desc">
+                    <h4>Lorentz <span class="tag" data-es="Origen europeo" data-en="European origin">Origen europeo</span></h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Muy usada en España. Diferencia según sexo en la corrección por talla." data-en="Widely used in Spain. Differentiates by sex in height correction.">Muy usada en España. Diferencia según sexo en la corrección por talla.</p>
+                </div>
+                <div class="formula-desc">
+                    <h4>Broca <span class="tag" data-es="La más antigua" data-en="The oldest">La más antigua</span></h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Extremadamente simple. Tiende a dar valores elevados para personas bajas." data-en="Extremely simple. Tends to overestimate for shorter individuals.">Extremadamente simple. Tiende a dar valores elevados para personas bajas.</p>
+                </div>
+                <div class="formula-desc">
+                    <h4>OMS / IMC <span class="tag" data-es="Internacional" data-en="International">Internacional</span></h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Basada en un IMC saludable (18.5 a 24.9). El peso ideal se calcula con IMC 22." data-en="Based on healthy BMI (18.5 to 24.9). Ideal weight calculated at BMI 22.">Basada en un IMC saludable (18.5 a 24.9). El peso ideal se calcula con IMC 22.</p>
+                </div>
+                <div class="formula-desc">
+                    <h4>Devine & Hamwi <span class="tag" data-es="Contexto clínico" data-en="Clinical context">Contexto clínico</span></h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Diseñadas en contexto hospitalario para ajustar dosis de fármacos." data-en="Designed in hospital settings for drug dosage adjustments.">Diseñadas en contexto hospitalario para ajustar dosis de fármacos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTRA INFO SECTIONS -->
+    <div class="text-section">
+        <h2 data-es="💜 Peso ideal vs. peso saludable" data-en="💜 Ideal weight vs. healthy weight">💜 Peso ideal vs. peso saludable</h2>
+        <p data-es="El <strong>peso ideal</strong> es un valor puntual que estiman fórmulas matemáticas basadas en altura, sexo y complexión. El <strong>peso saludable</strong>, en cambio, es un rango dentro del cual el riesgo cardiovascular y metabólico es estadísticamente bajo (IMC entre 18,5 y 24,9)." data-en="<strong>Ideal weight</strong> is a specific value estimated by math formulas. <strong>Healthy weight</strong>, however, is a range where cardiovascular and metabolic risk is statistically low (BMI 18.5 - 24.9).">El <strong>peso ideal</strong> es un valor puntual que estiman fórmulas matemáticas basadas en altura, sexo y complexión. El <strong>peso saludable</strong>, en cambio, es un rango dentro del cual el riesgo cardiovascular y metabólico es estadísticamente bajo (IMC entre 18,5 y 24,9).</p>
+        
+        <h3 data-es="¿Cuándo el peso ideal puede ser engañoso?" data-en="When can ideal weight be misleading?">¿Cuándo el peso ideal puede ser engañoso?</h3>
+        <ul>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="Atletas y deportistas:" data-en="Athletes:">Atletas y deportistas:</strong> <span data-es="Alta masa muscular eleva el peso por encima del ideal sin implicar exceso de grasa." data-en="High muscle mass raises weight above 'ideal' without meaning excess fat.">Alta masa muscular eleva el peso por encima del ideal sin implicar exceso de grasa.</span></li>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="Personas mayores:" data-en="Elderly:">Personas mayores:</strong> <span data-es="La pérdida natural de músculo puede situar el peso 'en el ideal' cuando hay exceso de grasa (obesidad sarcopénica)." data-en="Natural muscle loss can place weight at 'ideal' despite excess fat (sarcopenic obesity).">La pérdida natural de músculo puede situar el peso 'en el ideal' cuando hay exceso de grasa (obesidad sarcopénica).</span></li>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="Embarazadas:" data-en="Pregnant women:">Embarazadas:</strong> <span data-es="El peso ideal estándar no aplica durante el embarazo." data-en="Standard ideal weight does not apply during pregnancy.">El peso ideal estándar no aplica durante el embarazo.</span></li>
+        </ul>
+    </div>
+
+    <div class="text-section">
+        <h2 data-es="📋 Clasificación SEEDO del IMC" data-en="📋 SEEDO BMI Classification">📋 Clasificación SEEDO del IMC</h2>
+        <p data-es="Sociedad Española para el Estudio de la Obesidad. Referencia oficial en consultas de nutrición en España." data-en="Spanish Society for the Study of Obesity. Official reference in Spanish nutrition clinics.">Sociedad Española para el Estudio de la Obesidad. Referencia oficial en consultas de nutrición en España.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-es="Estado" data-en="Status">Estado</th>
+                        <th data-es="IMC (kg/m²)" data-en="BMI (kg/m²)">IMC (kg/m²)</th>
+                        <th data-es="Riesgo cardiovascular" data-en="Cardiovascular Risk">Riesgo cardiovascular</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td data-es="Bajo peso" data-en="Underweight">Bajo peso</td><td>< 18,5</td><td data-es="Aumentado (desnutrición)" data-en="Increased (malnutrition)">Aumentado (desnutrición)</td></tr>
+                    <tr><td data-es="Normopeso" data-en="Normal weight">Normopeso</td><td>18,5 – 24,9</td><td data-es="Mínimo ✅" data-en="Minimum ✅">Mínimo ✅</td></tr>
+                    <tr><td data-es="Sobrepeso grado I" data-en="Overweight grade I">Sobrepeso grado I</td><td>25,0 – 26,9</td><td data-es="Leve" data-en="Mild">Leve</td></tr>
+                    <tr><td data-es="Sobrepeso grado II (preobesidad)" data-en="Overweight grade II">Sobrepeso grado II (preobesidad)</td><td>27,0 – 29,9</td><td data-es="Moderado" data-en="Moderate">Moderado</td></tr>
+                    <tr><td data-es="Obesidad tipo I" data-en="Obesity type I">Obesidad tipo I</td><td>30,0 – 34,9</td><td data-es="Alto" data-en="High">Alto</td></tr>
+                    <tr><td data-es="Obesidad tipo II" data-en="Obesity type II">Obesidad tipo II</td><td>35,0 – 39,9</td><td data-es="Muy alto" data-en="Very high">Muy alto</td></tr>
+                    <tr><td data-es="Obesidad tipo III (mórbida)" data-en="Obesity type III (morbid)">Obesidad tipo III (mórbida)</td><td>40,0 – 49,9</td><td data-es="Extremadamente alto" data-en="Extremely high">Extremadamente alto</td></tr>
+                    <tr><td data-es="Obesidad tipo IV (extrema)" data-en="Obesity type IV (extreme)">Obesidad tipo IV (extrema)</td><td>≥ 50</td><td data-es="Crítico" data-en="Critical">Crítico</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if(el.children.length === 0 || el.tagName === 'TH' || el.tagName === 'TD' || el.tagName === 'SPAN') {
+                el.innerHTML = text; // allow basic html like <strong> if passed in dataset, though innerHTML is safe here
+            } else {
+                // If it contains children (like icons), just replace text nodes
+                Array.from(el.childNodes).forEach(node => {
+                    if (node.nodeType === 3 && node.nodeValue.trim() !== '') {
+                        node.nodeValue = text;
+                    }
+                });
+            }
+        });
+        
+        if(document.getElementById('results-container').style.display === 'block') {
+            calculateWeight();
+        }
+    }
+
+    function selectRadio(groupId, element) {
+        const group = document.getElementById(groupId);
+        group.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('selected'));
+        element.classList.add('selected');
+        element.querySelector('input').checked = true;
+    }
+
+    function calculateWeight() {
+        const height = parseFloat(document.getElementById('height').value);
+        const weight = parseFloat(document.getElementById('weight').value);
+        const sex = document.querySelector('input[name="sex"]:checked').value;
+        const frame = document.querySelector('input[name="frame"]:checked').value;
+
+        if (!height || height < 100 || height > 250) {
+            alert(currentLang === 'es' ? "Por favor ingresa una altura válida (100-250 cm)" : "Please enter a valid height (100-250 cm)");
+            return;
+        }
+
+        let frameMult = 1.0;
+        if (frame === 'small') frameMult = 0.9;
+        if (frame === 'large') frameMult = 1.1;
+
+        const hm = height / 100; // height in meters
+        const inchesOver5ft = (height - 152.4) / 2.54;
+
+        let lorentz, broca, devine, hamwi;
+
+        // Base Formulas
+        if (sex === 'male') {
+            lorentz = (height - 100) - ((height - 150) / 4);
+            broca = height - 100;
+            devine = 50 + (2.3 * inchesOver5ft);
+            hamwi = 48 + (2.7 * inchesOver5ft);
+        } else {
+            lorentz = (height - 100) - ((height - 150) / 2.5);
+            broca = (height - 100) * 0.85;
+            devine = 45.5 + (2.3 * inchesOver5ft);
+            hamwi = 45.5 + (2.2 * inchesOver5ft);
+        }
+
+        // Apply Frame Multiplier
+        lorentz *= frameMult;
+        broca *= frameMult;
+        devine *= frameMult;
+        hamwi *= frameMult;
+
+        // OMS calculations (BMI based)
+        const omsMin = 18.5 * hm * hm;
+        const omsMax = 24.9 * hm * hm;
+        const omsIdeal = 22 * hm * hm; // Point estimate for average
+
+        // Average of the 5 point estimates
+        const avgWeight = (lorentz + broca + devine + hamwi + omsIdeal) / 5;
+
+        // Format and Display
+        document.getElementById('res-avg').innerText = avgWeight.toFixed(1);
+        
+        const rangeText = currentLang === 'es' 
+            ? `Rango saludable OMS: ${omsMin.toFixed(1)} a ${omsMax.toFixed(1)} kg` 
+            : `WHO Healthy Range: ${omsMin.toFixed(1)} to ${omsMax.toFixed(1)} kg`;
+        document.getElementById('res-range').innerText = rangeText;
+
+        document.getElementById('res-lorentz').innerText = lorentz.toFixed(1) + ' kg';
+        document.getElementById('res-broca').innerText = broca.toFixed(1) + ' kg';
+        document.getElementById('res-devine').innerText = devine.toFixed(1) + ' kg';
+        document.getElementById('res-hamwi').innerText = hamwi.toFixed(1) + ' kg';
+        document.getElementById('res-oms').innerText = omsIdeal.toFixed(1) + ' kg';
+
+        // Weight difference logic
+        const diffDiv = document.getElementById('weight-diff');
+        if (weight && weight > 0) {
+            const diff = weight - avgWeight;
+            const absDiff = Math.abs(diff).toFixed(1);
+            if (Math.abs(diff) <= 2) {
+                diffDiv.innerHTML = `<span class="diff-badge diff-good">${currentLang==='es'?'¡Estás en tu peso ideal promedio!':'You are at your average ideal weight!'}</span>`;
+            } else if (diff > 0) {
+                diffDiv.innerHTML = `<span class="diff-badge diff-warn">${currentLang==='es'?`Estás ${absDiff} kg por encima del promedio`:`You are ${absDiff} kg above average`}</span>`;
+            } else {
+                diffDiv.innerHTML = `<span class="diff-badge diff-warn">${currentLang==='es'?`Estás ${absDiff} kg por debajo del promedio`:`You are ${absDiff} kg below average`}</span>`;
+            }
+        } else {
+            diffDiv.innerHTML = '';
+        }
+
+        document.getElementById('results-container').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
