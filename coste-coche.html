@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora del Coste del Coche 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-header {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .breakdown-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .breakdown-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .breakdown-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .breakdown-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            margin-top: 0.3rem;
+            overflow: hidden;
+        }
+
+        .breakdown-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #3b82f6);
+            border-radius: 4px;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            .breakdown-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🚗 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora del Coste del Coche en España" data-en="Car Cost Calculator for Spain">Calculadora del Coste del Coche en España</h1>
+    <p class="subtitle" data-es="Gasolina · Seguro · ITV · IVTM · Mantenimiento · Depreciación" data-en="Fuel · Insurance · ITV · IVTM · Maintenance · Depreciation">Gasolina · Seguro · ITV · IVTM · Mantenimiento · Depreciación</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="🚗 Coste real anual de tu vehículo" data-en="🚗 Real annual cost of your vehicle">🚗 Coste real anual de tu vehículo</h2>
+
+            <div class="form-group">
+                <label data-es="Km anuales recorridos" data-en="Annual kilometers">Km anuales recorridos</label>
+                <input type="number" id="annualKm" placeholder="15000" step="1000" min="0" value="15000">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Consumo medio (L/100km)" data-en="Average consumption (L/100km)">Consumo medio (L/100km)</label>
+                <input type="number" id="consumption" placeholder="6.5" step="0.1" min="0" value="6.5">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Típicamente 5-8 L/100km según modelo" data-en="Typically 5-8 L/100km depending on model">Típicamente 5-8 L/100km según modelo</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Precio combustible (€/L)" data-en="Fuel price (€/L)">Precio combustible (€/L)</label>
+                <input type="number" id="fuelPrice" placeholder="1.60" step="0.01" min="0" value="1.60">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Gasolina 1.55-1.70€; Diésel 1.45-1.60€ (2026)" data-en="Gasoline 1.55-1.70€; Diesel 1.45-1.60€ (2026)">Gasolina 1.55-1.70€; Diésel 1.45-1.60€ (2026)</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Precio del seguro (€/año)" data-en="Insurance cost (€/year)">Precio del seguro (€/año)</label>
+                <input type="number" id="insurance" placeholder="600" step="50" min="0" value="600">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Terceros 400€; Todo riesgo 1200€ (media 600€)" data-en="Third party 400€; Full coverage 1200€ (avg 600€)">Terceros 400€; Todo riesgo 1200€ (media 600€)</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="ITV (€/año, prorrateado)" data-en="ITV (€/year, prorated)">ITV (€/año, prorrateado)</label>
+                <input type="number" id="itv" placeholder="30" step="5" min="0" value="30">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Primeros 4 años gratis; 4-10 años cada 2 años ~45€; >10 años anual ~50€" data-en="First 4 years free; 4-10 years every 2 years ~45€; >10 years annual ~50€">Primeros 4 años gratis; 4-10 años cada 2 años ~45€; >10 años anual ~50€</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Impuesto municipal (IVTM, €/año)" data-en="Municipal tax (IVTM, €/year)">Impuesto municipal (IVTM, €/año)</label>
+                <input type="number" id="ivtm" placeholder="120" step="10" min="0" value="120">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Variable por municipio y cilindrada (50-300€)" data-en="Varies by municipality and cc (50-300€)">Variable por municipio y cilindrada (50-300€)</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Mantenimiento (€/año)" data-en="Maintenance (€/year)">Mantenimiento (€/año)</label>
+                <input type="number" id="maintenance" placeholder="400" step="50" min="0" value="400">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Revisión 150-250€, neumáticos cada 3-4 años ~400€, frenos, filtros, aceite" data-en="Service 150-250€, tires every 3-4 years ~400€, brakes, filters, oil">Revisión 150-250€, neumáticos cada 3-4 años ~400€, frenos, filtros, aceite</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Aparcamiento / peajes (€/mes)" data-en="Parking / tolls (€/month)">Aparcamiento / peajes (€/mes)</label>
+                <input type="number" id="parking" placeholder="50" step="10" min="0" value="50">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Depreciación anual estimada (€)" data-en="Estimated annual depreciation (€)">Depreciación anual estimada (€)</label>
+                <input type="number" id="depreciation" placeholder="2000" step="100" min="0" value="2000">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Coche nuevo: 15-20% año 1; 10% años siguientes" data-en="New car: 15-20% year 1; 10% following years">Coche nuevo: 15-20% año 1; 10% años siguientes</small>
+            </div>
+
+            <button class="btn" onclick="calculateCarCost()" data-es="🚗 Calcular coste total" data-en="🚗 Calculate total cost">🚗 Calcular coste total</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-header">
+                    <div class="result-item">
+                        <div class="result-label" data-es="Coste anual" data-en="Annual cost">Coste anual</div>
+                        <div class="result-value" id="annualCost">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Coste mensual" data-en="Monthly cost">Coste mensual</div>
+                        <div class="result-value" id="monthlyCost">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Coste por km" data-en="Cost per km">Coste por km</div>
+                        <div class="result-value" id="costPerKm">€0</div>
+                    </div>
+                </div>
+
+                <div class="breakdown-container">
+                    <div class="breakdown-title" data-es="Desglose de gastos:" data-en="Expense breakdown:">Desglose de gastos:</div>
+                    
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">⛽ <span data-es="Combustible" data-en="Fuel">Combustible</span></div>
+                        <div class="breakdown-value" id="fuelCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="fuelBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">🛡️ <span data-es="Seguro" data-en="Insurance">Seguro</span></div>
+                        <div class="breakdown-value" id="insuranceCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="insuranceBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">🔧 <span data-es="Mantenimiento" data-en="Maintenance">Mantenimiento</span></div>
+                        <div class="breakdown-value" id="maintenanceCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="maintenanceBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">🅿️ <span data-es="Parking/peajes" data-en="Parking/tolls">Parking/peajes</span></div>
+                        <div class="breakdown-value" id="parkingCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="parkingBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">📋 <span data-es="IVTM" data-en="IVTM">IVTM</span></div>
+                        <div class="breakdown-value" id="ivtmCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="ivtmBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">🔍 <span data-es="ITV" data-en="ITV">ITV</span></div>
+                        <div class="breakdown-value" id="itvCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="itvBar"></div></div>
+
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">📉 <span data-es="Depreciación" data-en="Depreciation">Depreciación</span></div>
+                        <div class="breakdown-value" id="depreciationCost">€0</div>
+                    </div>
+                    <div class="breakdown-bar"><div class="breakdown-fill" id="depreciationBar"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3 data-es="💡 Dato importante" data-en="💡 Important fact">💡 Dato importante</h3>
+                <p data-es="Según la DGT y estudios de la OCU, el coste medio anual de un turismo en España oscila entre 5.000€ y 9.000€. El combustible suele representar solo 30-40% del coste total — el seguro, mantenimiento y depreciación son tan importantes o más." data-en="According to DGT and OCU studies, average annual car cost in Spain ranges from 5,000€ to 9,000€. Fuel typically represents only 30-40% of total cost — insurance, maintenance, and depreciation are equally or more important.">Según la DGT y estudios de la OCU, el coste medio anual de un turismo en España oscila entre 5.000€ y 9.000€. El combustible suele representar solo 30-40% del coste total — el seguro, mantenimiento y depreciación son tan importantes o más.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="Componentes del coste real de un vehículo" data-en="Components of real vehicle cost">Componentes del coste real de un vehículo</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="⛽ Combustible" data-en="⛽ Fuel">⛽ Combustible</h3>
+                <p data-es="Gasolina: 1,55-1,70€/L; Diésel: 1,45-1,60€/L (2026). Un coche de 6,5 L/100km y 15.000 km/año consume ~975L → ~1.560€. El precio fluctúa según mercado internacional." data-en="Gasoline: 1.55-1.70€/L; Diesel: 1.45-1.60€/L (2026). A car with 6.5 L/100km and 15,000 km/year consumes ~975L → ~1,560€. Prices fluctuate with international markets.">Gasolina: 1,55-1,70€/L; Diésel: 1,45-1,60€/L (2026). Un coche de 6,5 L/100km y 15.000 km/año consume ~975L → ~1.560€. El precio fluctúa según mercado internacional.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🛡️ Seguro" data-en="🛡️ Insurance">🛡️ Seguro</h3>
+                <p data-es="Responsabilidad civil (terceros): 400-600€/año. Terceros ampliado: 600-800€. Todo riesgo: 1.000-1.200€. Conductores jóvenes (<25 años) pagan más. Buen historial de siniestralidad reduce tarifa 5-20%." data-en="Third party liability: 400-600€/year. Extended third party: 600-800€. Full coverage: 1,000-1,200€. Young drivers (<25 years) pay more. Good claims history reduces rate 5-20%.">Responsabilidad civil (terceros): 400-600€/año. Terceros ampliado: 600-800€. Todo riesgo: 1.000-1.200€. Conductores jóvenes (<25 años) pagan más. Buen historial de siniestralidad reduce tarifa 5-20%.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🔍 ITV" data-en="🔍 ITV">🔍 ITV</h3>
+                <p data-es="Primeros 4 años: GRATIS (algunos casos). 4-10 años: cada 2 años (~45€). Más de 10 años: anualmente (~50€). Fallos = revisión adicional. Coches antiguos pueden requerir ITV diaria en 15 días consecutivos." data-en="First 4 years: FREE (in some cases). 4-10 years: every 2 years (~45€). Over 10 years: annually (~50€). Failures = additional inspection. Old cars may require daily ITV for 15 consecutive days.">Primeros 4 años: GRATIS (algunos casos). 4-10 años: cada 2 años (~45€). Más de 10 años: anualmente (~50€). Fallos = revisión adicional. Coches antiguos pueden requerir ITV diaria en 15 días consecutivos.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="📋 IVTM (Impuesto circulación)" data-en="📋 IVTM (Tax)">📋 IVTM (Impuesto circulación)</h3>
+                <p data-es="Variable por municipio y cilindrada del motor. Rango: 50-300€/año. Madrid típicamente 120-150€; Barcelona 100-180€. Algunos municipios ofrecen bonificaciones por vehículos eléctricos (0-20%) o antiguos." data-en="Varies by municipality and engine cc. Range: 50-300€/year. Madrid typically 120-150€; Barcelona 100-180€. Some municipalities offer discounts for electric vehicles (0-20%) or older cars.">Variable por municipio y cilindrada del motor. Rango: 50-300€/año. Madrid típicamente 120-150€; Barcelona 100-180€. Algunos municipios ofrecen bonificaciones por vehículos eléctricos (0-20%) o antiguos.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🔧 Mantenimiento" data-en="🔧 Maintenance">🔧 Mantenimiento</h3>
+                <p data-es="Revisión anual: 150-250€. Neumáticos (4 ruedas): ~400€ cada 3-4 años. Filtro aire: 30-60€. Pastillas freno: 100-200€. Cambio aceite: 40-100€. Baterías: 150-300€. Total anual estimado: 300-500€." data-en="Annual service: 150-250€. Tires (4 wheels): ~400€ every 3-4 years. Air filter: 30-60€. Brake pads: 100-200€. Oil change: 40-100€. Batteries: 150-300€. Estimated annual total: 300-500€.">Revisión anual: 150-250€. Neumáticos (4 ruedas): ~400€ cada 3-4 años. Filtro aire: 30-60€. Pastillas freno: 100-200€. Cambio aceite: 40-100€. Baterías: 150-300€. Total anual estimado: 300-500€.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="📉 Depreciación (coste oculto)" data-en="📉 Depreciation (hidden cost)">📉 Depreciación (coste oculto)</h3>
+                <p data-es="Un vehículo NUEVO pierde: 15-20% de valor en año 1, ~10% años 2-5, ~5-8% años 6-10. Un coche de 25.000€ pierde 4.000-5.000€ año 1. Este es el MAYOR coste oculto de tener coche nuevo. Coches de 3-5 años son más eficientes en valor." data-en="A NEW vehicle loses: 15-20% value in year 1, ~10% years 2-5, ~5-8% years 6-10. A 25,000€ car loses 4,000-5,000€ year 1. This is the LARGEST hidden cost of owning a new car. 3-5 year old cars are more value-efficient.">Un vehículo NUEVO pierde: 15-20% de valor en año 1, ~10% años 2-5, ~5-8% años 6-10. Un coche de 25.000€ pierde 4.000-5.000€ año 1. Este es el MAYOR coste oculto de tener coche nuevo. Coches de 3-5 años son más eficientes en valor.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="guide-section">
+        <h2 data-es="Comparativa de tipos de vehículos" data-en="Comparison of vehicle types">Comparativa de tipos de vehículos</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Tipo vehículo" data-en="Vehicle type">Tipo vehículo</th>
+                    <th data-es="Consumo" data-en="Consumption">Consumo</th>
+                    <th data-es="Seguro anual" data-en="Annual insurance">Seguro anual</th>
+                    <th data-es="Mantenimiento" data-en="Maintenance">Mantenimiento</th>
+                    <th data-es="IVTM aprox." data-en="IVTM approx.">IVTM aprox.</th>
+                    <th data-es="Coste anual (15.000km)" data-en="Annual cost (15,000km)">Coste anual (15.000km)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="Coche pequeño (Gasolina)" data-en="Small car (Gasoline)">Coche pequeño (Gasolina)</td>
+                    <td>5.0-5.5 L/100km</td>
+                    <td>450€</td>
+                    <td>300€</td>
+                    <td>80€</td>
+                    <td class="amount">3.900€</td>
+                </tr>
+                <tr>
+                    <td data-es="Coche medio (Gasolina)" data-en="Mid-size car (Gasoline)">Coche medio (Gasolina)</td>
+                    <td>6.5-7.0 L/100km</td>
+                    <td>550€</td>
+                    <td>400€</td>
+                    <td>120€</td>
+                    <td class="amount">5.200€</td>
+                </tr>
+                <tr>
+                    <td data-es="Coche medio (Diésel)" data-en="Mid-size car (Diesel)">Coche medio (Diésel)</td>
+                    <td>5.0-5.5 L/100km</td>
+                    <td>600€</td>
+                    <td>500€</td>
+                    <td>100€</td>
+                    <td class="amount">4.900€</td>
+                </tr>
+                <tr>
+                    <td data-es="SUV/Break (Diésel)" data-en="SUV/Estate (Diesel)">SUV/Break (Diésel)</td>
+                    <td>6.5-7.5 L/100km</td>
+                    <td>700€</td>
+                    <td>600€</td>
+                    <td>150€</td>
+                    <td class="amount">6.800€</td>
+                </tr>
+                <tr>
+                    <td data-es="Coche eléctrico (EV)" data-en="Electric car (EV)">Coche eléctrico (EV)</td>
+                    <td>~0 L; 15-18 kWh/100km</td>
+                    <td>400€</td>
+                    <td>150€</td>
+                    <td>0€ (bonificación)</td>
+                    <td class="amount">2.500€</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function formatDecimal(value) {
+        return parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function calculateCarCost() {
+        const annualKm = parseFloat(document.getElementById('annualKm').value) || 0;
+        const consumption = parseFloat(document.getElementById('consumption').value) / 100 || 0;
+        const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
+        const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+        const itv = parseFloat(document.getElementById('itv').value) || 0;
+        const ivtm = parseFloat(document.getElementById('ivtm').value) || 0;
+        const maintenance = parseFloat(document.getElementById('maintenance').value) || 0;
+        const parking = parseFloat(document.getElementById('parking').value) * 12 || 0;
+        const depreciation = parseFloat(document.getElementById('depreciation').value) || 0;
+
+        // Calculate fuel cost
+        const litersPerYear = annualKm * consumption;
+        const fuelCostValue = litersPerYear * fuelPrice;
+
+        // Total annual cost
+        const totalAnnual = fuelCostValue + insurance + itv + ivtm + maintenance + parking + depreciation;
+        const monthlyCost = totalAnnual / 12;
+        const costPerKm = totalAnnual / annualKm;
+
+        // Update results
+        document.getElementById('annualCost').textContent = formatCurrency(totalAnnual);
+        document.getElementById('monthlyCost').textContent = formatCurrency(monthlyCost);
+        document.getElementById('costPerKm').textContent = '€' + formatDecimal(costPerKm);
+
+        // Update breakdown
+        const costs = {
+            fuel: fuelCostValue,
+            insurance: insurance,
+            maintenance: maintenance,
+            parking: parking,
+            ivtm: ivtm,
+            itv: itv,
+            depreciation: depreciation
+        };
+
+        const maxValue = Math.max(...Object.values(costs));
+
+        document.getElementById('fuelCost').textContent = formatCurrency(fuelCostValue);
+        document.getElementById('fuelBar').style.width = (fuelCostValue / maxValue * 100) + '%';
+
+        document.getElementById('insuranceCost').textContent = formatCurrency(insurance);
+        document.getElementById('insuranceBar').style.width = (insurance / maxValue * 100) + '%';
+
+        document.getElementById('maintenanceCost').textContent = formatCurrency(maintenance);
+        document.getElementById('maintenanceBar').style.width = (maintenance / maxValue * 100) + '%';
+
+        document.getElementById('parkingCost').textContent = formatCurrency(parking);
+        document.getElementById('parkingBar').style.width = (parking / maxValue * 100) + '%';
+
+        document.getElementById('ivtmCost').textContent = formatCurrency(ivtm);
+        document.getElementById('ivtmBar').style.width = (ivtm / maxValue * 100) + '%';
+
+        document.getElementById('itvCost').textContent = formatCurrency(itv);
+        document.getElementById('itvBar').style.width = (itv / maxValue * 100) + '%';
+
+        document.getElementById('depreciationCost').textContent = formatCurrency(depreciation);
+        document.getElementById('depreciationBar').style.width = (depreciation / maxValue * 100) + '%';
+
+        document.getElementById('result').style.display = 'block';
+    }
+
+    // Trigger calculation on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculateCarCost();
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
