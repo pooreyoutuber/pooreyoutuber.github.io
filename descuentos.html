@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Descuentos 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .modes-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--primary);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .calc-section {
+            display: none;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-savings {
+            font-size: 0.9rem;
+            color: var(--success);
+            margin-top: 0.5rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        .reference-table th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .reference-table th:first-child {
+            text-align: left;
+        }
+
+        .reference-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+            text-align: right;
+        }
+
+        .reference-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .reference-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .reference-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .discount-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .timeline-item {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+        }
+
+        .timeline-date {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-text {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .fake-discount-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid var(--danger);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .fake-discount-box h3 {
+            color: #991b1b;
+            margin-bottom: 0.5rem;
+        }
+
+        .fake-discount-box p {
+            color: #dc2626;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .modes-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reference-table {
+                font-size: 0.75rem;
+            }
+
+            .reference-table td,
+            .reference-table th {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🏷️ CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Descuentos 2026" data-en="Discount Calculator 2026">Calculadora de Descuentos 2026</h1>
+    <p class="subtitle" data-es="4 modos · Precio final · % Ahorro · Descuentos acumulados" data-en="4 modes · Final price · % Savings · Accumulated discounts">4 modos · Precio final · % Ahorro · Descuentos acumulados</p>
+
+    <!-- Mode Navigation -->
+    <div class="modes-nav">
+        <button class="mode-btn active" onclick="switchMode('mode1')" data-es="🏷️ Precio Final" data-en="🏷️ Final Price">🏷️ Precio Final</button>
+        <button class="mode-btn" onclick="switchMode('mode2')" data-es="📊 % de Ahorro" data-en="📊 % Savings">📊 % de Ahorro</button>
+        <button class="mode-btn" onclick="switchMode('mode3')" data-es="🔍 Precio Original" data-en="🔍 Original Price">🔍 Precio Original</button>
+        <button class="mode-btn" onclick="switchMode('mode4')" data-es="➕ Descuentos Acumulados" data-en="➕ Accumulated Discounts">➕ Descuentos Acumulados</button>
+    </div>
+
+    <!-- Mode 1: Final Price -->
+    <div class="card calc-section active" id="mode1">
+        <h2 data-es="🏷️ Precio original y descuento" data-en="🏷️ Original price and discount">🏷️ Precio original y descuento</h2>
+
+        <div class="form-group">
+            <label data-es="Precio original" data-en="Original price">Precio original</label>
+            <input type="number" id="mode1_original" placeholder="120" step="0.01" min="0" value="120">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Porcentaje de descuento" data-en="Discount percentage">Porcentaje de descuento</label>
+            <input type="number" id="mode1_discount" placeholder="30" step="0.1" min="0" max="100" value="30">
+        </div>
+
+        <button class="btn" onclick="calculateMode1()" data-es="🏷️ Calcular precio final" data-en="🏷️ Calculate final price">🏷️ Calcular precio final</button>
+
+        <div id="mode1-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Precio final" data-en="Final price">Precio final</div>
+                    <div class="result-value" id="mode1_final">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Ahorro" data-en="Savings">Ahorro</div>
+                    <div class="result-value" id="mode1_savings">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 2: Savings Percentage -->
+    <div class="card calc-section" id="mode2">
+        <h2 data-es="📊 Precio original y precio final" data-en="📊 Original and final price">📊 Precio original y precio final</h2>
+
+        <div class="form-group">
+            <label data-es="Precio original (antes)" data-en="Original price (before)">Precio original (antes)</label>
+            <input type="number" id="mode2_original" placeholder="150" step="0.01" min="0" value="150">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Precio con descuento (ahora)" data-en="Price with discount (now)">Precio con descuento (ahora)</label>
+            <input type="number" id="mode2_final" placeholder="90" step="0.01" min="0" value="90">
+        </div>
+
+        <button class="btn" onclick="calculateMode2()" data-es="📊 Calcular % de ahorro" data-en="📊 Calculate savings %">📊 Calcular % de ahorro</button>
+
+        <div id="mode2-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Descuento" data-en="Discount">Descuento</div>
+                    <div class="result-value" id="mode2_discount">0%</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Ahorro en €" data-en="Savings in €">Ahorro en €</div>
+                    <div class="result-value" id="mode2_savings">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 3: Original Price -->
+    <div class="card calc-section" id="mode3">
+        <h2 data-es="🔍 Precio que pagas y descuento aplicado" data-en="🔍 Price paid and discount applied">🔍 Precio que pagas y descuento aplicado</h2>
+
+        <div class="form-group">
+            <label data-es="Precio que pagas (con descuento)" data-en="Price you pay (with discount)">Precio que pagas (con descuento)</label>
+            <input type="number" id="mode3_final" placeholder="75" step="0.01" min="0" value="75">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Descuento aplicado" data-en="Discount applied">Descuento aplicado</label>
+            <input type="number" id="mode3_discount" placeholder="25" step="0.1" min="0" max="100" value="25">
+        </div>
+
+        <button class="btn" onclick="calculateMode3()" data-es="🔍 Calcular precio original" data-en="🔍 Calculate original price">🔍 Calcular precio original</button>
+
+        <div id="mode3-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Precio original" data-en="Original price">Precio original</div>
+                    <div class="result-value" id="mode3_original">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Ahorro" data-en="Savings">Ahorro</div>
+                    <div class="result-value" id="mode3_savings">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 4: Accumulated Discounts -->
+    <div class="card calc-section" id="mode4">
+        <h2 data-es="➕ Precio y hasta 3 descuentos" data-en="➕ Price and up to 3 discounts">➕ Precio y hasta 3 descuentos</h2>
+
+        <div class="form-group">
+            <label data-es="Precio original" data-en="Original price">Precio original</label>
+            <input type="number" id="mode4_original" placeholder="100" step="0.01" min="0" value="100">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Descuento 1" data-en="Discount 1">Descuento 1</label>
+            <input type="number" id="mode4_discount1" placeholder="30" step="0.1" min="0" max="100" value="30">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Descuento 2 — opcional" data-en="Discount 2 — optional">Descuento 2 — opcional</label>
+            <input type="number" id="mode4_discount2" placeholder="20" step="0.1" min="0" max="100" value="20">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Descuento 3 — opcional" data-en="Discount 3 — optional">Descuento 3 — opcional</label>
+            <input type="number" id="mode4_discount3" placeholder="10" step="0.1" min="0" max="100" value="10">
+        </div>
+
+        <button class="btn" onclick="calculateMode4()" data-es="➕ Calcular descuento real" data-en="➕ Calculate real discount">➕ Calcular descuento real</button>
+
+        <div id="mode4-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Precio final" data-en="Final price">Precio final</div>
+                    <div class="result-value" id="mode4_final">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Descuento total real" data-en="Real total discount">Descuento total real</div>
+                    <div class="result-value" id="mode4_total_discount">0%</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Ahorro total" data-en="Total savings">Ahorro total</div>
+                    <div class="result-value" id="mode4_savings">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Table -->
+    <div class="card">
+        <h2 data-es="📋 Tabla de referencia rápida" data-en="📋 Quick reference table">📋 Tabla de referencia rápida — <span data-es="Precios con descuento más comunes" data-en="Most common discounted prices">Precios con descuento más comunes</span></h2>
+
+        <table class="reference-table">
+            <thead>
+                <tr>
+                    <th data-es="Precio" data-en="Price">Precio</th>
+                    <th data-es="−10%" data-en="−10%">−10%</th>
+                    <th data-es="−20%" data-en="−20%">−20%</th>
+                    <th data-es="−25%" data-en="−25%">−25%</th>
+                    <th data-es="−30%" data-en="−30%">−30%</th>
+                    <th data-es="−40%" data-en="−40%">−40%</th>
+                    <th data-es="−50%" data-en="−50%">−50%</th>
+                    <th data-es="−70%" data-en="−70%">−70%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>€10</td>
+                    <td>€9,00</td>
+                    <td>€8,00</td>
+                    <td>€7,50</td>
+                    <td>€7,00</td>
+                    <td>€6,00</td>
+                    <td>€5,00</td>
+                    <td>€3,00</td>
+                </tr>
+                <tr>
+                    <td>€20</td>
+                    <td>€18,00</td>
+                    <td>€16,00</td>
+                    <td>€15,00</td>
+                    <td>€14,00</td>
+                    <td>€12,00</td>
+                    <td>€10,00</td>
+                    <td>€6,00</td>
+                </tr>
+                <tr>
+                    <td>€50</td>
+                    <td>€45,00</td>
+                    <td>€40,00</td>
+                    <td>€37,50</td>
+                    <td>€35,00</td>
+                    <td>€30,00</td>
+                    <td>€25,00</td>
+                    <td>€15,00</td>
+                </tr>
+                <tr>
+                    <td>€100</td>
+                    <td>€90,00</td>
+                    <td>€80,00</td>
+                    <td>€75,00</td>
+                    <td>€70,00</td>
+                    <td>€60,00</td>
+                    <td>€50,00</td>
+                    <td>€30,00</td>
+                </tr>
+                <tr>
+                    <td>€150</td>
+                    <td>€135,00</td>
+                    <td>€120,00</td>
+                    <td>€112,50</td>
+                    <td>€105,00</td>
+                    <td>€90,00</td>
+                    <td>€75,00</td>
+                    <td>€45,00</td>
+                </tr>
+                <tr>
+                    <td>€200</td>
+                    <td>€180,00</td>
+                    <td>€160,00</td>
+                    <td>€150,00</td>
+                    <td>€140,00</td>
+                    <td>€120,00</td>
+                    <td>€100,00</td>
+                    <td>€60,00</td>
+                </tr>
+                <tr>
+                    <td>€300</td>
+                    <td>€270,00</td>
+                    <td>€240,00</td>
+                    <td>€225,00</td>
+                    <td>€210,00</td>
+                    <td>€180,00</td>
+                    <td>€150,00</td>
+                    <td>€90,00</td>
+                </tr>
+                <tr>
+                    <td>€500</td>
+                    <td>€450,00</td>
+                    <td>€400,00</td>
+                    <td>€375,00</td>
+                    <td>€350,00</td>
+                    <td>€300,00</td>
+                    <td>€250,00</td>
+                    <td>€150,00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="🧮 Cómo calcular descuentos paso a paso" data-en="🧮 How to calculate discounts step by step">🧮 Cómo calcular descuentos paso a paso</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="1️⃣ Precio Final (Modo 1)" data-en="1️⃣ Final Price (Mode 1)">1️⃣ Precio Final (Modo 1)</h3>
+                <p data-es="Fórmula: Precio final = Precio original × (1 − descuento/100)" data-en="Formula: Final price = Original price × (1 − discount/100)">Fórmula: Precio final = Precio original × (1 − descuento/100)</p>
+                <p data-es="Ejemplo: artículo de 120€ con 30% descuento → 120 × (1 − 0,30) = 120 × 0,70 = 84€. Ahorro: 120 − 84 = 36€." data-en="Example: 120€ item with 30% discount → 120 × (1 − 0.30) = 120 × 0.70 = 84€. Savings: 120 − 84 = 36€.">Ejemplo: artículo de 120€ con 30% descuento → 120 × (1 − 0,30) = 120 × 0,70 = 84€. Ahorro: 120 − 84 = 36€.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="2️⃣ % de Descuento (Modo 2)" data-en="2️⃣ Discount % (Mode 2)">2️⃣ % de Descuento (Modo 2)</h3>
+                <p data-es="Fórmula: % descuento = ((Precio original − Precio final) / Precio original) × 100" data-en="Formula: % discount = ((Original price − Final price) / Original price) × 100">Fórmula: % descuento = ((Precio original − Precio final) / Precio original) × 100</p>
+                <p data-es="Ejemplo: artículo que pasó de 150€ a 90€ → ((150 − 90) / 150) × 100 = (60 / 150) × 100 = 40% descuento." data-en="Example: item that went from 150€ to 90€ → ((150 − 90) / 150) × 100 = (60 / 150) × 100 = 40% discount.">Ejemplo: artículo que pasó de 150€ a 90€ → ((150 − 90) / 150) × 100 = (60 / 150) × 100 = 40% descuento.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="3️⃣ Precio Original (Modo 3)" data-en="3️⃣ Original Price (Mode 3)">3️⃣ Precio Original (Modo 3)</h3>
+                <p data-es="Fórmula: Precio original = Precio final / (1 − descuento/100)" data-en="Formula: Original price = Final price / (1 − discount/100)">Fórmula: Precio original = Precio final / (1 − descuento/100)</p>
+                <p data-es="Ejemplo: pagas 75€ con 25% descuento → 75 / (1 − 0,25) = 75 / 0,75 = 100€ precio original." data-en="Example: you pay 75€ with 25% discount → 75 / (1 − 0.25) = 75 / 0.75 = 100€ original price.">Ejemplo: pagas 75€ con 25% descuento → 75 / (1 − 0,25) = 75 / 0,75 = 100€ precio original.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="4️⃣ Descuentos Acumulados (Modo 4)" data-en="4️⃣ Accumulated Discounts (Mode 4)">4️⃣ Descuentos Acumulados (Modo 4)</h3>
+                <p data-es="Error común: 30% + 20% ≠ 50%. Los descuentos se MULTIPLICAN, no se suman." data-en="Common mistake: 30% + 20% ≠ 50%. Discounts MULTIPLY, not add.">Error común: 30% + 20% ≠ 50%. Los descuentos se MULTIPLICAN, no se suman.</p>
+                <p data-es="Correcto: (1−0,30) × (1−0,20) = 0,70 × 0,80 = 0,56 → precio final 56% del original → 44% descuento real, no 50%." data-en="Correct: (1−0.30) × (1−0.20) = 0.70 × 0.80 = 0.56 → final price 56% of original → 44% real discount, not 50%.">Correcto: (1−0,30) × (1−0,20) = 0,70 × 0,80 = 0,56 → precio final 56% del original → 44% descuento real, no 50%.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Calendar -->
+    <div class="guide-section">
+        <h2 data-es="📅 Las mejores épocas de rebajas en España" data-en="📅 Best sales periods in Spain">📅 Las mejores épocas de rebajas en España</h2>
+
+        <div class="discount-timeline">
+            <div class="timeline-item">
+                <div class="timeline-date" data-es="7 de enero — Rebajas de enero" data-en="January 7 — January Sales">7 de enero — Rebajas de enero</div>
+                <div class="timeline-text" data-es="Comienzan tras Reyes. Descuentos típicos 30-70% en moda, electrodomésticos y decoración. Primeras 2 semanas: mejor surtido." data-en="Starts after Epiphany. Typical discounts 30-70% on fashion, appliances, decoration. First 2 weeks: best stock.">Comienzan tras Reyes. Descuentos típicos 30-70% en moda, electrodomésticos y decoración. Primeras 2 semanas: mejor surtido.</div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date" data-es="Julio — Rebajas de verano" data-en="July — Summer Sales">Julio — Rebajas de verano</div>
+                <div class="timeline-text" data-es="Patrón similar a enero. Aprovecha primera semana para mejores artículos. Descuentos acumulativos en últimas semanas." data-en="Similar pattern to January. Use first week for best items. Cumulative discounts in final weeks.">Patrón similar a enero. Aprovecha primera semana para mejores artículos. Descuentos acumulativos en últimas semanas.</div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date" data-es="27 de noviembre — Black Friday 2026" data-en="November 27 — Black Friday 2026">27 de noviembre — Black Friday 2026</div>
+                <div class="timeline-text" data-es="Último viernes de noviembre. Mayor volumen de compras online. Compara precios con 30 días de antelación (usa Keepa o CamelCamelCamel)." data-en="Last Friday of November. Largest online shopping day. Compare prices 30 days ahead (use Keepa or CamelCamelCamel).">Último viernes de noviembre. Mayor volumen de compras online. Compara precios con 30 días de antelación (usa Keepa o CamelCamelCamel).</div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date" data-es="30 de noviembre — Cyber Monday" data-en="November 30 — Cyber Monday">30 de noviembre — Cyber Monday</div>
+                <div class="timeline-text" data-es="Lunes siguiente a Black Friday. Descuentos especiales en tecnología y artículos digitales. Oportunidades en electrónica." data-en="Monday after Black Friday. Special discounts on tech and digital items. Electronics opportunities.">Lunes siguiente a Black Friday. Descuentos especiales en tecnología y artículos digitales. Oportunidades en electrónica.</div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date" data-es="11.11 — Prime Day / Singles Day" data-en="11.11 — Prime Day / Singles Day">11.11 — Prime Day / Singles Day</div>
+                <div class="timeline-text" data-es="Ofertas en Amazon, AliExpress. Muy competitivas en electrónica y gadgets. Mejor para compras tecnológicas." data-en="Offers on Amazon, AliExpress. Highly competitive in electronics and gadgets. Best for tech purchases.">Ofertas en Amazon, AliExpress. Muy competitivas en electrónica y gadgets. Mejor para compras tecnológicas.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fake Discount Detection -->
+    <div class="card">
+        <div class="fake-discount-box">
+            <h3 data-es="🚨 ¿Cómo detectar un descuento falso?" data-en="🚨 How to detect a fake discount?">🚨 ¿Cómo detectar un descuento falso?</h3>
+            <p data-es="La Ley de Ordenación del Comercio Minorista en España exige que el precio de referencia ('precio tachado') sea el precio más bajo aplicado en los 30 días anteriores a la promoción." data-en="Spain's Retail Trade Law requires that the reference price ('crossed-out price') be the lowest price applied in the 30 days before the promotion.">La Ley de Ordenación del Comercio Minorista en España exige que el precio de referencia ('precio tachado') sea el precio más bajo aplicado en los 30 días anteriores a la promoción.</p>
+            <p data-es="🚩 <strong>Señal de alerta:</strong> Si el precio 'original' fue inflado artificialmente justo antes de la promoción, el descuento anunciado es ENGAÑOSO." data-en="🚩 <strong>Red flag:</strong> If the 'original' price was artificially inflated just before the promotion, the announced discount is DECEPTIVE.">🚩 <strong>Señal de alerta:</strong> Si el precio 'original' fue inflado artificialmente justo antes de la promoción, el descuento anunciado es ENGAÑOSO.</p>
+            <p data-es="<strong>Herramientas para verificar:</strong> Keepa (Amazon) o CamelCamelCamel permiten ver el historial de precios de un producto." data-en="<strong>Verification tools:</strong> Keepa (Amazon) or CamelCamelCamel let you see a product's price history."><strong>Herramientas para verificar:</strong> Keepa (Amazon) o CamelCamelCamel permiten ver el historial de precios de un producto.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchMode(mode) {
+        document.querySelectorAll('.calc-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(mode).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function calculateMode1() {
+        const original = parseFloat(document.getElementById('mode1_original').value) || 0;
+        const discount = parseFloat(document.getElementById('mode1_discount').value) / 100 || 0;
+
+        const final = original * (1 - discount);
+        const savings = original - final;
+
+        document.getElementById('mode1_final').textContent = formatCurrency(final);
+        document.getElementById('mode1_savings').textContent = formatCurrency(savings);
+        document.getElementById('mode1-result').style.display = 'block';
+    }
+
+    function calculateMode2() {
+        const original = parseFloat(document.getElementById('mode2_original').value) || 0;
+        const final = parseFloat(document.getElementById('mode2_final').value) || 0;
+
+        if (original === 0) return;
+
+        const discount = ((original - final) / original) * 100;
+        const savings = original - final;
+
+        document.getElementById('mode2_discount').textContent = discount.toFixed(1) + '%';
+        document.getElementById('mode2_savings').textContent = formatCurrency(savings);
+        document.getElementById('mode2-result').style.display = 'block';
+    }
+
+    function calculateMode3() {
+        const final = parseFloat(document.getElementById('mode3_final').value) || 0;
+        const discount = parseFloat(document.getElementById('mode3_discount').value) / 100 || 0;
+
+        const original = final / (1 - discount);
+        const savings = original - final;
+
+        document.getElementById('mode3_original').textContent = formatCurrency(original);
+        document.getElementById('mode3_savings').textContent = formatCurrency(savings);
+        document.getElementById('mode3-result').style.display = 'block';
+    }
+
+    function calculateMode4() {
+        const original = parseFloat(document.getElementById('mode4_original').value) || 0;
+        const discount1 = parseFloat(document.getElementById('mode4_discount1').value) / 100 || 0;
+        const discount2 = parseFloat(document.getElementById('mode4_discount2').value) / 100 || 0;
+        const discount3 = parseFloat(document.getElementById('mode4_discount3').value) / 100 || 0;
+
+        // Accumulated discounts multiply
+        const finalMultiplier = (1 - discount1) * (1 - discount2) * (1 - discount3);
+        const final = original * finalMultiplier;
+        const totalDiscount = (1 - finalMultiplier) * 100;
+        const savings = original - final;
+
+        document.getElementById('mode4_final').textContent = formatCurrency(final);
+        document.getElementById('mode4_total_discount').textContent = totalDiscount.toFixed(1) + '%';
+        document.getElementById('mode4_savings').textContent = formatCurrency(savings);
+        document.getElementById('mode4-result').style.display = 'block';
+    }
+
+    // Trigger calculations on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const section = input.closest('.calc-section');
+                    if (section.id === 'mode1') calculateMode1();
+                    else if (section.id === 'mode2') calculateMode2();
+                    else if (section.id === 'mode3') calculateMode3();
+                    else if (section.id === 'mode4') calculateMode4();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
