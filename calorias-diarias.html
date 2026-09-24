@@ -5,350 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Calorías Diarias 2026</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #6366f1;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            --primary: #6366f1; --bg: #f8fafc; --card-bg: #ffffff;
+            --text-dark: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        header {
-            background: var(--card-bg);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .lang-toggle {
-            background: none;
-            border: 2px solid var(--border);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-dark);
-            transition: all 0.3s;
-        }
-
-        .lang-toggle.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            color: var(--text-light);
-            margin-bottom: 2rem;
-            font-size: 1rem;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-        }
-
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-dark);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.95rem;
-        }
-
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: var(--card-bg);
-            color: var(--text-dark);
-            transition: border 0.3s;
-        }
-
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .radio-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 600;
-            background: white;
-            transition: all 0.3s;
-        }
-
-        .radio-btn input {
-            display: none;
-        }
-
-        .radio-btn.selected {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
-        }
-
-        .result-box {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-left: 4px solid var(--primary);
-            padding: 2rem;
-            border-radius: 8px;
-            margin-top: 1.5rem;
-        }
-
-        .result-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .result-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.3rem;
-        }
-
-        .result-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .macros-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .macro-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-            border-top: 3px solid var(--primary);
-        }
-
-        .macro-label {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-        }
-
-        .macro-val {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--text-dark);
-            margin-top: 0.2rem;
-        }
-
-        .info-box {
-            background: #fef3c7;
-            border-left: 4px solid var(--warning);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-
-        .info-box h3 {
-            margin-bottom: 0.5rem;
-            color: #92400e;
-        }
-
-        .info-box p {
-            color: #b45309;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 0.5rem;
-        }
-
-        .guide-section {
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 2px solid var(--border);
-        }
-
-        .guide-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-dark);
-        }
-
-        .guide-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .guide-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .guide-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .guide-card p {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            line-height: 1.8;
-            margin-bottom: 0.8rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            font-size: 0.9rem;
-        }
-
-        th {
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            color: white;
-            padding: 0.9rem;
-            text-align: left;
-            font-weight: 700;
-        }
-
-        td {
-            padding: 0.9rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-dark);
-        }
-
-        tr:nth-child(even) {
-            background: #f8fafc;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+        header { background: var(--card-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--text-dark); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-dark); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border 0.3s; }
+        input[type="number"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .radio-group { display: flex; gap: 1rem; }
+        .radio-btn { flex: 1; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; background: white; transition: all 0.3s; }
+        .radio-btn input { display: none; }
+        .radio-btn.selected { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3); }
+        .result-box { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 4px solid var(--primary); padding: 2rem; border-radius: 8px; margin-top: 1.5rem; }
+        .result-header { text-align: center; margin-bottom: 1.5rem; }
+        .result-label { font-size: 0.9rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+        .result-value { font-size: 2.2rem; font-weight: 700; color: var(--primary); }
+        .macros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+        .macro-item { background: white; padding: 1rem; border-radius: 8px; text-align: center; border-top: 3px solid var(--primary); }
+        .macro-label { font-size: 0.8rem; color: var(--text-light); text-transform: uppercase; }
+        .macro-val { font-weight: 700; font-size: 1.1rem; color: var(--text-dark); margin-top: 0.2rem; }
+        .info-box { background: #fef3c7; border-left: 4px solid var(--warning); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box h3 { margin-bottom: 0.5rem; color: #92400e; }
+        .info-box p { color: #b45309; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.5rem; }
+        .guide-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+        .guide-section h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-dark); }
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .guide-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); }
+        .guide-card h3 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary); }
+        .guide-card p { font-size: 0.9rem; color: var(--text-light); line-height: 1.8; margin-bottom: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; margin: 2rem 0; background: var(--card-bg); border-radius: 8px; overflow: hidden; font-size: 0.9rem; }
+        th { background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; padding: 0.9rem; text-align: left; font-weight: 700; }
+        td { padding: 0.9rem; border-bottom: 1px solid var(--border); color: var(--text-dark); }
+        tr:nth-child(even) { background: #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+        .text-section p { margin-bottom: 1rem; }
+        .text-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            .macros-grid {
-                grid-template-columns: 1fr;
-            }
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .macros-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -363,7 +79,7 @@
 
 <div class="container">
     <h1 data-es="Calculadora de Calorías Diarias 2026" data-en="Daily Calorie Calculator 2026">Calculadora de Calorías Diarias 2026</h1>
-    <p class="subtitle" data-es="Harris-Benedict + Mifflin-St Jeor · Macros · Distribución por comidas · Actualizada 2026" data-en="Harris-Benedict + Mifflin-St Jeor · Macros · Meal distribution · Updated 2026">Harris-Benedict + Mifflin-St Jeor · Macros · Distribución por comidas · Actualizada 2026</p>
+    <p class="subtitle" data-es="Calcula tus calorías diarias necesarias (TDEE) con las dos fórmulas científicas más precisas. Obtén tu objetivo para adelgazar, mantener o ganar masa muscular con desglose de macronutrientes y distribución por comidas." data-en="Calculate your daily calorie needs (TDEE) with the two most accurate scientific formulas. Get your goal to lose weight, maintain, or gain muscle mass with a breakdown of macronutrients and meal distribution.">Calcula tus calorías diarias necesarias (TDEE) con las dos fórmulas científicas más precisas. Obtén tu objetivo para adelgazar, mantener o ganar masa muscular con desglose de macronutrientes y distribución por comidas.</p>
 
     <div class="grid-2">
         <div class="card">
@@ -410,17 +126,18 @@
             <div class="form-group">
                 <label data-es="Objetivo" data-en="Goal">Objetivo</label>
                 <select id="goal">
-                    <option value="lose" data-es="🔻 Adelgazar (-20% kcal)" data-en="🔻 Lose weight (-20% kcal)">🔻 Adelgazar (-20% kcal)</option>
-                    <option value="maintain" selected data-es="⚖️ Mantener peso" data-en="⚖️ Maintain weight">⚖️ Mantener peso</option>
-                    <option value="gain" data-es="🔺 Ganar músculo (+15% kcal)" data-en="🔺 Gain muscle (+15% kcal)">🔺 Ganar músculo (+15% kcal)</option>
+                    <option value="lose" data-es="🔻 Adelgazar" data-en="🔻 Lose weight">🔻 Adelgazar</option>
+                    <option value="maintain" selected data-es="⚖️ Mantener" data-en="⚖️ Maintain">⚖️ Mantener</option>
+                    <option value="gain" data-es="🔺 Ganar músculo" data-en="🔺 Gain muscle">🔺 Ganar músculo</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label data-es="Fórmula de cálculo" data-en="Calculation formula">Fórmula de cálculo</label>
+                <label data-es="Fórmula" data-en="Formula">Fórmula</label>
                 <select id="formula">
                     <option value="mifflin" selected data-es="Mifflin-St Jeor (Más precisa - 1990)" data-en="Mifflin-St Jeor (Most precise - 1990)">Mifflin-St Jeor (Más precisa - 1990)</option>
                     <option value="harris" data-es="Harris-Benedict (Revisada - 1984)" data-en="Harris-Benedict (Revised - 1984)">Harris-Benedict (Revisada - 1984)</option>
+                    <option value="average" data-es="Media ambas (Mayor precisión)" data-en="Average of both (Higher precision)">Media ambas (Mayor precisión)</option>
                 </select>
             </div>
 
@@ -452,17 +169,40 @@
 
         <div>
             <div class="info-box">
-                <h3 data-es="¿Cuántas calorías necesito al día?" data-en="How many calories do I need daily?">¿Cuántas calorías necesito al día?</h3>
-                <p data-es="Tus necesidades calóricas dependen de tu Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por tu factor de actividad física (TDEE)." data-en="Your caloric needs depend on your Basal Metabolic Rate (BMR) multiplied by your physical activity factor (TDEE).">Tus necesidades calóricas dependen de tu Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por tu factor de actividad física (TDEE).</p>
+                <h3 data-es="⚠️ Atención" data-en="⚠️ Warning">⚠️ Atención</h3>
+                <p data-es="Los resultados son estimaciones orientativas con un margen de error de ±10-15%. La calorimetría indirecta es el método de referencia para mediciones precisas. Consulta con un nutricionista dietista para un plan personalizado, especialmente si tienes condiciones médicas." data-en="The results are estimates with a margin of error of ±10-15%. Indirect calorimetry is the gold standard for accurate measurements. Consult a dietitian for a personalized plan, especially if you have medical conditions.">Los resultados son estimaciones orientativas con un margen de error de ±10-15%. La calorimetría indirecta es el método de referencia para mediciones precisas. Consulta con un nutricionista dietista para un plan personalizado, especialmente si tienes condiciones médicas.</p>
+            </div>
+            
+            <div class="text-section">
+                <h3 data-es="Factores de actividad" data-en="Activity Factors">Factores de actividad</h3>
+                <p data-es="Niveles de actividad física y factores Harris-Benedict. El factor de actividad multiplica tu TMB para obtener el TDEE. Elige el que mejor describe tu vida cotidiana habitual, no un día de entrenamiento." data-en="Physical activity levels and Harris-Benedict factors. The activity factor multiplies your BMR to get your TDEE. Choose the one that best describes your usual daily life, not a training day.">Niveles de actividad física y factores Harris-Benedict. El factor de actividad multiplica tu TMB para obtener el TDEE. Elige el que mejor describe tu vida cotidiana habitual, no un día de entrenamiento.</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-es="Nivel" data-en="Level">Nivel</th>
+                            <th data-es="Descripción" data-en="Description">Descripción</th>
+                            <th data-es="Factor" data-en="Factor">Factor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-es="Sedentario" data-en="Sedentary">Sedentario</td><td data-es="Oficinista, estudiante, teletrabajo" data-en="Office worker, student, remote work">Oficinista, estudiante, teletrabajo</td><td>×1,200</td></tr>
+                        <tr><td data-es="Ligeramente activo" data-en="Lightly active">Ligeramente activo</td><td data-es="Paseos, yoga suave, trabajo de pie" data-en="Walks, gentle yoga, standing work">Paseos, yoga suave, trabajo de pie</td><td>×1,375</td></tr>
+                        <tr><td data-es="Moderadamente activo" data-en="Moderately active">Moderadamente activo</td><td data-es="Gimnasio, running, ciclismo" data-en="Gym, running, cycling">Gimnasio, running, ciclismo</td><td>×1,550</td></tr>
+                        <tr><td data-es="Muy activo" data-en="Very active">Muy activo</td><td data-es="Deportistas amateur, trabajo físico" data-en="Amateur athletes, physical work">Deportistas amateur, trabajo físico</td><td>×1,725</td></tr>
+                        <tr><td data-es="Extremadamente activo" data-en="Extremely active">Extremadamente activo</td><td data-es="Atletas de élite, albañil, agricultor" data-en="Elite athletes, bricklayer, farmer">Atletas de élite, albañil, agricultor</td><td>×1,900</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <h2 data-es="📊 Tabla de referencia: TDEE estimado (Mifflin-St Jeor, actividad moderada)" data-en="📊 Reference Table: Estimated TDEE (Mifflin-St Jeor, moderate activity)">📊 Tabla de referencia: TDEE estimado (Mifflin-St Jeor, actividad moderada)</h2>
     <table>
         <thead>
             <tr>
                 <th data-es="Perfil" data-en="Profile">Perfil</th>
-                <th data-es="TMB aprox." data-en="Approx. BMR">TMB aprox.</th>
+                <th data-es="TMB" data-en="BMR">TMB</th>
                 <th data-es="TDEE mantenimiento" data-en="Maintenance TDEE">TDEE mantenimiento</th>
                 <th data-es="Para adelgazar" data-en="To lose weight">Para adelgazar</th>
                 <th data-es="Para ganar músculo" data-en="To gain muscle">Para ganar músculo</th>
@@ -470,39 +210,90 @@
         </thead>
         <tbody>
             <tr>
+                <td data-es="Mujer 25 años, 55 kg, 163 cm" data-en="Woman 25 yrs, 55 kg, 163 cm">Mujer 25 años, 55 kg, 163 cm</td>
+                <td>1283 kcal</td><td>1988 kcal</td><td>1538 kcal</td><td>2288 kcal</td>
+            </tr>
+            <tr>
                 <td data-es="Mujer 35 años, 65 kg, 165 cm" data-en="Woman 35 yrs, 65 kg, 165 cm">Mujer 35 años, 65 kg, 165 cm</td>
-                <td>1345 kcal</td>
-                <td>2085 kcal</td>
-                <td>1635 kcal</td>
-                <td>2385 kcal</td>
+                <td>1345 kcal</td><td>2085 kcal</td><td>1635 kcal</td><td>2385 kcal</td>
+            </tr>
+            <tr>
+                <td data-es="Mujer 50 años, 70 kg, 162 cm" data-en="Woman 50 yrs, 70 kg, 162 cm">Mujer 50 años, 70 kg, 162 cm</td>
+                <td>1302 kcal</td><td>2017 kcal</td><td>1567 kcal</td><td>2317 kcal</td>
+            </tr>
+            <tr>
+                <td data-es="Hombre 25 años, 75 kg, 178 cm" data-en="Man 25 yrs, 75 kg, 178 cm">Hombre 25 años, 75 kg, 178 cm</td>
+                <td>1743 kcal</td><td>2701 kcal</td><td>2251 kcal</td><td>3001 kcal</td>
             </tr>
             <tr>
                 <td data-es="Hombre 35 años, 80 kg, 176 cm" data-en="Man 35 yrs, 80 kg, 176 cm">Hombre 35 años, 80 kg, 176 cm</td>
-                <td>1730 kcal</td>
-                <td>2682 kcal</td>
-                <td>2232 kcal</td>
-                <td>2982 kcal</td>
+                <td>1730 kcal</td><td>2682 kcal</td><td>2232 kcal</td><td>2982 kcal</td>
+            </tr>
+            <tr>
+                <td data-es="Hombre 50 años, 85 kg, 174 cm" data-en="Man 50 yrs, 85 kg, 174 cm">Hombre 50 años, 85 kg, 174 cm</td>
+                <td>1693 kcal</td><td>2623 kcal</td><td>2173 kcal</td><td>2923 kcal</td>
             </tr>
         </tbody>
     </table>
 
     <div class="guide-section">
-        <h2 data-es="Consejos para gestionar tus calorías" data-en="Tips for managing your calories">Consejos para gestionar tus calorías</h2>
+        <h2 data-es="🥗 Consejos para gestionar tus calorías con la dieta mediterránea" data-en="🥗 Tips for managing your calories with the Mediterranean diet">🥗 Consejos para gestionar tus calorías con la dieta mediterránea</h2>
         <div class="guide-grid">
             <div class="guide-card">
                 <h3 data-es="🥗 Prioriza alimentos de alta saciedad" data-en="🥗 Prioritize high satiety foods">🥗 Prioriza alimentos de alta saciedad</h3>
-                <p data-es="Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos." data-en="Proteins and fiber are more satiating than fats or simple carbs. Legumes, fish, vegetables, and eggs are perfect allies.">Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos.</p>
+                <p data-es="Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos del déficit calórico." data-en="Proteins and fiber are more satiating than fats or simple carbs. Legumes, fish, vegetables, and eggs are perfect allies for a caloric deficit.">Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos del déficit calórico.</p>
             </div>
             <div class="guide-card">
-                <h3 data-es="🫒 Grasas de calidad" data-en="🫒 Quality fats">🫒 Grasas de calidad</h3>
-                <p data-es="El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea para regular las hormonas." data-en="Extra virgin olive oil, nuts, and avocado are essential in the Mediterranean diet to regulate hormones.">El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea para regular las hormonas.</p>
+                <h3 data-es="🫒 Grasas de calidad, no pocas grasas" data-en="🫒 Quality fats, not low fats">🫒 Grasas de calidad, no pocas grasas</h3>
+                <p data-es="El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea. No los elimines: las grasas son necesarias para las hormonas y la absorción de vitaminas." data-en="Extra virgin olive oil, nuts, and avocado are essential in the Mediterranean diet. Do not eliminate them: fats are necessary for hormones and vitamin absorption.">El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea. No los elimines: las grasas son necesarias para las hormonas y la absorción de vitaminas.</p>
             </div>
             <div class="guide-card">
-                <h3 data-es="📊 Recalcula periódicamente" data-en="📊 Recalculate periodically">📊 Recalcula periódicamente</h3>
-                <p data-es="A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación para seguir progresando." data-en="As you lose or gain weight, your TDEE changes. Recalculate your caloric needs for every 3-5 kg variation.">A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación para seguir progresando.</p>
+                <h3 data-es="⏰ Respeta el ritmo horario español" data-en="⏰ Respect the Spanish schedule">⏰ Respeta el ritmo horario español</h3>
+                <p data-es="Comer la comida principal a las 14h y cenar ligero a las 21h optimiza el metabolismo. El desayuno y la merienda distribuyen la energía a lo largo del día." data-en="Eating the main meal at 2 PM and having a light dinner at 9 PM optimizes metabolism. Breakfast and snacks distribute energy throughout the day.">Comer la comida principal a las 14h y cenar ligero a las 21h optimiza el metabolismo. El desayuno y la merienda distribuyen la energía a lo largo del día.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="💪 No bajes de 1.200/1.500 kcal" data-en="💪 Do not drop below 1,200/1,500 kcal">💪 No bajes de 1.200/1.500 kcal</h3>
+                <p data-es="Los déficits extremos ralentizan el metabolismo y generan pérdida de músculo. El objetivo es mantener el máximo de músculo mientras se pierde grasa." data-en="Extreme deficits slow down the metabolism and cause muscle loss. The goal is to maintain maximum muscle while losing fat.">Los déficits extremos ralentizan el metabolismo y generan pérdida de músculo. El objetivo es mantener el máximo de músculo mientras se pierde grasa.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="📊 Recalcula cada 3-4 kg" data-en="📊 Recalculate every 3-4 kg">📊 Recalcula cada 3-4 kg</h3>
+                <p data-es="A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación de peso para seguir progresando." data-en="As you lose or gain weight, your TDEE changes. Recalculate your caloric needs for every 3-5 kg of weight variation to keep progressing.">A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación de peso para seguir progresando.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="🔄 Haz refeed semanal si estás en déficit" data-en="🔄 Do a weekly refeed if in a deficit">🔄 Haz refeed semanal si estás en déficit</h3>
+                <p data-es="Un día a la semana comiendo a nivel de mantenimiento evita que el metabolismo se adapte al déficit y ayuda a mantener los niveles hormonales." data-en="Eating at maintenance level one day a week prevents the metabolism from adapting to the deficit and helps maintain hormone levels.">Un día a la semana comiendo a nivel de mantenimiento evita que el metabolismo se adapte al déficit y ayuda a mantener los niveles hormonales.</p>
             </div>
         </div>
     </div>
+
+    <div class="text-section" style="margin-top: 3rem;">
+        <h2 data-es="¿Cuántas calorías necesito al día? Guía completa" data-en="How many calories do I need daily? Complete Guide">¿Cuántas calorías necesito al día? Guía completa</h2>
+        <p data-es="Las calorías diarias necesarias dependen de la Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por un factor que refleja tu nivel de actividad. El resultado se llama TDEE (Total Daily Energy Expenditure) o Gasto Energético Total Diario. El punto de partida de cualquier cálculo calórico es conocer tu tasa metabólica basal, que representa las calorías mínimas que tu cuerpo consume en reposo absoluto para mantener las funciones vitales." data-en="The daily calories needed depend on the Basal Metabolic Rate (BMR)—the calories your body burns at absolute rest—multiplied by a factor that reflects your activity level. The result is called TDEE (Total Daily Energy Expenditure). The starting point of any calorie calculation is knowing your basal metabolic rate, which represents the minimum calories your body consumes at absolute rest to maintain vital functions.">Las calorías diarias necesarias dependen de la Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por un factor que refleja tu nivel de actividad. El resultado se llama TDEE (Total Daily Energy Expenditure) o Gasto Energético Total Diario. El punto de partida de cualquier cálculo calórico es conocer tu tasa metabólica basal, que representa las calorías mínimas que tu cuerpo consume en reposo absoluto para mantener las funciones vitales.</p>
+
+        <h3 data-es="Fórmula Mifflin-St Jeor (1990) — La más precisa" data-en="Mifflin-St Jeor Formula (1990) — Most precise">Fórmula Mifflin-St Jeor (1990) — La más precisa</h3>
+        <p data-es="Desarrollada en 1990, es la fórmula actualmente recomendada por la Academia de Nutrición y Dietética americana por ser aproximadamente un 5% más precisa que Harris-Benedict para la población actual:" data-en="Developed in 1990, it is the formula currently recommended by the American Academy of Nutrition and Dietetics for being approximately 5% more accurate than Harris-Benedict for today's population:">Desarrollada en 1990, es la fórmula actualmente recomendada por la Academia de Nutrición y Dietética americana por ser aproximadamente un 5% más precisa que Harris-Benedict para la población actual:</p>
+        <ul>
+            <li data-es="Hombres: TMB = (10 × peso kg) + (6,25 × altura cm) − (5 × edad) + 5" data-en="Men: BMR = (10 × weight kg) + (6.25 × height cm) − (5 × age) + 5">Hombres: TMB = (10 × peso kg) + (6,25 × altura cm) − (5 × edad) + 5</li>
+            <li data-es="Mujeres: TMB = (10 × peso kg) + (6,25 × altura cm) − (5 × edad) − 161" data-en="Women: BMR = (10 × weight kg) + (6.25 × height cm) − (5 × age) − 161">Mujeres: TMB = (10 × peso kg) + (6,25 × altura cm) − (5 × edad) − 161</li>
+        </ul>
+        <br>
+        <h3 data-es="Fórmula Harris-Benedict revisada (1984)" data-en="Revised Harris-Benedict Formula (1984)">Fórmula Harris-Benedict revisada (1984)</h3>
+        <p data-es="La fórmula clásica revisada por Roza y Shizgal en 1984. Ligeramente menos precisa que Mifflin para población con sobrepeso, pero ampliamente usada en contextos clínicos:" data-en="The classic formula revised by Roza and Shizgal in 1984. Slightly less accurate than Mifflin for overweight populations, but widely used in clinical contexts:">La fórmula clásica revisada por Roza y Shizgal en 1984. Ligeramente menos precisa que Mifflin para población con sobrepeso, pero ampliamente usada en contextos clínicos:</p>
+        <ul>
+            <li data-es="Hombres: TMB = 88,362 + (13,397 × kg) + (4,799 × cm) − (5,677 × edad)" data-en="Men: BMR = 88.362 + (13.397 × kg) + (4.799 × cm) − (5.677 × age)">Hombres: TMB = 88,362 + (13,397 × kg) + (4,799 × cm) − (5,677 × edad)</li>
+            <li data-es="Mujeres: TMB = 447,593 + (9,247 × kg) + (3,098 × cm) − (4,330 × edad)" data-en="Women: BMR = 447.593 + (9.247 × kg) + (3.098 × cm) − (4.330 × age)">Mujeres: TMB = 447,593 + (9,247 × kg) + (3,098 × cm) − (4,330 × edad)</li>
+        </ul>
+        <br>
+        <h3 data-es="¿Cuántas calorías tiene un kilo de grasa?" data-en="How many calories are in a kilo of fat?">¿Cuántas calorías tiene un kilo de grasa?</h3>
+        <p data-es="Aproximadamente 7.700 kcal. Para perder 1 kg de grasa a la semana necesitarías un déficit de 1.100 kcal/día, lo que es excesivo y poco saludable. Un déficit de 500 kcal/día = pérdida de ~0,45 kg/semana es más realista y sostenible. La pérdida saludable oscila entre 0,3-0,7 kg por semana." data-en="Approximately 7,700 kcal. To lose 1 kg of fat per week you would need a deficit of 1,100 kcal/day, which is excessive and unhealthy. A deficit of 500 kcal/day = loss of ~0.45 kg/week is more realistic and sustainable. Healthy weight loss ranges between 0.3-0.7 kg per week.">Aproximadamente 7.700 kcal. Para perder 1 kg de grasa a la semana necesitarías un déficit de 1.100 kcal/día, lo que es excesivo y poco saludable. Un déficit de 500 kcal/día = pérdida de ~0,45 kg/semana es más realista y sostenible. La pérdida saludable oscila entre 0,3-0,7 kg por semana.</p>
+
+        <h3 data-es="Macronutrientes: proteínas, carbohidratos y grasas" data-en="Macronutrients: proteins, carbs, and fats">Macronutrientes: proteínas, carbohidratos y grasas</h3>
+        <p data-es="Los macronutrientes tienen distinto valor calórico: proteínas 4 kcal/g, carbohidratos 4 kcal/g, grasas 9 kcal/g. Para un adulto activo en mantenimiento, la distribución recomendada suele ser: 25-30% proteínas, 45-55% carbohidratos, 20-30% grasas. Esta distribución varía según el objetivo: quienes quieren ganar músculo suben proteínas (1,6-2,2 g/kg de peso)." data-en="Macronutrients have different caloric values: proteins 4 kcal/g, carbohydrates 4 kcal/g, fats 9 kcal/g. For an active adult in maintenance, the recommended distribution is usually: 25-30% protein, 45-55% carbohydrates, 20-30% fats. This distribution varies depending on the goal: those who want to gain muscle increase protein (1.6-2.2 g/kg of weight).">Los macronutrientes tienen distinto valor calórico: proteínas 4 kcal/g, carbohidratos 4 kcal/g, grasas 9 kcal/g. Para un adulto activo en mantenimiento, la distribución recomendada suele ser: 25-30% proteínas, 45-55% carbohidratos, 20-30% grasas. Esta distribución varía según el objetivo: quienes quieren ganar músculo suben proteínas (1,6-2,2 g/kg de peso).</p>
+
+        <h3 data-es="Necesidades calóricas por edad en España" data-en="Caloric needs by age in Spain">Necesidades calóricas por edad en España</h3>
+        <p data-es="Las necesidades calóricas disminuyen progresivamente con la edad. Un hombre de 25 años activo necesita ~2.800 kcal/día; a los 65, con la misma actividad, ~2.300 kcal/día. En mujeres: ~2.200 kcal a los 25, ~1.800 kcal a los 65. Estas cifras son orientativas y varían enormemente según la composición corporal individual." data-en="Caloric needs decrease progressively with age. An active 25-year-old man needs ~2,800 kcal/day; at 65, with the same activity, ~2,300 kcal/day. For women: ~2,200 kcal at 25, ~1,800 kcal at 65. These figures are indicative and vary enormously according to individual body composition.">Las necesidades calóricas disminuyen progresivamente con la edad. Un hombre de 25 años activo necesita ~2.800 kcal/día; a los 65, con la misma actividad, ~2.300 kcal/día. En mujeres: ~2.200 kcal a los 25, ~1.800 kcal a los 65. Estas cifras son orientativas y varían enormemente según la composición corporal individual.</p>
+    </div>
+
 </div>
 
 <script>
@@ -516,12 +307,15 @@
 
         document.querySelectorAll('[data-es][data-en]').forEach(el => {
             const text = el.getAttribute(`data-${currentLang}`);
-            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'A') {
-                el.textContent = text;
-            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
-                el.textContent = text;
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'A' || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'DIV') {
+                if(el.childNodes.length === 1 || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'LI' || el.tagName === 'OPTION' || el.tagName === 'A' || el.tagName === 'SPAN') {
+                   el.textContent = text;
+                }
             }
         });
+        
+        // Re-calculate to update the target text in the result box
+        calculateCalories();
     }
 
     function setGender(gender) {
@@ -545,18 +339,23 @@
 
         if (weight <= 0 || height <= 0 || age <= 0) return;
 
+        let bmrMifflin = (10 * weight) + (6.25 * height) - (5 * age);
+        bmrMifflin += (selectedGender === 'male') ? 5 : -161;
+
+        let bmrHarris = 0;
+        if (selectedGender === 'male') {
+            bmrHarris = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+        } else {
+            bmrHarris = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+        }
+
         let bmr = 0;
         if (formula === 'mifflin') {
-            // Mifflin-St Jeor
-            bmr = (10 * weight) + (6.25 * height) - (5 * age);
-            bmr += (selectedGender === 'male') ? 5 : -161;
+            bmr = bmrMifflin;
+        } else if (formula === 'harris') {
+            bmr = bmrHarris;
         } else {
-            // Harris-Benedict (Revised)
-            if (selectedGender === 'male') {
-                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-            } else {
-                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-            }
+            bmr = (bmrMifflin + bmrHarris) / 2;
         }
 
         const tdee = bmr * activity;
@@ -568,7 +367,6 @@
         document.getElementById('targetCalories').textContent = formatNumber(target) + ' kcal';
         document.getElementById('tdeeText').textContent = (currentLang === 'es' ? 'Gasto energético diario (TDEE): ' : 'Daily energy expenditure (TDEE): ') + formatNumber(tdee) + ' kcal';
 
-        // Macros calculation (Protein: 2g/kg, Fats: 0.9g/kg, Rest carbs)
         const proteinGrams = weight * 2;
         const fatGrams = weight * 0.9;
         const proteinKcal = proteinGrams * 4;
