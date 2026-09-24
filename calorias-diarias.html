@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Calorías Diarias 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .radio-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .radio-btn input {
+            display: none;
+        }
+
+        .radio-btn.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .macros-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .macro-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-top: 3px solid var(--primary);
+        }
+
+        .macro-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .macro-val {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-top: 0.2rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.9rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .macros-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="🍎 NutriMX" data-en="🍎 NutriMX">🍎 NutriMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Calorías Diarias 2026" data-en="Daily Calorie Calculator 2026">Calculadora de Calorías Diarias 2026</h1>
+    <p class="subtitle" data-es="Harris-Benedict + Mifflin-St Jeor · Macros · Distribución por comidas · Actualizada 2026" data-en="Harris-Benedict + Mifflin-St Jeor · Macros · Meal distribution · Updated 2026">Harris-Benedict + Mifflin-St Jeor · Macros · Distribución por comidas · Actualizada 2026</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="🍎 Introduce tus datos" data-en="🍎 Enter your details">🍎 Introduce tus datos</h2>
+
+            <div class="form-group">
+                <label data-es="Sexo" data-en="Gender">Sexo</label>
+                <div class="radio-group">
+                    <label class="radio-btn selected" onclick="setGender('male')">
+                        <input type="radio" name="gender" value="male" checked> ♂ <span data-es="Hombre" data-en="Male">Hombre</span>
+                    </label>
+                    <label class="radio-btn" onclick="setGender('female')">
+                        <input type="radio" name="gender" value="female"> ♀ <span data-es="Mujer" data-en="Female">Mujer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Peso (kg)" data-en="Weight (kg)">Peso (kg)</label>
+                <input type="number" id="weight" placeholder="75" step="0.5" min="30" max="250" value="75">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Altura (cm)" data-en="Height (cm)">Altura (cm)</label>
+                <input type="number" id="height" placeholder="175" step="1" min="100" max="230" value="175">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Edad (años)" data-en="Age (years)">Edad (años)</label>
+                <input type="number" id="age" placeholder="30" step="1" min="10" max="120" value="30">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Nivel de actividad física" data-en="Physical activity level">Nivel de actividad física</label>
+                <select id="activity">
+                    <option value="1.2" data-es="🪑 Sedentario (oficina, sin ejercicio)" data-en="🪑 Sedentary (office, no exercise)">🪑 Sedentario (oficina, sin ejercicio)</option>
+                    <option value="1.375" data-es="🚶 Ligeramente activo (1-3 días/sem)" data-en="🚶 Lightly active (1-3 days/wk)">🚶 Ligeramente activo (1-3 días/sem)</option>
+                    <option value="1.55" selected data-es="🏃 Moderadamente activo (3-5 días/sem)" data-en="🏃 Moderately active (3-5 days/wk)">🏃 Moderadamente activo (3-5 días/sem)</option>
+                    <option value="1.725" data-es="💪 Muy activo (6-7 días/sem o trabajo físico)" data-en="💪 Very active (6-7 days/wk or physical work)">💪 Muy activo (6-7 días/sem o trabajo físico)</option>
+                    <option value="1.9" data-es="🏋️ Extremadamente activo (atleta, trabajo muy físico)" data-en="🏋️ Extremely active (athlete, heavy work)">🏋️ Extremadamente activo (atleta, trabajo muy físico)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Objetivo" data-en="Goal">Objetivo</label>
+                <select id="goal">
+                    <option value="lose" data-es="🔻 Adelgazar (-20% kcal)" data-en="🔻 Lose weight (-20% kcal)">🔻 Adelgazar (-20% kcal)</option>
+                    <option value="maintain" selected data-es="⚖️ Mantener peso" data-en="⚖️ Maintain weight">⚖️ Mantener peso</option>
+                    <option value="gain" data-es="🔺 Ganar músculo (+15% kcal)" data-en="🔺 Gain muscle (+15% kcal)">🔺 Ganar músculo (+15% kcal)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Fórmula de cálculo" data-en="Calculation formula">Fórmula de cálculo</label>
+                <select id="formula">
+                    <option value="mifflin" selected data-es="Mifflin-St Jeor (Más precisa - 1990)" data-en="Mifflin-St Jeor (Most precise - 1990)">Mifflin-St Jeor (Más precisa - 1990)</option>
+                    <option value="harris" data-es="Harris-Benedict (Revisada - 1984)" data-en="Harris-Benedict (Revised - 1984)">Harris-Benedict (Revisada - 1984)</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="calculateCalories()" data-es="🍎 Calcular calorías" data-en="🍎 Calculate calories">🍎 Calcular calorías</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-header">
+                    <div class="result-label" data-es="Calorías objetivo diarias" data-en="Target daily calories">Calorías objetivo diarias</div>
+                    <div class="result-value" id="targetCalories">0 kcal</div>
+                    <div id="tdeeText" style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.4rem;"></div>
+                </div>
+
+                <div class="macros-grid">
+                    <div class="macro-item">
+                        <div class="macro-label" data-es="Proteínas" data-en="Protein">Proteínas</div>
+                        <div class="macro-val" id="proteinVal">0g</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label" data-es="Carbohidratos" data-en="Carbs">Carbohidratos</div>
+                        <div class="macro-val" id="carbsVal">0g</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label" data-es="Grasas" data-en="Fats">Grasas</div>
+                        <div class="macro-val" id="fatsVal">0g</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3 data-es="¿Cuántas calorías necesito al día?" data-en="How many calories do I need daily?">¿Cuántas calorías necesito al día?</h3>
+                <p data-es="Tus necesidades calóricas dependen de tu Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por tu factor de actividad física (TDEE)." data-en="Your caloric needs depend on your Basal Metabolic Rate (BMR) multiplied by your physical activity factor (TDEE).">Tus necesidades calóricas dependen de tu Tasa Metabólica Basal (TMB) —las calorías que tu cuerpo quema en reposo absoluto— multiplicadas por tu factor de actividad física (TDEE).</p>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th data-es="Perfil" data-en="Profile">Perfil</th>
+                <th data-es="TMB aprox." data-en="Approx. BMR">TMB aprox.</th>
+                <th data-es="TDEE mantenimiento" data-en="Maintenance TDEE">TDEE mantenimiento</th>
+                <th data-es="Para adelgazar" data-en="To lose weight">Para adelgazar</th>
+                <th data-es="Para ganar músculo" data-en="To gain muscle">Para ganar músculo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-es="Mujer 35 años, 65 kg, 165 cm" data-en="Woman 35 yrs, 65 kg, 165 cm">Mujer 35 años, 65 kg, 165 cm</td>
+                <td>1345 kcal</td>
+                <td>2085 kcal</td>
+                <td>1635 kcal</td>
+                <td>2385 kcal</td>
+            </tr>
+            <tr>
+                <td data-es="Hombre 35 años, 80 kg, 176 cm" data-en="Man 35 yrs, 80 kg, 176 cm">Hombre 35 años, 80 kg, 176 cm</td>
+                <td>1730 kcal</td>
+                <td>2682 kcal</td>
+                <td>2232 kcal</td>
+                <td>2982 kcal</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="guide-section">
+        <h2 data-es="Consejos para gestionar tus calorías" data-en="Tips for managing your calories">Consejos para gestionar tus calorías</h2>
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="🥗 Prioriza alimentos de alta saciedad" data-en="🥗 Prioritize high satiety foods">🥗 Prioriza alimentos de alta saciedad</h3>
+                <p data-es="Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos." data-en="Proteins and fiber are more satiating than fats or simple carbs. Legumes, fish, vegetables, and eggs are perfect allies.">Las proteínas y la fibra sacian más que las grasas o carbohidratos simples. Legumbres, pescado, verduras y huevos son aliados perfectos.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="🫒 Grasas de calidad" data-en="🫒 Quality fats">🫒 Grasas de calidad</h3>
+                <p data-es="El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea para regular las hormonas." data-en="Extra virgin olive oil, nuts, and avocado are essential in the Mediterranean diet to regulate hormones.">El aceite de oliva virgen extra, los frutos secos y el aguacate son esenciales en la dieta mediterránea para regular las hormonas.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="📊 Recalcula periódicamente" data-en="📊 Recalculate periodically">📊 Recalcula periódicamente</h3>
+                <p data-es="A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación para seguir progresando." data-en="As you lose or gain weight, your TDEE changes. Recalculate your caloric needs for every 3-5 kg variation.">A medida que pierdes o ganas peso, tu TDEE cambia. Recalcula tus necesidades calóricas por cada 3-5 kg de variación para seguir progresando.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+    let selectedGender = 'male';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'A') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function setGender(gender) {
+        selectedGender = gender;
+        document.querySelectorAll('.radio-btn').forEach(el => el.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        event.currentTarget.querySelector('input').checked = true;
+    }
+
+    function formatNumber(value) {
+        return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function calculateCalories() {
+        const weight = parseFloat(document.getElementById('weight').value) || 0;
+        const height = parseFloat(document.getElementById('height').value) || 0;
+        const age = parseFloat(document.getElementById('age').value) || 0;
+        const activity = parseFloat(document.getElementById('activity').value) || 1.2;
+        const goal = document.getElementById('goal').value;
+        const formula = document.getElementById('formula').value;
+
+        if (weight <= 0 || height <= 0 || age <= 0) return;
+
+        let bmr = 0;
+        if (formula === 'mifflin') {
+            // Mifflin-St Jeor
+            bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            bmr += (selectedGender === 'male') ? 5 : -161;
+        } else {
+            // Harris-Benedict (Revised)
+            if (selectedGender === 'male') {
+                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+        }
+
+        const tdee = bmr * activity;
+        let target = tdee;
+
+        if (goal === 'lose') target *= 0.8;
+        else if (goal === 'gain') target *= 1.15;
+
+        document.getElementById('targetCalories').textContent = formatNumber(target) + ' kcal';
+        document.getElementById('tdeeText').textContent = (currentLang === 'es' ? 'Gasto energético diario (TDEE): ' : 'Daily energy expenditure (TDEE): ') + formatNumber(tdee) + ' kcal';
+
+        // Macros calculation (Protein: 2g/kg, Fats: 0.9g/kg, Rest carbs)
+        const proteinGrams = weight * 2;
+        const fatGrams = weight * 0.9;
+        const proteinKcal = proteinGrams * 4;
+        const fatKcal = fatGrams * 9;
+        const carbKcal = Math.max(0, target - (proteinKcal + fatKcal));
+        const carbGrams = carbKcal / 4;
+
+        document.getElementById('proteinVal').textContent = Math.round(proteinGrams) + 'g';
+        document.getElementById('carbsVal').textContent = Math.round(carbGrams) + 'g';
+        document.getElementById('fatsVal').textContent = Math.round(fatGrams) + 'g';
+
+        document.getElementById('result').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculateCalories();
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
