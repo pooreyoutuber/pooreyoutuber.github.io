@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IMC Online 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .radio-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .radio-btn input {
+            display: none;
+        }
+
+        .radio-btn.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .quick-examples {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-classification {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.9rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="⚖️ SaludMX" data-en="⚖️ SaludMX">⚖️ SaludMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de IMC Online 2026" data-en="Online BMI Calculator 2026">Calculadora de IMC Online 2026</h1>
+    <p class="subtitle" data-es="Clasificación OMS + SEEDO · Riesgo cardiovascular · Actualizada 2026" data-en="WHO + SEEDO Classification · Cardiovascular risk · Updated 2026">Clasificación OMS + SEEDO · Riesgo cardiovascular · Actualizada 2026</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="⚖️ Introduce tus datos" data-en="⚖️ Enter your details">⚖️ Introduce tus datos</h2>
+
+            <div class="form-group">
+                <label data-es="Sexo" data-en="Gender">Sexo</label>
+                <div class="radio-group">
+                    <label class="radio-btn selected" onclick="setGender('male')">
+                        <input type="radio" name="gender" value="male" checked> ♂ <span data-es="Hombre" data-en="Male">Hombre</span>
+                    </label>
+                    <label class="radio-btn" onclick="setGender('female')">
+                        <input type="radio" name="gender" value="female"> ♀ <span data-es="Mujer" data-en="Female">Mujer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Peso (kg)" data-en="Weight (kg)">Peso (kg)</label>
+                <input type="number" id="weight" placeholder="70" step="0.5" min="20" max="300" value="70">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Altura (cm)" data-en="Height (cm)">Altura (cm)</label>
+                <input type="number" id="height" placeholder="175" step="1" min="100" max="250" value="175">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Edad (años)" data-en="Age (years)">Edad (años)</label>
+                <input type="number" id="age" placeholder="30" step="1" min="1" max="120" value="30">
+            </div>
+
+            <div class="form-group">
+                <label data-es="💚 Opcional: Perímetro de cintura (cm)" data-en="💚 Optional: Waist circumference (cm)">💚 Opcional: Perímetro de cintura (cm)</label>
+                <input type="number" id="waist" placeholder="85" step="1" min="40" max="200">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Mide por encima del ombligo, al final de una espiración normal." data-en="Measure above the navel, at the end of a normal expiration.">Mide por encima del ombligo, al final de una espiración normal.</small>
+            </div>
+
+            <button class="btn" onclick="calculateIMC()" data-es="⚖️ Calcular IMC" data-en="⚖️ Calculate BMI">⚖️ Calcular IMC</button>
+
+            <div class="quick-examples">
+                <span style="font-size: 0.85rem; color: var(--text-light); width: 100%;" data-es="Ejemplos rápidos:" data-en="Quick examples:">Ejemplos rápidos:</span>
+                <span class="chip" onclick="setExample(70, 175)">70kg / 175cm</span>
+                <span class="chip" onclick="setExample(60, 163)">60kg / 163cm</span>
+                <span class="chip" onclick="setExample(90, 178)">90kg / 178cm</span>
+                <span class="chip" onclick="setExample(55, 160)">55kg / 160cm</span>
+            </div>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-header">
+                    <div class="result-label" data-es="Tu Índice de Masa Corporal" data-en="Your Body Mass Index">Tu Índice de Masa Corporal</div>
+                    <div class="result-value" id="imcValue">0.0</div>
+                    <div id="imcBadge" class="result-classification badge-success">Normopeso</div>
+                </div>
+                <div id="waistResult" style="margin-top: 1rem; font-size: 0.95rem; text-align: center; font-weight: 600;"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3 data-es="Clasificación española (OMS + SEEDO)" data-en="Spanish classification (WHO + SEEDO)">Clasificación española (OMS + SEEDO)</h3>
+                <p data-es="La SEEDO (Sociedad Española para el Estudio de la Obesidad) añade subdivisiones al sobrepeso que la OMS no distingue, más relevantes para la práctica clínica en España." data-en="SEEDO adds subdivisions to overweight that WHO does not distinguish, more relevant for clinical practice in Spain.">La SEEDO (Sociedad Española para el Estudio de la Obesidad) añade subdivisiones al sobrepeso que la OMS no distingue, más relevantes para la práctica clínica en España.</p>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th data-es="Clasificación OMS" data-en="WHO Classification">Clasificación OMS</th>
+                <th data-es="Clasificación SEEDO (España)" data-en="SEEDO Classification (Spain)">Clasificación SEEDO (España)</th>
+                <th data-es="Rango IMC" data-en="BMI Range">Rango IMC</th>
+                <th data-es="Riesgo salud" data-en="Health Risk">Riesgo salud</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-es="Bajo peso" data-en="Underweight">Bajo peso</td>
+                <td data-es="Peso insuficiente" data-en="Insufficient weight">Peso insuficiente</td>
+                <td>&lt; 18,5</td>
+                <td data-es="Aumentado" data-en="Increased">Aumentado</td>
+            </tr>
+            <tr>
+                <td data-es="Normopeso" data-en="Normal weight">Normopeso</td>
+                <td data-es="Normopeso" data-en="Normal weight">Normopeso</td>
+                <td>18,5 – 24,9</td>
+                <td data-es="Normal" data-en="Normal">Normal</td>
+            </tr>
+            <tr>
+                <td rowspan="2" data-es="Sobrepeso" data-en="Overweight">Sobrepeso</td>
+                <td data-es="Sobrepeso grado I" data-en="Overweight grade I">Sobrepeso grado I</td>
+                <td>25,0 – 26,9</td>
+                <td data-es="Aumentado" data-en="Increased">Aumentado</td>
+            </tr>
+            <tr>
+                <td data-es="Sobrepeso grado II (preobesidad)" data-en="Overweight grade II">Sobrepeso grado II (preobesidad)</td>
+                <td>27,0 – 29,9</td>
+                <td data-es="Moderado" data-en="Moderate">Moderado</td>
+            </tr>
+            <tr>
+                <td data-es="Obesidad clase I" data-en="Obesity class I">Obesidad clase I</td>
+                <td data-es="Obesidad tipo I" data-en="Obesity type I">Obesidad tipo I</td>
+                <td>30,0 – 34,9</td>
+                <td data-es="Alto" data-en="High">Alto</td>
+            </tr>
+            <tr>
+                <td data-es="Obesidad clase II" data-en="Obesity class II">Obesidad clase II</td>
+                <td data-es="Obesidad tipo II" data-en="Obesity type II">Obesidad tipo II</td>
+                <td>35,0 – 39,9</td>
+                <td data-es="Muy alto" data-en="Very high">Muy alto</td>
+            </tr>
+            <tr>
+                <td data-es="Obesidad clase III" data-en="Obesity class III">Obesidad clase III</td>
+                <td data-es="Obesidad tipo III (mórbida)" data-en="Obesity type III (morbid)">Obesidad tipo III (mórbida)</td>
+                <td>&ge; 40,0</td>
+                <td data-es="Extremadamente alto" data-en="Extremely high">Extremadamente alto</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="guide-section">
+        <h2 data-es="Consejos de salud y bienestar" data-en="Health and wellness tips">Consejos de salud y bienestar</h2>
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="🥗 Dieta mediterránea" data-en="🥗 Mediterranean diet">🥗 Dieta mediterránea</h3>
+                <p data-es="Frutas, verduras, legumbres, aceite de oliva y pescado azul. Reduce el riesgo cardiovascular hasta un 30% y facilita el mantenimiento del peso." data-en="Fruits, vegetables, legumes, olive oil, and oily fish. Reduces cardiovascular risk up to 30% and helps maintain weight.">Frutas, verduras, legumbres, aceite de oliva y pescado azul. Reduce el riesgo cardiovascular hasta un 30% y facilita el mantenimiento del peso.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="🚶 150 min/semana de ejercicio" data-en="🚶 150 min/week of exercise">🚶 150 min/semana de ejercicio</h3>
+                <p data-es="La OMS recomienda 150 minutos de actividad moderada o 75 de actividad intensa. Caminar a paso rápido 30 min/día es suficiente para empezar." data-en="WHO recommends 150 minutes of moderate activity or 75 minutes of intense activity. Brisk walking 30 min/day is enough to start.">La OMS recomienda 150 minutos de actividad moderada o 75 de actividad intensa. Caminar a paso rápido 30 min/día es suficiente para empezar.</p>
+            </div>
+            <div class="guide-card">
+                <h3 data-es="💧 Hidratación adecuada" data-en="💧 Adequate hydration">💧 Hidratación adecuada</h3>
+                <p data-es="Beber 35 ml/kg al día. A veces confundimos la sed con hambre. La buena hidratación ayuda a controlar el apetito y mejora el metabolismo." data-en="Drink 35 ml/kg daily. Sometimes we confuse thirst with hunger. Good hydration helps control appetite and improves metabolism.">Beber 35 ml/kg al día. A veces confundimos la sed con hambre. La buena hidratación ayuda a controlar el apetito y mejora el metabolismo.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+    let selectedGender = 'male';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'A') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function setGender(gender) {
+        selectedGender = gender;
+        document.querySelectorAll('.radio-btn').forEach(el => el.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        event.currentTarget.querySelector('input').checked = true;
+    }
+
+    function setExample(w, h) {
+        document.getElementById('weight').value = w;
+        document.getElementById('height').value = h;
+        calculateIMC();
+    }
+
+    function formatDecimal(value) {
+        return parseFloat(value).toFixed(1).replace('.', ',');
+    }
+
+    function calculateIMC() {
+        const weight = parseFloat(document.getElementById('weight').value) || 0;
+        const heightCm = parseFloat(document.getElementById('height').value) || 0;
+        const waist = parseFloat(document.getElementById('waist').value) || 0;
+
+        if (weight <= 0 || heightCm <= 0) return;
+
+        const heightM = heightCm / 100;
+        const imc = weight / (heightM * heightM);
+
+        document.getElementById('imcValue').textContent = formatDecimal(imc);
+
+        const badge = document.getElementById('imcBadge');
+        let classification = '';
+        let badgeClass = 'badge-success';
+
+        if (imc < 18.5) {
+            classification = currentLang === 'es' ? 'Peso insuficiente' : 'Underweight';
+            badgeClass = 'badge-warning';
+        } else if (imc < 25) {
+            classification = currentLang === 'es' ? 'Normopeso (Normal)' : 'Normal weight';
+            badgeClass = 'badge-success';
+        } else if (imc < 27) {
+            classification = currentLang === 'es' ? 'Sobrepeso Grado I' : 'Overweight Grade I';
+            badgeClass = 'badge-warning';
+        } else if (imc < 30) {
+            classification = currentLang === 'es' ? 'Sobrepeso Grado II (Preobesidad)' : 'Overweight Grade II';
+            badgeClass = 'badge-warning';
+        } else if (imc < 35) {
+            classification = currentLang === 'es' ? 'Obesidad Tipo I' : 'Obesity Type I';
+            badgeClass = 'badge-danger';
+        } else if (imc < 40) {
+            classification = currentLang === 'es' ? 'Obesidad Tipo II' : 'Obesity Type II';
+            badgeClass = 'badge-danger';
+        } else {
+            classification = currentLang === 'es' ? 'Obesidad Tipo III (Mórbida)' : 'Obesity Type III (Morbid)';
+            badgeClass = 'badge-danger';
+        }
+
+        badge.textContent = classification;
+        badge.className = 'result-classification ' + badgeClass;
+
+        const waistRes = document.getElementById('waistResult');
+        if (waist > 0) {
+            let riskText = '';
+            if (selectedGender === 'male') {
+                if (waist < 94) riskText = currentLang === 'es' ? '✅ Perímetro de cintura: Sin riesgo aumentado (< 94 cm)' : '✅ Waist circumference: No increased risk (< 94 cm)';
+                else if (waist <= 102) riskText = currentLang === 'es' ? '⚠️ Perímetro de cintura: Riesgo cardiovascular aumentado (94-102 cm)' : '⚠️ Waist circumference: Increased cardiovascular risk (94-102 cm)';
+                else riskText = currentLang === 'es' ? '🚨 Perímetro de cintura: Riesgo cardiovascular alto (> 102 cm)' : '🚨 Waist circumference: High cardiovascular risk (> 102 cm)';
+            } else {
+                if (waist < 80) riskText = currentLang === 'es' ? '✅ Perímetro de cintura: Sin riesgo aumentado (< 80 cm)' : '✅ Waist circumference: No increased risk (< 80 cm)';
+                else if (waist <= 88) riskText = currentLang === 'es' ? '⚠️ Perímetro de cintura: Riesgo cardiovascular aumentado (80-88 cm)' : '⚠️ Waist circumference: Increased cardiovascular risk (80-88 cm)';
+                else riskText = currentLang === 'es' ? '🚨 Perímetro de cintura: Riesgo cardiovascular alto (> 88 cm)' : '🚨 Waist circumference: High cardiovascular risk (> 88 cm)';
+            }
+            waistRes.textContent = riskText;
+        } else {
+            waistRes.textContent = '';
+        }
+
+        document.getElementById('result').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculateIMC();
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
