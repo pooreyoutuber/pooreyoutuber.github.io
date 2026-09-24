@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ahorro 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.8rem;
+        }
+
+        .radio-option {
+            flex: 1;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0;
+            transition: all 0.3s;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .radio-option input[type="radio"]:checked + label::before {
+            content: '✓';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .radio-option label span {
+            flex: 1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .chart-label-text {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .chart-label-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .chart-bar-bg {
+            height: 40px;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 0.8rem;
+        }
+
+        .chart-bar-value {
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🏦 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Ahorro 2026" data-en="Savings Calculator 2026">Calculadora de Ahorro 2026</h1>
+    <p class="subtitle" data-es="Interés Compuesto · Aportaciones Periódicas · Rentabilidad Esperada" data-en="Compound Interest · Periodic Contributions · Expected Returns">Interés Compuesto · Aportaciones Periódicas · Rentabilidad Esperada</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="Simula tu plan de ahorro" data-en="Simulate your savings plan">Simula tu plan de ahorro</h2>
+
+            <div class="form-group">
+                <label data-es="Capital inicial (€)" data-en="Initial capital (€)">Capital inicial (€)</label>
+                <input type="number" id="initial" placeholder="10000" step="1000" min="0" value="10000">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Aportación mensual (€)" data-en="Monthly contribution (€)">Aportación mensual (€)</label>
+                <input type="number" id="monthly" placeholder="500" step="50" min="0" value="500">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Rentabilidad anual (%)" data-en="Annual return (%)">Rentabilidad anual (%)</label>
+                <input type="number" id="rate" placeholder="4.0" step="0.1" min="0" max="20" value="4.0">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Cuentas remuneradas: 2-3,5% · Fondos indexados: 6-9% · Depósitos a plazo: 2-4%" data-en="Savings accounts: 2-3.5% · Index funds: 6-9% · Fixed deposits: 2-4%">Cuentas remuneradas: 2-3,5% · Fondos indexados: 6-9% · Depósitos a plazo: 2-4%</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Período (años)" data-en="Period (years)">Período (años)</label>
+                <input type="number" id="years" placeholder="10" step="1" min="1" max="50" value="10">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Capitalización" data-en="Capitalization">Capitalización</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="monthly-cap" name="capitalization" value="monthly" checked>
+                        <label for="monthly-cap"><span data-es="Mensual" data-en="Monthly">Mensual</span></label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="quarterly-cap" name="capitalization" value="quarterly">
+                        <label for="quarterly-cap"><span data-es="Trimestral" data-en="Quarterly">Trimestral</span></label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="annual-cap" name="capitalization" value="annual">
+                        <label for="annual-cap"><span data-es="Anual" data-en="Annual">Anual</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculateSavings()" data-es="🏦 Calcular ahorro" data-en="🏦 Calculate savings">🏦 Calcular ahorro</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label" data-es="Ahorrado total" data-en="Total saved">Ahorrado total</div>
+                        <div class="result-value" id="totalSaved">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Intereses ganados" data-en="Interest earned">Intereses ganados</div>
+                        <div class="result-value" id="totalInterest">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Capital aportado" data-en="Capital contributed">Capital aportado</div>
+                        <div class="result-value" id="totalCapital">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Rentabilidad efectiva" data-en="Effective return">Rentabilidad efectiva</div>
+                        <div class="result-value" id="effectiveReturn">0%</div>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                        <span style="font-weight: 600; color: var(--text-dark);" data-es="Desglose:" data-en="Breakdown:">Desglose:</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: #10b981; border-radius: 4px;"></div>
+                        <span style="flex: 1; color: var(--text-light);" data-es="Capital aportado" data-en="Capital contributed">Capital aportado</span>
+                        <span style="font-weight: 600;" id="breakdown-capital">€0</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <div style="width: 20px; height: 20px; background: #3b82f6; border-radius: 4px;"></div>
+                        <span style="flex: 1; color: var(--text-light);" data-es="Intereses" data-en="Interest">Intereses</span>
+                        <span style="font-weight: 600;" id="breakdown-interest">€0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3>⚠️ <span data-es="Simulación orientativa" data-en="Guidance simulation">Simulación orientativa</span></h3>
+                <p data-es="Interés compuesto constante. Los rendimientos reales de inversiones no están garantizados y pueden variar. Consulta con un asesor financiero antes de invertir." data-en="Constant compound interest. Actual investment returns are not guaranteed and may vary. Consult a financial advisor before investing.">Interés compuesto constante. Los rendimientos reales de inversiones no están garantizados y pueden variar. Consulta con un asesor financiero antes de invertir.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3>💡 <span data-es="Regla del 72" data-en="Rule of 72">Regla del 72</span></h3>
+                <p data-es="Divide 72 entre tu tasa de interés anual para estimar cuántos años tardará tu dinero en duplicarse:" data-en="Divide 72 by your annual interest rate to estimate how many years it takes your money to double:">Divide 72 entre tu tasa de interés anual para estimar cuántos años tardará tu dinero en duplicarse:</p>
+                <ul>
+                    <li data-es="Al 2% → 36 años" data-en="At 2% → 36 years">Al 2% → 36 años</li>
+                    <li data-es="Al 4% → 18 años" data-en="At 4% → 18 years">Al 4% → 18 años</li>
+                    <li data-es="Al 6% → 12 años" data-en="At 6% → 12 years">Al 6% → 12 años</li>
+                    <li data-es="Al 8% → 9 años" data-en="At 8% → 9 years">Al 8% → 9 años</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-container" id="chartContainer" style="display: none;">
+        <h3 data-es="Evolución de tu ahorro (años seleccionados)" data-en="Savings evolution (selected years)">Evolución de tu ahorro (años seleccionados)</h3>
+        
+        <div id="chartBars"></div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="¿Cómo funciona el interés compuesto?" data-en="How does compound interest work?">¿Cómo funciona el interés compuesto?</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="Interés Compuesto" data-en="Compound Interest">Interés Compuesto</h3>
+                <p data-es="Tus intereses generan nuevos intereses cada período. Con aportaciones mensuales constantes, el efecto se multiplica enormemente con el tiempo — especialmente en horizontes de 10, 20 o 30 años." data-en="Your interest earns new interest each period. With constant monthly contributions, the effect multiplies greatly over time — especially over 10, 20 or 30 year horizons.">Tus intereses generan nuevos intereses cada período. Con aportaciones mensuales constantes, el efecto se multiplica enormemente con el tiempo — especialmente en horizontes de 10, 20 o 30 años.</p>
+                <p style="margin-top: 1rem; font-weight: 600; color: var(--text-dark);" data-es="Cuanto antes empieces, más interés compuesto acumularás." data-en="The sooner you start, the more compound interest you'll accumulate.">Cuanto antes empieces, más interés compuesto acumularás.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Cuentas Remuneradas" data-en="Savings Accounts">Cuentas Remuneradas</h3>
+                <p data-es="Rentabilidad: 2-3,5% TAE. Sin riesgo, con liquidez inmediata. Hasta 100.000€ garantizados por el FGD (Fondo de Garantía de Depósitos)." data-en="Return: 2-3.5% APY. No risk, immediate liquidity. Up to €100,000 guaranteed by DGF.">Rentabilidad: 2-3,5% TAE. Sin riesgo, con liquidez inmediata. Hasta 100.000€ garantizados por el FGD (Fondo de Garantía de Depósitos).</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Bancos:" data-en="Banks:">Bancos:</strong> ING, Banco Sabadell, Abanca, Openbank, etc.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Fondos Indexados" data-en="Index Funds">Fondos Indexados</h3>
+                <p data-es="Replican un índice como S&P 500 o MSCI World. Rentabilidad histórica ~7-9% anual a largo plazo. Mayor potencial pero con mayor volatilidad." data-en="Replicate an index like S&P 500 or MSCI World. Historical return ~7-9% annually long-term. Higher potential but more volatility.">Replican un índice como S&P 500 o MSCI World. Rentabilidad histórica ~7-9% anual a largo plazo. Mayor potencial pero con mayor volatilidad.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Brokers:" data-en="Brokers:">Brokers:</strong> MyInvestor, Indexa Capital, eToro, etc.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Planes de Pensiones" data-en="Pension Plans">Planes de Pensiones</h3>
+                <p data-es="Reducen la base del IRPF hasta €1.500/año (autónomos €2.000). Liquidez limitada hasta jubilación. Ideal para planificación a largo plazo." data-en="Reduce IRPF base up to €1,500/year (self-employed €2,000). Limited liquidity until retirement. Ideal for long-term planning.">Reducen la base del IRPF hasta €1.500/año (autónomos €2.000). Liquidez limitada hasta jubilación. Ideal para planificación a largo plazo.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Productos:" data-en="Products:">Productos:</strong> Seguros Ahorro, Fondos de Pensiones, etc.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Depósitos a Plazo Fijo" data-en="Fixed Term Deposits">Depósitos a Plazo Fijo</h3>
+                <p data-es="Rentabilidad: 2-4% a 1-3 años. Sin riesgo pero sin liquidez antes del vencimiento. Ideal para dinero que no necesitas a corto plazo." data-en="Return: 2-4% over 1-3 years. No risk but no liquidity before maturity. Ideal for money you don't need short-term.">Rentabilidad: 2-4% a 1-3 años. Sin riesgo pero sin liquidez antes del vencimiento. Ideal para dinero que no necesitas a corto plazo.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Duración:" data-en="Duration:">Duración:</strong> 1, 2, 3 años (típicamente)</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Capitalización vs Aportaciones" data-en="Capitalization vs Contributions">Capitalización vs Aportaciones</h3>
+                <p data-es="Mensual: máximo interés compuesto (12 veces/año). Trimestral: intermedio (4 veces/año). Anual: menor efecto (1 vez/año)." data-en="Monthly: maximum compound interest (12x/year). Quarterly: intermediate (4x/year). Annual: lower effect (1x/year).">Mensual: máximo interés compuesto (12 veces/año). Trimestral: intermedio (4 veces/año). Anual: menor efecto (1 vez/año).</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);" data-es="Las aportaciones mensuales amplían el efecto compuesto." data-en="Monthly contributions amplify the compound effect.">Las aportaciones mensuales amplían el efecto compuesto.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="guide-section">
+        <h2 data-es="Comparativa de inversiones en España 2026" data-en="Investment Comparison Spain 2026">Comparativa de inversiones en España 2026</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Producto" data-en="Product">Producto</th>
+                    <th data-es="Rentabilidad esperada" data-en="Expected return">Rentabilidad esperada</th>
+                    <th data-es="Riesgo" data-en="Risk">Riesgo</th>
+                    <th data-es="Liquidez" data-en="Liquidity">Liquidez</th>
+                    <th data-es="Ventajas fiscales" data-en="Tax benefits">Ventajas fiscales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="Cuenta Remunerada" data-en="Savings Account">Cuenta Remunerada</td>
+                    <td><span class="amount">2-3,5%</span></td>
+                    <td data-es="Nulo" data-en="None">Nulo</td>
+                    <td data-es="Inmediata" data-en="Immediate">Inmediata</td>
+                    <td data-es="Ninguna" data-en="None">Ninguna</td>
+                </tr>
+                <tr>
+                    <td data-es="Depósito a Plazo" data-en="Fixed Deposit">Depósito a Plazo</td>
+                    <td><span class="amount">2-4%</span></td>
+                    <td data-es="Nulo" data-en="None">Nulo</td>
+                    <td data-es="A vencimiento" data-en="At maturity">A vencimiento</td>
+                    <td data-es="Ninguna" data-en="None">Ninguna</td>
+                </tr>
+                <tr>
+                    <td data-es="Fondos Indexados" data-en="Index Funds">Fondos Indexados</td>
+                    <td><span class="amount">6-9%</span></td>
+                    <td data-es="Bajo-Medio" data-en="Low-Medium">Bajo-Medio</td>
+                    <td data-es="T+2 días" data-en="T+2 days">T+2 días</td>
+                    <td data-es="Pérdidas deducibles" data-en="Losses deductible">Pérdidas deducibles</td>
+                </tr>
+                <tr>
+                    <td data-es="Plan Pensiones" data-en="Pension Plan">Plan Pensiones</td>
+                    <td><span class="amount">4-6%</span></td>
+                    <td data-es="Bajo-Medio" data-en="Low-Medium">Bajo-Medio</td>
+                    <td data-es="Jubilación" data-en="Retirement">Jubilación</td>
+                    <td><span class="amount">Reducción IRPF €1.500</span></td>
+                </tr>
+                <tr>
+                    <td data-es="Acciones" data-en="Stocks">Acciones</td>
+                    <td><span class="amount">8-10%+</span></td>
+                    <td data-es="Alto" data-en="High">Alto</td>
+                    <td data-es="Inmediata" data-en="Immediate">Inmediata</td>
+                    <td data-es="Pérdidas deducibles" data-en="Losses deductible">Pérdidas deducibles</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'TH' || el.tagName === 'TD') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function calculateSavings() {
+        const initial = parseFloat(document.getElementById('initial').value) || 0;
+        const monthly = parseFloat(document.getElementById('monthly').value) || 0;
+        const rate = parseFloat(document.getElementById('rate').value) / 100 || 0;
+        const years = parseInt(document.getElementById('years').value) || 10;
+        const capitalization = document.querySelector('input[name="capitalization"]:checked').value;
+
+        let periods = years * 12;
+        let monthlyRate = rate / 12;
+
+        if (capitalization === 'quarterly') {
+            periods = years * 4;
+            monthlyRate = rate / 4;
+        } else if (capitalization === 'annual') {
+            periods = years;
+            monthlyRate = rate;
+        }
+
+        let balance = initial;
+        let totalContributed = initial;
+        const yearlyData = [];
+
+        for (let i = 0; i < periods; i++) {
+            balance = balance * (1 + monthlyRate) + monthly;
+            totalContributed += monthly;
+
+            if (capitalization === 'monthly' && (i + 1) % 12 === 0) {
+                yearlyData.push({
+                    year: (i + 1) / 12,
+                    balance: balance,
+                    contributed: totalContributed
+                });
+            } else if (capitalization === 'quarterly' && (i + 1) % 4 === 0) {
+                yearlyData.push({
+                    year: (i + 1) / 4,
+                    balance: balance,
+                    contributed: totalContributed
+                });
+            } else if (capitalization === 'annual' && (i + 1) === (i + 1)) {
+                yearlyData.push({
+                    year: i + 1,
+                    balance: balance,
+                    contributed: totalContributed
+                });
+            }
+        }
+
+        const totalSaved = balance;
+        const totalInterest = totalSaved - totalContributed;
+        const effectiveReturn = (totalInterest / totalContributed) * 100;
+
+        document.getElementById('totalSaved').textContent = formatCurrency(totalSaved);
+        document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+        document.getElementById('totalCapital').textContent = formatCurrency(totalContributed);
+        document.getElementById('effectiveReturn').textContent = effectiveReturn.toFixed(1) + '%';
+        document.getElementById('breakdown-capital').textContent = formatCurrency(totalContributed);
+        document.getElementById('breakdown-interest').textContent = formatCurrency(totalInterest);
+        document.getElementById('result').style.display = 'block';
+
+        // Generate chart
+        generateChart(yearlyData, totalSaved);
+    }
+
+    function generateChart(yearlyData, maxValue) {
+        const chartBars = document.getElementById('chartBars');
+        chartBars.innerHTML = '';
+
+        const step = Math.max(1, Math.floor(yearlyData.length / 8));
+        const selectedData = yearlyData.filter((_, i) => i % step === 0 || i === yearlyData.length - 1);
+
+        selectedData.forEach(data => {
+            const percentage = (data.balance / maxValue) * 100;
+            const html = `
+                <div class="chart-bar">
+                    <div class="chart-label">
+                        <span class="chart-label-text">${data.year.toFixed(0)} año${data.year !== 1 ? 's' : ''}</span>
+                        <span class="chart-label-value">${formatCurrency(data.balance)}</span>
+                    </div>
+                    <div class="chart-bar-bg" style="width: ${percentage}%">
+                        <span class="chart-bar-value">${percentage.toFixed(0)}%</span>
+                    </div>
+                </div>
+            `;
+            chartBars.innerHTML += html;
+        });
+
+        document.getElementById('chartContainer').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
