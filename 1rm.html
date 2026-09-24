@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de 1RM — Repetición Máxima 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ef4444; /* Red theme for strength/gym */
+            --primary-dark: #dc2626;
+            --bg: #0f172a; /* Dark slate theme */
+            --card-bg: #1e293b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-light); line-height: 1.6; }
+        header { background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-light); }
+        .subtitle { color: var(--text-muted); margin-bottom: 2rem; font-size: 1rem; }
+        
+        .grid-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-light); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-light); font-size: 0.95rem; }
+        input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #0f172a; color: var(--text-light); transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+        
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #dc2626); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(239, 68, 68, 0.4); }
+
+        .result-box { background: linear-gradient(135deg, #27272a 18%, #18181b 100%); border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; text-align: center; }
+        .result-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem; }
+        .result-value { font-size: 2.5rem; font-weight: 800; color: var(--primary); line-height: 1.1; margin-bottom: 0.5rem; }
+
+        .formula-list { margin-top: 1rem; display: grid; gap: 0.8rem; }
+        .formula-item { display: flex; justify-content: space-between; padding: 0.8rem; background: #0f172a; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
+        .formula-item strong { color: var(--text-muted); }
+        .formula-item span { color: var(--text-light); font-weight: 700; }
+
+        .text-section { background: var(--card-bg); border: 1px solid var(--border); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .text-section h3 { color: var(--primary); margin-top: 1.5rem; }
+        .text-section p, .text-section li { margin-bottom: 1rem; color: var(--text-muted); }
+        .text-section strong { color: var(--text-light); }
+
+        /* Intensity Table */
+        .intensity-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+        .intensity-table th, .intensity-table td { padding: 0.7rem; border: 1px solid var(--border); text-align: left; }
+        .intensity-table th { background: #0f172a; color: var(--text-light); }
+        .intensity-table td { background: #1e293b; color: var(--text-muted); }
+
+        ul { margin-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="🏋️ StrengthMX 1RM" data-en="🏋️ StrengthMX 1RM">🏋️ StrengthMX 1RM</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de 1RM — Repetición Máxima" data-en="1RM Calculator — One-Repetition Maximum">Calculadora de 1RM — Repetición Máxima</h1>
+    <p class="subtitle" data-es="🏋️ Epley · Brzycki · Lander · Tabla de intensidades" data-en="🏋️ Epley · Brzycki · Lander · Intensity Table">🏋️ Epley · Brzycki · Lander · Tabla de intensidades</p>
+
+    <div class="grid-layout">
+        <!-- FORM COLUMN -->
+        <div class="card">
+            <h2 data-es="🏋️ Calcula tu repetición máxima" data-en="🏋️ Calculate your maximum repetition">🏋️ Calcula tu repetición máxima</h2>
+            
+            <div class="form-group">
+                <label data-es="Peso levantado (kg)" data-en="Weight lifted (kg)">Peso levantado (kg)</label>
+                <input type="number" id="weight" placeholder="Ej. 100" step="0.5" min="1">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Repeticiones realizadas" data-en="Repetitions performed">Repeticiones realizadas</label>
+                <input type="number" id="reps" placeholder="Ej. 5" min="1" max="20">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Ejercicio (para referencia)" data-en="Exercise (for reference)">Ejercicio (para referencia)</label>
+                <select id="exercise">
+                    <option value="bench" data-es="Press de banca" data-en="Bench press">Press de banca</option>
+                    <option value="squat" data-es="Sentadilla" data-en="Squat">Sentadilla</option>
+                    <option value="deadlift" data-es="Peso muerto" data-en="Deadlift">Peso muerto</option>
+                    <option value="ohp" data-es="Press militar" data-en="Overhead press">Press militar</option>
+                    <option value="row" data-es="Remo con barra" data-en="Barbell row">Remo con barra</option>
+                    <option value="bicep" data-es="Curl de bíceps" data-en="Bicep curl">Curl de bíceps</option>
+                    <option value="other" data-es="Otro ejercicio" data-en="Other exercise">Otro ejercicio</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="calculate1RM()" data-es="🏋️ Calcular 1RM" data-en="🏋️ Calculate 1RM">🏋️ Calcular 1RM</button>
+
+            <!-- RESULTS -->
+            <div id="results-container" style="display: none;">
+                <div class="result-box">
+                    <div class="result-label" data-es="1RM Estimado (Promedio Científico)" data-en="Estimated 1RM (Scientific Average)">1RM Estimado (Promedio Científico)</div>
+                    <div class="result-value"><span id="res-avg">--</span> kg</div>
+                </div>
+
+                <div class="formula-list">
+                    <div class="formula-item">
+                        <strong data-es="Fórmula Epley (1985)" data-en="Epley Formula (1985)">Epley (1985)</strong> <span id="res-epley">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Fórmula Brzycki (1993)" data-en="Brzycki Formula (1993)">Brzycki (1993)</strong> <span id="res-brzycki">-- kg</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Fórmula Lander (1985)" data-en="Lander Formula (1985)">Lander (1985)</strong> <span id="res-lander">-- kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO COLUMN -->
+        <div class="text-section" style="margin-bottom: 0;">
+            <h2 style="margin-top:0;" data-es="¿Qué es el 1RM y para qué sirve?" data-en="What is 1RM and what is it for?">¿Qué es el 1RM y para qué sirve?</h2>
+            <p data-es="El <strong>1RM (One-Repetition Maximum)</strong> o repetición máxima es el peso máximo que puedes mover en un ejercicio para una sola repetición con técnica correcta. Es el estándar de referencia para planificar la intensidad del entrenamiento de fuerza." data-en="<strong>1RM (One-Repetition Maximum)</strong> is the maximum weight you can move in an exercise for a single repetition with proper technique. It is the gold standard for planning strength training intensity.">El <strong>1RM (One-Repetition Maximum)</strong> o repetición máxima es el peso máximo que puedes mover en un ejercicio para una sola repetición con técnica correcta. Es el estándar de referencia para planificar la intensidad del entrenamiento de fuerza.</p>
+
+            <h3 data-es="Fórmulas científicas utilizadas" data-en="Scientific formulas used">Fórmulas científicas utilizadas</h3>
+            <p><strong data-es="Epley (1985):" data-en="Epley (1985):">Epley (1985):</strong> 1RM = Peso × (1 + 0,0333 × Reps). <span data-es="La más usada en entrenamiento deportivo." data-en="The most widely used in sports training.">La más usada en entrenamiento deportivo.</span></p>
+            <p><strong data-es="Brzycki (1993):" data-en="Brzycki (1993):">Brzycki (1993):</strong> 1RM = Peso ÷ (1,0278 − 0,0278 × Reps). <span data-es="Más precisa para series de 1-10 repeticiones." data-en="More accurate for 1-10 repetition sets.">Más precisa para series de 1-10 repeticiones.</span></p>
+            <p><strong data-es="Lander (1985):" data-en="Lander (1985):">Lander (1985):</strong> 1RM = 100 × Peso ÷ (101,3 − 2,67123 × Reps). <span data-es="Alternativa fiable para rangos medios." data-en="Reliable alternative for mid-ranges.">Alternativa fiable para rangos medios.</span></p>
+        </div>
+    </div>
+
+    <!-- INTENSITY TABLE SECTION -->
+    <div class="text-section" id="intensity-section" style="display: none;">
+        <h2 data-es="📊 Zonas de entrenamiento según % del 1RM" data-en="📊 Training zones based on % of 1RM">📊 Zonas de entrenamiento según % del 1RM</h2>
+        <p data-es="Basado en tu 1RM calculado, esta tabla te muestra los pesos recomendados para trabajar diferentes adaptaciones neuromusculares:" data-en="Based on your calculated 1RM, this table shows recommended weights for different neuromuscular adaptations:">Basado en tu 1RM calculado, esta tabla te muestra los pesos recomendados para trabajar diferentes adaptaciones neuromusculares:</p>
+        
+        <table class="intensity-table">
+            <thead>
+                <tr>
+                    <th data-es="Porcentaje" data-en="Percentage">Porcentaje</th>
+                    <th data-es="Peso estimado" data-en="Estimated Weight">Peso estimado</th>
+                    <th data-es="Rango de reps habitual" data-en="Usual Rep Range">Rango de reps</th>
+                    <th data-es="Objetivo / Zona" data-en="Goal / Zone">Objetivo / Zona</th>
+                </tr>
+            </thead>
+            <tbody id="intensity-rows">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-section">
+        <h3 data-es="Guía rápida de zonas de entrenamiento" data-en="Quick guide to training zones">Guía rápida de zonas de entrenamiento</h3>
+        <ul>
+            <li><strong data-es="90-100% 1RM (1-3 reps):" data-en="90-100% 1RM (1-3 reps):">90-100% 1RM (1-3 reps):</strong> <span data-es="Fuerza máxima y potencia" data-en="Maximum strength and power">Fuerza máxima y potencia</span></li>
+            <li><strong data-es="75-90% 1RM (4-6 reps):" data-en="75-90% 1RM (4-6 reps):">75-90% 1RM (4-6 reps):</strong> <span data-es="Hipertrofia con componente de fuerza" data-en="Hypertrophy with a strength component">Hipertrofia con componente de fuerza</span></li>
+            <li><strong data-es="65-75% 1RM (8-12 reps):" data-en="65-75% 1RM (8-12 reps):">65-75% 1RM (8-12 reps):</strong> <span data-es="Hipertrofia muscular (zona clásica)" data-en="Muscle hypertrophy (classic zone)">Hipertrofia muscular (zona clásica)</span></li>
+            <li><strong data-es="50-65% 1RM (12-20 reps):" data-en="50-65% 1RM (12-20 reps):">50-65% 1RM (12-20 reps):</strong> <span data-es="Resistencia muscular y definición" data-en="Muscular endurance and definition">Resistencia muscular y definición</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if(el.children.length === 0 || el.tagName === 'OPTION' || el.tagName === 'SPAN') {
+                el.innerHTML = text; 
+            } else {
+                Array.from(el.childNodes).forEach(node => {
+                    if (node.nodeType === 3 && node.nodeValue.trim() !== '') {
+                        node.nodeValue = text;
+                    }
+                });
+            }
+        });
+
+        if(document.getElementById('results-container').style.display === 'block') {
+            calculate1RM();
+        }
+    }
+
+    function calculate1RM() {
+        const weight = parseFloat(document.getElementById('weight').value);
+        const reps = parseInt(document.getElementById('reps').value);
+
+        if (!weight || weight <= 0 || !reps || reps <= 0) {
+            alert(currentLang === 'es' ? "Por favor ingresa un peso y número de repeticiones válidos." : "Please enter a valid weight and number of repetitions.");
+            return;
+        }
+
+        if (reps === 1) {
+            // If 1 rep, 1RM is simply the weight lifted
+            document.getElementById('res-epley').innerText = weight + ' kg';
+            document.getElementById('res-brzycki').innerText = weight + ' kg';
+            document.getElementById('res-lander').innerText = weight + ' kg';
+            document.getElementById('res-avg').innerText = weight;
+            buildIntensityTable(weight);
+            document.getElementById('results-container').style.display = 'block';
+            document.getElementById('intensity-section').style.display = 'block';
+            return;
+        }
+
+        if (reps > 20) {
+            alert(currentLang === 'es' ? "Las fórmulas pierden precisión con más de 20 repeticiones. Intenta con un peso mayor." : "Formulas lose precision beyond 20 reps. Try using a heavier weight.");
+            return;
+        }
+
+        // Formulas
+        const epley = weight * (1 + 0.0333 * reps);
+        const brzycki = weight / (1.0278 - (0.0278 * reps));
+        const lander = (100 * weight) / (101.3 - (2.67123 * reps));
+
+        const avg = (epley + brzycki + lander) / 3;
+
+        document.getElementById('res-epley').innerText = Math.round(epley * 10) / 10 + ' kg';
+        document.getElementById('res-brzycki').innerText = Math.round(brzycki * 10) / 10 + ' kg';
+        document.getElementById('res-lander').innerText = Math.round(lander * 10) / 10 + ' kg';
+        document.getElementById('res-avg').innerText = Math.round(avg * 10) / 10;
+
+        buildIntensityTable(avg);
+
+        document.getElementById('results-container').style.display = 'block';
+        document.getElementById('intensity-section').style.display = 'block';
+    }
+
+    function buildIntensityTable(rm1) {
+        const tbody = document.getElementById('intensity-rows');
+        tbody.innerHTML = '';
+
+        const percentages = [
+            { pct: 100, reps: '1 rep', zoneEs: 'Fuerza máxima absoluta', zoneEn: 'Absolute max strength' },
+            { pct: 95, reps: '2 reps', zoneEs: 'Fuerza máxima y potencia', zoneEn: 'Max strength and power' },
+            { pct: 90, reps: '3 reps', zoneEs: 'Fuerza máxima y potencia', zoneEn: 'Max strength and power' },
+            { pct: 85, reps: '5 reps', zoneEs: 'Hipertrofia / Fuerza', zoneEn: 'Hypertrophy / Strength' },
+            { pct: 80, reps: '6-7 reps', zoneEs: 'Hipertrofia con componente de fuerza', zoneEn: 'Hypertrophy with strength' },
+            { pct: 75, reps: '8-9 reps', zoneEs: 'Hipertrofia muscular (clásica)', zoneEn: 'Muscle hypertrophy (classic)' },
+            { pct: 70, reps: '10-11 reps', zoneEs: 'Hipertrofia muscular', zoneEn: 'Muscle hypertrophy' },
+            { pct: 65, reps: '12-14 reps', zoneEs: 'Resistencia e hipertrofia', zoneEn: 'Endurance & hypertrophy' },
+            { pct: 60, reps: '15-16 reps', zoneEs: 'Resistencia muscular', zoneEn: 'Muscular endurance' },
+            { pct: 50, reps: '20+ reps', zoneEs: 'Resistencia y definición', zoneEn: 'Endurance & definition' }
+        ];
+
+        percentages.forEach(item => {
+            const calculatedWeight = Math.round((rm1 * (item.pct / 100)) * 10) / 10;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.pct}%</strong></td>
+                <td>${calculatedWeight} kg</td>
+                <td>${item.reps}</td>
+                <td>${currentLang === 'es' ? item.zoneEs : item.zoneEn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+</script>
+
+</body>
+</html>
