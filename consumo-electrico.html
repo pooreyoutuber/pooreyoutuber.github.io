@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Consumo Eléctrico 2026</title>
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --primary-hover: #d97706;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p.desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .result-box {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .result-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .result-box strong {
+            display: block;
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .info-section h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .info-section ul {
+            padding-left: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>⚡ Calculadora de Consumo Eléctrico 2026</h1>
+        <p class="desc">Descubre cuánto cuesta cada aparato eléctrico de tu hogar al día, al mes y al año en España.</p>
+
+        <div class="form-group">
+            <label for="preset">Aparato frecuente</label>
+            <select id="preset" onchange="loadPreset()">
+                <option value="">— Selecciona un aparato —</option>
+                <option value="1500">Secador de pelo (1500W)</option>
+                <option value="2000">Horno eléctrico (2000W)</option>
+                <option value="2500">Vitrocerámica 1 fuego (2500W)</option>
+                <option value="250">Frigorífico A+++ (250W)</option>
+                <option value="2000">Lavadora (2000W)</option>
+                <option value="2200">Lavavajillas (2200W)</option>
+                <option value="1800">Plancha (1800W)</option>
+                <option value="100">TV LED 55" (100W)</option>
+                <option value="6">TV en standby (6W)</option>
+                <option value="60">Ordenador portátil (60W)</option>
+                <option value="300">Ordenador de sobremesa (300W)</option>
+                <option value="1100">Aire acondicionado (1100W)</option>
+                <option value="2000">Calefactor eléctrico (2000W)</option>
+                <option value="1000">Microondas (1000W)</option>
+                <option value="2200">Aspiradora (2200W)</option>
+                <option value="10">Bombilla LED (10W)</option>
+                <option value="9">Router WiFi (9W)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="power">Potencia del aparato (W)</label>
+            <input type="number" id="power" placeholder="Ej: 1000">
+        </div>
+
+        <div class="form-group">
+            <label for="hours">Horas de uso al día (h)</label>
+            <input type="number" id="hours" step="0.1" value="1">
+        </div>
+
+        <div class="form-group">
+            <label for="days">Días al mes</label>
+            <input type="number" id="days" value="30">
+        </div>
+
+        <div class="form-group">
+            <label for="price">Precio kWh (€)</label>
+            <input type="number" id="price" step="0.01" value="0.18">
+        </div>
+
+        <button onclick="calculate()">⚡ Calcular consumo</button>
+
+        <div class="results">
+            <div class="result-box">
+                <span>Coste Diario</span>
+                <strong id="cost-day">0,00 €</strong>
+            </div>
+            <div class="result-box">
+                <span>Coste Mensual</span>
+                <strong id="cost-month">0,00 €</strong>
+            </div>
+            <div class="result-box">
+                <span>Coste Anual</span>
+                <strong id="cost-year">0,00 €</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card info-section">
+        <h2>¿Cuánto cuesta la electricidad en España en 2026?</h2>
+        <p class="desc">El precio orientativo para 2026 en el mercado regulado (PVPC) se sitúa entre 0,15 y 0,22 €/kWh según la franja horaria.</p>
+        
+        <h2>Consejos para reducir la factura</h2>
+        <ul>
+            <li>Programa los electrodomésticos en horas valle.</li>
+            <li>Evita el consumo en standby de televisores y ordenadores.</li>
+            <li>Ajusta el aire acondicionado a 26°C en verano.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function loadPreset() {
+        const select = document.getElementById('preset');
+        if (select.value) {
+            document.getElementById('power').value = select.value;
+        }
+    }
+
+    function calculate() {
+        const power = parseFloat(document.getElementById('power').value) || 0;
+        const hours = parseFloat(document.getElementById('hours').value) || 0;
+        const days = parseFloat(document.getElementById('days').value) || 0;
+        const price = parseFloat(document.getElementById('price').value) || 0;
+
+        // Consumo diario en kWh = (W * horas) / 1000
+        const kwhPerDay = (power * hours) / 1000;
+        const dailyCost = kwhPerDay * price;
+        const monthlyCost = dailyCost * days;
+        const yearlyCost = dailyCost * 365;
+
+        document.getElementById('cost-day').innerText = dailyCost.toFixed(2).replace('.', ',') + ' €';
+        document.getElementById('cost-month').innerText = monthlyCost.toFixed(2).replace('.', ',') + ' €';
+        document.getElementById('cost-year').innerText = yearlyCost.toFixed(2).replace('.', ',') + ' €';
+    }
+</script>
+
+</body>
+</html>
