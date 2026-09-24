@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IVA Inverso 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .modes-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--primary);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .card-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-section {
+            display: none;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .example-btn {
+            padding: 0.8rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .example-btn:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .example-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .example-desc {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .modes-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            .quick-examples {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🧾 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de IVA Inverso 2026" data-en="Reverse VAT Calculator 2026">Calculadora de IVA Inverso 2026</h1>
+    <p class="subtitle" data-es="IVA Inverso · Añadir IVA · Facturas Autónomos · Recargo Equivalencia" data-en="Reverse VAT · Add VAT · Freelancer Invoices · Equivalence Surcharge">IVA Inverso · Añadir IVA · Facturas Autónomos · Recargo Equivalencia</p>
+
+    <!-- Mode Navigation -->
+    <div class="modes-nav">
+        <button class="mode-btn active" onclick="switchMode('mode1')" data-es="⬇️ IVA Inverso" data-en="⬇️ Reverse VAT">⬇️ IVA Inverso</button>
+        <button class="mode-btn" onclick="switchMode('mode2')" data-es="⬆️ Añadir IVA" data-en="⬆️ Add VAT">⬆️ Añadir IVA</button>
+        <button class="mode-btn" onclick="switchMode('mode3')" data-es="📋 Factura Autónomo" data-en="📋 Freelancer Invoice">📋 Factura Autónomo</button>
+        <button class="mode-btn" onclick="switchMode('mode4')" data-es="🏪 Recargo Equiv." data-en="🏪 Surcharge">🏪 Recargo Equiv.</button>
+    </div>
+
+    <!-- Mode 1: Reverse VAT -->
+    <div class="card calc-section active" id="mode1">
+        <h2 data-es="⬇️ IVA Inverso — Quitar IVA de un total" data-en="⬇️ Reverse VAT — Extract VAT from total">⬇️ IVA Inverso — Quitar IVA de un total</h2>
+        <p class="card-desc" data-es="Tienes un precio que ya incluye IVA y quieres saber la base imponible y la cuota de IVA por separado." data-en="You have a price that includes VAT and want to know the taxable base and VAT amount separately.">Tienes un precio que ya incluye IVA y quieres saber la base imponible y la cuota de IVA por separado.</p>
+
+        <div class="form-group">
+            <label data-es="Importe total con IVA incluido" data-en="Total amount including VAT">Importe total con IVA incluido</label>
+            <input type="number" id="mode1_total" placeholder="121" step="0.01" min="0" value="121">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Tipo de IVA incluido" data-en="VAT type included">Tipo de IVA incluido</label>
+            <select id="mode1_vat">
+                <option value="0.21" data-es="21% — General" data-en="21% — General">21% — General</option>
+                <option value="0.10" data-es="10% — Reducido" data-en="10% — Reduced">10% — Reducido</option>
+                <option value="0.04" data-es="4% — Superreducido" data-en="4% — Super-reduced">4% — Superreducido</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="calculateMode1()" data-es="⬇️ Calcular IVA inverso" data-en="⬇️ Calculate reverse VAT">⬇️ Calcular IVA inverso</button>
+
+        <div class="quick-examples">
+            <button class="example-btn" onclick="loadExample1(121, 0.21)">
+                <div class="example-title" data-es="Factura típica 21%" data-en="Typical invoice 21%">Factura típica 21%</div>
+                <div class="example-desc" data-es="Total: 121€ → Base: 100€ + IVA: 21€" data-en="Total: 121€ → Base: 100€ + VAT: 21€">Total: 121€ → Base: 100€ + IVA: 21€</div>
+            </button>
+            <button class="example-btn" onclick="loadExample1(110, 0.10)">
+                <div class="example-title" data-es="Hostelería 10%" data-en="Hospitality 10%">Hostelería 10%</div>
+                <div class="example-desc" data-es="Ticket: 110€ → Base: 100€ + IVA: 10€" data-en="Ticket: 110€ → Base: 100€ + VAT: 10€">Ticket: 110€ → Base: 100€ + IVA: 10€</div>
+            </button>
+            <button class="example-btn" onclick="loadExample1(104, 0.04)">
+                <div class="example-title" data-es="Libro/Medicamento 4%" data-en="Book/Medicine 4%">Libro/Medicamento 4%</div>
+                <div class="example-desc" data-es="Precio: 104€ → Base: 100€ + IVA: 4€" data-en="Price: 104€ → Base: 100€ + VAT: 4€">Precio: 104€ → Base: 100€ + IVA: 4€</div>
+            </button>
+        </div>
+
+        <div id="mode1-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Base imponible" data-en="Taxable base">Base imponible</div>
+                    <div class="result-value" id="mode1_base">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Cuota IVA" data-en="VAT amount">Cuota IVA</div>
+                    <div class="result-value" id="mode1_vat_amount">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 2: Add VAT -->
+    <div class="card calc-section" id="mode2">
+        <h2 data-es="⬆️ Añadir IVA — Base imponible a total" data-en="⬆️ Add VAT — Base to total">⬆️ Añadir IVA — Base imponible a total</h2>
+        <p class="card-desc" data-es="Tienes un precio sin IVA (base imponible) y quieres calcular el total que pagará el cliente." data-en="You have a price without VAT (taxable base) and want to calculate the total your customer pays.">Tienes un precio sin IVA (base imponible) y quieres calcular el total que pagará el cliente.</p>
+
+        <div class="form-group">
+            <label data-es="Base imponible (precio sin IVA)" data-en="Taxable base (price without VAT)">Base imponible (precio sin IVA)</label>
+            <input type="number" id="mode2_base" placeholder="100" step="0.01" min="0" value="100">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Tipo de IVA a aplicar" data-en="VAT type to apply">Tipo de IVA a aplicar</label>
+            <select id="mode2_vat">
+                <option value="0.21" data-es="21% — General" data-en="21% — General">21% — General</option>
+                <option value="0.10" data-es="10% — Reducido" data-en="10% — Reduced">10% — Reducido</option>
+                <option value="0.04" data-es="4% — Superreducido" data-en="4% — Super-reduced">4% — Superreducido</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="calculateMode2()" data-es="⬆️ Calcular total con IVA" data-en="⬆️ Calculate total with VAT">⬆️ Calcular total con IVA</button>
+
+        <div id="mode2-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Cuota IVA" data-en="VAT amount">Cuota IVA</div>
+                    <div class="result-value" id="mode2_vat_amount">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Total con IVA" data-en="Total with VAT">Total con IVA</div>
+                    <div class="result-value" id="mode2_total">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 3: Freelancer Invoice -->
+    <div class="card calc-section" id="mode3">
+        <h2 data-es="📋 Factura de autónomo — IVA + IRPF" data-en="📋 Freelancer Invoice — VAT + Income Tax">📋 Factura de autónomo — IVA + IRPF</h2>
+        <p class="card-desc" data-es="Calcula el total neto a cobrar de una factura aplicando el IVA repercutido y la retención de IRPF." data-en="Calculate the net amount to charge on an invoice applying VAT and income tax withholding.">Calcula el total neto a cobrar de una factura aplicando el IVA repercutido y la retención de IRPF.</p>
+
+        <div class="form-group">
+            <label data-es="Base imponible (importe de tus servicios)" data-en="Taxable base (amount of services)">Base imponible (importe de tus servicios)</label>
+            <input type="number" id="mode3_base" placeholder="1000" step="0.01" min="0" value="1000">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Tipo de IVA" data-en="VAT type">Tipo de IVA</label>
+            <select id="mode3_vat">
+                <option value="0.21" data-es="21% — General" data-en="21% — General">21% — General</option>
+                <option value="0.10" data-es="10% — Reducido" data-en="10% — Reduced">10% — Reducido</option>
+                <option value="0.04" data-es="4% — Superreducido" data-en="4% — Super-reduced">4% — Superreducido</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label data-es="Retención de IRPF" data-en="Income tax withholding">Retención de IRPF</label>
+            <select id="mode3_irpf">
+                <option value="0.15" data-es="15% — General (autónomos +3 años)" data-en="15% — General (freelancers +3 years)">15% — General (autónomos +3 años)</option>
+                <option value="0.07" data-es="7% — Nuevos autónomos (primeros 3 años)" data-en="7% — New freelancers (first 3 years)">7% — Nuevos autónomos (primeros 3 años)</option>
+                <option value="0.19" data-es="19% — Estimación objetiva módulos" data-en="19% — Objective estimation">19% — Estimación objetiva módulos</option>
+                <option value="0" data-es="0% — Sin retención (cliente no empresa)" data-en="0% — No withholding (non-business client)">0% — Sin retención (cliente no empresa)</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="calculateMode3()" data-es="📋 Calcular factura completa" data-en="📋 Calculate complete invoice">📋 Calcular factura completa</button>
+
+        <div id="mode3-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="IVA repercutido" data-en="VAT charged">IVA repercutido</div>
+                    <div class="result-value" id="mode3_vat_amount">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Retención IRPF" data-en="IRPF withholding">Retención IRPF</div>
+                    <div class="result-value" id="mode3_irpf_amount">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Total factura" data-en="Invoice total">Total factura</div>
+                    <div class="result-value" id="mode3_invoice_total">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="A cobrar (neto)" data-en="To charge (net)">A cobrar (neto)</div>
+                    <div class="result-value" id="mode3_net">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 4: Equivalence Surcharge -->
+    <div class="card calc-section" id="mode4">
+        <h2 data-es="🏪 Recargo de equivalencia — Minoristas" data-en="🏪 Equivalence Surcharge — Retailers">🏪 Recargo de equivalencia — Minoristas</h2>
+        <p class="card-desc" data-es="Si eres comerciante minorista en régimen especial, tus proveedores te cargan IVA más el recargo de equivalencia. Calcula ambos aquí." data-en="If you're a retailer under special scheme, suppliers charge VAT plus equivalence surcharge. Calculate both here.">Si eres comerciante minorista en régimen especial, tus proveedores te cargan IVA más el recargo de equivalencia. Calcula ambos aquí.</p>
+
+        <div class="form-group">
+            <label data-es="Base imponible (precio sin IVA ni recargo)" data-en="Taxable base (price without VAT or surcharge)">Base imponible (precio sin IVA ni recargo)</label>
+            <input type="number" id="mode4_base" placeholder="100" step="0.01" min="0" value="100">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Tipo de IVA + Recargo de equivalencia" data-en="VAT type + Equivalence surcharge">Tipo de IVA + Recargo de equivalencia</label>
+            <select id="mode4_type">
+                <option value="0.21|0.052" data-es="21% + 5,2% (General)" data-en="21% + 5.2% (General)">21% + 5,2% (General)</option>
+                <option value="0.10|0.014" data-es="10% + 1,4% (Reducido)" data-en="10% + 1.4% (Reduced)">10% + 1,4% (Reducido)</option>
+                <option value="0.04|0.005" data-es="4% + 0,5% (Superreducido)" data-en="4% + 0.5% (Super-reduced)">4% + 0,5% (Superreducido)</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="calculateMode4()" data-es="🏪 Calcular con recargo" data-en="🏪 Calculate with surcharge">🏪 Calcular con recargo</button>
+
+        <div id="mode4-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="IVA" data-en="VAT">IVA</div>
+                    <div class="result-value" id="mode4_vat">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Recargo equivalencia" data-en="Equivalence surcharge">Recargo equivalencia</div>
+                    <div class="result-value" id="mode4_surcharge">€0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Total a pagar" data-en="Total to pay">Total a pagar</div>
+                    <div class="result-value" id="mode4_total">€0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VAT Types Table -->
+    <div class="card">
+        <h2 data-es="🧾 Tipos de IVA en España 2026 — tabla completa" data-en="🧾 VAT types in Spain 2026 — complete table">🧾 Tipos de IVA en España 2026 — tabla completa</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Tipo" data-en="Type">Tipo</th>
+                    <th>%</th>
+                    <th data-es="Divisor IVA inverso" data-en="Reverse VAT divisor">Divisor IVA inverso</th>
+                    <th data-es="Ejemplos" data-en="Examples">Ejemplos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="General" data-en="General">General</td>
+                    <td>21%</td>
+                    <td>÷ 1,21</td>
+                    <td data-es="Ropa, tecnología, servicios profesionales, alcohol, tabaco" data-en="Clothing, technology, professional services, alcohol, tobacco">Ropa, tecnología, servicios profesionales, alcohol, tabaco</td>
+                </tr>
+                <tr>
+                    <td data-es="Reducido" data-en="Reduced">Reducido</td>
+                    <td>10%</td>
+                    <td>÷ 1,10</td>
+                    <td data-es="Hostelería, transporte de viajeros, vivienda nueva, museos" data-en="Hospitality, passenger transport, new housing, museums">Hostelería, transporte de viajeros, vivienda nueva, museos</td>
+                </tr>
+                <tr>
+                    <td data-es="Superreducido" data-en="Super-reduced">Superreducido</td>
+                    <td>4%</td>
+                    <td>÷ 1,04</td>
+                    <td data-es="Pan, leche, queso, frutas, verduras, libros, medicamentos" data-en="Bread, milk, cheese, fruits, vegetables, books, medicines">Pan, leche, queso, frutas, verduras, libros, medicamentos</td>
+                </tr>
+                <tr>
+                    <td data-es="Exento" data-en="Exempt">Exento</td>
+                    <td>0%</td>
+                    <td data-es="No aplica" data-en="Not applicable">No aplica</td>
+                    <td data-es="Servicios médicos, educación, servicios financieros, alquiler vivienda" data-en="Medical services, education, financial services, housing rent">Servicios médicos, educación, servicios financieros, alquiler vivienda</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info-box" style="margin-top: 2rem;">
+            <h3>🏝️ <span data-es="Canarias, Ceuta y Melilla" data-en="Canary Islands, Ceuta and Melilla">Canarias, Ceuta y Melilla</span></h3>
+            <p data-es="En Canarias no se aplica IVA sino el IGIC (Impuesto General Indirecto Canario). Tipos principales: general 7%, reducido 3%, incrementado 9,5%. En Ceuta y Melilla se aplica el IPSI con tipos propios." data-en="In Canary Islands, IGIC (Indirect General Tax) applies instead of VAT. Main types: general 7%, reduced 3%, increased 9.5%. In Ceuta and Melilla, IPSI applies with its own rates.">En Canarias no se aplica IVA sino el IGIC (Impuesto General Indirecto Canario). Tipos principales: general 7%, reducido 3%, incrementado 9,5%. En Ceuta y Melilla se aplica el IPSI con tipos propios.</p>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="🔢 Fórmulas del IVA inverso explicadas paso a paso" data-en="🔢 Reverse VAT formulas explained step by step">🔢 Fórmulas del IVA inverso explicadas paso a paso</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="Fórmula IVA Inverso" data-en="Reverse VAT Formula">Fórmula IVA Inverso</h3>
+                <p data-es="Base imponible = Total con IVA ÷ (1 + tipo de IVA)" data-en="Taxable base = Total with VAT ÷ (1 + VAT rate)">Base imponible = Total con IVA ÷ (1 + tipo de IVA)</p>
+                <p data-es="Cuota de IVA = Total con IVA − Base imponible" data-en="VAT amount = Total with VAT − Taxable base">Cuota de IVA = Total con IVA − Base imponible</p>
+                <p data-es="Ejemplo: 121€ con 21% → Base = 121 ÷ 1,21 = 100€. IVA = 121 − 100 = 21€" data-en="Example: 121€ with 21% → Base = 121 ÷ 1.21 = 100€. VAT = 121 − 100 = 21€">Ejemplo: 121€ con 21% → Base = 121 ÷ 1,21 = 100€. IVA = 121 − 100 = 21€</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Error frecuente" data-en="Common mistake">Error frecuente</h3>
+                <p data-es="❌ Incorrecto: multiplicar por el tipo (121 × 0,21 = 25,41€)" data-en="❌ Wrong: multiply by rate (121 × 0.21 = 25.41€)">❌ Incorrecto: multiplicar por el tipo (121 × 0,21 = 25,41€)</p>
+                <p data-es="✅ Correcto: dividir entre (1 + tipo) (121 ÷ 1,21 × 0,21 = 21€)" data-en="✅ Correct: divide by (1 + rate) (121 ÷ 1.21 × 0.21 = 21€)">✅ Correcto: dividir entre (1 + tipo) (121 ÷ 1,21 × 0,21 = 21€)</p>
+                <p data-es="El 21% es del precio SIN IVA, no del total." data-en="The 21% is of the price WITHOUT VAT, not total.">El 21% es del precio SIN IVA, no del total.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="IVA para autónomos" data-en="VAT for freelancers">IVA para autónomos</h3>
+                <ul>
+                    <li data-es="IVA repercutido: el que cobras a clientes (tuyo → Hacienda)" data-en="VAT charged: what you charge clients (yours → Tax Authority)">IVA repercutido: el que cobras a clientes (tuyo → Hacienda)</li>
+                    <li data-es="IVA soportado: el que pagas a proveedores (deducible)" data-en="VAT paid: what you pay suppliers (deductible)">IVA soportado: el que pagas a proveedores (deducible)</li>
+                    <li data-es="Modelo 303: trimestral, liquidar diferencia" data-en="Form 303: quarterly settlement">Modelo 303: trimestral, liquidar diferencia</li>
+                    <li data-es="VERI*FACTU 2026: código QR obligatorio" data-en="VERI*FACTU 2026: mandatory QR code">VERI*FACTU 2026: código QR obligatorio</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Retención IRPF" data-en="IRPF Withholding">Retención IRPF</h3>
+                <ul>
+                    <li data-es="15%: General (autónomos con +3 años)" data-en="15%: General (freelancers with +3 years)">15%: General (autónomos con +3 años)</li>
+                    <li data-es="7%: Nuevos autónomos (primeros 3 años)" data-en="7%: New freelancers (first 3 years)">7%: Nuevos autónomos (primeros 3 años)</li>
+                    <li data-es="19%: Estimación objetiva módulos" data-en="19%: Objective estimation">19%: Estimación objetiva módulos</li>
+                    <li data-es="0%: Cliente no empresa" data-en="0%: Non-business client">0%: Cliente no empresa</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="card">
+        <div class="info-box">
+            <h3 data-es="⚠️ Aviso fiscal importante" data-en="⚠️ Important tax notice">⚠️ Aviso fiscal importante</h3>
+            <p data-es="Esta calculadora es orientativa. Los tipos de IVA, exenciones y casos especiales pueden variar según el producto, el destinatario y la comunidad autónoma. Para declaraciones fiscales y casos específicos, consulta con un asesor fiscal o la Agencia Tributaria (AEAT)." data-en="This calculator is informative only. VAT rates, exemptions, and special cases may vary by product, recipient, and region. For tax returns and specific cases, consult a tax advisor or the Tax Agency (AEAT).">Esta calculadora es orientativa. Los tipos de IVA, exenciones y casos especiales pueden variar según el producto, el destinatario y la comunidad autónoma. Para declaraciones fiscales y casos específicos, consulta con un asesor fiscal o la Agencia Tributaria (AEAT).</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchMode(mode) {
+        document.querySelectorAll('.calc-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(mode).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function loadExample1(total, vat) {
+        document.getElementById('mode1_total').value = total;
+        document.getElementById('mode1_vat').value = vat;
+        calculateMode1();
+    }
+
+    function calculateMode1() {
+        const total = parseFloat(document.getElementById('mode1_total').value) || 0;
+        const vat = parseFloat(document.getElementById('mode1_vat').value) || 0;
+
+        const base = total / (1 + vat);
+        const vatAmount = total - base;
+
+        document.getElementById('mode1_base').textContent = formatCurrency(base);
+        document.getElementById('mode1_vat_amount').textContent = formatCurrency(vatAmount);
+        document.getElementById('mode1-result').style.display = 'block';
+    }
+
+    function calculateMode2() {
+        const base = parseFloat(document.getElementById('mode2_base').value) || 0;
+        const vat = parseFloat(document.getElementById('mode2_vat').value) || 0;
+
+        const vatAmount = base * vat;
+        const total = base + vatAmount;
+
+        document.getElementById('mode2_vat_amount').textContent = formatCurrency(vatAmount);
+        document.getElementById('mode2_total').textContent = formatCurrency(total);
+        document.getElementById('mode2-result').style.display = 'block';
+    }
+
+    function calculateMode3() {
+        const base = parseFloat(document.getElementById('mode3_base').value) || 0;
+        const vat = parseFloat(document.getElementById('mode3_vat').value) || 0;
+        const irpf = parseFloat(document.getElementById('mode3_irpf').value) || 0;
+
+        const vatAmount = base * vat;
+        const irpfAmount = base * irpf;
+        const invoiceTotal = base + vatAmount;
+        const net = invoiceTotal - irpfAmount;
+
+        document.getElementById('mode3_vat_amount').textContent = formatCurrency(vatAmount);
+        document.getElementById('mode3_irpf_amount').textContent = formatCurrency(irpfAmount);
+        document.getElementById('mode3_invoice_total').textContent = formatCurrency(invoiceTotal);
+        document.getElementById('mode3_net').textContent = formatCurrency(net);
+        document.getElementById('mode3-result').style.display = 'block';
+    }
+
+    function calculateMode4() {
+        const base = parseFloat(document.getElementById('mode4_base').value) || 0;
+        const type = document.getElementById('mode4_type').value.split('|');
+        const vat = parseFloat(type[0]) || 0;
+        const surcharge = parseFloat(type[1]) || 0;
+
+        const vatAmount = base * vat;
+        const surchargeAmount = base * surcharge;
+        const total = base + vatAmount + surchargeAmount;
+
+        document.getElementById('mode4_vat').textContent = formatCurrency(vatAmount);
+        document.getElementById('mode4_surcharge').textContent = formatCurrency(surchargeAmount);
+        document.getElementById('mode4_total').textContent = formatCurrency(total);
+        document.getElementById('mode4-result').style.display = 'block';
+    }
+
+    // Trigger calculations on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const section = input.closest('.calc-section');
+                    if (section.id === 'mode1') calculateMode1();
+                    else if (section.id === 'mode2') calculateMode2();
+                    else if (section.id === 'mode3') calculateMode3();
+                    else if (section.id === 'mode4') calculateMode4();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
