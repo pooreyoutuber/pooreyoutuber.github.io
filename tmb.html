@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de TMB y TDEE 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #f97316; /* Orange theme for metabolism/fire */
+            --primary-dark: #ea580c;
+            --bg: #fff7ed;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #fed7aa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+        header { background: var(--card-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; }
+        
+        .grid-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-dark); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+        
+        .radio-group { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .radio-btn { flex: 1; min-width: 100px; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; background: white; transition: all 0.3s; font-size: 0.9rem; }
+        .radio-btn input { display: none; }
+        .radio-btn.selected { border-color: var(--primary); background: rgba(249, 115, 22, 0.1); color: var(--primary); }
+        
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #ef4444); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3); }
+
+        .result-box { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; text-align: center; position: relative;}
+        .result-label { font-size: 0.9rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem; }
+        .result-value { font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); line-height: 1.1; margin-bottom: 0.5rem; }
+        
+        .tdee-box { background: #1e293b; color: white; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; text-align: center;}
+        .tdee-box .result-label { color: #cbd5e1; }
+        .tdee-box .result-value { color: #facc15; }
+        .tdee-desc { font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem; }
+
+        .formula-list { margin-top: 1.5rem; display: grid; gap: 0.8rem; }
+        .formula-item { display: flex; justify-content: space-between; padding: 0.8rem; background: white; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .formula-item strong { color: var(--text-dark); }
+        .formula-item span { color: var(--primary-dark); font-weight: 700; }
+
+        .info-box { background: #fef3c7; border-left: 4px solid var(--warning); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box h3 { margin-bottom: 0.5rem; color: #92400e; font-size: 1rem; }
+        .info-box p { color: #b45309; font-size: 0.9rem; margin-bottom: 0; }
+
+        .text-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .text-section h3 { color: var(--primary-dark); margin-top: 1.5rem; }
+        .text-section p { margin-bottom: 1rem; color: #475569; }
+        
+        .highlight-card { border-left: 3px solid var(--primary); padding-left: 1rem; margin-bottom: 1.5rem; }
+        .highlight-card h4 { color: var(--text-dark); font-size: 1.05rem; }
+
+        ul { margin-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        li { margin-bottom: 0.5rem; }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .radio-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="🔥 NutriMX TMB" data-en="🔥 NutriMX BMR">🔥 NutriMX TMB</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de TMB (Tasa Metabólica Basal) 2026" data-en="BMR (Basal Metabolic Rate) Calculator 2026">Calculadora de TMB (Tasa Metabólica Basal) 2026</h1>
+    <p class="subtitle" data-es="🔥 Harris-Benedict + Mifflin-St Jeor · TDEE · Todos los niveles actividad" data-en="🔥 Harris-Benedict + Mifflin-St Jeor · TDEE · All activity levels">🔥 Harris-Benedict + Mifflin-St Jeor · TDEE · Todos los niveles actividad</p>
+
+    <div class="grid-layout">
+        <!-- FORM COLUMN -->
+        <div class="card">
+            <h2 data-es="🧮 Introduce tus datos" data-en="🧮 Enter your details">🧮 Introduce tus datos</h2>
+            
+            <div class="form-group">
+                <label data-es="Sexo biológico" data-en="Biological Sex">Sexo biológico</label>
+                <div class="radio-group" id="sex-group">
+                    <label class="radio-btn selected" onclick="selectRadio('sex-group', this)">
+                        <input type="radio" name="sex" value="male" checked> <span data-es="♂ Hombre" data-en="♂ Male">♂ Hombre</span>
+                    </label>
+                    <label class="radio-btn" onclick="selectRadio('sex-group', this)">
+                        <input type="radio" name="sex" value="female"> <span data-es="♀ Mujer" data-en="♀ Female">♀ Mujer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid-layout" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0;">
+                <div class="form-group">
+                    <label data-es="Edad (años)" data-en="Age (years)">Edad (años)</label>
+                    <input type="number" id="age" placeholder="Ej. 30" min="15" max="100">
+                </div>
+                <div class="form-group">
+                    <label data-es="Peso (kg)" data-en="Weight (kg)">Peso (kg)</label>
+                    <input type="number" id="weight" placeholder="Ej. 75" step="0.1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Altura (cm)" data-en="Height (cm)">Altura (cm)</label>
+                <input type="number" id="height" placeholder="Ej. 175" min="100" max="250">
+            </div>
+
+            <div class="form-group">
+                <label data-es="Nivel de actividad habitual" data-en="Habitual Activity Level">Nivel de actividad habitual</label>
+                <select id="activity">
+                    <option value="1.2" data-es="Sedentario (sin ejercicio / trabajo de escritorio)" data-en="Sedentary (no exercise / desk job)">Sedentario (sin ejercicio / trabajo de escritorio)</option>
+                    <option value="1.375" data-es="Ligero (ejercicio 1-3 días/semana)" data-en="Light (exercise 1-3 days/week)">Ligero (ejercicio 1-3 días/semana)</option>
+                    <option value="1.55" data-es="Moderado (ejercicio 3-5 días/semana)" data-en="Moderate (exercise 3-5 days/week)">Moderado (ejercicio 3-5 días/semana)</option>
+                    <option value="1.725" data-es="Activo (ejercicio intenso 6-7 días/semana)" data-en="Active (intense exercise 6-7 days/week)">Activo (ejercicio intenso 6-7 días/semana)</option>
+                    <option value="1.9" data-es="Muy activo (atleta / trabajo físico intenso)" data-en="Very active (athlete / intense physical job)">Muy activo (atleta / trabajo físico intenso)</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="calculateTMB()" data-es="🔥 Calcular mi TMB" data-en="🔥 Calculate my BMR">🔥 Calcular mi TMB</button>
+
+            <!-- RESULTS -->
+            <div id="results-container" style="display: none;">
+                
+                <div class="tdee-box">
+                    <div class="result-label" data-es="TDEE (Gasto Energético Total Diario)" data-en="TDEE (Total Daily Energy Expenditure)">TDEE (Gasto Energético Total Diario)</div>
+                    <div class="result-value"><span id="res-tdee">--</span> kcal</div>
+                    <div class="tdee-desc" data-es="Calorías para MANTENER tu peso actual." data-en="Calories to MAINTAIN your current weight.">Calorías para MANTENER tu peso actual.</div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label" data-es="TMB Promedio (Solo reposo)" data-en="Average BMR (Resting only)">TMB Promedio (Solo reposo)</div>
+                    <div class="result-value" style="font-size: 2rem;"><span id="res-avg">--</span> kcal</div>
+                </div>
+
+                <div class="formula-list">
+                    <div class="formula-item">
+                        <strong data-es="Mifflin-St Jeor" data-en="Mifflin-St Jeor">Mifflin-St Jeor</strong> <span id="res-mifflin">-- kcal</span>
+                    </div>
+                    <div class="formula-item">
+                        <strong data-es="Harris-Benedict" data-en="Harris-Benedict">Harris-Benedict</strong> <span id="res-harris">-- kcal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO COLUMN -->
+        <div>
+            <div class="info-box">
+                <h3 data-es="⚠️ Aviso médico" data-en="⚠️ Medical Notice">⚠️ Aviso médico</h3>
+                <p data-es="Esta calculadora ofrece estimaciones orientativas basadas en fórmulas de referencia científica. Los resultados pueden variar según composición corporal, condiciones de salud y otros factores individuales. Consulta siempre con un dietista-nutricionista o médico antes de modificar significativamente tu alimentación." data-en="This calculator provides estimates based on scientific reference formulas. Results may vary depending on body composition, health conditions, and other individual factors. Always consult a dietitian or doctor before significantly changing your diet.">Esta calculadora ofrece estimaciones orientativas basadas en fórmulas de referencia científica. Los resultados pueden variar según composición corporal, condiciones de salud y otros factores individuales. Consulta siempre con un dietista-nutricionista o médico antes de modificar significativamente tu alimentación.</p>
+            </div>
+
+            <div class="text-section" style="padding: 1.5rem;">
+                <h2 style="margin-top:0;" data-es="🔬 ¿Qué es la TMB y por qué importa?" data-en="🔬 What is BMR and why does it matter?">🔬 ¿Qué es la TMB y por qué importa?</h2>
+                <p data-es="La Tasa Metabólica Basal (TMB) es la cantidad de energía —medida en kilocalorías— que tu cuerpo consume en reposo absoluto durante 24 horas para mantener las funciones vitales: respiración, circulación sanguínea, regulación de la temperatura, etc." data-en="Basal Metabolic Rate (BMR) is the amount of energy —measured in kilocalories— your body consumes at absolute rest over 24 hours to maintain vital functions: breathing, blood circulation, temperature regulation, etc.">La Tasa Metabólica Basal (TMB) es la cantidad de energía —medida en kilocalorías— que tu cuerpo consume en reposo absoluto durante 24 horas para mantener las funciones vitales: respiración, circulación sanguínea, regulación de la temperatura, etc.</p>
+                <p data-es="Representa entre el 60% y el 75% de tu gasto energético total diario, lo que la convierte en el componente más importante de cualquier estrategia nutricional." data-en="It represents between 60% and 75% of your total daily energy expenditure, making it the most important component of any nutritional strategy.">Representa entre el 60% y el 75% de tu gasto energético total diario, lo que la convierte en el componente más importante de cualquier estrategia nutricional.</p>
+            </div>
+            
+            <div class="text-section" style="padding: 1.5rem;">
+                <h2 style="margin-top:0;" data-es="Diferencias entre Fórmulas" data-en="Differences between Formulas">Diferencias entre Fórmulas</h2>
+                <div class="highlight-card">
+                    <h4 data-es="Mifflin-St Jeor (1990)" data-en="Mifflin-St Jeor (1990)">Mifflin-St Jeor (1990)</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Considerada la fórmula más precisa para la población occidental actual. Recomendada por la Academy of Nutrition and Dietetics. (Margen error ±10%)" data-en="Considered the most accurate formula for modern western populations. Recommended by the Academy of Nutrition and Dietetics. (Margin of error ±10%)">Considerada la fórmula más precisa para la población occidental actual. Recomendada por la Academy of Nutrition and Dietetics. (Margen error ±10%)</p>
+                </div>
+                <div class="highlight-card">
+                    <h4 data-es="Harris-Benedict revisada (1984)" data-en="Revised Harris-Benedict (1984)">Harris-Benedict revisada (1984)</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;" data-es="Actualización de la fórmula original de 1919. Tiende a sobreestimar ligeramente el gasto basal en personas con sobrepeso o sedentarias. Histórica y confiable." data-en="Update of the original 1919 formula. Tends to slightly overestimate resting energy in overweight or sedentary individuals. Historic and reliable.">Actualización de la fórmula original de 1919. Tiende a sobreestimar ligeramente el gasto basal en personas con sobrepeso o sedentarias. Histórica y confiable.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTRA INFO SECTIONS -->
+    <div class="text-section">
+        <h2 data-es="⚡ TDEE: del metabolismo basal al gasto real" data-en="⚡ TDEE: from basal metabolism to actual expenditure">⚡ TDEE: del metabolismo basal al gasto real</h2>
+        <p data-es="El <strong>TDEE (Total Daily Energy Expenditure)</strong> o Gasto Energético Total Diario incorpora a la TMB el efecto térmico de los alimentos (~10%) y el gasto por actividad física. Es el número que realmente importa para gestionar el peso:" data-en="<strong>TDEE (Total Daily Energy Expenditure)</strong> incorporates the thermic effect of food (~10%) and physical activity expenditure into your BMR. It's the number that really matters for weight management:">El <strong>TDEE (Total Daily Energy Expenditure)</strong> o Gasto Energético Total Diario incorpora a la TMB el efecto térmico de los alimentos (~10%) y el gasto por actividad física. Es el número que realmente importa para gestionar el peso:</p>
+        
+        <ul>
+            <li><strong data-es="Para mantener peso:" data-en="To maintain weight:">Para mantener peso:</strong> <span data-es="consume calorías ≈ TDEE" data-en="consume calories ≈ TDEE">consume calorías ≈ TDEE</span></li>
+            <li><strong data-es="Para perder grasa:" data-en="To lose fat:">Para perder grasa:</strong> <span data-es="déficit de 300-500 kcal/día respecto al TDEE" data-en="deficit of 300-500 kcal/day from TDEE">déficit de 300-500 kcal/día respecto al TDEE</span></li>
+            <li><strong data-es="Para ganar masa:" data-en="To gain muscle:">Para ganar masa:</strong> <span data-es="superávit de 200-400 kcal/día respecto al TDEE" data-en="surplus of 200-400 kcal/day over TDEE">superávit de 200-400 kcal/día respecto al TDEE</span></li>
+        </ul>
+
+        <h3 data-es="Errores frecuentes al aplicar el TDEE" data-en="Common mistakes when applying TDEE">Errores frecuentes al aplicar el TDEE</h3>
+        <ul>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="Sobreestimar el nivel de actividad:" data-en="Overestimating activity level:">Sobreestimar el nivel de actividad:</strong> <span data-es="Si vas al gimnasio 3 días pero trabajas sentado el resto, el nivel 'moderado' es más apropiado que 'activo'." data-en="If you go to the gym 3 days but sit for work the rest, 'moderate' is more appropriate than 'active'.">Si vas al gimnasio 3 días pero trabajas sentado el resto, el nivel 'moderado' es más apropiado que 'activo'.</span></li>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="No recalcular tras cambios de peso:" data-en="Not recalculating after weight changes:">No recalcular tras cambios de peso:</strong> <span data-es="Cada 5 kg de variación, el TDEE cambia significativamente." data-en="For every 5 kg (11 lbs) change, TDEE shifts significantly.">Cada 5 kg de variación, el TDEE cambia significativamente.</span></li>
+            <li style="margin-bottom: 0.5rem;"><strong data-es="Confundir TMB con 'mínimo de calorías':" data-en="Confusing BMR with 'minimum calories':">Confundir TMB con 'mínimo de calorías':</strong> <span data-es="La TMB no incluye ninguna actividad; comer solo la TMB supone un déficit severo incluso en reposo total." data-en="BMR does not include any activity; eating only your BMR is a severe deficit even at total rest.">La TMB no incluye ninguna actividad; comer solo la TMB supone un déficit severo incluso en reposo total.</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if(el.children.length === 0 || el.tagName === 'OPTION' || el.tagName === 'SPAN') {
+                el.innerHTML = text; 
+            } else {
+                // Safely replace text nodes to preserve nested HTML like <strong>
+                Array.from(el.childNodes).forEach(node => {
+                    if (node.nodeType === 3 && node.nodeValue.trim() !== '') {
+                        node.nodeValue = text;
+                    }
+                });
+            }
+        });
+        
+        if(document.getElementById('results-container').style.display === 'block') {
+            calculateTMB();
+        }
+    }
+
+    function selectRadio(groupId, element) {
+        const group = document.getElementById(groupId);
+        group.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('selected'));
+        element.classList.add('selected');
+        element.querySelector('input').checked = true;
+    }
+
+    function calculateTMB() {
+        const age = parseFloat(document.getElementById('age').value);
+        const weight = parseFloat(document.getElementById('weight').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const activity = parseFloat(document.getElementById('activity').value);
+        const sex = document.querySelector('input[name="sex"]:checked').value;
+
+        if (!age || age < 15 || age > 120 || !weight || weight < 30 || !height || height < 100) {
+            alert(currentLang === 'es' ? "Por favor ingresa valores válidos para edad, peso y altura." : "Please enter valid values for age, weight, and height.");
+            return;
+        }
+
+        let harris, mifflin;
+
+        // Harris-Benedict (Revised 1984)
+        if (sex === 'male') {
+            harris = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+        } else {
+            harris = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+        }
+
+        // Mifflin-St Jeor (1990)
+        if (sex === 'male') {
+            mifflin = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        } else {
+            mifflin = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        }
+
+        const avgTMB = (harris + mifflin) / 2;
+        const tdee = avgTMB * activity;
+
+        // Display Data
+        document.getElementById('res-harris').innerText = Math.round(harris) + ' kcal';
+        document.getElementById('res-mifflin').innerText = Math.round(mifflin) + ' kcal';
+        document.getElementById('res-avg').innerText = Math.round(avgTMB);
+        document.getElementById('res-tdee').innerText = Math.round(tdee);
+
+        document.getElementById('results-container').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
