@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Embarazo y Fecha de Parto 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ec4899; /* Pink theme for pregnancy */
+            --bg: #fdf2f8;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #fce7f3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+        header { background: var(--card-bg); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .lang-toggle { background: none; border: 2px solid var(--primary); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary); transition: all 0.3s; }
+        .lang-toggle.active { background: var(--primary); color: white; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { color: var(--primary); margin-bottom: 1rem; margin-top: 2rem; }
+        h3 { margin-bottom: 0.5rem; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); }
+        .card h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-dark); margin-top: 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="date"], input[type="number"], select { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1); }
+        .radio-group { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .radio-btn { flex: 1; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; background: white; transition: all 0.3s; }
+        .radio-btn input { display: none; }
+        .radio-btn.selected { border-color: var(--primary); background: rgba(236, 72, 153, 0.1); color: var(--primary); }
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--primary), #f43f5e); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(236, 72, 153, 0.3); }
+        
+        .quick-btns { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .quick-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); transition: all 0.2s; }
+        .quick-btn:hover { background: #e2e8f0; }
+
+        .result-box { background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border-left: 4px solid var(--primary); padding: 2rem; border-radius: 8px; margin-top: 1.5rem; }
+        .result-header { text-align: center; margin-bottom: 1.5rem; }
+        .result-label { font-size: 0.9rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+        .result-value { font-size: 2.2rem; font-weight: 700; color: var(--primary); }
+        
+        .timeline { margin-top: 1.5rem; border-top: 2px dashed var(--border); padding-top: 1.5rem; }
+        .timeline-item { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .timeline-item strong { color: var(--text-dark); }
+        .timeline-item span { color: var(--primary); font-weight: 600; }
+
+        .info-box { background: #fef3c7; border-left: 4px solid var(--warning); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .info-box h3 { margin-bottom: 0.5rem; color: #92400e; }
+        .info-box p { color: #b45309; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.5rem; }
+        
+        .guide-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+        .guide-section h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-dark); }
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        
+        .trimester-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .trimester-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
+        .trimester-num { position: absolute; top: -10px; right: -10px; font-size: 5rem; font-weight: 800; color: rgba(236, 72, 153, 0.05); line-height: 1; }
+        .trimester-card h3 { font-size: 1.2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .trimester-card .subtitle-tri { font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem; font-weight: 600; }
+        .trimester-card ul { margin-left: 1.2rem; margin-bottom: 1rem; }
+        .trimester-card li { margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-dark); }
+
+        .text-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .text-section p { margin-bottom: 1rem; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="#" class="logo" data-es="🤰 NutriMX Mamá" data-en="🤰 NutriMX Mom">🤰 NutriMX Mamá</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Embarazo y Fecha de Parto 2026" data-en="Pregnancy & Due Date Calculator 2026">Calculadora de Embarazo y Fecha de Parto 2026</h1>
+    <p class="subtitle" data-es="Calcula la fecha probable de parto, semanas de gestación, trimestre y un timeline médico completo con todas las fechas clave de tu embarazo." data-en="Calculate the estimated due date, weeks of gestation, trimester, and a complete medical timeline with all the key dates of your pregnancy.">Calcula la fecha probable de parto, semanas de gestación, trimestre y un timeline médico completo con todas las fechas clave de tu embarazo.</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="📅 Introduce tus datos" data-en="📅 Enter your details">📅 Introduce tus datos</h2>
+
+            <div class="radio-group">
+                <label class="radio-btn selected" onclick="setMode('fur')">
+                    <input type="radio" name="calc-mode" value="fur" checked> 📅 <span data-es="Desde la FUR" data-en="From LMP">Desde la FUR</span>
+                </label>
+                <label class="radio-btn" onclick="setMode('concepcion')">
+                    <input type="radio" name="calc-mode" value="concepcion"> 🔬 <span data-es="Desde concepción" data-en="From conception">Desde concepción</span>
+                </label>
+            </div>
+
+            <div id="fur-section">
+                <div class="form-group">
+                    <label data-es="Fecha de la última regla (FUR)" data-en="First day of last menstrual period (LMP)">Fecha de la última regla (FUR)</label>
+                    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem;" data-es="El primer día de tu última menstruación." data-en="The first day of your last period.">El primer día de tu última menstruación.</p>
+                    <input type="date" id="date-fur">
+                </div>
+                <div class="form-group">
+                    <label data-es="Duración media del ciclo (días)" data-en="Average cycle length (days)">Duración media del ciclo (días)</label>
+                    <input type="number" id="cycle-length" value="28" min="20" max="45">
+                </div>
+            </div>
+
+            <div id="concepcion-section" style="display: none;">
+                <div class="form-group">
+                    <label data-es="Fecha de concepción (aprox.)" data-en="Conception date (approx.)">Fecha de concepción (aprox.)</label>
+                    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem;" data-es="La FUR equivalente se calcula automáticamente." data-en="The equivalent LMP is calculated automatically.">La FUR equivalente se calcula automáticamente.</p>
+                    <input type="date" id="date-concepcion">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Ejemplos rápidos:" data-en="Quick examples:">Ejemplos rápidos:</label>
+                <div class="quick-btns">
+                    <button class="quick-btn" onclick="setQuickWeeks(4)" data-es="4 semanas" data-en="4 weeks">4 semanas</button>
+                    <button class="quick-btn" onclick="setQuickWeeks(12)" data-es="12 semanas" data-en="12 weeks">12 semanas</button>
+                    <button class="quick-btn" onclick="setQuickWeeks(20)" data-es="20 semanas" data-en="20 weeks">20 semanas</button>
+                    <button class="quick-btn" onclick="setQuickWeeks(32)" data-es="32 semanas" data-en="32 weeks">32 semanas</button>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculatePregnancy()" data-es="🤰 Calcular embarazo" data-en="🤰 Calculate pregnancy">🤰 Calcular embarazo</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-header">
+                    <div class="result-label" data-es="Fecha Probable de Parto (FPP)" data-en="Estimated Due Date (EDD)">Fecha Probable de Parto (FPP)</div>
+                    <div class="result-value" id="fpp-date">--</div>
+                </div>
+
+                <div class="result-header" style="margin-bottom: 0.5rem;">
+                    <div class="result-label" data-es="Tiempo de Gestación" data-en="Gestation Time">Tiempo de Gestación</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-dark);" id="gestation-time">--</div>
+                    <div style="font-size: 1rem; color: var(--primary); font-weight: 600; margin-top: 0.3rem;" id="trimester-text">--</div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong data-es="Concepción estimada:" data-en="Estimated conception:">Concepción estimada:</strong>
+                        <span id="tl-conception">--</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong data-es="Fin 1er Trimestre (Sem 13):" data-en="End 1st Trimester (Wk 13):">Fin 1er Trimestre (Sem 13):</strong>
+                        <span id="tl-tri1">--</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong data-es="Fin 2º Trimestre (Sem 27):" data-en="End 2nd Trimester (Wk 27):">Fin 2º Trimestre (Sem 27):</strong>
+                        <span id="tl-tri2">--</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong data-es="Parto a término (Sem 37):" data-en="Full term (Wk 37):">Parto a término (Sem 37):</strong>
+                        <span id="tl-term">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3 data-es="⚠️ Aviso Médico" data-en="⚠️ Medical Notice">⚠️ Aviso Médico</h3>
+                <p data-es="La fecha probable de parto calculada es una estimación orientativa basada en la Regla de Naegele. La FPP real la determina tu ginecólogo o matrona mediante ecografía. Consulta siempre con tu equipo médico." data-en="The calculated due date is an estimate based on Naegele's Rule. Your actual due date is determined by your doctor via ultrasound. Always consult your medical team.">La fecha probable de parto calculada es una estimación orientativa basada en la Regla de Naegele. La FPP real la determina tu ginecólogo o matrona mediante ecografía. Consulta siempre con tu equipo médico.</p>
+            </div>
+
+            <div class="text-section">
+                <h2 data-es="¿Cómo se calcula la fecha de parto?" data-en="How is the due date calculated?">¿Cómo se calcula la fecha de parto?</h2>
+                <p data-es="La fecha probable de parto (FPP) se calcula aplicando la Regla de Naegele, el método estándar en obstetricia: suma 280 días (40 semanas) al primer día de la última menstruación (FUR). De forma rápida: suma 9 meses y 7 días a la FUR." data-en="The estimated due date (EDD) is calculated using Naegele's Rule, the standard obstetric method: add 280 days (40 weeks) to the first day of your last menstrual period (LMP). Quickly: add 9 months and 7 days to the LMP.">La fecha probable de parto (FPP) se calcula aplicando la Regla de Naegele, el método estándar en obstetricia: suma 280 días (40 semanas) al primer día de la última menstruación (FUR). De forma rápida: suma 9 meses y 7 días a la FUR.</p>
+                <p data-es="Ejemplo: si tu última regla empezó el 1 de enero de 2026, tu FPP sería el 8 de octubre de 2026." data-en="Example: if your last period started on January 1, 2026, your EDD would be October 8, 2026.">Ejemplo: si tu última regla empezó el 1 de enero de 2026, tu FPP sería el 8 de octubre de 2026.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide-section">
+        <h2 data-es="Los tres trimestres del embarazo" data-en="The three pregnancy trimesters">Los tres trimestres del embarazo</h2>
+        <p class="subtitle" data-es="Síntomas, pruebas e hitos más importantes semana a semana." data-en="Symptoms, tests, and important milestones week by week.">Síntomas, pruebas e hitos más importantes semana a semana.</p>
+        
+        <div class="guide-grid">
+            <div class="trimester-card">
+                <div class="trimester-num">1</div>
+                <h3 data-es="1er Trimestre" data-en="1st Trimester">1er Trimestre</h3>
+                <div class="subtitle-tri" data-es="Semanas 1 a 13" data-en="Weeks 1 to 13">Semanas 1 a 13</div>
+                <p data-es="El período de mayor desarrollo embrionario. Se forman todos los órganos principales." data-en="The period of greatest embryonic development. All major organs form.">El período de mayor desarrollo embrionario. Se forman todos los órganos principales.</p>
+                <ul>
+                    <li data-es="Náuseas matutinas (50-90% de embarazadas)" data-en="Morning sickness (50-90% of pregnant women)">Náuseas matutinas (50-90% de embarazadas)</li>
+                    <li data-es="Fatiga intensa y somnolencia" data-en="Intense fatigue and sleepiness">Fatiga intensa y somnolencia</li>
+                    <li data-es="Sensibilidad en los pechos" data-en="Breast tenderness">Sensibilidad en los pechos</li>
+                    <li data-es="Primera ecografía (sem 11-13+6)" data-en="First ultrasound (wk 11-13+6)">Primera ecografía (sem 11-13+6)</li>
+                    <li data-es="Cribado combinado para trisomías" data-en="Combined screening for trisomies">Cribado combinado para trisomías</li>
+                </ul>
+            </div>
+            
+            <div class="trimester-card">
+                <div class="trimester-num">2</div>
+                <h3 data-es="2º Trimestre" data-en="2nd Trimester">2º Trimestre</h3>
+                <div class="subtitle-tri" data-es="Semanas 14 a 27" data-en="Weeks 14 to 27">Semanas 14 a 27</div>
+                <p data-es="El trimestre más cómodo para la mayoría. Las náuseas ceden y el vientre empieza a notarse." data-en="The most comfortable trimester for most. Nausea subsides and the belly begins to show.">El trimestre más cómodo para la mayoría. Las náuseas ceden y el vientre empieza a notarse.</p>
+                <ul>
+                    <li data-es="Se notan los primeros movimientos (sem 18-22)" data-en="First baby movements felt (wk 18-22)">Se notan los primeros movimientos (sem 18-22)</li>
+                    <li data-es="Ecografía morfológica (sem 18-22)" data-en="Morphological ultrasound (wk 18-22)">Ecografía morfológica (sem 18-22)</li>
+                    <li data-es="Test O'Sullivan — glucosa (sem 24-28)" data-en="Glucose screening test (wk 24-28)">Test O'Sullivan — glucosa (sem 24-28)</li>
+                    <li data-es="Aumento notable del vientre" data-en="Noticeable belly growth">Aumento notable del vientre</li>
+                    <li data-es="Posibles calambres, ardor de estómago" data-en="Possible cramps, heartburn">Posibles calambres, ardor de estómago</li>
+                </ul>
+            </div>
+
+            <div class="trimester-card">
+                <div class="trimester-num">3</div>
+                <h3 data-es="3er Trimestre" data-en="3rd Trimester">3er Trimestre</h3>
+                <div class="subtitle-tri" data-es="Semanas 28 a 40+" data-en="Weeks 28 to 40+">Semanas 28 a 40+</div>
+                <p data-es="El bebé termina de madurar. La incomodidad aumenta al acercarse el parto." data-en="The baby finishes maturing. Discomfort increases as delivery approaches.">El bebé termina de madurar. La incomodidad aumenta al acercarse el parto.</p>
+                <ul>
+                    <li data-es="Ecografía del 3er trimestre (sem 32-36)" data-en="3rd trimester ultrasound (wk 32-36)">Ecografía del 3er trimestre (sem 32-36)</li>
+                    <li data-es="Cultivo estreptococo B (sem 35-37)" data-en="Group B strep culture (wk 35-37)">Cultivo estreptococo B (sem 35-37)</li>
+                    <li data-es="Braxtons Hicks (contracciones de práctica)" data-en="Braxton Hicks (practice contractions)">Braxtons Hicks (contracciones de práctica)</li>
+                    <li data-es="Inicio de la baja maternal (sem 36-38)" data-en="Start of maternity leave (wk 36-38)">Inicio de la baja maternal (sem 36-38)</li>
+                    <li data-es="Parto a término: semanas 37-42" data-en="Full term delivery: weeks 37-42">Parto a término: semanas 37-42</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-section" style="margin-top: 3rem;">
+        <h2 data-es="Preguntas Frecuentes" data-en="Frequently Asked Questions">Preguntas Frecuentes</h2>
+        
+        <h3 data-es="¿Por qué se cuenta desde la última regla y no desde la concepción?" data-en="Why count from the last period and not conception?">¿Por qué se cuenta desde la última regla y no desde la concepción?</h3>
+        <p data-es="Porque en la mayoría de embarazos la fecha exacta de concepción no se conoce con precisión, pero la fecha de la última regla sí. La concepción ocurre aproximadamente 14 días después del primer día de la FUR (en ciclos de 28 días). Por eso el embarazo se cuenta como 40 semanas desde la FUR, aunque la gestación real dura unas 38 semanas desde la concepción." data-en="Because in most pregnancies the exact date of conception is unknown, but the last period date is known. Conception occurs roughly 14 days after the first day of the LMP (in 28-day cycles). This is why pregnancy is counted as 40 weeks from the LMP, even though actual gestation is about 38 weeks.">Porque en la mayoría de embarazos la fecha exacta de concepción no se conoce con precisión, pero la fecha de la última regla sí. La concepción ocurre aproximadamente 14 días después del primer día de la FUR (en ciclos de 28 días). Por eso el embarazo se cuenta como 40 semanas desde la FUR, aunque la gestación real dura unas 38 semanas desde la concepción.</p>
+
+        <h3 data-es="¿Cuándo se realiza la primera ecografía en España?" data-en="When is the first ultrasound done in Spain?">¿Cuándo se realiza la primera ecografía en España?</h3>
+        <p data-es="El sistema sanitario español contempla 3 ecografías obligatorias durante el embarazo normal:" data-en="The Spanish healthcare system includes 3 mandatory ultrasounds during a normal pregnancy:">El sistema sanitario español contempla 3 ecografías obligatorias durante el embarazo normal:</p>
+        <ul>
+            <li data-es="1ª Ecografía (sem 11-13+6): Confirma el embarazo, detecta el número de fetos, mide la translucencia nucal para el cribado de trisomías." data-en="1st Ultrasound (wk 11-13+6): Confirms pregnancy, detects number of fetuses, measures nuchal translucency for trisomy screening.">1ª Ecografía (sem 11-13+6): Confirma el embarazo, detecta el número de fetos, mide la translucencia nucal para el cribado de trisomías.</li>
+            <li data-es="2ª Ecografía morfológica (sem 18-22): La más importante. Examina la anatomía fetal en detalle para detectar malformaciones." data-en="2nd Morphological Ultrasound (wk 18-22): The most important. Examines fetal anatomy in detail to detect malformations.">2ª Ecografía morfológica (sem 18-22): La más importante. Examina la anatomía fetal en detalle para detectar malformaciones.</li>
+            <li data-es="3ª Ecografía (sem 32-36): Evalúa el crecimiento fetal, la posición del bebé y la cantidad de líquido amniótico." data-en="3rd Ultrasound (wk 32-36): Evaluates fetal growth, baby's position, and amniotic fluid volume.">3ª Ecografía (sem 32-36): Evalúa el crecimiento fetal, la posición del bebé y la cantidad de líquido amniótico.</li>
+        </ul>
+        <br>
+        <h3 data-es="¿Qué es la baja maternal en España?" data-en="What is maternity leave in Spain?">¿Qué es la baja maternal en España?</h3>
+        <p data-es="En España, la baja por maternidad dura 16 semanas, de las cuales las 6 semanas inmediatamente posteriores al parto son obligatorias. Las 10 semanas restantes pueden distribuirse antes del parto (a partir de la semana 36) o después. Ambos progenitores tienen derecho a las mismas 16 semanas." data-en="In Spain, maternity leave lasts 16 weeks, of which the 6 weeks immediately following birth are mandatory. The remaining 10 weeks can be taken before birth (from week 36) or after. Both parents have the right to the same 16 weeks.">En España, la baja por maternidad dura 16 semanas, de las cuales las 6 semanas inmediatamente posteriores al parto son obligatorias. Las 10 semanas restantes pueden distribuirse antes del parto (a partir de la semana 36) o después. Ambos progenitores tienen derecho a las mismas 16 semanas.</p>
+
+        <h3 data-es="¿Es exacta la fecha probable de parto?" data-en="Is the estimated due date exact?">¿Es exacta la fecha probable de parto?</h3>
+        <p data-es="La FPP es una estimación con un margen de ±2 semanas. Solo el 5% de los bebés nace exactamente en la FPP. El 95% nace entre las semanas 37 y 42. Un parto es considerado a término entre las semanas 37 y 40+6, prematuro antes de la semana 37, y postérmino a partir de la semana 42 (momento en que los médicos suelen considerar la inducción)." data-en="The EDD is an estimate with a margin of ±2 weeks. Only 5% of babies are born exactly on their due date. 95% are born between weeks 37 and 42. A birth is considered full term between weeks 37 and 40+6, premature before week 37, and post-term after week 42 (when doctors usually consider induction).">La FPP es una estimación con un margen de ±2 semanas. Solo el 5% de los bebés nace exactamente en la FPP. El 95% nace entre las semanas 37 y 42. Un parto es considerado a término entre las semanas 37 y 40+6, prematuro antes de la semana 37, y postérmino a partir de la semana 42 (momento en que los médicos suelen considerar la inducción).</p>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+    let currentMode = 'fur';
+
+    // Set today as default date
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date-fur').value = today;
+        document.getElementById('date-concepcion').value = today;
+    });
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'A' || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                if(el.childNodes.length === 1 || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'LI' || el.tagName === 'OPTION' || el.tagName === 'A' || el.tagName === 'SPAN' || el.tagName === 'STRONG' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'DIV') {
+                   // Ensure we don't overwrite elements that have nested HTML (like icons)
+                   if(el.children.length === 0) {
+                        el.textContent = text;
+                   }
+                }
+            }
+        });
+        
+        // Custom updates for mixed elements
+        if(currentLang === 'en') {
+            document.querySelectorAll('.radio-btn')[0].innerHTML = `<input type="radio" name="calc-mode" value="fur" ${currentMode==='fur'?'checked':''}> 📅 <span data-es="Desde la FUR" data-en="From LMP">From LMP</span>`;
+            document.querySelectorAll('.radio-btn')[1].innerHTML = `<input type="radio" name="calc-mode" value="concepcion" ${currentMode==='concepcion'?'checked':''}> 🔬 <span data-es="Desde concepción" data-en="From conception">From conception</span>`;
+        } else {
+            document.querySelectorAll('.radio-btn')[0].innerHTML = `<input type="radio" name="calc-mode" value="fur" ${currentMode==='fur'?'checked':''}> 📅 <span data-es="Desde la FUR" data-en="From LMP">Desde la FUR</span>`;
+            document.querySelectorAll('.radio-btn')[1].innerHTML = `<input type="radio" name="calc-mode" value="concepcion" ${currentMode==='concepcion'?'checked':''}> 🔬 <span data-es="Desde concepción" data-en="From conception">Desde concepción</span>`;
+        }
+
+        if(document.getElementById('result').style.display === 'block') {
+            calculatePregnancy();
+        }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.radio-btn').forEach(el => el.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        
+        if (mode === 'fur') {
+            document.getElementById('fur-section').style.display = 'block';
+            document.getElementById('concepcion-section').style.display = 'none';
+        } else {
+            document.getElementById('fur-section').style.display = 'none';
+            document.getElementById('concepcion-section').style.display = 'block';
+        }
+    }
+
+    function setQuickWeeks(weeks) {
+        const today = new Date();
+        const furDate = new Date(today.getTime() - (weeks * 7 * 24 * 60 * 60 * 1000));
+        
+        document.getElementById('date-fur').value = furDate.toISOString().split('T')[0];
+        setMode('fur');
+        document.querySelectorAll('.radio-btn')[0].classList.add('selected');
+        document.querySelectorAll('.radio-btn')[1].classList.remove('selected');
+        
+        calculatePregnancy();
+    }
+
+    function formatDate(dateObj) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        let locale = currentLang === 'es' ? 'es-ES' : 'en-US';
+        return dateObj.toLocaleDateString(locale, options);
+    }
+
+    function calculatePregnancy() {
+        let baseFurDate;
+        
+        if (currentMode === 'fur') {
+            const furInput = document.getElementById('date-fur').value;
+            if (!furInput) return;
+            baseFurDate = new Date(furInput);
+            
+            // Adjust for cycle length
+            const cycleLength = parseInt(document.getElementById('cycle-length').value) || 28;
+            if (cycleLength !== 28) {
+                const diffDays = cycleLength - 28;
+                baseFurDate.setDate(baseFurDate.getDate() + diffDays);
+            }
+        } else {
+            const concepcionInput = document.getElementById('date-concepcion').value;
+            if (!concepcionInput) return;
+            // Conception is roughly 14 days after FUR
+            baseFurDate = new Date(concepcionInput);
+            baseFurDate.setDate(baseFurDate.getDate() - 14);
+        }
+
+        // Calculations
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const today = new Date();
+        
+        // FPP (280 days from FUR)
+        const fppDate = new Date(baseFurDate.getTime() + (280 * msPerDay));
+        
+        // Timeline dates
+        const conceptionDate = new Date(baseFurDate.getTime() + (14 * msPerDay));
+        const tri1EndDate = new Date(baseFurDate.getTime() + (13 * 7 * msPerDay));
+        const tri2EndDate = new Date(baseFurDate.getTime() + (27 * 7 * msPerDay));
+        const termDate = new Date(baseFurDate.getTime() + (37 * 7 * msPerDay));
+
+        // Current Gestation
+        const diffTime = Math.max(0, today.getTime() - baseFurDate.getTime());
+        const totalDays = Math.floor(diffTime / msPerDay);
+        const weeks = Math.floor(totalDays / 7);
+        const days = totalDays % 7;
+
+        // Trimester logic
+        let trimesterStr = "";
+        if (weeks < 14) trimesterStr = currentLang === 'es' ? "1er Trimestre" : "1st Trimester";
+        else if (weeks < 28) trimesterStr = currentLang === 'es' ? "2º Trimestre" : "2nd Trimester";
+        else trimesterStr = currentLang === 'es' ? "3er Trimestre" : "3rd Trimester";
+
+        if (totalDays > 300) { // Safety check if date is way in the past
+             document.getElementById('gestation-time').textContent = currentLang === 'es' ? "Parto ya realizado" : "Delivery already passed";
+             document.getElementById('trimester-text').textContent = "";
+        } else {
+             document.getElementById('gestation-time').textContent = currentLang === 'es' ? 
+                 `${weeks} semanas y ${days} días` : `${weeks} weeks and ${days} days`;
+             document.getElementById('trimester-text').textContent = trimesterStr;
+        }
+
+        // Set UI values
+        document.getElementById('fpp-date').textContent = formatDate(fppDate);
+        document.getElementById('tl-conception').textContent = formatDate(conceptionDate);
+        document.getElementById('tl-tri1').textContent = formatDate(tri1EndDate);
+        document.getElementById('tl-tri2').textContent = formatDate(tri2EndDate);
+        document.getElementById('tl-term').textContent = formatDate(termDate);
+
+        document.getElementById('result').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
