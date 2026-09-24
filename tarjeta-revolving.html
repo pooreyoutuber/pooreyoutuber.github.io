@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Tarjeta Revolving 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .payment-mode {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .mode-option {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .mode-option input[type="radio"] {
+            display: none;
+        }
+
+        .mode-option label {
+            display: block;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mode-option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .payment-input {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .payment-input.active {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .usury-warning {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid var(--danger);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .usury-warning h3 {
+            color: #991b1b;
+            margin-bottom: 0.5rem;
+        }
+
+        .usury-warning p {
+            color: #dc2626;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box a {
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .warning-text {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-mode {
+                flex-direction: column;
+            }
+
+            .mode-option {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">💳 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Tarjeta Revolving 2026" data-en="Revolving Card Calculator 2026">Calculadora de Tarjeta Revolving 2026</h1>
+    <p class="subtitle" data-es="TAE Real · Jurisprudencia Tribunal Supremo · Detector de Usura" data-en="Real APY · Supreme Court Jurisprudence · Usury Detector">TAE Real · Jurisprudencia Tribunal Supremo · Detector de Usura</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="Calcula el coste real de tu tarjeta revolving" data-en="Calculate real cost of your revolving card">Calcula el coste real de tu tarjeta revolving</h2>
+
+            <div class="form-group">
+                <label data-es="Deuda actual (€)" data-en="Current debt (€)">Deuda actual (€)</label>
+                <input type="number" id="debt" placeholder="3000" step="100" min="0" value="3000">
+            </div>
+
+            <div class="form-group">
+                <label data-es="TAE de la tarjeta (%)" data-en="Card APY (%)">TAE de la tarjeta (%)</label>
+                <input type="number" id="apr" placeholder="26" step="0.1" min="0" max="50" value="26">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Típicamente 20-30%. Valores >30% pueden ser usurarios." data-en="Typically 20-30%. Values >30% may be usurious.">Típicamente 20-30%. Valores >30% pueden ser usurarios.</small>
+            </div>
+
+            <div class="form-group">
+                <label data-es="Modo de pago mensual" data-en="Monthly payment mode">Modo de pago mensual</label>
+                <div class="payment-mode">
+                    <div class="mode-option">
+                        <input type="radio" id="fixed" name="paymentMode" value="fixed" checked onchange="updatePaymentMode()">
+                        <label for="fixed" data-es="Cuota fija" data-en="Fixed payment">Cuota fija</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="percentage" name="paymentMode" value="percentage" onchange="updatePaymentMode()">
+                        <label for="percentage" data-es="Porcentaje" data-en="Percentage">Porcentaje</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="minimum" name="paymentMode" value="minimum" onchange="updatePaymentMode()">
+                        <label for="minimum" data-es="Solo mínimo" data-en="Minimum only">Solo mínimo</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-input active" id="fixed-input">
+                <label data-es="Cuota mensual fija (€)" data-en="Fixed monthly payment (€)">Cuota mensual fija (€)</label>
+                <input type="number" id="fixedPayment" placeholder="200" step="10" min="0" value="200">
+            </div>
+
+            <div class="payment-input" id="percentage-input">
+                <label data-es="Porcentaje del saldo pendiente (%)" data-en="Percentage of balance (%)">Porcentaje del saldo pendiente (%)</label>
+                <input type="number" id="percentagePayment" placeholder="5" step="0.5" min="0" value="5">
+            </div>
+
+            <div class="payment-input" id="minimum-input">
+                <label data-es="Mínimo (porcentaje del saldo + intereses)" data-en="Minimum (% of balance + interest)">Mínimo típico: 1% saldo + intereses</label>
+                <input type="number" id="minimumPayment" placeholder="1" step="0.1" min="0" value="1" disabled>
+            </div>
+
+            <button class="btn" onclick="calculateRevolving()" data-es="💳 Calcular coste real" data-en="💳 Calculate real cost">💳 Calcular coste real</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label" data-es="Meses para liquidar" data-en="Months to pay off">Meses para liquidar</div>
+                        <div class="result-value" id="months">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Años" data-en="Years">Años</div>
+                        <div class="result-value" id="years">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Total intereses pagados" data-en="Total interest paid">Total intereses pagados</div>
+                        <div class="result-value" id="totalInterest">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Total a pagar" data-en="Total to pay">Total a pagar</div>
+                        <div class="result-value" id="totalPayment">€0</div>
+                    </div>
+                </div>
+
+                <div id="usury-section"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3>⚠️ <span data-es="Atención Legal" data-en="Legal Notice">Atención Legal</span></h3>
+                <p data-es="Las tarjetas revolving con TAE superiores al 20% pueden ser declaradas usurarias según el Tribunal Supremo español (STS 628/2015)." data-en="Revolving cards with APY over 20% may be declared usurious under Spanish Supreme Court ruling (STS 628/2015).">Las tarjetas revolving con TAE superiores al 20% pueden ser declaradas usurarias según el Tribunal Supremo español (STS 628/2015).</p>
+                <p data-es="Si tu tarjeta supera el doble del tipo medio del mercado (~10%), puedes reclamar la nulidad del contrato." data-en="If your card exceeds double the market average rate (~10%), you can claim contract nullity.">Si tu tarjeta supera el doble del tipo medio del mercado (~10%), puedes reclamar la nulidad del contrato.</p>
+                <p style="margin-top: 1rem; font-weight: 600;" data-es="Consulta con un abogado especializado en derecho bancario." data-en="Consult a lawyer specialized in banking law.">Consulta con un abogado especializado en derecho bancario.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="¿Qué es una tarjeta revolving?" data-en="What is a revolving card?">¿Qué es una tarjeta revolving?</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="Tarjeta Revolving" data-en="Revolving Card">Tarjeta Revolving</h3>
+                <p data-es="Es una línea de crédito renovable donde el saldo pendiente genera intereses cada mes. A diferencia de las tarjetas de crédito tradicionales (pago total al mes siguiente), las revolving permiten pagar a plazos — generalmente con TAE entre 20%-30%." data-en="A renewable credit line where the outstanding balance generates interest each month. Unlike traditional credit cards (full payment next month), revolving cards allow installment payments — typically with APY 20%-30%.">Es una línea de crédito renovable donde el saldo pendiente genera intereses cada mes. A diferencia de las tarjetas de crédito tradicionales (pago total al mes siguiente), las revolving permiten pagar a plazos — generalmente con TAE entre 20%-30%.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="El efecto del pago mínimo" data-en="The effect of minimum payment">El efecto del pago mínimo</h3>
+                <p data-es="Muchos contratos establecen una cuota mínima del 1-3% del saldo + intereses. Con este sistema, una deuda de €3.000 al 26% TAE pagando solo el mínimo puede tardar más de 15 años en liquidarse, con intereses que duplican o triplican la deuda original." data-en="Many contracts set a minimum payment of 1-3% of balance + interest. With this system, a €3,000 debt at 26% APY paying only minimum can take 15+ years to pay off, with interest doubling or tripling the original debt.">Muchos contratos establecen una cuota mínima del 1-3% del saldo + intereses. Con este sistema, una deuda de €3.000 al 26% TAE pagando solo el mínimo puede tardar más de 15 años en liquidarse, con intereses que duplican o triplican la deuda original.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Jurisprudencia española" data-en="Spanish jurisprudence">Jurisprudencia española</h3>
+                <p data-es="El Tribunal Supremo (STS 628/2015 y STS 149/2020) declaró que los intereses de tarjetas revolving que duplican el interés normal del mercado son usurarios y nulos. Puedes reclamar ante el banco, y si no prospera, ante el Banco de España o tribunales." data-en="The Supreme Court (STS 628/2015 and STS 149/2020) ruled that revolving card interest that doubles normal market interest are usurious and void. You can claim against the bank, and if unsuccessful, to the Spanish Central Bank or courts.">El Tribunal Supremo (STS 628/2015 y STS 149/2020) declaró que los intereses de tarjetas revolving que duplican el interés normal del mercado son usurarios y nulos. Puedes reclamar ante el banco, y si no prospera, ante el Banco de España o tribunales.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Cómo reclamar" data-en="How to claim">Cómo reclamar</h3>
+                <ul>
+                    <li data-es="1. Solicita al banco devuelva los intereses excesivos." data-en="1. Request bank return excessive interest.">1. Solicita al banco devuelva los intereses excesivos.</li>
+                    <li data-es="2. Si rechaza, presenta una reclamación al Banco de España." data-en="2. If rejected, file complaint with Spanish Central Bank.">2. Si rechaza, presenta una reclamación al Banco de España.</li>
+                    <li data-es="3. Si persiste, demanda en los tribunales civiles." data-en="3. If continues, sue in civil courts.">3. Si persiste, demanda en los tribunales civiles.</li>
+                    <li data-es="4. Consulta con un abogado especializado." data-en="4. Consult a specialized lawyer.">4. Consulta con un abogado especializado.</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Alternativas a la revolving" data-en="Alternatives to revolving">Alternativas a la revolving</h3>
+                <ul>
+                    <li data-es="Refinanciación: consolidar deuda en un préstamo personal." data-en="Refinancing: consolidate debt in personal loan.">Refinanciación: consolidar deuda en un préstamo personal.</li>
+                    <li data-es="Negociación con el banco: solicitar reducción de TAE." data-en="Bank negotiation: request APY reduction.">Negociación con el banco: solicitar reducción de TAE.</li>
+                    <li data-es="Asesoría de endeudamiento: organismos públicos sin coste." data-en="Debt counseling: free public agencies.">Asesoría de endeudamiento: organismos públicos sin coste.</li>
+                    <li data-es="Préstamo personal: típicamente 6-12% TAE." data-en="Personal loan: typically 6-12% APY.">Préstamo personal: típicamente 6-12% TAE.</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Señales de alerta" data-en="Warning signs">Señales de alerta</h3>
+                <p data-es="Si experimentas lo siguiente, es tiempo de actuar:" data-en="If you experience this, it's time to act:">Si experimentas lo siguiente, es tiempo de actuar:</p>
+                <ul>
+                    <li data-es="Saldo que crece mes a mes aunque pagas" data-en="Balance grows despite payments">Saldo que crece mes a mes aunque pagas</li>
+                    <li data-es="Intereses que superan tus pagos" data-en="Interest exceeds your payments">Intereses que superan tus pagos</li>
+                    <li data-es="TAE por encima del 25%" data-en="APY above 25%">TAE por encima del 25%</li>
+                    <li data-es="Tarjeta bloqueada por sobre límite" data-en="Card blocked over limit">Tarjeta bloqueada por sobre límite</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amortization Table -->
+    <div class="guide-section">
+        <h2 data-es="Tabla de amortización estimada" data-en="Estimated amortization table">Tabla de amortización estimada</h2>
+        <p data-es="Primeros 12 meses del plan de pago" data-en="First 12 months of payment plan">Primeros 12 meses del plan de pago</p>
+
+        <table id="amortizationTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th data-es="Mes" data-en="Month">Mes</th>
+                    <th data-es="Saldo inicial" data-en="Initial balance">Saldo inicial</th>
+                    <th data-es="Interés" data-en="Interest">Interés</th>
+                    <th data-es="Pago" data-en="Payment">Pago</th>
+                    <th data-es="Capital" data-en="Principal">Capital</th>
+                    <th data-es="Saldo final" data-en="Final balance">Saldo final</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'TH') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function updatePaymentMode() {
+        document.querySelectorAll('.payment-input').forEach(el => el.classList.remove('active'));
+        const mode = document.querySelector('input[name="paymentMode"]:checked').value;
+        document.getElementById(`${mode}-input`).classList.add('active');
+    }
+
+    function formatCurrency(value) {
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function calculateRevolving() {
+        const debt = parseFloat(document.getElementById('debt').value) || 0;
+        const apr = parseFloat(document.getElementById('apr').value) / 100 || 0;
+        const mode = document.querySelector('input[name="paymentMode"]:checked').value;
+
+        let monthlyPayment = 0;
+        
+        if (mode === 'fixed') {
+            monthlyPayment = parseFloat(document.getElementById('fixedPayment').value) || 0;
+        } else if (mode === 'percentage') {
+            const percentage = parseFloat(document.getElementById('percentagePayment').value) / 100 || 0;
+            monthlyPayment = debt * percentage;
+        }
+
+        const monthlyRate = apr / 12;
+        let balance = debt;
+        let month = 0;
+        let totalInterest = 0;
+        const amortizationData = [];
+
+        while (balance > 0 && month < 600) {
+            month++;
+            const interestPayment = balance * monthlyRate;
+            totalInterest += interestPayment;
+
+            if (mode === 'minimum') {
+                monthlyPayment = (balance * 0.01) + interestPayment;
+            } else if (mode === 'percentage') {
+                monthlyPayment = Math.max((balance * (parseFloat(document.getElementById('percentagePayment').value) / 100)), balance * 0.01 + interestPayment);
+            }
+
+            if (monthlyPayment <= 0) {
+                monthlyPayment = interestPayment + 1;
+            }
+
+            const principalPayment = monthlyPayment - interestPayment;
+            const newBalance = Math.max(0, balance - principalPayment);
+
+            if (month <= 12) {
+                amortizationData.push({
+                    month,
+                    initialBalance: balance,
+                    interest: interestPayment,
+                    payment: monthlyPayment,
+                    principal: principalPayment,
+                    finalBalance: newBalance
+                });
+            }
+
+            balance = newBalance;
+
+            if (balance <= 0) break;
+        }
+
+        const years = Math.floor(month / 12);
+        const remainingMonths = month % 12;
+        const totalPayment = debt + totalInterest;
+        const marketAvgAPR = 0.10;
+        const isUsurious = apr > marketAvgAPR * 2;
+
+        document.getElementById('months').textContent = month + ' ' + (currentLang === 'es' ? 'meses' : 'months');
+        document.getElementById('years').textContent = years + ',' + remainingMonths + ' ' + (currentLang === 'es' ? 'años' : 'years');
+        document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+        document.getElementById('totalPayment').textContent = formatCurrency(totalPayment);
+
+        // Usury warning
+        const usureSection = document.getElementById('usury-section');
+        if (isUsurious) {
+            usureSection.innerHTML = `
+                <div class="usury-warning">
+                    <h3>⚠️ ${currentLang === 'es' ? 'POSIBLE TARJETA USURARIA' : 'POSSIBLE USURIOUS CARD'}</h3>
+                    <p>${currentLang === 'es' ? 'Tu tarjeta supera el doble del tipo medio del mercado (~10%). Según el Tribunal Supremo (STS 628/2015), los intereses pueden ser declarados usurarios.' : 'Your card exceeds double the market average (~10%). According to the Supreme Court (STS 628/2015), interest may be declared usurious.'}</p>
+                    <p><strong>${currentLang === 'es' ? 'Puedes reclamar:' : 'You can claim:'}</strong></p>
+                    <ul style="list-style-position: inside; color: #dc2626; margin-top: 0.5rem;">
+                        <li>${currentLang === 'es' ? '✓ Devolución de intereses pagados' : '✓ Refund of interest paid'}</li>
+                        <li>${currentLang === 'es' ? '✓ Nulidad del contrato' : '✓ Contract nullity'}</li>
+                        <li>${currentLang === 'es' ? '✓ Cancelación de la deuda' : '✓ Debt cancellation'}</li>
+                    </ul>
+                </div>
+            `;
+        } else {
+            usureSection.innerHTML = '';
+        }
+
+        // Amortization table
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        amortizationData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.month}</td>
+                <td>${formatCurrency(row.initialBalance)}</td>
+                <td>${formatCurrency(row.interest)}</td>
+                <td><strong>${formatCurrency(row.payment)}</strong></td>
+                <td>${formatCurrency(row.principal)}</td>
+                <td>${formatCurrency(row.finalBalance)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('amortizationTable').style.display = 'table';
+        document.getElementById('result').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
