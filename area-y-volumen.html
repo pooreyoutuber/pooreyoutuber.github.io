@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Área y Volumen 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        select:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--success);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .formula-box {
+            background: #f0f0f0;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .shape-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .shape-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .shape-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+
+        .formula-inline {
+            background: #f8fafc;
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .shape-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">📐 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Área y Volumen 2026" data-en="Area and Volume Calculator 2026">Calculadora de Área y Volumen 2026</h1>
+    <p class="subtitle" data-es="Geometría · Figuras Planas · Sólidos · LOMLOE" data-en="Geometry · Plane Figures · Solids · LOMLOE">Geometría · Figuras Planas · Sólidos · LOMLOE</p>
+
+    <!-- Main Calculator -->
+    <div class="card">
+        <h2 data-es="📐 Selecciona la figura y calcula" data-en="📐 Select figure and calculate">📐 Selecciona la figura y calcula</h2>
+
+        <div class="form-group">
+            <label data-es="Tipo de figura" data-en="Type of figure">Tipo de figura</label>
+            <select id="figureSelect" onchange="updateInputs()">
+                <option value="" data-es="Elige una figura..." data-en="Choose a figure...">Elige una figura...</option>
+                <optgroup label="Figuras Planas / Plane Figures">
+                    <option value="square" data-es="Cuadrado / Square" data-en="Cuadrado / Square">Cuadrado / Square</option>
+                    <option value="rectangle" data-es="Rectángulo / Rectangle" data-en="Rectángulo / Rectangle">Rectángulo / Rectangle</option>
+                    <option value="triangle" data-es="Triángulo / Triangle" data-en="Triángulo / Triangle">Triángulo / Triangle</option>
+                    <option value="circle" data-es="Círculo / Circle" data-en="Círculo / Circle">Círculo / Circle</option>
+                    <option value="trapezoid" data-es="Trapecio / Trapezoid" data-en="Trapecio / Trapezoid">Trapecio / Trapezoid</option>
+                    <option value="rhombus" data-es="Rombo / Rhombus" data-en="Rombo / Rhombus">Rombo / Rhombus</option>
+                    <option value="pentagon" data-es="Pentágono Regular / Regular Pentagon" data-en="Pentágono Regular / Regular Pentagon">Pentágono Regular / Regular Pentagon</option>
+                    <option value="hexagon" data-es="Hexágono Regular / Regular Hexagon" data-en="Hexágono Regular / Regular Hexagon">Hexágono Regular / Regular Hexagon</option>
+                </optgroup>
+                <optgroup label="Sólidos / Solids">
+                    <option value="cube" data-es="Cubo / Cube" data-en="Cubo / Cube">Cubo / Cube</option>
+                    <option value="parallelepiped" data-es="Paralelepípedo / Parallelepiped" data-en="Paralelepípedo / Parallelepiped">Paralelepípedo / Parallelepiped</option>
+                    <option value="sphere" data-es="Esfera / Sphere" data-en="Esfera / Sphere">Esfera / Sphere</option>
+                    <option value="cylinder" data-es="Cilindro / Cylinder" data-en="Cilindro / Cylinder">Cilindro / Cylinder</option>
+                    <option value="cone" data-es="Cono / Cone" data-en="Cono / Cone">Cono / Cone</option>
+                    <option value="pyramid" data-es="Pirámide Cuadrada / Square Pyramid" data-en="Pirámide Cuadrada / Square Pyramid">Pirámide Cuadrada / Square Pyramid</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div id="inputsContainer"></div>
+
+        <button class="btn" onclick="calculate()" data-es="📐 Calcular" data-en="📐 Calculate">📐 Calcular</button>
+
+        <div id="result" class="result-box" style="display: none;">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <!-- Formulas Guide -->
+    <div class="card">
+        <h2 data-es="📋 Fórmulas de área y volumen — guía rápida" data-en="📋 Area and volume formulas — quick guide">📋 Fórmulas de área y volumen — guía rápida</h2>
+
+        <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);" data-es="Figuras Planas" data-en="Plane Figures">Figuras Planas / Plane Figures</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Figura" data-en="Figure">Figura / Figure</th>
+                    <th data-es="Fórmula" data-en="Formula">Fórmula / Formula</th>
+                    <th data-es="Variables" data-en="Variables">Variables</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="Cuadrado" data-en="Square">Cuadrado</td>
+                    <td>A = l²</td>
+                    <td data-es="l = lado" data-en="l = side">l = lado</td>
+                </tr>
+                <tr>
+                    <td data-es="Rectángulo" data-en="Rectangle">Rectángulo</td>
+                    <td>A = b × h</td>
+                    <td data-es="b = base, h = altura" data-en="b = base, h = height">b = base, h = altura</td>
+                </tr>
+                <tr>
+                    <td data-es="Triángulo" data-en="Triangle">Triángulo</td>
+                    <td>A = (b × h) / 2</td>
+                    <td data-es="b = base, h = altura" data-en="b = base, h = height">b = base, h = altura</td>
+                </tr>
+                <tr>
+                    <td data-es="Círculo" data-en="Circle">Círculo</td>
+                    <td>A = π × r²</td>
+                    <td data-es="r = radio" data-en="r = radius">r = radio</td>
+                </tr>
+                <tr>
+                    <td data-es="Trapecio" data-en="Trapezoid">Trapecio</td>
+                    <td>A = (b₁ + b₂) / 2 × h</td>
+                    <td data-es="b₁, b₂ = bases, h = altura" data-en="b₁, b₂ = bases, h = height">b₁, b₂ = bases</td>
+                </tr>
+                <tr>
+                    <td data-es="Rombo" data-en="Rhombus">Rombo</td>
+                    <td>A = (d₁ × d₂) / 2</td>
+                    <td data-es="d₁, d₂ = diagonales" data-en="d₁, d₂ = diagonals">d₁, d₂ = diagonales</td>
+                </tr>
+                <tr>
+                    <td data-es="Pentágono Regular" data-en="Regular Pentagon">Pentágono</td>
+                    <td>A = (P × a) / 2</td>
+                    <td data-es="P = perímetro, a = apotema" data-en="P = perimeter, a = apothem">P = perímetro, a = apotema</td>
+                </tr>
+                <tr>
+                    <td data-es="Hexágono Regular" data-en="Regular Hexagon">Hexágono</td>
+                    <td>A = (P × a) / 2</td>
+                    <td data-es="P = perímetro, a = apotema" data-en="P = perimeter, a = apothem">P = perímetro, a = apotema</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);" data-es="Sólidos" data-en="Solids">Sólidos / Solids</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Sólido" data-en="Solid">Sólido / Solid</th>
+                    <th data-es="Fórmula Volumen" data-en="Volume Formula">Volumen / Volume</th>
+                    <th data-es="Fórmula Área" data-en="Surface Area Formula">Área / Surface Area</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="Cubo" data-en="Cube">Cubo</td>
+                    <td>V = a³</td>
+                    <td>A = 6a²</td>
+                </tr>
+                <tr>
+                    <td data-es="Paralelepípedo" data-en="Parallelepiped">Paralelepípedo</td>
+                    <td>V = l × a × h</td>
+                    <td>A = 2(la + ah + lh)</td>
+                </tr>
+                <tr>
+                    <td data-es="Esfera" data-en="Sphere">Esfera</td>
+                    <td>V = (4/3)πr³</td>
+                    <td>A = 4πr²</td>
+                </tr>
+                <tr>
+                    <td data-es="Cilindro" data-en="Cylinder">Cilindro</td>
+                    <td>V = πr²h</td>
+                    <td>A = 2πr(r + h)</td>
+                </tr>
+                <tr>
+                    <td data-es="Cono" data-en="Cone">Cono</td>
+                    <td>V = (1/3)πr²h</td>
+                    <td>A = πr(r + s)</td>
+                </tr>
+                <tr>
+                    <td data-es="Pirámide Cuadrada" data-en="Square Pyramid">Pirámide</td>
+                    <td>V = (1/3)a²h</td>
+                    <td>A = a² + 2as</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Shape Details Grid -->
+    <div class="card">
+        <h2 data-es="📚 Detalles de cada figura" data-en="📚 Details of each figure">📚 Detalles de cada figura</h2>
+
+        <div class="shape-grid">
+            <div class="shape-card">
+                <h3 data-es="Cuadrado" data-en="Square">Cuadrado</h3>
+                <p data-es="Figura con 4 lados iguales y 4 ángulos rectos." data-en="Figure with 4 equal sides and 4 right angles.">Figura con 4 lados iguales y 4 ángulos rectos.</p>
+                <div class="formula-inline">A = l²</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Círculo" data-en="Circle">Círculo</h3>
+                <p data-es="Conjunto de puntos equidistantes de un centro. π ≈ 3,14159" data-en="Set of points equidistant from center. π ≈ 3.14159">Conjunto de puntos equidistantes de un centro. π ≈ 3,14159</p>
+                <div class="formula-inline">A = π × r²</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Triángulo" data-en="Triangle">Triángulo</h3>
+                <p data-es="Figura con 3 lados. La altura es perpendicular a la base." data-en="Figure with 3 sides. Height is perpendicular to base.">Figura con 3 lados. La altura es perpendicular a la base.</p>
+                <div class="formula-inline">A = (b × h) / 2</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Rectángulo" data-en="Rectangle">Rectángulo</h3>
+                <p data-es="Cuadrilátero con lados opuestos iguales y 4 ángulos rectos." data-en="Quadrilateral with equal opposite sides and 4 right angles.">Cuadrilátero con lados opuestos iguales y 4 ángulos rectos.</p>
+                <div class="formula-inline">A = b × h</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Esfera" data-en="Sphere">Esfera</h3>
+                <p data-es="Sólido formado por puntos equidistantes de un centro en el espacio." data-en="Solid formed by points equidistant from center in space.">Sólido formado por puntos equidistantes de un centro en el espacio.</p>
+                <div class="formula-inline">V = (4/3)πr³</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Cubo" data-en="Cube">Cubo</h3>
+                <p data-es="Sólido con 6 caras cuadradas iguales. Caso especial de paralelepípedo." data-en="Solid with 6 equal square faces. Special case of parallelepiped.">Sólido con 6 caras cuadradas iguales. Caso especial de paralelepípedo.</p>
+                <div class="formula-inline">V = a³</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Cilindro" data-en="Cylinder">Cilindro</h3>
+                <p data-es="Sólido con 2 bases circulares paralelas e iguales." data-en="Solid with 2 parallel and equal circular bases.">Sólido con 2 bases circulares paralelas e iguales.</p>
+                <div class="formula-inline">V = πr²h</div>
+            </div>
+
+            <div class="shape-card">
+                <h3 data-es="Cono" data-en="Cone">Cono</h3>
+                <p data-es="Sólido con una base circular y un vértice. 1/3 del volumen de un cilindro." data-en="Solid with circular base and apex. 1/3 of cylinder volume.">Sólido con una base circular y un vértice. 1/3 del volumen de un cilindro.</p>
+                <div class="formula-inline">V = (1/3)πr²h</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    const figures = {
+        square: {
+            name_es: 'Cuadrado',
+            name_en: 'Square',
+            type: 'area',
+            inputs: [{ id: 'l', label_es: 'Lado (l)', label_en: 'Side (l)' }],
+            calculate: (inputs) => {
+                const l = inputs.l;
+                return {
+                    result: l * l,
+                    formula: `A = l² = ${l}² = ${l * l}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        rectangle: {
+            name_es: 'Rectángulo',
+            name_en: 'Rectangle',
+            type: 'area',
+            inputs: [
+                { id: 'b', label_es: 'Base (b)', label_en: 'Base (b)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { b, h } = inputs;
+                return {
+                    result: b * h,
+                    formula: `A = b × h = ${b} × ${h} = ${b * h}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        triangle: {
+            name_es: 'Triángulo',
+            name_en: 'Triangle',
+            type: 'area',
+            inputs: [
+                { id: 'b', label_es: 'Base (b)', label_en: 'Base (b)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { b, h } = inputs;
+                const result = (b * h) / 2;
+                return {
+                    result,
+                    formula: `A = (b × h) / 2 = (${b} × ${h}) / 2 = ${result}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        circle: {
+            name_es: 'Círculo',
+            name_en: 'Circle',
+            type: 'area',
+            inputs: [{ id: 'r', label_es: 'Radio (r)', label_en: 'Radius (r)' }],
+            calculate: (inputs) => {
+                const r = inputs.r;
+                const result = Math.PI * r * r;
+                return {
+                    result,
+                    formula: `A = π × r² = π × ${r}² = ${result.toFixed(4)}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        trapezoid: {
+            name_es: 'Trapecio',
+            name_en: 'Trapezoid',
+            type: 'area',
+            inputs: [
+                { id: 'b1', label_es: 'Base 1 (b₁)', label_en: 'Base 1 (b₁)' },
+                { id: 'b2', label_es: 'Base 2 (b₂)', label_en: 'Base 2 (b₂)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { b1, b2, h } = inputs;
+                const result = ((b1 + b2) / 2) * h;
+                return {
+                    result,
+                    formula: `A = (b₁ + b₂) / 2 × h = (${b1} + ${b2}) / 2 × ${h} = ${result}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        rhombus: {
+            name_es: 'Rombo',
+            name_en: 'Rhombus',
+            type: 'area',
+            inputs: [
+                { id: 'd1', label_es: 'Diagonal 1 (d₁)', label_en: 'Diagonal 1 (d₁)' },
+                { id: 'd2', label_es: 'Diagonal 2 (d₂)', label_en: 'Diagonal 2 (d₂)' }
+            ],
+            calculate: (inputs) => {
+                const { d1, d2 } = inputs;
+                const result = (d1 * d2) / 2;
+                return {
+                    result,
+                    formula: `A = (d₁ × d₂) / 2 = (${d1} × ${d2}) / 2 = ${result}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        pentagon: {
+            name_es: 'Pentágono Regular',
+            name_en: 'Regular Pentagon',
+            type: 'area',
+            inputs: [
+                { id: 'l', label_es: 'Lado (l)', label_en: 'Side (l)' },
+                { id: 'a', label_es: 'Apotema (a)', label_en: 'Apothem (a)' }
+            ],
+            calculate: (inputs) => {
+                const { l, a } = inputs;
+                const P = 5 * l;
+                const result = (P * a) / 2;
+                return {
+                    result,
+                    formula: `A = (P × a) / 2 = (${P} × ${a}) / 2 = ${result}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        hexagon: {
+            name_es: 'Hexágono Regular',
+            name_en: 'Regular Hexagon',
+            type: 'area',
+            inputs: [
+                { id: 'l', label_es: 'Lado (l)', label_en: 'Side (l)' },
+                { id: 'a', label_es: 'Apotema (a)', label_en: 'Apothem (a)' }
+            ],
+            calculate: (inputs) => {
+                const { l, a } = inputs;
+                const P = 6 * l;
+                const result = (P * a) / 2;
+                return {
+                    result,
+                    formula: `A = (P × a) / 2 = (${P} × ${a}) / 2 = ${result}`,
+                    unit: 'u²'
+                };
+            }
+        },
+        cube: {
+            name_es: 'Cubo',
+            name_en: 'Cube',
+            type: 'volume',
+            inputs: [{ id: 'a', label_es: 'Arista (a)', label_en: 'Edge (a)' }],
+            calculate: (inputs) => {
+                const a = inputs.a;
+                const volume = a * a * a;
+                const surface = 6 * a * a;
+                return {
+                    volume,
+                    surface,
+                    formula: `V = a³ = ${a}³ = ${volume}; A = 6a² = 6 × ${a}² = ${surface}`,
+                    unit: 'u³'
+                };
+            }
+        },
+        parallelepiped: {
+            name_es: 'Paralelepípedo',
+            name_en: 'Parallelepiped',
+            type: 'volume',
+            inputs: [
+                { id: 'l', label_es: 'Largo (l)', label_en: 'Length (l)' },
+                { id: 'a', label_es: 'Ancho (a)', label_en: 'Width (a)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { l, a, h } = inputs;
+                const volume = l * a * h;
+                const surface = 2 * (l*a + a*h + l*h);
+                return {
+                    volume,
+                    surface,
+                    formula: `V = l × a × h = ${l} × ${a} × ${h} = ${volume}`,
+                    unit: 'u³'
+                };
+            }
+        },
+        sphere: {
+            name_es: 'Esfera',
+            name_en: 'Sphere',
+            type: 'volume',
+            inputs: [{ id: 'r', label_es: 'Radio (r)', label_en: 'Radius (r)' }],
+            calculate: (inputs) => {
+                const r = inputs.r;
+                const volume = (4/3) * Math.PI * r * r * r;
+                const surface = 4 * Math.PI * r * r;
+                return {
+                    volume,
+                    surface,
+                    formula: `V = (4/3)πr³ = (4/3)π × ${r}³ = ${volume.toFixed(4)}`,
+                    unit: 'u³'
+                };
+            }
+        },
+        cylinder: {
+            name_es: 'Cilindro',
+            name_en: 'Cylinder',
+            type: 'volume',
+            inputs: [
+                { id: 'r', label_es: 'Radio (r)', label_en: 'Radius (r)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { r, h } = inputs;
+                const volume = Math.PI * r * r * h;
+                const surface = 2 * Math.PI * r * (r + h);
+                return {
+                    volume,
+                    surface,
+                    formula: `V = πr²h = π × ${r}² × ${h} = ${volume.toFixed(4)}`,
+                    unit: 'u³'
+                };
+            }
+        },
+        cone: {
+            name_es: 'Cono',
+            name_en: 'Cone',
+            type: 'volume',
+            inputs: [
+                { id: 'r', label_es: 'Radio (r)', label_en: 'Radius (r)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { r, h } = inputs;
+                const volume = (1/3) * Math.PI * r * r * h;
+                return {
+                    volume,
+                    formula: `V = (1/3)πr²h = (1/3)π × ${r}² × ${h} = ${volume.toFixed(4)}`,
+                    unit: 'u³'
+                };
+            }
+        },
+        pyramid: {
+            name_es: 'Pirámide Cuadrada',
+            name_en: 'Square Pyramid',
+            type: 'volume',
+            inputs: [
+                { id: 'a', label_es: 'Lado base (a)', label_en: 'Base side (a)' },
+                { id: 'h', label_es: 'Altura (h)', label_en: 'Height (h)' }
+            ],
+            calculate: (inputs) => {
+                const { a, h } = inputs;
+                const volume = (1/3) * a * a * h;
+                return {
+                    volume,
+                    formula: `V = (1/3)a²h = (1/3) × ${a}² × ${h} = ${volume.toFixed(4)}`,
+                    unit: 'u³'
+                };
+            }
+        }
+    };
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'H3' || el.tagName === 'H4') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function updateInputs() {
+        const select = document.getElementById('figureSelect');
+        const figureKey = select.value;
+        const container = document.getElementById('inputsContainer');
+
+        if (!figureKey) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const figure = figures[figureKey];
+        let html = '<div class="input-group">';
+
+        figure.inputs.forEach(input => {
+            const label = currentLang === 'es' ? input.label_es : input.label_en;
+            html += `
+                <div class="form-group">
+                    <label>${label}</label>
+                    <input type="number" id="input_${input.id}" placeholder="0" step="0.01" value="0">
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function calculate() {
+        const select = document.getElementById('figureSelect');
+        const figureKey = select.value;
+
+        if (!figureKey) {
+            alert(currentLang === 'es' ? 'Selecciona una figura' : 'Select a figure');
+            return;
+        }
+
+        const figure = figures[figureKey];
+        const inputs = {};
+
+        figure.inputs.forEach(input => {
+            inputs[input.id] = parseFloat(document.getElementById(`input_${input.id}`).value) || 0;
+        });
+
+        const result = figure.calculate(inputs);
+        const figureName = currentLang === 'es' ? figure.name_es : figure.name_en;
+
+        let html = `
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">${figureName}</div>
+                    <div class="result-value">${result.volume ? result.volume.toFixed(2) : result.result.toFixed(2)}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-light);">${result.unit}</div>
+                </div>
+        `;
+
+        if (result.surface) {
+            html += `
+                <div class="result-item">
+                    <div class="result-label">${currentLang === 'es' ? 'Superficie' : 'Surface Area'}</div>
+                    <div class="result-value">${result.surface.toFixed(2)}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-light);">u²</div>
+                </div>
+            `;
+        }
+
+        html += `</div><div class="formula-box"><strong>${currentLang === 'es' ? 'Fórmula:' : 'Formula:'}</strong><br>${result.formula}</div>`;
+
+        document.getElementById('resultContent').innerHTML = html;
+        document.getElementById('result').style.display = 'block';
+    }
+
+    // Trigger calculation on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('inputsContainer').innerHTML) {
+                calculate();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
