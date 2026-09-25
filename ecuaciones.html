@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ecuaciones 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .modes-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--primary);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .card-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-section {
+            display: none;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-inline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--success);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .step-box {
+            background: #f0f0f0;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .step-number {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .example-section {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .modes-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-inline {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">📐 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Ecuaciones 2026" data-en="Equation Calculator 2026">Calculadora de Ecuaciones 2026</h1>
+    <p class="subtitle" data-es="1er Grado · 2º Grado · Sistemas 2×2 · Sistemas 3×3 · Paso a Paso" data-en="1st Degree · 2nd Degree · 2×2 Systems · 3×3 Systems · Step by Step">1er Grado · 2º Grado · Sistemas 2×2 · Sistemas 3×3 · Paso a Paso</p>
+
+    <!-- Mode Navigation -->
+    <div class="modes-nav">
+        <button class="mode-btn active" onclick="switchMode('mode1')" data-es="📏 1er Grado" data-en="📏 1st Degree">📏 1er Grado</button>
+        <button class="mode-btn" onclick="switchMode('mode2')" data-es="📈 2º Grado" data-en="📈 2nd Degree">📈 2º Grado</button>
+        <button class="mode-btn" onclick="switchMode('mode3')" data-es="🔀 Sistema 2×2" data-en="🔀 2×2 System">🔀 Sistema 2×2</button>
+        <button class="mode-btn" onclick="switchMode('mode4')" data-es="🔁 Sistema 3×3" data-en="🔁 3×3 System">🔁 Sistema 3×3</button>
+    </div>
+
+    <!-- Mode 1: Linear Equation -->
+    <div class="card calc-section active" id="mode1">
+        <h2 data-es="📏 Ecuación Lineal (1er grado)" data-en="📏 Linear Equation (1st degree)">📏 Ecuación Lineal (1er grado)</h2>
+        <p class="card-desc" data-es="Despeja x en cualquier ecuación de la forma ax + b = cx + d" data-en="Solve x in any equation of the form ax + b = cx + d">Despeja x en cualquier ecuación de la forma ax + b = cx + d</p>
+
+        <div class="form-inline">
+            <div class="form-group">
+                <label>a</label>
+                <input type="number" id="mode1_a" placeholder="2" step="0.01" value="2">
+            </div>
+            <div class="form-group">
+                <label data-es="x +" data-en="x +">x +</label>
+                <input type="number" id="mode1_b" placeholder="3" step="0.01" value="3">
+            </div>
+            <div class="form-group">
+                <label data-es="=" data-en="=">=</label>
+                <input type="number" id="mode1_c" placeholder="5" step="0.01" value="5">
+            </div>
+            <div class="form-group">
+                <label data-es="x +" data-en="x +">x +</label>
+                <input type="number" id="mode1_d" placeholder="-6" step="0.01" value="-6">
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculateMode1()" data-es="📏 Calcular x" data-en="📏 Solve x">📏 Calcular x</button>
+        <button class="btn btn-secondary" onclick="clearMode1()" data-es="↺ Limpiar" data-en="↺ Clear">↺ Limpiar</button>
+
+        <div id="mode1-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Solución" data-en="Solution">Solución</div>
+                    <div class="result-value" id="mode1_x">0</div>
+                </div>
+            </div>
+
+            <div id="mode1-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 2: Quadratic Equation -->
+    <div class="card calc-section" id="mode2">
+        <h2 data-es="📈 Ecuación Cuadrática (2º grado)" data-en="📈 Quadratic Equation (2nd degree)">📈 Ecuación Cuadrática (2º grado)</h2>
+        <p class="card-desc" data-es="Resuelve ax² + bx + c = 0 usando la fórmula cuadrática y el discriminante" data-en="Solve ax² + bx + c = 0 using the quadratic formula and discriminant">Resuelve ax² + bx + c = 0 usando la fórmula cuadrática y el discriminante</p>
+
+        <div class="form-inline">
+            <div class="form-group">
+                <label>a</label>
+                <input type="number" id="mode2_a" placeholder="1" step="0.01" value="1">
+            </div>
+            <div class="form-group">
+                <label data-es="x² +" data-en="x² +">x² +</label>
+                <input type="number" id="mode2_b" placeholder="-5" step="0.01" value="-5">
+            </div>
+            <div class="form-group">
+                <label data-es="x +" data-en="x +">x +</label>
+                <input type="number" id="mode2_c" placeholder="6" step="0.01" value="6">
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculateMode2()" data-es="📈 Calcular soluciones" data-en="📈 Solve">📈 Calcular soluciones</button>
+        <button class="btn btn-secondary" onclick="clearMode2()" data-es="↺ Limpiar" data-en="↺ Clear">↺ Limpiar</button>
+
+        <div id="mode2-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Discriminante (Δ)" data-en="Discriminant (Δ)">Discriminante (Δ)</div>
+                    <div class="result-value" id="mode2_delta">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="x₁" data-en="x₁">x₁</div>
+                    <div class="result-value" id="mode2_x1">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="x₂" data-en="x₂">x₂</div>
+                    <div class="result-value" id="mode2_x2">0</div>
+                </div>
+            </div>
+
+            <div id="mode2-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 3: System 2x2 -->
+    <div class="card calc-section" id="mode3">
+        <h2 data-es="🔀 Sistema de Ecuaciones 2×2" data-en="🔀 2×2 System of Equations">🔀 Sistema de Ecuaciones 2×2</h2>
+        <p class="card-desc" data-es="Resuelve: a₁x + b₁y = c₁  |  a₂x + b₂y = c₂" data-en="Solve: a₁x + b₁y = c₁  |  a₂x + b₂y = c₂">Resuelve: a₁x + b₁y = c₁  |  a₂x + b₂y = c₂</p>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-dark);" data-es="Ecuación 1" data-en="Equation 1">Ecuación 1:</h4>
+            <div class="form-inline">
+                <div class="form-group">
+                    <label>a₁</label>
+                    <input type="number" id="mode3_a1" placeholder="2" step="0.01" value="2">
+                </div>
+                <div class="form-group">
+                    <label>x +</label>
+                    <input type="number" id="mode3_b1" placeholder="1" step="0.01" value="1">
+                </div>
+                <div class="form-group">
+                    <label>y =</label>
+                    <input type="number" id="mode3_c1" placeholder="7" step="0.01" value="7">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-dark);" data-es="Ecuación 2" data-en="Equation 2">Ecuación 2:</h4>
+            <div class="form-inline">
+                <div class="form-group">
+                    <label>a₂</label>
+                    <input type="number" id="mode3_a2" placeholder="1" step="0.01" value="1">
+                </div>
+                <div class="form-group">
+                    <label>x +</label>
+                    <input type="number" id="mode3_b2" placeholder="-1" step="0.01" value="-1">
+                </div>
+                <div class="form-group">
+                    <label>y =</label>
+                    <input type="number" id="mode3_c2" placeholder="2" step="0.01" value="2">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculateMode3()" data-es="🔀 Resolver sistema" data-en="🔀 Solve system">🔀 Resolver sistema</button>
+        <button class="btn btn-secondary" onclick="clearMode3()" data-es="↺ Limpiar" data-en="↺ Clear">↺ Limpiar</button>
+
+        <div id="mode3-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">x</div>
+                    <div class="result-value" id="mode3_x">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">y</div>
+                    <div class="result-value" id="mode3_y">0</div>
+                </div>
+            </div>
+
+            <div id="mode3-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 4: System 3x3 -->
+    <div class="card calc-section" id="mode4">
+        <h2 data-es="🔁 Sistema de Ecuaciones 3×3" data-en="🔁 3×3 System of Equations">🔁 Sistema de Ecuaciones 3×3</h2>
+        <p class="card-desc" data-es="Resuelve sistemas de 3 ecuaciones con 3 incógnitas usando eliminación gaussiana" data-en="Solve 3 equations with 3 unknowns using Gaussian elimination">Resuelve sistemas de 3 ecuaciones con 3 incógnitas usando eliminación gaussiana</p>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-dark);" data-es="Ecuación 1" data-en="Equation 1">Ecuación 1:</h4>
+            <div class="form-inline">
+                <input type="number" id="mode4_a1" placeholder="1" step="0.01" value="1">
+                <input type="number" id="mode4_b1" placeholder="1" step="0.01" value="1">
+                <input type="number" id="mode4_c1" placeholder="1" step="0.01" value="1">
+                <input type="number" id="mode4_d1" placeholder="6" step="0.01" value="6">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-dark);" data-es="Ecuación 2" data-en="Equation 2">Ecuación 2:</h4>
+            <div class="form-inline">
+                <input type="number" id="mode4_a2" placeholder="2" step="0.01" value="2">
+                <input type="number" id="mode4_b2" placeholder="1" step="0.01" value="1">
+                <input type="number" id="mode4_c2" placeholder="-1" step="0.01" value="-1">
+                <input type="number" id="mode4_d2" placeholder="3" step="0.01" value="3">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-dark);" data-es="Ecuación 3" data-en="Equation 3">Ecuación 3:</h4>
+            <div class="form-inline">
+                <input type="number" id="mode4_a3" placeholder="1" step="0.01" value="1">
+                <input type="number" id="mode4_b3" placeholder="-1" step="0.01" value="-1">
+                <input type="number" id="mode4_c3" placeholder="2" step="0.01" value="2">
+                <input type="number" id="mode4_d3" placeholder="5" step="0.01" value="5">
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculateMode4()" data-es="🔁 Resolver sistema" data-en="🔁 Solve system">🔁 Resolver sistema</button>
+        <button class="btn btn-secondary" onclick="clearMode4()" data-es="↺ Limpiar" data-en="↺ Clear">↺ Limpiar</button>
+
+        <div id="mode4-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">x</div>
+                    <div class="result-value" id="mode4_x">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">y</div>
+                    <div class="result-value" id="mode4_y">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">z</div>
+                    <div class="result-value" id="mode4_z">0</div>
+                </div>
+            </div>
+
+            <div id="mode4-steps"></div>
+        </div>
+    </div>
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+        <h2 data-es="📚 ¿Qué es una ecuación?" data-en="📚 What is an equation?">📚 ¿Qué es una ecuación?</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="📏 Primer Grado (Lineal)" data-en="📏 First Degree (Linear)">📏 Primer Grado (Lineal)</h3>
+                <p data-es="La incógnita aparece con exponente 1. Siempre tiene exactamente una solución (si a ≠ 0)." data-en="The unknown appears with exponent 1. Always has exactly one solution (if a ≠ 0).">La incógnita aparece con exponente 1. Siempre tiene exactamente una solución (si a ≠ 0).</p>
+                <p data-es="Ejemplo: 3x + 2 = 11 → x = 3" data-en="Example: 3x + 2 = 11 → x = 3">Ejemplo: 3x + 2 = 11 → x = 3</p>
+                <div class="code-block">
+                    ax + b = cx + d<br>
+                    x = (d - b) / (a - c)
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="📈 Segundo Grado (Cuadrática)" data-en="📈 Second Degree (Quadratic)">📈 Segundo Grado (Cuadrática)</h3>
+                <p data-es="La incógnita aparece elevada al cuadrado. Puede tener 0, 1 o 2 soluciones reales." data-en="The unknown appears squared. Can have 0, 1 or 2 real solutions.">La incógnita aparece elevada al cuadrado. Puede tener 0, 1 o 2 soluciones reales.</p>
+                <p data-es="Ejemplo: x² − 5x + 6 = 0 → x₁ = 3, x₂ = 2" data-en="Example: x² − 5x + 6 = 0 → x₁ = 3, x₂ = 2">Ejemplo: x² − 5x + 6 = 0 → x₁ = 3, x₂ = 2</p>
+                <div class="code-block">
+                    Δ = b² - 4ac<br>
+                    x = (-b ± √Δ) / 2a
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🔀 Discriminante (Δ)" data-en="🔀 Discriminant (Δ)">🔀 Discriminante (Δ)</h3>
+                <ul>
+                    <li data-es="Δ > 0: dos soluciones reales distintas" data-en="Δ > 0: two different real solutions">Δ > 0: dos soluciones reales distintas</li>
+                    <li data-es="Δ = 0: una solución doble" data-en="Δ = 0: one double solution">Δ = 0: una solución doble</li>
+                    <li data-es="Δ < 0: no hay soluciones reales" data-en="Δ < 0: no real solutions">Δ < 0: no hay soluciones reales</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🔀 Sistemas 2×2" data-en="🔀 2×2 Systems">🔀 Sistemas 2×2</h3>
+                <p data-es="Dos ecuaciones con dos incógnitas. Métodos: sustitución, igualación, reducción." data-en="Two equations with two unknowns. Methods: substitution, equalization, reduction.">Dos ecuaciones con dos incógnitas. Métodos: sustitución, igualación, reducción.</p>
+                <div class="code-block">
+                    a₁x + b₁y = c₁<br>
+                    a₂x + b₂y = c₂
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="🔁 Sistemas 3×3" data-en="🔁 3×3 Systems">🔁 Sistemas 3×3</h3>
+                <p data-es="Tres ecuaciones con tres incógnitas. Método: eliminación gaussiana." data-en="Three equations with three unknowns. Method: Gaussian elimination.">Tres ecuaciones con tres incógnitas. Método: eliminación gaussiana.</p>
+                <div class="code-block">
+                    a₁x + b₁y + c₁z = d₁<br>
+                    a₂x + b₂y + c₂z = d₂<br>
+                    a₃x + b₃y + c₃z = d₃
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="⚡ Métodos de resolución" data-en="⚡ Solution methods">⚡ Métodos de resolución</h3>
+                <ul>
+                    <li data-es="Sustitución: despejar una variable y sustituir" data-en="Substitution: isolate one variable">Sustitución: despejar una variable y sustituir</li>
+                    <li data-es="Igualación: despejar la misma variable en ambas" data-en="Equalization: isolate same variable in both">Igualación: despejar la misma variable en ambas</li>
+                    <li data-es="Reducción: multiplicar y sumar para eliminar" data-en="Reduction: multiply and add to eliminate">Reducción: multiplicar y sumar para eliminar</li>
+                    <li data-es="Gaussiana: matriz de coeficientes" data-en="Gaussian: coefficient matrix">Gaussiana: matriz de coeficientes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Examples Table -->
+    <div class="card">
+        <h2 data-es="📝 Ejemplos prácticos resueltos" data-en="📝 Practical examples solved">📝 Ejemplos prácticos resueltos</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Tipo" data-en="Type">Tipo</th>
+                    <th data-es="Problema" data-en="Problem">Problema</th>
+                    <th data-es="Solución" data-en="Solution">Solución</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="1er grado" data-en="1st degree">1er grado</td>
+                    <td>3x - 4 = 2x + 7</td>
+                    <td><strong>x = 11</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="2º grado" data-en="2nd degree">2º grado</td>
+                    <td>x² - 5x + 6 = 0</td>
+                    <td><strong>x₁ = 3, x₂ = 2</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="Sistema 2×2" data-en="2×2 System">Sistema 2×2</td>
+                    <td>2x + y = 7 | x - y = 2</td>
+                    <td><strong>x = 3, y = 1</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="Sistema 3×3" data-en="3×3 System">Sistema 3×3</td>
+                    <td>x+y+z=6 | 2x+y-z=3 | x-y+2z=5</td>
+                    <td><strong>x = 2, y = 1, z = 3</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'H4') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchMode(mode) {
+        document.querySelectorAll('.calc-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(mode).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function formatNumber(value) {
+        const num = parseFloat(value).toFixed(4);
+        return parseFloat(num).toString();
+    }
+
+    function calculateMode1() {
+        const a = parseFloat(document.getElementById('mode1_a').value) || 0;
+        const b = parseFloat(document.getElementById('mode1_b').value) || 0;
+        const c = parseFloat(document.getElementById('mode1_c').value) || 0;
+        const d = parseFloat(document.getElementById('mode1_d').value) || 0;
+
+        if (a === c) {
+            alert(currentLang === 'es' ? 'No hay solución única (a = c)' : 'No unique solution (a = c)');
+            return;
+        }
+
+        const x = (d - b) / (a - c);
+        document.getElementById('mode1_x').textContent = formatNumber(x);
+
+        const stepsHtml = `
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 1:' : 'Step 1:'} ${currentLang === 'es' ? 'Ecuación original' : 'Original equation'}</div>
+                ${a}x + ${b} = ${c}x + ${d}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 2:' : 'Step 2:'} ${currentLang === 'es' ? 'Agrupar términos' : 'Group terms'}</div>
+                (${a} - ${c})x = ${d} - ${b}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 3:' : 'Step 3:'} ${currentLang === 'es' ? 'Resultado' : 'Result'}</div>
+                x = ${formatNumber(d - b)} / ${formatNumber(a - c)} = ${formatNumber(x)}
+            </div>
+        `;
+
+        document.getElementById('mode1-steps').innerHTML = stepsHtml;
+        document.getElementById('mode1-result').style.display = 'block';
+    }
+
+    function clearMode1() {
+        document.getElementById('mode1_a').value = '';
+        document.getElementById('mode1_b').value = '';
+        document.getElementById('mode1_c').value = '';
+        document.getElementById('mode1_d').value = '';
+        document.getElementById('mode1-result').style.display = 'none';
+    }
+
+    function calculateMode2() {
+        const a = parseFloat(document.getElementById('mode2_a').value) || 1;
+        const b = parseFloat(document.getElementById('mode2_b').value) || 0;
+        const c = parseFloat(document.getElementById('mode2_c').value) || 0;
+
+        const delta = b * b - 4 * a * c;
+        document.getElementById('mode2_delta').textContent = formatNumber(delta);
+
+        let x1, x2;
+        if (delta < 0) {
+            x1 = currentLang === 'es' ? 'Sin soluciones reales' : 'No real solutions';
+            x2 = '';
+        } else {
+            x1 = (-b + Math.sqrt(delta)) / (2 * a);
+            x2 = (-b - Math.sqrt(delta)) / (2 * a);
+            document.getElementById('mode2_x1').textContent = formatNumber(x1);
+            document.getElementById('mode2_x2').textContent = formatNumber(x2);
+        }
+
+        const stepsHtml = `
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 1:' : 'Step 1:'} ${currentLang === 'es' ? 'Calcular discriminante' : 'Calculate discriminant'}</div>
+                Δ = b² - 4ac = (${b})² - 4(${a})(${c}) = ${formatNumber(delta)}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 2:' : 'Step 2:'} ${currentLang === 'es' ? 'Aplicar fórmula cuadrática' : 'Apply quadratic formula'}</div>
+                x = (-b ± √Δ) / 2a = (-${b} ± √${formatNumber(delta)}) / ${2 * a}
+            </div>
+            ${delta >= 0 ? `
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 3:' : 'Step 3:'} ${currentLang === 'es' ? 'Soluciones' : 'Solutions'}</div>
+                x₁ = ${formatNumber(x1)}<br>
+                x₂ = ${formatNumber(x2)}
+            </div>
+            ` : ''}
+        `;
+
+        document.getElementById('mode2-steps').innerHTML = stepsHtml;
+        document.getElementById('mode2-result').style.display = 'block';
+    }
+
+    function clearMode2() {
+        document.getElementById('mode2_a').value = '';
+        document.getElementById('mode2_b').value = '';
+        document.getElementById('mode2_c').value = '';
+        document.getElementById('mode2-result').style.display = 'none';
+    }
+
+    function calculateMode3() {
+        const a1 = parseFloat(document.getElementById('mode3_a1').value) || 0;
+        const b1 = parseFloat(document.getElementById('mode3_b1').value) || 0;
+        const c1 = parseFloat(document.getElementById('mode3_c1').value) || 0;
+        const a2 = parseFloat(document.getElementById('mode3_a2').value) || 0;
+        const b2 = parseFloat(document.getElementById('mode3_b2').value) || 0;
+        const c2 = parseFloat(document.getElementById('mode3_c2').value) || 0;
+
+        const det = a1 * b2 - a2 * b1;
+        if (det === 0) {
+            alert(currentLang === 'es' ? 'Sistema sin solución única' : 'System has no unique solution');
+            return;
+        }
+
+        const x = (c1 * b2 - c2 * b1) / det;
+        const y = (a1 * c2 - a2 * c1) / det;
+
+        document.getElementById('mode3_x').textContent = formatNumber(x);
+        document.getElementById('mode3_y').textContent = formatNumber(y);
+
+        const stepsHtml = `
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 1:' : 'Step 1:'} ${currentLang === 'es' ? 'Sistema original' : 'Original system'}</div>
+                ${a1}x + ${b1}y = ${c1}<br>
+                ${a2}x + ${b2}y = ${c2}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 2:' : 'Step 2:'} ${currentLang === 'es' ? 'Calcular determinante' : 'Calculate determinant'}</div>
+                det = ${a1} × ${b2} - ${a2} × ${b1} = ${formatNumber(det)}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 3:' : 'Step 3:'} ${currentLang === 'es' ? 'Soluciones' : 'Solutions'}</div>
+                x = ${formatNumber(x)}<br>
+                y = ${formatNumber(y)}
+            </div>
+        `;
+
+        document.getElementById('mode3-steps').innerHTML = stepsHtml;
+        document.getElementById('mode3-result').style.display = 'block';
+    }
+
+    function clearMode3() {
+        ['a1', 'b1', 'c1', 'a2', 'b2', 'c2'].forEach(id => document.getElementById('mode3_' + id).value = '');
+        document.getElementById('mode3-result').style.display = 'none';
+    }
+
+    function calculateMode4() {
+        // Read all coefficients
+        const matrix = [
+            [parseFloat(document.getElementById('mode4_a1').value) || 0, parseFloat(document.getElementById('mode4_b1').value) || 0, parseFloat(document.getElementById('mode4_c1').value) || 0, parseFloat(document.getElementById('mode4_d1').value) || 0],
+            [parseFloat(document.getElementById('mode4_a2').value) || 0, parseFloat(document.getElementById('mode4_b2').value) || 0, parseFloat(document.getElementById('mode4_c2').value) || 0, parseFloat(document.getElementById('mode4_d2').value) || 0],
+            [parseFloat(document.getElementById('mode4_a3').value) || 0, parseFloat(document.getElementById('mode4_b3').value) || 0, parseFloat(document.getElementById('mode4_c3').value) || 0, parseFloat(document.getElementById('mode4_d3').value) || 0]
+        ];
+
+        // Gaussian elimination
+        for (let i = 0; i < 3; i++) {
+            let maxRow = i;
+            for (let k = i + 1; k < 3; k++) {
+                if (Math.abs(matrix[k][i]) > Math.abs(matrix[maxRow][i])) {
+                    maxRow = k;
+                }
+            }
+
+            [matrix[i], matrix[maxRow]] = [matrix[maxRow], matrix[i]];
+
+            if (Math.abs(matrix[i][i]) < 1e-10) {
+                alert(currentLang === 'es' ? 'Sistema sin solución única' : 'System has no unique solution');
+                return;
+            }
+
+            for (let k = i + 1; k < 3; k++) {
+                const c = matrix[k][i] / matrix[i][i];
+                for (let j = i; j < 4; j++) {
+                    matrix[k][j] -= c * matrix[i][j];
+                }
+            }
+        }
+
+        // Back substitution
+        const x = [0, 0, 0];
+        for (let i = 2; i >= 0; i--) {
+            x[i] = matrix[i][3];
+            for (let j = i + 1; j < 3; j++) {
+                x[i] -= matrix[i][j] * x[j];
+            }
+            x[i] /= matrix[i][i];
+        }
+
+        document.getElementById('mode4_x').textContent = formatNumber(x[0]);
+        document.getElementById('mode4_y').textContent = formatNumber(x[1]);
+        document.getElementById('mode4_z').textContent = formatNumber(x[2]);
+
+        const stepsHtml = `
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 1:' : 'Step 1:'} ${currentLang === 'es' ? 'Sistema original' : 'Original system'}</div>
+                ${matrix[0][0]}x + ${matrix[0][1]}y + ${matrix[0][2]}z = ${matrix[0][3]}<br>
+                ${matrix[1][0]}x + ${matrix[1][1]}y + ${matrix[1][2]}z = ${matrix[1][3]}<br>
+                ${matrix[2][0]}x + ${matrix[2][1]}y + ${matrix[2][2]}z = ${matrix[2][3]}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 2:' : 'Step 2:'} ${currentLang === 'es' ? 'Eliminación Gaussiana' : 'Gaussian elimination'}</div>
+                ${currentLang === 'es' ? 'Reducción de la matriz a forma triangular' : 'Reduce matrix to triangular form'}
+            </div>
+            <div class="step-box">
+                <div class="step-number">${currentLang === 'es' ? 'Paso 3:' : 'Step 3:'} ${currentLang === 'es' ? 'Soluciones' : 'Solutions'}</div>
+                x = ${formatNumber(x[0])}<br>
+                y = ${formatNumber(x[1])}<br>
+                z = ${formatNumber(x[2])}
+            </div>
+        `;
+
+        document.getElementById('mode4-steps').innerHTML = stepsHtml;
+        document.getElementById('mode4-result').style.display = 'block';
+    }
+
+    function clearMode4() {
+        for (let i = 1; i <= 3; i++) {
+            for (let j = 'a b c d'.split(' '); j < 4; j++) {
+                document.getElementById('mode4_' + j + i).value = '';
+            }
+        }
+        document.getElementById('mode4-result').style.display = 'none';
+    }
+
+    // Trigger calculations on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const section = input.closest('.calc-section');
+                    if (section.id === 'mode1') calculateMode1();
+                    else if (section.id === 'mode2') calculateMode2();
+                    else if (section.id === 'mode3') calculateMode3();
+                    else if (section.id === 'mode4') calculateMode4();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
