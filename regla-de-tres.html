@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Regla de Tres 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .modes-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--primary);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .card-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-section {
+            display: none;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-secondary {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-box {
+            background: #f0f0f0;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .quick-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .example-btn {
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .example-btn:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .example-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .example-desc {
+            color: var(--text-light);
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .proportion-visual {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .proportion-line {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+            font-weight: 700;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .modes-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            .quick-examples {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🔢 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Regla de Tres 2026" data-en="Rule of Three Calculator 2026">Calculadora de Regla de Tres 2026</h1>
+    <p class="subtitle" data-es="Proporcionalidad Directa e Inversa · Paso a Paso · Fórmula Explicada" data-en="Direct and Inverse Proportion · Step by Step · Formula Explained">Proporcionalidad Directa e Inversa · Paso a Paso · Fórmula Explicada</p>
+
+    <!-- Mode Navigation -->
+    <div class="modes-nav">
+        <button class="mode-btn active" onclick="switchMode('mode1')" data-es="↗️ Regla de Tres Simple" data-en="↗️ Simple Rule of Three">↗️ Regla de Tres Simple</button>
+        <button class="mode-btn" onclick="switchMode('mode2')" data-es="↙️ Regla de Tres Inversa" data-en="↙️ Inverse Rule of Three">↙️ Regla de Tres Inversa</button>
+        <button class="mode-btn" onclick="switchMode('mode3')" data-es="📊 Regla de Tres Compuesta" data-en="📊 Compound Rule of Three">📊 Regla de Tres Compuesta</button>
+    </div>
+
+    <!-- Mode 1: Simple Direct Proportion -->
+    <div class="card calc-section active" id="mode1">
+        <h2 data-es="↗️ Regla de Tres Simple — Proporcionalidad Directa" data-en="↗️ Simple Rule of Three — Direct Proportion">↗️ Regla de Tres Simple — Proporcionalidad Directa</h2>
+        <p class="card-desc" data-es="Si A es a B, como C es a X. Cuando aumenta A, también aumenta X en la misma proporción." data-en="If A is to B, as C is to X. When A increases, X increases in the same proportion.">Si A es a B, como C es a X. Cuando aumenta A, también aumenta X en la misma proporción.</p>
+
+        <div class="form-group">
+            <label data-es="Primera cantidad (A)" data-en="First quantity (A)">Primera cantidad (A)</label>
+            <input type="number" id="mode1_a" placeholder="5" step="0.01" value="5">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Resultado de A (B)" data-en="Result of A (B)">Resultado de A (B)</label>
+            <input type="number" id="mode1_b" placeholder="10" step="0.01" value="10">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Segunda cantidad (C)" data-en="Second quantity (C)">Segunda cantidad (C)</label>
+            <input type="number" id="mode1_c" placeholder="15" step="0.01" value="15">
+        </div>
+
+        <button class="btn" onclick="calculateMode1()" data-es="↗️ Calcular X" data-en="↗️ Calculate X">↗️ Calcular X</button>
+
+        <div class="proportion-visual" id="mode1_visual" style="display: none;">
+            <div class="proportion-line">A / B = C / X</div>
+            <div class="proportion-line"><span id="mode1_visual_values"></span></div>
+            <div class="proportion-line" style="color: var(--primary); font-size: 1.3rem; margin-top: 1rem;">X = <span id="mode1_formula"></span></div>
+        </div>
+
+        <div class="quick-examples">
+            <button class="example-btn" onclick="loadExample1(5, 10, 15)">
+                <div class="example-title" data-es="Compras" data-en="Shopping">Compras</div>
+                <div class="example-desc" data-es="5 camisetas cuestan 50€. ¿Cuánto cuesta 1 camiseta?" data-en="5 shirts cost 50€. How much costs 1 shirt?">5 camisetas cuestan 50€. ¿Cuánto cuesta 1?</div>
+            </button>
+            <button class="example-btn" onclick="loadExample1(3, 12, 7)">
+                <div class="example-title" data-es="Receta" data-en="Recipe">Receta</div>
+                <div class="example-desc" data-es="3 huevos = 2 tazas harina. ¿Y 7 huevos?" data-en="3 eggs = 2 cups flour. And 7 eggs?">3 huevos = 2 tazas harina. ¿Y 7?</div>
+            </button>
+            <button class="example-btn" onclick="loadExample1(100, 15, 500)">
+                <div class="example-title" data-es="Distancia" data-en="Distance">Distancia</div>
+                <div class="example-desc" data-es="100km en 1 hora. ¿Y 500km?" data-en="100km in 1 hour. And 500km?">100km en 1 hora. ¿Y 500km?</div>
+            </button>
+        </div>
+
+        <div id="mode1-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Valor de X" data-en="Value of X">Valor de X</div>
+                    <div class="result-value" id="mode1_x">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Proporción" data-en="Proportion">Proporción</div>
+                    <div class="result-value" id="mode1_ratio">0</div>
+                    <div class="result-secondary" data-es="(A es a B como C es a X)" data-en="(A is to B as C is to X)">(A es a B como C es a X)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 2: Inverse Proportion -->
+    <div class="card calc-section" id="mode2">
+        <h2 data-es="↙️ Regla de Tres Inversa — Proporcionalidad Inversa" data-en="↙️ Inverse Rule of Three — Inverse Proportion">↙️ Regla de Tres Inversa — Proporcionalidad Inversa</h2>
+        <p class="card-desc" data-es="Cuando A aumenta, X disminuye en proporción inversa. Si 4 obreros tardan 6 días, 8 obreros tardarán menos días." data-en="When A increases, X decreases in inverse proportion. If 4 workers take 6 days, 8 workers take fewer days.">Cuando A aumenta, X disminuye en proporción inversa. Si 4 obreros tardan 6 días, 8 obreros tardarán menos días.</p>
+
+        <div class="form-group">
+            <label data-es="Primera cantidad (A)" data-en="First quantity (A)">Primera cantidad (A)</label>
+            <input type="number" id="mode2_a" placeholder="4" step="0.01" value="4">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Resultado de A (B)" data-en="Result of A (B)">Resultado de A (B)</label>
+            <input type="number" id="mode2_b" placeholder="6" step="0.01" value="6">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Segunda cantidad (C)" data-en="Second quantity (C)">Segunda cantidad (C)</label>
+            <input type="number" id="mode2_c" placeholder="8" step="0.01" value="8">
+        </div>
+
+        <button class="btn" onclick="calculateMode2()" data-es="↙️ Calcular X" data-en="↙️ Calculate X">↙️ Calcular X</button>
+
+        <div class="proportion-visual" id="mode2_visual" style="display: none;">
+            <div class="proportion-line">A × B = C × X</div>
+            <div class="proportion-line"><span id="mode2_visual_values"></span></div>
+            <div class="proportion-line" style="color: var(--primary); font-size: 1.3rem; margin-top: 1rem;">X = <span id="mode2_formula"></span></div>
+        </div>
+
+        <div class="quick-examples">
+            <button class="example-btn" onclick="loadExample2(4, 6, 8)">
+                <div class="example-title" data-es="Obreros y tiempo" data-en="Workers and time">Obreros y tiempo</div>
+                <div class="example-desc" data-es="4 obreros tardan 6 días. ¿Y 8 obreros?" data-en="4 workers take 6 days. And 8 workers?">4 obreros tardan 6 días. ¿Y 8 obreros?</div>
+            </button>
+            <button class="example-btn" onclick="loadExample2(60, 8, 80)">
+                <div class="example-title" data-es="Velocidad y tiempo" data-en="Speed and time">Velocidad y tiempo</div>
+                <div class="example-desc" data-es="A 60 km/h tardas 8h. ¿A 80 km/h?" data-en="At 60 km/h you take 8h. At 80 km/h?">A 60 km/h tardas 8h. ¿A 80 km/h?</div>
+            </button>
+            <button class="example-btn" onclick="loadExample2(10, 12, 15)">
+                <div class="example-title" data-es="Alimento para animales" data-en="Animal food">Alimento para animales</div>
+                <div class="example-desc" data-es="10 caballos comen 12 sacos/mes. ¿15 caballos?" data-en="10 horses eat 12 sacks/month. 15 horses?">10 caballos comen 12 sacos/mes. ¿15?</div>
+            </button>
+        </div>
+
+        <div id="mode2-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Valor de X" data-en="Value of X">Valor de X</div>
+                    <div class="result-value" id="mode2_x">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" data-es="Proporción" data-en="Proportion">Proporción</div>
+                    <div class="result-value" id="mode2_ratio">0</div>
+                    <div class="result-secondary" data-es="(A × B = C × X)" data-en="(A × B = C × X)">(A × B = C × X)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 3: Compound Proportion -->
+    <div class="card calc-section" id="mode3">
+        <h2 data-es="📊 Regla de Tres Compuesta" data-en="📊 Compound Rule of Three">📊 Regla de Tres Compuesta</h2>
+        <p class="card-desc" data-es="Involucra más de dos magnitudes. Ejemplo: 4 obreros, trabajando 8 horas al día, completan un trabajo en 6 días. ¿Cuántos días necesitan 6 obreros trabajando 6 horas?" data-en="Involves more than two magnitudes. Example: 4 workers, working 8 hours/day, complete a job in 6 days. How many days do 6 workers need working 6 hours?">Involucra más de dos magnitudes. Ejemplo: 4 obreros, trabajando 8 horas al día, completan un trabajo en 6 días. ¿Cuántos días necesitan 6 obreros trabajando 6 horas?</p>
+
+        <div class="form-group">
+            <label data-es="Cantidad 1 (A)" data-en="Quantity 1 (A)">Cantidad 1 (A)</label>
+            <input type="number" id="mode3_a" placeholder="4" step="0.01" value="4">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Ej: obreros" data-en="Ex: workers">Ej: obreros</small>
+        </div>
+
+        <div class="form-group">
+            <label data-es="Cantidad 2 (B)" data-en="Quantity 2 (B)">Cantidad 2 (B)</label>
+            <input type="number" id="mode3_b" placeholder="8" step="0.01" value="8">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Ej: horas/día" data-en="Ex: hours/day">Ej: horas/día</small>
+        </div>
+
+        <div class="form-group">
+            <label data-es="Resultado (C)" data-en="Result (C)">Resultado (C)</label>
+            <input type="number" id="mode3_c" placeholder="6" step="0.01" value="6">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Ej: días" data-en="Ex: days">Ej: días</small>
+        </div>
+
+        <div class="form-group">
+            <label data-es="Nueva cantidad 1 (A')" data-en="New quantity 1 (A')">Nueva cantidad 1 (A')</label>
+            <input type="number" id="mode3_a2" placeholder="6" step="0.01" value="6">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Ej: nuevos obreros" data-en="Ex: new workers">Ej: nuevos obreros</small>
+        </div>
+
+        <div class="form-group">
+            <label data-es="Nueva cantidad 2 (B')" data-en="New quantity 2 (B')">Nueva cantidad 2 (B')</label>
+            <input type="number" id="mode3_b2" placeholder="6" step="0.01" value="6">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Ej: nuevas horas/día" data-en="Ex: new hours/day">Ej: nuevas horas/día</small>
+        </div>
+
+        <button class="btn" onclick="calculateMode3()" data-es="📊 Calcular resultado" data-en="📊 Calculate result">📊 Calcular resultado</button>
+
+        <div id="mode3-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Resultado" data-en="Result">Resultado</div>
+                    <div class="result-value" id="mode3_result">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="card">
+        <div class="info-box">
+            <h3 data-es="📚 ¿Qué es la regla de tres?" data-en="📚 What is the rule of three?">📚 ¿Qué es la regla de tres?</h3>
+            <p data-es="La regla de tres es un procedimiento matemático para resolver problemas de proporcionalidad. Es uno de los conceptos más importantes en matemáticas básicas porque permite calcular valores desconocidos basándose en relaciones proporcionales entre magnitudes conocidas." data-en="The rule of three is a mathematical procedure for solving proportion problems. It's one of the most important concepts in basic math because it allows calculating unknown values based on proportional relationships between known quantities.">La regla de tres es un procedimiento matemático para resolver problemas de proporcionalidad. Es uno de los conceptos más importantes en matemáticas básicas porque permite calcular valores desconocidos basándose en relaciones proporcionales entre magnitudes conocidas.</p>
+        </div>
+    </div>
+
+    <!-- Formula Guide -->
+    <div class="guide-section">
+        <h2 data-es="🔢 Fórmulas paso a paso" data-en="🔢 Formulas step by step">🔢 Fórmulas paso a paso</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="1️⃣ Regla de Tres Simple Directa" data-en="1️⃣ Simple Direct Rule of Three">1️⃣ Regla de Tres Simple Directa</h3>
+                <p data-es="Cuando dos magnitudes aumentan o disminuyen juntas." data-en="When two magnitudes increase or decrease together.">Cuando dos magnitudes aumentan o disminuyen juntas.</p>
+                <div class="formula-box">
+                    A → B<br>
+                    C → X<br>
+                    <br>
+                    X = (C × B) / A
+                </div>
+                <p data-es="Ejemplo: Si 5 camisetas cuestan 50€, ¿cuánto cuestan 3 camisetas?" data-en="Example: If 5 shirts cost 50€, how much do 3 shirts cost?">Ejemplo: Si 5 camisetas cuestan 50€, ¿cuánto cuestan 3 camisetas?</p>
+                <div class="formula-box">
+                    5 → 50<br>
+                    3 → X<br>
+                    <br>
+                    X = (3 × 50) / 5 = 30€
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="2️⃣ Regla de Tres Simple Inversa" data-en="2️⃣ Simple Inverse Rule of Three">2️⃣ Regla de Tres Simple Inversa</h3>
+                <p data-es="Cuando una magnitud aumenta y la otra disminuye." data-en="When one magnitude increases and the other decreases.">Cuando una magnitud aumenta y la otra disminuye.</p>
+                <div class="formula-box">
+                    A → B<br>
+                    C → X<br>
+                    <br>
+                    X = (A × B) / C
+                </div>
+                <p data-es="Ejemplo: Si 4 obreros tardan 6 días, ¿cuánto tardan 8 obreros?" data-en="Example: If 4 workers take 6 days, how long do 8 workers take?">Ejemplo: Si 4 obreros tardan 6 días, ¿cuánto tardan 8 obreros?</p>
+                <div class="formula-box">
+                    4 → 6<br>
+                    8 → X<br>
+                    <br>
+                    X = (4 × 6) / 8 = 3 días
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="3️⃣ Regla de Tres Compuesta" data-en="3️⃣ Compound Rule of Three">3️⃣ Regla de Tres Compuesta</h3>
+                <p data-es="Combina directa e inversa según las magnitudes." data-en="Combines direct and inverse based on the magnitudes.">Combina directa e inversa según las magnitudes.</p>
+                <div class="formula-box">
+                    Pasos:<br>
+                    1. Ordena magnitudes<br>
+                    2. Identifica proporciones<br>
+                    3. Multiplica numeradores<br>
+                    4. Divide por denominadores
+                </div>
+                <p style="margin-top: 1rem;" data-es="Ejemplo: 4 obreros × 8h/día → 6 días. ¿6 obreros × 6h/día?" data-en="Example: 4 workers × 8h/day → 6 days. 6 workers × 6h/day?">Ejemplo: 4 obreros × 8h/día → 6 días. ¿6 obreros × 6h/día?</p>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="⚡ Trucos prácticos" data-en="⚡ Practical tricks">⚡ Trucos prácticos</h3>
+                <ul>
+                    <li data-es="Simplifica fracciones antes de calcular" data-en="Simplify fractions before calculating">Simplifica fracciones antes de calcular</li>
+                    <li data-es="Verifica si es directa o inversa" data-en="Verify if it's direct or inverse">Verifica si es directa o inversa</li>
+                    <li data-es="Multiplica cruzado en directa" data-en="Cross multiply in direct proportion">Multiplica cruzado en directa</li>
+                    <li data-es="En inversa, multiplica lado por lado" data-en="In inverse, multiply side by side">En inversa, multiplica lado por lado</li>
+                    <li data-es="Comprueba: ¿el resultado tiene sentido?" data-en="Check: does the result make sense?">Comprueba: ¿el resultado tiene sentido?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Practice Examples Table -->
+    <div class="card">
+        <h2 data-es="📋 Ejemplos prácticos resueltos" data-en="📋 Practical examples solved">📋 Ejemplos prácticos resueltos</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Problema" data-en="Problem">Problema</th>
+                    <th data-es="Tipo" data-en="Type">Tipo</th>
+                    <th data-es="Cálculo" data-en="Calculation">Cálculo</th>
+                    <th data-es="Resultado" data-en="Result">Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="5 libros cuestan 40€. ¿8 libros?" data-en="5 books cost 40€. 8 books?">5 libros cuestan 40€. ¿8 libros?</td>
+                    <td data-es="Directa" data-en="Direct">Directa</td>
+                    <td>(8 × 40) / 5</td>
+                    <td><strong>64€</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="6 obreros tardan 10 días. ¿3 obreros?" data-en="6 workers take 10 days. 3 workers?">6 obreros tardan 10 días. ¿3 obreros?</td>
+                    <td data-es="Inversa" data-en="Inverse">Inversa</td>
+                    <td>(6 × 10) / 3</td>
+                    <td><strong>20 días</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="Un coche recorre 120km en 2h. ¿Km en 5h?" data-en="A car travels 120km in 2h. Km in 5h?">Un coche recorre 120km en 2h. ¿Km en 5h?</td>
+                    <td data-es="Directa" data-en="Direct">Directa</td>
+                    <td>(5 × 120) / 2</td>
+                    <td><strong>300km</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="A 60 km/h tardas 8h. ¿A 80 km/h?" data-en="At 60 km/h you take 8h. At 80 km/h?">A 60 km/h tardas 8h. ¿A 80 km/h?</td>
+                    <td data-es="Inversa" data-en="Inverse">Inversa</td>
+                    <td>(60 × 8) / 80</td>
+                    <td><strong>6 horas</strong></td>
+                </tr>
+                <tr>
+                    <td data-es="3 máquinas hacen 90 piezas/día. ¿5 máquinas?" data-en="3 machines make 90 pieces/day. 5 machines?">3 máquinas hacen 90 piezas/día. ¿5 máquinas?</td>
+                    <td data-es="Directa" data-en="Direct">Directa</td>
+                    <td>(5 × 90) / 3</td>
+                    <td><strong>150 piezas/día</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchMode(mode) {
+        document.querySelectorAll('.calc-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(mode).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function formatNumber(value) {
+        return parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    function loadExample1(a, b, c) {
+        document.getElementById('mode1_a').value = a;
+        document.getElementById('mode1_b').value = b;
+        document.getElementById('mode1_c').value = c;
+        calculateMode1();
+    }
+
+    function loadExample2(a, b, c) {
+        document.getElementById('mode2_a').value = a;
+        document.getElementById('mode2_b').value = b;
+        document.getElementById('mode2_c').value = c;
+        calculateMode2();
+    }
+
+    function calculateMode1() {
+        const a = parseFloat(document.getElementById('mode1_a').value) || 0;
+        const b = parseFloat(document.getElementById('mode1_b').value) || 0;
+        const c = parseFloat(document.getElementById('mode1_c').value) || 0;
+
+        if (a === 0) return;
+
+        const x = (c * b) / a;
+        const ratio = b / a;
+
+        document.getElementById('mode1_x').textContent = formatNumber(x);
+        document.getElementById('mode1_ratio').textContent = formatNumber(ratio);
+        document.getElementById('mode1_visual_values').textContent = `${formatNumber(a)} / ${formatNumber(b)} = ${formatNumber(c)} / ${formatNumber(x)}`;
+        document.getElementById('mode1_formula').textContent = `(${formatNumber(c)} × ${formatNumber(b)}) / ${formatNumber(a)} = ${formatNumber(x)}`;
+        document.getElementById('mode1_visual').style.display = 'block';
+        document.getElementById('mode1-result').style.display = 'block';
+    }
+
+    function calculateMode2() {
+        const a = parseFloat(document.getElementById('mode2_a').value) || 0;
+        const b = parseFloat(document.getElementById('mode2_b').value) || 0;
+        const c = parseFloat(document.getElementById('mode2_c').value) || 0;
+
+        if (c === 0) return;
+
+        const x = (a * b) / c;
+        const ratio = a / c;
+
+        document.getElementById('mode2_x').textContent = formatNumber(x);
+        document.getElementById('mode2_ratio').textContent = formatNumber(ratio);
+        document.getElementById('mode2_visual_values').textContent = `${formatNumber(a)} × ${formatNumber(b)} = ${formatNumber(c)} × ${formatNumber(x)}`;
+        document.getElementById('mode2_formula').textContent = `(${formatNumber(a)} × ${formatNumber(b)}) / ${formatNumber(c)} = ${formatNumber(x)}`;
+        document.getElementById('mode2_visual').style.display = 'block';
+        document.getElementById('mode2-result').style.display = 'block';
+    }
+
+    function calculateMode3() {
+        const a = parseFloat(document.getElementById('mode3_a').value) || 0;
+        const b = parseFloat(document.getElementById('mode3_b').value) || 0;
+        const c = parseFloat(document.getElementById('mode3_c').value) || 0;
+        const a2 = parseFloat(document.getElementById('mode3_a2').value) || 0;
+        const b2 = parseFloat(document.getElementById('mode3_b2').value) || 0;
+
+        if (a === 0 || b === 0) return;
+
+        // A and B are direct, so: (A × B) → C becomes (A' × B') → X
+        const x = (c * a * b) / (a2 * b2);
+
+        document.getElementById('mode3_result').textContent = formatNumber(x);
+        document.getElementById('mode3-result').style.display = 'block';
+    }
+
+    // Trigger calculations on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const section = input.closest('.calc-section');
+                    if (section.id === 'mode1') calculateMode1();
+                    else if (section.id === 'mode2') calculateMode2();
+                    else if (section.id === 'mode3') calculateMode3();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
