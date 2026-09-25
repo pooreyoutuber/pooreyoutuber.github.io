@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Potencias y Raíces 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .lang-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .modes-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--primary);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .calc-section {
+            display: none;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--success);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .formula-box {
+            background: #f0f0f0;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #92400e;
+        }
+
+        .info-box p {
+            color: #b45309;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .guide-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .guide-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .modes-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">🔢 CalculadorasMX</a>
+        <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
+    </div>
+</header>
+
+<div class="container">
+    <h1 data-es="Calculadora de Potencias y Raíces 2026" data-en="Powers and Roots Calculator 2026">Calculadora de Potencias y Raíces 2026</h1>
+    <p class="subtitle" data-es="Potencias · Raíces n-ésimas · Potencias Fraccionarias · Logaritmos · ESO" data-en="Powers · N-th Roots · Fractional Powers · Logarithms · ESO">Potencias · Raíces n-ésimas · Potencias Fraccionarias · Logaritmos · ESO</p>
+
+    <!-- Mode Navigation -->
+    <div class="modes-nav">
+        <button class="mode-btn active" onclick="switchMode('mode1')" data-es="🔢 Potencia: aⁿ" data-en="🔢 Power: aⁿ">🔢 Potencia: aⁿ</button>
+        <button class="mode-btn" onclick="switchMode('mode2')" data-es="√ Raíz n-ésima" data-en="√ N-th Root">√ Raíz n-ésima</button>
+        <button class="mode-btn" onclick="switchMode('mode3')" data-es="🔄 Potencia Fraccionaria" data-en="🔄 Fractional Power">🔄 Potencia Fraccionaria</button>
+        <button class="mode-btn" onclick="switchMode('mode4')" data-es="📊 Logaritmo" data-en="📊 Logarithm">📊 Logaritmo</button>
+    </div>
+
+    <!-- Mode 1: Power -->
+    <div class="card calc-section active" id="mode1">
+        <h2 data-es="🔢 Potencia: aⁿ" data-en="🔢 Power: aⁿ">🔢 Potencia: aⁿ</h2>
+
+        <div class="form-group">
+            <label data-es="Base (a)" data-en="Base (a)">Base (a)</label>
+            <input type="number" id="mode1_a" placeholder="2" step="0.01" value="2">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Exponente (n)" data-en="Exponent (n)">Exponente (n)</label>
+            <input type="number" id="mode1_n" placeholder="3" step="1" value="3">
+        </div>
+
+        <button class="btn" onclick="calculateMode1()" data-es="🔢 Calcular potencia" data-en="🔢 Calculate power">🔢 Calcular potencia</button>
+
+        <div id="mode1-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Resultado" data-en="Result">Resultado</div>
+                    <div class="result-value" id="mode1_result">0</div>
+                </div>
+            </div>
+
+            <div id="mode1-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 2: N-th Root -->
+    <div class="card calc-section" id="mode2">
+        <h2 data-es="√ Raíz n-ésima: ⁿ√a" data-en="√ N-th Root: ⁿ√a">√ Raíz n-ésima: ⁿ√a</h2>
+
+        <div class="form-group">
+            <label data-es="Radicando (a)" data-en="Radicand (a)">Radicando (a)</label>
+            <input type="number" id="mode2_a" placeholder="8" step="0.01" value="8">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Índice de la raíz (n)" data-en="Root index (n)">Índice de la raíz (n)</label>
+            <input type="number" id="mode2_n" placeholder="3" step="1" min="2" value="3">
+        </div>
+
+        <button class="btn" onclick="calculateMode2()" data-es="√ Calcular raíz" data-en="√ Calculate root">√ Calcular raíz</button>
+
+        <div id="mode2-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Resultado" data-en="Result">Resultado</div>
+                    <div class="result-value" id="mode2_result">0</div>
+                </div>
+            </div>
+
+            <div id="mode2-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 3: Fractional Power -->
+    <div class="card calc-section" id="mode3">
+        <h2 data-es="🔄 Potencia Fraccionaria: a^(p/q)" data-en="🔄 Fractional Power: a^(p/q)">🔄 Potencia Fraccionaria: a^(p/q)</h2>
+
+        <div class="form-group">
+            <label data-es="Base (a)" data-en="Base (a)">Base (a)</label>
+            <input type="number" id="mode3_a" placeholder="8" step="0.01" value="8">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Numerador (p)" data-en="Numerator (p)">Numerador (p)</label>
+            <input type="number" id="mode3_p" placeholder="2" step="1" value="2">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Denominador (q)" data-en="Denominator (q)">Denominador (q)</label>
+            <input type="number" id="mode3_q" placeholder="3" step="1" value="3">
+        </div>
+
+        <button class="btn" onclick="calculateMode3()" data-es="🔄 Calcular potencia fraccionaria" data-en="🔄 Calculate fractional power">🔄 Calcular potencia fraccionaria</button>
+
+        <div id="mode3-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Resultado" data-en="Result">Resultado</div>
+                    <div class="result-value" id="mode3_result">0</div>
+                </div>
+            </div>
+
+            <div id="mode3-steps"></div>
+        </div>
+    </div>
+
+    <!-- Mode 4: Logarithm -->
+    <div class="card calc-section" id="mode4">
+        <h2 data-es="📊 Logaritmo: logₙ(a)" data-en="📊 Logarithm: logₙ(a)">📊 Logaritmo: logₙ(a)</h2>
+
+        <div class="form-group">
+            <label data-es="Argumento (a)" data-en="Argument (a)">Argumento (a)</label>
+            <input type="number" id="mode4_a" placeholder="100" step="0.01" value="100">
+        </div>
+
+        <div class="form-group">
+            <label data-es="Base (n)" data-en="Base (n)">Base (n)</label>
+            <input type="number" id="mode4_n" placeholder="10" step="0.01" value="10">
+            <small style="color: var(--text-light); display: block; margin-top: 0.3rem;" data-es="Base típicamente 10, e, o 2" data-en="Base typically 10, e, or 2">Base típicamente 10, e, o 2</small>
+        </div>
+
+        <button class="btn" onclick="calculateMode4()" data-es="📊 Calcular logaritmo" data-en="📊 Calculate logarithm">📊 Calcular logaritmo</button>
+
+        <div id="mode4-result" class="result-box" style="display: none;">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label" data-es="Resultado" data-en="Result">Resultado</div>
+                    <div class="result-value" id="mode4_result">0</div>
+                </div>
+            </div>
+
+            <div id="mode4-steps"></div>
+        </div>
+    </div>
+
+    <!-- Properties Guide -->
+    <div class="guide-section">
+        <h2 data-es="📚 Propiedades de las potencias y raíces" data-en="📚 Properties of powers and roots">📚 Propiedades de las potencias y raíces</h2>
+
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3 data-es="Reglas Fundamentales" data-en="Fundamental Rules">Reglas Fundamentales</h3>
+                <ul>
+                    <li data-es="aᵐ × aⁿ = aᵐ⁺ⁿ (misma base, suma exponentes)" data-en="aᵐ × aⁿ = aᵐ⁺ⁿ (same base, add exponents)">aᵐ × aⁿ = aᵐ⁺ⁿ</li>
+                    <li data-es="aᵐ ÷ aⁿ = aᵐ⁻ⁿ (misma base, resta exponentes)" data-en="aᵐ ÷ aⁿ = aᵐ⁻ⁿ (same base, subtract exponents)">aᵐ ÷ aⁿ = aᵐ⁻ⁿ</li>
+                    <li data-es="(aᵐ)ⁿ = aᵐˣⁿ (potencia de potencia)" data-en="(aᵐ)ⁿ = aᵐˣⁿ (power of power)">(aᵐ)ⁿ = aᵐˣⁿ</li>
+                    <li data-es="a⁰ = 1 (cualquier número a la 0)" data-en="a⁰ = 1 (any number to power 0)">a⁰ = 1</li>
+                    <li data-es="a⁻ⁿ = 1/aⁿ (exponente negativo)" data-en="a⁻ⁿ = 1/aⁿ (negative exponent)">a⁻ⁿ = 1/aⁿ</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Raíces como Potencias" data-en="Roots as Powers">Raíces como Potencias</h3>
+                <ul>
+                    <li data-es="√a = a^(1/2) (raíz cuadrada)" data-en="√a = a^(1/2) (square root)">√a = a^(1/2)</li>
+                    <li data-es="∛a = a^(1/3) (raíz cúbica)" data-en="∛a = a^(1/3) (cube root)">∛a = a^(1/3)</li>
+                    <li data-es="ⁿ√a = a^(1/n) (raíz n-ésima)" data-en="ⁿ√a = a^(1/n) (n-th root)">ⁿ√a = a^(1/n)</li>
+                    <li data-es="ⁿ√(aᵐ) = a^(m/n)" data-en="ⁿ√(aᵐ) = a^(m/n)">ⁿ√(aᵐ) = a^(m/n)</li>
+                    <li data-es="√a × √b = √(a×b)" data-en="√a × √b = √(a×b)">√a × √b = √(a×b)</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Logaritmos" data-en="Logarithms">Logaritmos</h3>
+                <ul>
+                    <li data-es="logₙ(a) = x ⟺ nˣ = a (definición)" data-en="logₙ(a) = x ⟺ nˣ = a (definition)">logₙ(a) = x ⟺ nˣ = a</li>
+                    <li data-es="log₁₀(a) = log(a) (logaritmo decimal)" data-en="log₁₀(a) = log(a) (common log)">log₁₀(a) = log(a)</li>
+                    <li data-es="logₑ(a) = ln(a) (logaritmo natural)" data-en="logₑ(a) = ln(a) (natural log)">logₑ(a) = ln(a)</li>
+                    <li data-es="log(a×b) = log(a) + log(b)" data-en="log(a×b) = log(a) + log(b)">log(a×b) = log(a) + log(b)</li>
+                    <li data-es="log(aⁿ) = n×log(a)" data-en="log(aⁿ) = n×log(a)">log(aⁿ) = n×log(a)</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Casos Especiales" data-en="Special Cases">Casos Especiales</h3>
+                <ul>
+                    <li data-es="Exponente 1: a¹ = a" data-en="Exponent 1: a¹ = a">a¹ = a</li>
+                    <li data-es="Exponente 0: a⁰ = 1" data-en="Exponent 0: a⁰ = 1">a⁰ = 1</li>
+                    <li data-es="Base 0: 0ⁿ = 0 (si n > 0)" data-en="Base 0: 0ⁿ = 0 (if n > 0)">0ⁿ = 0</li>
+                    <li data-es="Base 1: 1ⁿ = 1 (cualquier n)" data-en="Base 1: 1ⁿ = 1 (any n)">1ⁿ = 1</li>
+                    <li data-es="Raíz cuadrada de 1: √1 = 1" data-en="Square root of 1: √1 = 1">√1 = 1</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Ejemplos Comunes" data-en="Common Examples">Ejemplos Comunes</h3>
+                <ul>
+                    <li>2³ = 8 (dos al cubo)</li>
+                    <li>2⁴ = 16 (dos a la cuarta)</li>
+                    <li>√9 = 3 (raíz cuadrada de 9)</li>
+                    <li>∛8 = 2 (raíz cúbica de 8)</li>
+                    <li>log₁₀(100) = 2 (logaritmo en base 10)</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h3 data-es="Tabla de Potencias 2ⁿ" data-en="Table of Powers 2ⁿ">Tabla de Potencias 2ⁿ</h3>
+                <ul>
+                    <li>2¹ = 2</li>
+                    <li>2² = 4</li>
+                    <li>2³ = 8</li>
+                    <li>2⁴ = 16</li>
+                    <li>2⁵ = 32</li>
+                    <li>2¹⁰ = 1024</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulas Table -->
+    <div class="card">
+        <h2 data-es="📋 Tabla de Operaciones" data-en="📋 Operations Table">📋 Tabla de Operaciones</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th data-es="Operación" data-en="Operation">Operación</th>
+                    <th data-es="Fórmula" data-en="Formula">Fórmula</th>
+                    <th data-es="Ejemplo" data-en="Example">Ejemplo</th>
+                    <th data-es="Resultado" data-en="Result">Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-es="Potencia" data-en="Power">Potencia</td>
+                    <td>aⁿ</td>
+                    <td>2³</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td data-es="Raíz Cuadrada" data-en="Square Root">Raíz Cuadrada</td>
+                    <td>√a = a^(1/2)</td>
+                    <td>√9</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td data-es="Raíz Cúbica" data-en="Cube Root">Raíz Cúbica</td>
+                    <td>∛a = a^(1/3)</td>
+                    <td>∛8</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td data-es="Raíz n-ésima" data-en="N-th Root">Raíz n-ésima</td>
+                    <td>ⁿ√a = a^(1/n)</td>
+                    <td>⁴√16</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td data-es="Potencia Fraccionaria" data-en="Fractional Power">Potencia Fraccionaria</td>
+                    <td>a^(p/q)</td>
+                    <td>8^(2/3)</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td data-es="Logaritmo" data-en="Logarithm">Logaritmo</td>
+                    <td>logₙ(a)</td>
+                    <td>log₁₀(100)</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td data-es="Logaritmo Natural" data-en="Natural Log">Logaritmo Natural</td>
+                    <td>ln(a)</td>
+                    <td>ln(e)</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td data-es="Exponente Negativo" data-en="Negative Exponent">Exponente Negativo</td>
+                    <td>a⁻ⁿ = 1/aⁿ</td>
+                    <td>2⁻²</td>
+                    <td>0.25</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLang() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        const btn = document.querySelector('.lang-toggle');
+        btn.textContent = currentLang === 'es' ? 'ES' : 'EN';
+
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`);
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI' || el.tagName === 'P' || el.tagName === 'TD' || el.tagName === 'TH') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+                el.textContent = text;
+            }
+        });
+    }
+
+    function switchMode(mode) {
+        document.querySelectorAll('.calc-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(mode).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function formatNumber(value) {
+        return parseFloat(value).toFixed(6).replace(/\.?0+$/, '');
+    }
+
+    function calculateMode1() {
+        const a = parseFloat(document.getElementById('mode1_a').value) || 0;
+        const n = parseInt(document.getElementById('mode1_n').value) || 0;
+
+        const result = Math.pow(a, n);
+
+        document.getElementById('mode1_result').textContent = formatNumber(result);
+
+        let steps = '';
+        if (n >= 0) {
+            let multiplication = a;
+            for (let i = 1; i < n; i++) {
+                multiplication += ' × ' + a;
+            }
+            steps = `<div class="formula-box"><strong>${currentLang === 'es' ? 'Cálculo:' : 'Calculation:'}</strong><br>${a}^${n} = ${multiplication} = ${formatNumber(result)}</div>`;
+        } else {
+            steps = `<div class="formula-box"><strong>${currentLang === 'es' ? 'Cálculo:' : 'Calculation:'}</strong><br>${a}^${n} = 1/${a}^${Math.abs(n)} = 1/${Math.pow(a, Math.abs(n))} = ${formatNumber(result)}</div>`;
+        }
+
+        document.getElementById('mode1-steps').innerHTML = steps;
+        document.getElementById('mode1-result').parentElement.parentElement.style.display = 'block';
+    }
+
+    function calculateMode2() {
+        const a = parseFloat(document.getElementById('mode2_a').value) || 0;
+        const n = parseInt(document.getElementById('mode2_n').value) || 2;
+
+        const result = Math.pow(a, 1 / n);
+
+        document.getElementById('mode2_result').textContent = formatNumber(result);
+
+        const steps = `<div class="formula-box"><strong>${currentLang === 'es' ? 'Cálculo:' : 'Calculation:'}</strong><br>ⁿ√${a} = ${a}^(1/${n}) = ${formatNumber(result)}</div>`;
+
+        document.getElementById('mode2-steps').innerHTML = steps;
+        document.getElementById('mode2-result').parentElement.parentElement.style.display = 'block';
+    }
+
+    function calculateMode3() {
+        const a = parseFloat(document.getElementById('mode3_a').value) || 0;
+        const p = parseInt(document.getElementById('mode3_p').value) || 1;
+        const q = parseInt(document.getElementById('mode3_q').value) || 1;
+
+        const result = Math.pow(a, p / q);
+
+        document.getElementById('mode3_result').textContent = formatNumber(result);
+
+        const steps = `<div class="formula-box"><strong>${currentLang === 'es' ? 'Cálculo:' : 'Calculation:'}</strong><br>${a}^(${p}/${q}) = ⁿ√(${a}^${p}) = ⁿ√${Math.pow(a, p)} = ${formatNumber(result)}</div>`;
+
+        document.getElementById('mode3-steps').innerHTML = steps;
+        document.getElementById('mode3-result').parentElement.parentElement.style.display = 'block';
+    }
+
+    function calculateMode4() {
+        const a = parseFloat(document.getElementById('mode4_a').value) || 0;
+        const n = parseFloat(document.getElementById('mode4_n').value) || 10;
+
+        if (a <= 0 || n <= 0) {
+            alert(currentLang === 'es' ? 'Argumentos inválidos' : 'Invalid arguments');
+            return;
+        }
+
+        const result = Math.log(a) / Math.log(n);
+
+        document.getElementById('mode4_result').textContent = formatNumber(result);
+
+        const steps = `<div class="formula-box"><strong>${currentLang === 'es' ? 'Cálculo:' : 'Calculation:'}</strong><br>log_${n}(${a}) = ln(${a}) / ln(${n}) = ${formatNumber(result)}<br><strong>${currentLang === 'es' ? 'Verificación:' : 'Verification:'}</strong> ${n}^${formatNumber(result)} ≈ ${a}</div>`;
+
+        document.getElementById('mode4-steps').innerHTML = steps;
+        document.getElementById('mode4-result').parentElement.parentElement.style.display = 'block';
+    }
+
+    // Trigger calculations on Enter
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const section = input.closest('.calc-section');
+                    if (section.id === 'mode1') calculateMode1();
+                    else if (section.id === 'mode2') calculateMode2();
+                    else if (section.id === 'mode3') calculateMode3();
+                    else if (section.id === 'mode4') calculateMode4();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
