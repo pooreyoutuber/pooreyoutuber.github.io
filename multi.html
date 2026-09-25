@@ -829,13 +829,29 @@
 
     function toggleLanguage() {
         currentLanguage = currentLanguage === 'es' ? 'en' : 'es';
+        
+        // Button text update
         const button = document.querySelector('.lang-toggle');
         button.textContent = currentLanguage === 'es' ? 'ES' : 'EN';
         
-        // Update all elements with data-es and data-en attributes
+        // Update elements with data-es and data-en
         document.querySelectorAll('[data-es][data-en]').forEach(element => {
             element.textContent = element.getAttribute(`data-${currentLanguage}`);
         });
+
+        // Toggle SEO article section
+        const seoEs = document.getElementById('seo-es');
+        const seoEn = document.getElementById('seo-en');
+
+        if (seoEs && seoEn) {
+            if (currentLanguage === 'en') {
+                seoEs.style.display = 'none';
+                seoEn.style.display = 'block';
+            } else {
+                seoEs.style.display = 'block';
+                seoEn.style.display = 'none';
+            }
+        }
     }
 </script>
 
