@@ -690,7 +690,7 @@
 
     </footer>
 
-    <!-- Logic Script -->
+   <!-- Logic Script -->
     <script>
 async function processVideo() {
     const urlInput = document.getElementById('videoUrlInput').value.trim();
@@ -700,10 +700,17 @@ async function processVideo() {
     const fileSizeText = document.getElementById('fileSizeText');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // Priority 22: Generic error message without platform keyword repetition
     if (!urlInput) {
-        alert('Please enter a valid video link.');
+        alert('Please paste a valid Instagram Reel URL link here.');
         return;
+    }
+
+    // Strict Instagram Reel Regex Validation
+    const isInstaReel = /^(https?:\/\/)?(www\.)?instagram\.com\/(reel|reels|p)\/[\w-]+\/?/i.test(urlInput);
+
+    if (!isInstaReel) {
+       alert('This tool only supports Instagram Reels. YouTube, Facebook, or other video URLs are not supported.');
+        return; // Backend request nahi bhejega
     }
 
     // UI Reset
