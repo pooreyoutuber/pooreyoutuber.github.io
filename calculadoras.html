@@ -38,9 +38,8 @@
   
     <script async src="https://fundingchoicesmessages.google.com/i/pub-7020422718957281?ers=1"></script>
     <script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
-    
 
-    <!-- Schema.org JSON-LD (E-E-A-T & GEO Optimization) -->
+    <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -63,398 +62,245 @@
     }
     </script>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-color: #6366f1;
+        --text-dark: #1e293b;
+        --text-light: #475569;
+        --border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Fixed background-attachment hataya gaya hai scrolling lag ko zero karne ke liye */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        color: var(--text-dark);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    /* Header Optimization */
+    .header {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        will-change: transform;
+    }
+
+    .header .logo {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-controls {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header nav {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .header nav a {
+        text-decoration: none;
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .header nav a:hover {
+        color: var(--primary-color);
+    }
+
+    /* Dropdown Styling */
+    .dropdown { position: relative; display: inline-block; }
+    .dropbtn { background: none; border: none; color: var(--text-dark); font-weight: 600; font-size: 0.95rem; cursor: pointer; padding: 0.5rem 0.2rem; font-family: inherit; }
+    .dropbtn:hover { color: var(--primary-color); }
+    
+    .dropdown-content { 
+        display: none; 
+        position: absolute; 
+        top: 100%; 
+        left: 0; 
+        background-color: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(8px); 
+        -webkit-backdrop-filter: blur(8px);
+        min-width: 170px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12); 
+        border-radius: 8px; 
+        border: 1px solid var(--border-color); 
+        z-index: 1050; 
+        overflow: hidden; 
+    }
+
+    .dropdown-content a { color: var(--text-dark); padding: 0.75rem 1rem; text-decoration: none; display: block; font-size: 0.9rem; transition: background-color 0.2s, color 0.2s; }
+    .dropdown-content a:hover { background-color: rgba(255,255,255,0.7); color: var(--primary-color); }
+    .dropdown:hover .dropdown-content { display: block; }
+    
+    .badge-new { background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+    
+    .lang-toggle { background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.8); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 700; color: var(--text-dark); transition: all 0.2s; font-size: 0.85rem; }
+    .lang-toggle:hover { border-color: var(--primary-color); color: var(--primary-color); background: rgba(255,255,255,0.9); }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    header.hero { text-align: center; margin-bottom: 4rem; }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: #1e293b; }
+    .hero p { font-size: 1.1rem; color: #334155; max-width: 650px; margin: 0 auto; line-height: 1.8; font-weight: 500;}
+
+    /* --- GPU-Accelerated Tools Grid --- */
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .tool {
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        will-change: transform;
+    }
+
+    .tool:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .tool h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+    }
+
+    .tool a {
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .tool a:hover {
+        background: #4f46e5;
+    }
+
+    .ad-container { margin: 25px 0; overflow: visible; }
+        .content-section {
+            text-align: left;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
         }
 
-        :root {
-            --primary-color: #6366f1;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.12);
+    /* Google Auto Ads Fix */
+    .tool .google-auto-placed,
+    .tool ins.adsbygoogle {
+        display: none !important;
+    }
+    
+    .tools-grid > .google-auto-placed,
+    .tools-grid > ins.adsbygoogle {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin: 1rem 0;
+        text-align: center;
+    }
+
+    /* SEO Section Optimization */
+    .seo-section {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 4rem 2rem;
+        margin-top: 3rem;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .seo-container { max-width: 1100px; margin: 0 auto; color: var(--text-dark); line-height: 1.8; }
+    .seo-container h2 { font-size: 2.1rem; margin-bottom: 1.5rem; color: #1e293b; }
+    .seo-container h3 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 1rem; color: var(--text-dark); }
+    .seo-container p, .seo-container ul { margin-bottom: 1.2rem; color: #334155; font-weight: 500; }
+    .seo-container ul { margin-left: 1.5rem; }
+    .seo-container li { margin-bottom: 0.6rem; }
+
+    .faq-box {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 1.8rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+        margin-top: 2.5rem;
+    }
+
+    .footer-bottom {
+        max-width: 1200px; margin: 1.5rem auto 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.85rem; padding: 0 2rem; font-weight: 600; color: #334155;
+    }
+
+    /* Mobile Performance Tweaks (Removes Blur for Low-End Mobile GPUs) */
+    @media (max-width: 768px) {
+        .header, .tool, .seo-section, .dropdown-content {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(255, 255, 255, 0.95) !important;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        /* Header Navigation Styles Fix */
-        .header {
-            background: var(--card-bg);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-controls {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .header nav {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-        }
-
-        .header nav a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .header nav a:hover {
-            color: var(--primary-color);
-        }
-
-        /* Dropdown Styling */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropbtn {
-            background: none;
-            border: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            padding: 0.5rem 0.2rem;
-            font-family: inherit;
-        }
-
-        .dropbtn:hover {
-            color: var(--primary-color);
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: var(--card-bg);
-            min-width: 170px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            z-index: 1050;
-            overflow: hidden;
-        }
-
-        .dropdown-content a {
-            color: var(--text-dark);
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            display: block;
-            font-size: 0.9rem;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f5f9;
-            color: var(--primary-color);
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .badge-new {
-            background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .lang-toggle {
-            background: none;
-            border: 2px solid var(--border-color);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            color: var(--text-dark);
-            transition: all 0.3s;
-            font-size: 0.85rem;
-        }
-
-        .lang-toggle:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        header.hero {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            max-width: 650px;
-            margin: 0 auto;
-            line-height: 1.8;
-        }
-
-        /* Tools Grid */
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .tool-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tool-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary-color);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .icon {
-            font-size: 2rem;
-            line-height: 1;
-        }
-
-        .badge {
-            font-size: 0.65rem;
-            padding: 0.35rem 0.7rem;
-            border-radius: 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .badge.top {
-            background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-            color: #78350f;
-        }
-
-        .badge.nuevo {
-            background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
-            color: #065f46;
-        }
-
-        .badge.autonomos {
-            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
-            color: #1e3a8a;
-        }
-
-        .tool-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.7rem;
-            color: var(--text-dark);
-        }
-
-        .tool-card p {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 1.2rem;
-            flex-grow: 1;
-            line-height: 1.6;
-        }
-
-        .tool-card a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: gap 0.3s;
-        }
-
-        .tool-card a:hover {
-            gap: 0.75rem;
-        }
-
-        /* SEO Content Styles */
-        .seo-section {
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            padding: 4rem 2rem;
-            margin-top: 3rem;
-        }
-
-        .seo-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            color: var(--text-dark);
-            line-height: 1.8;
-        }
-
-        .seo-container h2 {
-            font-size: 2.1rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        .seo-container h3 {
-            font-size: 1.4rem;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-        .seo-container p {
-            margin-bottom: 1.2rem;
-            color: var(--text-light);
-        }
-
-        .seo-container ul {
-            margin-left: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-light);
-        }
-
-        .seo-container li {
-            margin-bottom: 0.6rem;
-        }
-
-        .faq-box {
-            background: #f1f5f9;
-            padding: 1.8rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary-color);
-            margin-top: 2.5rem;
-        }
-
-        .faq-box h4 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-.footer-bottom {
-    max-width: 1200px;
-    margin: 1.5rem auto 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.85rem;
-}
-        
-        footer a {
-            color: #cbd5e1;
-            text-decoration: underline;
-        }
-
-        /* Mobile Responsiveness Fix */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .nav-controls {
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-
-            .header nav {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.8rem;
-            }
-
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .tools-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .container {
-                padding: 2rem 1rem;
-            }
-        }
-    </style>
+        .header { flex-direction: column; gap: 1rem; padding: 1rem; }
+        .nav-controls { width: 100%; justify-content: center; flex-wrap: wrap; gap: 1rem; }
+        .header nav { flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+        .hero h1 { font-size: 1.8rem; }
+        .tools-grid { grid-template-columns: 1fr; }
+        .container { padding: 2rem 1rem; }
+    }
+</style>
 </head>
 <body>
 
-<!-- Header (Integrado exactamente según la solicitud) -->
 <header class="header">
     <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
     <div class="nav-controls">
@@ -464,8 +310,8 @@
             <div class="dropdown">
                 <button class="dropbtn">🛒 Shop ▾</button>
                 <div class="dropdown-content">
-                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    <a href="https://www.amazon.in/..." target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/..." target="_blank" rel="nofollow">🇺🇸 US Deals</a>
                 </div>
             </div>
             <a href="donation.html" class="donate-coffee-btn">☕ Buy me a coffee</a>
@@ -474,354 +320,261 @@
     </div>
 </header>
 
-    <div class="ad-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-7020422718957281"
-                 data-ad-slot="6541049739"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
+<!-- AD 1 (Office Display) - 1st Time -->
+<div class="ad-container">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="1310573623" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
     
-<!-- Main Content -->
 <div class="container">
     <header class="hero">
         <h1 data-es="Calculadoras más populares" data-en="Most Popular Calculators">Calculadoras más populares</h1>
         <p data-es="Herramientas inteligentes y precisas para tus cálculos del día a día. Desde finanzas hasta salud, todo en un solo lugar." data-en="Smart and accurate tools for your daily calculations. From finances to health, everything in one place.">Herramientas inteligentes y precisas para tus cálculos del día a día. Desde finanzas hasta salud, todo en un solo lugar.</p>
     </header>
 
-    <!-- Tools Grid -->
+    <!-- TOOLS GRID (Simple 1 line codes) -->
     <div class="tools-grid">
+    <!-- 1. Calculadora de IVA -->
+    <div class="tool">
+        <div class="tool-icon">💰</div>
+        <h3 data-es="1. Calculadora de IVA" data-en="1. VAT Calculator">1. Calculadora de IVA</h3>
+        <p data-es="Calcula el IVA e importe total de forma rápida y sencilla." data-en="Calculate VAT and total amount quickly and easily.">Calcula el IVA e importe total de forma rápida y sencilla.</p>
+        <a href="calculadora-iva.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <!-- Finance -->
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">💶</span>
-                    <span class="badge top" data-es="🔥 TOP" data-en="🔥 TOP">🔥 TOP</span>
-                </div>
-                <h3 data-es="Calculadora de IVA" data-en="VAT Calculator">Calculadora de IVA</h3>
-                <p data-es="Suma o resta IVA al 21%, 10% y 4%. Calcula base imponible y cuota al instante." data-en="Add or subtract VAT at 21%, 10% and 4%. Calculate tax base and amount instantly.">Suma o resta IVA al 21%, 10% y 4%. Calcula base imponible y cuota al instante.</p>
-            </div>
-            <a href="calculadora-iva.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 2. Sueldo Neto -->
+    <div class="tool">
+        <div class="tool-icon">💵</div>
+        <h3 data-es="2. Sueldo Neto" data-en="2. Net Salary">2. Sueldo Neto</h3>
+        <p data-es="Calcula tu salario neto mensual y anual tras deducciones e IRPF." data-en="Calculate your monthly and annual net salary after taxes.">Calcula tu salario neto mensual y anual tras deducciones e IRPF.</p>
+        <a href="sueldo-neto.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">💼</span>
-                    <span class="badge top" data-es="🔥 TOP" data-en="🔥 TOP">🔥 TOP</span>
-                </div>
-                <h3 data-es="Sueldo Neto" data-en="Net Salary">Sueldo Neto</h3>
-                <p data-es="Convierte salario bruto a neto. Descuenta IRPF y Seguridad Social 2026." data-en="Convert gross to net salary. Deduct IRPF and Social Security 2026.">Convierte salario bruto a neto. Descuenta IRPF y Seguridad Social 2026.</p>
-            </div>
-            <a href="sueldo-neto.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 3. Hipoteca -->
+    <div class="tool">
+        <div class="tool-icon">🏠</div>
+        <h3 data-es="3. Hipoteca" data-en="3. Mortgage">3. Hipoteca</h3>
+        <p data-es="Estima tu cuota mensual de hipoteca e intereses según el plazo." data-en="Estimate your monthly mortgage payments and total interest.">Estima tu cuota mensual de hipoteca e intereses según el plazo.</p>
+        <a href="hipoteca.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🏠</span>
-                </div>
-                <h3 data-es="Hipoteca" data-en="Mortgage">Hipoteca</h3>
-                <p data-es="Calcula cuota mensual, intereses totales y tabla de amortización." data-en="Calculate monthly payment, total interest and amortization schedule.">Calcula cuota mensual, intereses totales y tabla de amortización.</p>
-            </div>
-            <a href="hipoteca.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 4. IRPF -->
+    <div class="tool">
+        <div class="tool-icon">📊</div>
+        <h3 data-es="4. IRPF" data-en="4. Income Tax">4. IRPF</h3>
+        <p data-es="Calcula la retención del IRPF aplicable a tu sueldo bruto." data-en="Calculate the income tax retention rate applied to your gross salary.">Calcula la retención del IRPF aplicable a tu sueldo bruto.</p>
+        <a href="irpf.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">📋</span>
-                </div>
-                <h3 data-es="IRPF" data-en="Income Tax">IRPF</h3>
-                <p data-es="Estima tu retención de IRPF según tramos 2026 y situación personal." data-en="Estimate your income tax withholding for 2026.">Estima tu retención de IRPF según tramos 2026 y situación personal.</p>
-            </div>
-            <a href="irpf.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 5. Ahorro -->
+    <div class="tool">
+        <div class="tool-icon">🐷</div>
+        <h3 data-es="5. Ahorro" data-en="5. Savings">5. Ahorro</h3>
+        <p data-es="Planifica tus metas financieras y calcula el interés compuesto." data-en="Plan financial goals and calculate compound interest growth over time.">Planifica tus metas financieras y calcula el interés compuesto.</p>
+        <a href="ahorro.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🏦</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Ahorro" data-en="Savings">Ahorro</h3>
-                <p data-es="Simula tu plan de ahorro con interés compuesto. Capital inicial y aportaciones mensuales." data-en="Simulate your savings plan with compound interest. Initial capital and monthly contributions.">Simula tu plan de ahorro con interés compuesto. Capital inicial y aportaciones mensuales.</p>
-            </div>
-            <a href="ahorro.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 6. Tarjeta Revolving -->
+    <div class="tool">
+        <div class="tool-icon">💳</div>
+        <h3 data-es="6. Tarjeta Revolving" data-en="6. Revolving Card">6. Tarjeta Revolving</h3>
+        <p data-es="Calcula los intereses reales y plazos de pago de tu tarjeta." data-en="Calculate real interest rates and payoff timelines for credit cards.">Calcula los intereses reales y plazos de pago de tu tarjeta.</p>
+        <a href="tarjeta-revolving.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">💳</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Tarjeta Revolving" data-en="Revolving Card">Tarjeta Revolving</h3>
-                <p data-es="Descubre el coste real: meses para liquidarla y total de intereses pagados." data-en="Discover the real cost: months to pay off and total interest paid.">Descubre el coste real: meses para liquidarla y total de intereses pagados.</p>
-            </div>
-            <a href="tarjeta-revolving.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 7. Coste del Coche -->
+    <div class="tool">
+        <div class="tool-icon">🚗</div>
+        <h3 data-es="7. Coste del Coche" data-en="7. Car Cost">7. Coste del Coche</h3>
+        <p data-es="Evalúa los gastos totales de mantener tu vehículo al año." data-en="Evaluate the total annual cost of owning and running a vehicle.">Evalúa los gastos totales de mantener tu vehículo al año.</p>
+        <a href="coste-coche.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🚗</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Coste del Coche" data-en="Car Cost">Coste del Coche</h3>
-                <p data-es="Coste anual real: combustible, seguro, ITV, IVTM, mantenimiento y coste por km." data-en="Real annual cost: fuel, insurance, maintenance and cost per km.">Coste anual real: combustible, seguro, ITV, IVTM, mantenimiento y coste por km.</p>
-            </div>
-            <a href="coste-coche.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 8. Descuentos -->
+    <div class="tool">
+        <div class="tool-icon">🏷️</div>
+        <h3 data-es="8. Descuentos" data-en="8. Discounts">8. Discounts</h3>
+        <p data-es="Descubre el precio final y el ahorro de cualquier rebaja." data-en="Find the final price and money saved after applying discounts.">Descubre el precio final y el ahorro de cualquier rebaja.</p>
+        <a href="descuentos.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🏷️</span>
-                    <span class="badge top" data-es="🔥 TOP" data-en="🔥 TOP">🔥 TOP</span>
-                </div>
-                <h3 data-es="Descuentos" data-en="Discounts">Descuentos</h3>
-                <p data-es="4 modos: precio con descuento, % de ahorro, precio original y descuentos acumulados." data-en="4 modes: discounted price, savings %, original price and cumulative discounts.">4 modos: precio con descuento, % de ahorro, precio original y descuentos acumulados.</p>
-            </div>
-            <a href="descuentos.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
+    <!-- 9. IVA Inverso -->
+    <div class="tool">
+        <div class="tool-icon">🔄</div>
+        <h3 data-es="9. IVA Inverso" data-en="9. Reverse VAT">9. IVA Inverso</h3>
+        <p data-es="Extrae la base imponible y el IVA a partir del precio total." data-en="Extract the base price and VAT amount from the total price.">Extrae la base imponible y el IVA a partir del precio total.</p>
+        <a href="iva-inverso.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
 
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🧾</span>
-                    <span class="badge autonomos" data-es="💼 AUTÓNOMOS" data-en="💼 FREELANCERS">💼 AUTÓNOMOS</span>
-                </div>
-                <h3 data-es="IVA Inverso" data-en="Reverse VAT">IVA Inverso</h3>
-                <p data-es="Extrae base imponible e IVA de un precio final. Incluye factura autónomo." data-en="Extract tax base and VAT from final price. Includes freelancer invoice.">Extrae base imponible e IVA de un precio final. Incluye factura autónomo.</p>
-            </div>
-            <a href="iva-inverso.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">⚡</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Consumo Eléctrico" data-en="Electric Consumption">Consumo Eléctrico</h3>
-                <p data-es="Coste de electrodomésticos al día, mes y año. 18 aparatos preconfigurados." data-en="Cost of appliances per day, month and year. 18 preconfigured devices.">Coste de electrodomésticos al día, mes y año. 18 aparatos preconfigurados.</p>
-            </div>
-            <a href="consumo-electrico.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <!-- Health -->
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">⚖️</span>
-                    <span class="badge top" data-es="🔥 TOP" data-en="🔥 TOP">🔥 TOP</span>
-                </div>
-                <h3 data-es="IMC" data-en="BMI">IMC</h3>
-                <p data-es="Calcula tu Índice de Masa Corporal según OMS. Clasificación SEEDO incluida." data-en="Calculate your Body Mass Index according to WHO. SEEDO classification included.">Calcula tu Índice de Masa Corporal según OMS. Clasificación SEEDO incluida.</p>
-            </div>
-            <a href="imc.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🍎</span>
-                </div>
-                <h3 data-es="Calorías Diarias" data-en="Daily Calories">Calorías Diarias</h3>
-                <p data-es="Calcula tu TDEE y necesidades calóricas según objetivo: adelgazar, mantener o ganar músculo." data-en="Calculate your TDEE and caloric needs by goal: lose weight, maintain or gain muscle.">Calcula tu TDEE y necesidades calóricas según objetivo: adelgazar, mantener o ganar músculo.</p>
-            </div>
-            <a href="calorias-diarias.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🤰</span>
-                </div>
-                <h3 data-es="Embarazo" data-en="Pregnancy">Embarazo</h3>
-                <p data-es="Calcula fecha probable de parto, semanas de gestación y fechas clave." data-en="Calculate estimated due date, weeks of pregnancy and key dates.">Calcula fecha probable de parto, semanas de gestación y fechas clave.</p>
-            </div>
-            <a href="embarazo.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">💪</span>
-                </div>
-                <h3 data-es="Peso Ideal" data-en="Ideal Weight">Peso Ideal</h3>
-                <p data-es="5 fórmulas científicas (Lorentz, Broca, OMS, Devine, Hamwi) con ajuste por complexión." data-en="5 scientific formulas (Lorentz, Broca, WHO, Devine, Hamwi) with body frame adjustment.">5 fórmulas científicas (Lorentz, Broca, OMS, Devine, Hamwi) con ajuste por complexión.</p>
-            </div>
-            <a href="peso-ideal.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🔥</span>
-                </div>
-                <h3 data-es="TMB" data-en="BMR">TMB</h3>
-                <p data-es="Tasa Metabólica Basal con Mifflin y Harris-Benedict. TDEE por nivel de actividad." data-en="Basal Metabolic Rate with Mifflin and Harris-Benedict. TDEE by activity level.">Tasa Metabólica Basal con Mifflin y Harris-Benedict. TDEE por nivel de actividad.</p>
-            </div>
-            <a href="tmb.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">💧</span>
-                </div>
-                <h3 data-es="Agua Diaria" data-en="Daily Water">Agua Diaria</h3>
-                <p data-es="Calcula cuánta agua necesitas al día según peso, actividad física y clima." data-en="Calculate how much water you need daily based on weight, activity and climate.">Calcula cuánta agua necesitas al día según peso, actividad física y clima.</p>
-            </div>
-            <a href="agua-diaria.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🏋️</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="1RM" data-en="1RM">1RM</h3>
-                <p data-es="Calcula tu repetición máxima con Epley, Brzycki y Lander. Tabla de intensidades." data-en="Calculate your maximum repetition with Epley, Brzycki and Lander. Intensity table.">Calcula tu repetición máxima con Epley, Brzycki y Lander. Tabla de intensidades.</p>
-            </div>
-            <a href="1rm.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🍺</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Alcoholemia" data-en="Blood Alcohol">Alcoholemia</h3>
-                <p data-es="Estima tu tasa de alcohol en sangre (fórmula Widmark). Límites DGT. Solo orientativa." data-en="Estimate your blood alcohol level (Widmark formula). DGT limits. Guidance only.">Estima tu tasa de alcohol en sangre (fórmula Widmark). Límites DGT. Solo orientativa.</p>
-            </div>
-            <a href="alcoholemia.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <!-- Math -->
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">%</span>
-                    <span class="badge top" data-es="🔥 TOP" data-en="🔥 TOP">🔥 TOP</span>
-                </div>
-                <h3 data-es="Porcentajes" data-en="Percentages">Porcentajes</h3>
-                <p data-es="Calcula porcentajes en todos los modos: de un número, qué %, número original y variación." data-en="Calculate percentages in all modes: % of a number, what %, original number and change.">Calcula porcentajes en todos los modos: de un número, qué %, número original y variación.</p>
-            </div>
-            <a href="porcentajes.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">½</span>
-                </div>
-                <h3 data-es="Fracciones" data-en="Fractions">Fracciones</h3>
-                <p data-es="Suma, resta, multiplica y divide fracciones. Simplificación, mixtas y decimales." data-en="Add, subtract, multiply and divide fractions. Simplification, mixed and decimal.">Suma, resta, multiplica y divide fracciones. Simplificación, mixtas y decimales.</p>
-            </div>
-            <a href="fracciones.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">⚖️</span>
-                </div>
-                <h3 data-es="Regla de Tres" data-en="Rule of Three">Regla de Tres</h3>
-                <p data-es="Resuelve proporciones simples directas e inversas y regla de tres compuesta paso a paso." data-en="Solve simple direct and inverse proportions and compound rule of three step by step.">Resuelve proporciones simples directas e inversas y regla de tres compuesta paso a paso.</p>
-            </div>
-            <a href="regla-de-tres.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🔣</span>
-                </div>
-                <h3 data-es="Ecuaciones" data-en="Equations">Ecuaciones</h3>
-                <p data-es="Ecuaciones de 1º y 2º grado con discriminante, fórmula cuadrática y verificación." data-en="1st and 2nd degree equations with discriminant, quadratic formula and verification.">Ecuaciones de 1º y 2º grado con discriminante, fórmula cuadrática y verificación.</p>
-            </div>
-            <a href="ecuaciones.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">📐</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Área y Volumen" data-en="Area & Volume">Área y Volumen</h3>
-                <p data-es="Área de figuras planas y volumen de sólidos: círculo, triángulo, esfera, cilindro." data-en="Area of flat shapes and volume of solids: circle, triangle, sphere, cylinder.">Área de figuras planas y volumen de sólidos: círculo, triángulo, esfera, cilindro.</p>
-            </div>
-            <a href="area-y-volumen.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🔢</span>
-                    <span class="badge nuevo" data-es="✨ NUEVO" data-en="✨ NEW">✨ NUEVO</span>
-                </div>
-                <h3 data-es="Potencias y Raíces" data-en="Powers & Roots">Potencias y Raíces</h3>
-                <p data-es="Potencias enteras, fraccionarias, raíces n-ésimas y logaritmos con procedimiento paso a paso." data-en="Integer and fractional powers, nth roots and logarithms with step-by-step procedure.">Potencias enteras, fraccionarias, raíces n-ésimas y logaritmos con procedimiento paso a paso.</p>
-            </div>
-            <a href="potencias-y-raices.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🌍</span>
-                </div>
-                <h3 data-es="Convertidor de Unidades" data-en="Unit Converter">Convertidor de Unidades</h3>
-                <p data-es="Métrico ↔ Imperial: longitud, peso, temperatura, volumen, área, velocidad y energía." data-en="Metric ↔ Imperial: length, weight, temperature, volume, area, speed and energy.">Métrico ↔ Imperial: length, weight, temperature, volume, area, speed and energy.</p>
-            </div>
-            <a href="convertidor-unidades.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <!-- Misc -->
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">📅</span>
-                </div>
-                <h3 data-es="Tiempo entre Fechas" data-en="Time Between Dates">Tiempo entre Fechas</h3>
-                <p data-es="Calcula días, meses y años entre fechas. Días hábiles, sumar/restar y edad exacta." data-en="Calculate days, months and years between dates. Business days, add/subtract and exact age.">Calcula días, meses y años entre fechas. Días hábiles, sumar/restar y edad exacta.</p>
-            </div>
-            <a href="tiempo-entre-fechas.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
-        <div class="tool-card">
-            <div>
-                <div class="card-header">
-                    <span class="icon">🍽️</span>
-                </div>
-                <h3 data-es="Propina" data-en="Tip Calculator">Propina</h3>
-                <p data-es="Calcula cuánto dejar de propina según la calidad del servicio. Divide entre comensales." data-en="Calculate how much tip to leave based on service quality. Split among diners.">Calcula cuánto dejar de propina según la calidad del servicio. Divide entre comensales.</p>
-            </div>
-            <a href="propina.html" data-es="Usar calculadora →" data-en="Use calculator →">Usar calculadora →</a>
-        </div>
-
+    <!-- 10. Consumo Eléctrico -->
+    <div class="tool">
+        <div class="tool-icon">⚡</div>
+        <h3 data-es="10. Consumo Eléctrico" data-en="10. Electric Consumption">10. Consumo Eléctrico</h3>
+        <p data-es="Calcula el gasto de tus electrodomésticos en la factura." data-en="Estimate the electricity cost of household appliances on your bill.">Calcula el gasto de tus electrodomésticos en la factura.</p>
+        <a href="consumo-electrico.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
     </div>
 </div>
 
-<!-- Detailed SEO Article Section (Spanish & English) -->
+<!-- AD 2 (Fluid Layout) - 1st Time -->
+<div class="ad-container">
+    <script async src="[https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281](https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281)" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-7020422718957281" data-ad-slot="2713109038"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<!-- MORE TOOLS -->
+<div class="tools-grid">
+    <!-- 11. IMC -->
+    <div class="tool">
+        <div class="tool-icon">⚖️</div>
+        <h3 data-es="11. IMC" data-en="11. BMI">11. IMC</h3>
+        <p data-es="Calcula tu Índice de Masa Corporal y rango de peso saludable." data-en="Calculate your Body Mass Index and healthy weight range.">Calcula tu Índice de Masa Corporal y rango de peso saludable.</p>
+        <a href="imc.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 12. Calorías Diarias -->
+    <div class="tool">
+        <div class="tool-icon">🔥</div>
+        <h3 data-es="12. Calorías Diarias" data-en="12. Daily Calories">12. Calorías Diarias</h3>
+        <p data-es="Determina tus necesidades calóricas para ganar o perder peso." data-en="Determine daily calorie intake needed to gain, lose, or maintain weight.">Determina tus necesidades calóricas para ganar o perder peso.</p>
+        <a href="calorias-diarias.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 13. Embarazo -->
+    <div class="tool">
+        <div class="tool-icon">🤰</div>
+        <h3 data-es="13. Embarazo" data-en="13. Pregnancy">13. Embarazo</h3>
+        <p data-es="Estima la fecha probable de parto y semanas de gestación." data-en="Estimate the due date and track gestational progress by weeks.">Estima la fecha probable de parto y semanas de gestación.</p>
+        <a href="embarazo.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 14. Peso Ideal -->
+    <div class="tool">
+        <div class="tool-icon">🎯</div>
+        <h3 data-es="14. Peso Ideal" data-en="14. Ideal Weight">14. Peso Ideal</h3>
+        <p data-es="Encuentra tu peso recomendado según tu altura y complexión." data-en="Find your recommended healthy weight based on height and frame.">Encuentra tu peso recomendado según tu altura y complexión.</p>
+        <a href="peso-ideal.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 15. TMB -->
+    <div class="tool">
+        <div class="tool-icon">💓</div>
+        <h3 data-es="15. TMB" data-en="15. BMR">15. TMB</h3>
+        <p data-es="Calcula la Tasa Metabólica Basal que tu cuerpo quema en reposo." data-en="Calculate Basal Metabolic Rate calories burned at complete rest.">Calcula la Tasa Metabólica Basal que tu cuerpo quema en reposo.</p>
+        <a href="tmb.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 16. Agua Diaria -->
+    <div class="tool">
+        <div class="tool-icon">💧</div>
+        <h3 data-es="16. Agua Diaria" data-en="16. Daily Water">16. Agua Diaria</h3>
+        <p data-es="Calcula la cantidad idónea de agua que debes beber al día." data-en="Calculate recommended daily water consumption for proper hydration.">Calcula la cantidad idónea de agua que debes beber al día.</p>
+        <a href="agua-diaria.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 17. 1RM -->
+    <div class="tool">
+        <div class="tool-icon">🏋️</div>
+        <h3 data-es="17. 1RM" data-en="17. 1RM">17. 1RM</h3>
+        <p data-es="Estima la repetición máxima de fuerza para tus entrenamientos." data-en="Estimate your maximum weight limit for one single repetition lift.">Estima la repetición máxima de fuerza para tus entrenamientos.</p>
+        <a href="1rm.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 18. Alcoholemia -->
+    <div class="tool">
+        <div class="tool-icon">🍷</div>
+        <h3 data-es="18. Alcoholemia" data-en="18. Blood Alcohol">18. Alcoholemia</h3>
+        <p data-es="Estima tu nivel aproximado de alcohol en sangre consumido." data-en="Estimate approximate blood alcohol content based on drinks.">Estima tu nivel aproximado de alcohol en sangre consumido.</p>
+        <a href="alcoholemia.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 19. Porcentajes -->
+    <div class="tool">
+        <div class="tool-icon">🔢</div>
+        <h3 data-es="19. Porcentajes" data-en="19. Percentages">19. Porcentajes</h3>
+        <p data-es="Calcula aumentos, disminuciones y proporciones en segundos." data-en="Calculate percentage increases, decreases, and ratios instantly.">Calcula aumentos, disminuciones y proporciones en segundos.</p>
+        <a href="porcentajes.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 20. Fracciones -->
+    <div class="tool">
+        <div class="tool-icon">➗</div>
+        <h3 data-es="20. Fracciones" data-en="20. Fractions">20. Fractions</h3>
+        <p data-es="Suma, resta, multiplica y simplifica fracciones paso a paso." data-en="Add, subtract, multiply, and simplify fraction equations easily.">Suma, resta, multiplica y simplifica fracciones paso a paso.</p>
+        <a href="fracciones.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 21. Regla de Tres -->
+    <div class="tool">
+        <div class="tool-icon">📐</div>
+        <h3 data-es="21. Regla de Tres" data-en="21. Rule of Three">21. Regla de Tres</h3>
+        <p data-es="Resuelve proporciones directas e inversas de manera sencilla." data-en="Solve simple direct and inverse proportions step by step.">Resuelve proporciones directas e inversas de manera sencilla.</p>
+        <a href="regla-de-tres.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 22. Ecuaciones -->
+    <div class="tool">
+        <div class="tool-icon">🧮</div>
+        <h3 data-es="22. Ecuaciones" data-en="22. Equations">22. Ecuaciones</h3>
+        <p data-es="Resuelve ecuaciones de primer y segundo grado al instante." data-en="Solve first and second-degree algebraic equations instantly.">Resuelve ecuaciones de primer y segundo grado al instante.</p>
+        <a href="ecuaciones.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 23. Área y Volumen -->
+    <div class="tool">
+        <div class="tool-icon">📦</div>
+        <h3 data-es="23. Área y Volumen" data-en="23. Area & Volume">23. Área y Volumen</h3>
+        <p data-es="Calcula superficies y capacidades de figuras geométricas." data-en="Calculate total surface area and volume for geometric shapes.">Calcula superficies y capacidades de figuras geométricas.</p>
+        <a href="area-y-volumen.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 24. Potencias y Raíces -->
+    <div class="tool">
+        <div class="tool-icon">√</div>
+        <h3 data-es="24. Potencias y Raíces" data-en="24. Powers & Roots">24. Potencias y Raíces</h3>
+        <p data-es="Obtén exponentes y raíces cuadradas o cúbicas fácilmente." data-en="Compute exponents, square roots, and cubic roots quickly.">Obtén exponentes y raíces cuadradas o cúbicas fácilmente.</p>
+        <a href="potencias-y-raices.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 25. Convertidor Unidades -->
+    <div class="tool">
+        <div class="tool-icon">📏</div>
+        <h3 data-es="25. Convertidor Unidades" data-en="25. Unit Converter">25. Convertidor Unidades</h3>
+        <p data-es="Convierte medidas de longitud, peso, masa y temperatura." data-en="Convert standard length, weight, mass, and temperature units.">Convierte medidas de longitud, peso, masa y temperatura.</p>
+        <a href="convertidor-unidades.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 26. Tiempo entre Fechas -->
+    <div class="tool">
+        <div class="tool-icon">📅</div>
+        <h3 data-es="26. Tiempo entre Fechas" data-en="26. Time Between Dates">26. Tiempo entre Fechas</h3>
+        <p data-es="Calcula la cantidad exacta de días, meses y años transcurridos." data-en="Calculate exact days, months, and years between two dates.">Calcula la cantidad exacta de días, meses y años transcurridos.</p>
+        <a href="tiempo-entre-fechas.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+
+    <!-- 27. Propina -->
+    <div class="tool">
+        <div class="tool-icon">🍽️</div>
+        <h3 data-es="27. Propina" data-en="27. Tip Calculator">27. Propina</h3>
+        <p data-es="Calcula la propina adecuada y divide la cuenta por persona." data-en="Calculate proper tip percentage and split the bill among people.">Calcula la propina adecuada y divide la cuenta por persona.</p>
+        <a href="propina.html" data-es="Usar calculadora" data-en="Use calculator">Usar calculadora</a>
+    </div>
+</div>
 <section class="seo-section">
+    <!-- AD 3 (In-Article Layout) - 1st Time -->
+    <div class="ad-container">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-7020422718957281" data-ad-slot="8805920262"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
     <!-- Spanish Content -->
     <article class="seo-container" id="seo-es">
         <h2>Guía Completa de Calculadoras Online Gratuitas en Español (2026)</h2>
-        
         <p>En el entorno digital actual, contar con herramientas de cálculo rápidas, precisas y fiables es indispensable tanto para la toma de decisiones financieras como para el seguimiento de la salud y la resolución de problemas académicos o cotidianos. Nuestra plataforma ofrece una suite integral de más de 25 calculadoras especializadas, diseñadas específicamente para responder a las necesidades legislativas, fiscales y sociales del público hispanohablante, con especial enfoque en las normativas vigentes en España para el ejercicio 2026.</p>
 
         <h3>1. Calculadoras Financieras e Impuestos: Rigor Fiscal y Transparencia</h3>
-        <p>La gestión económica personal y empresarial requiere una precisión matemática absoluta. Nuestras herramientas financieras incorporan los parámetros oficiales actualizados para garantizar resultados exactos:</p>
         <ul>
             <li><strong>Calculadora de IVA e IVA Inverso:</strong> Permite desglosar la base imponible y la cuota tributaria aplicando los tipos vigentes en España (21% general, 10% reducido y 4% superreducido). Es la solución ideal para autónomos, PYMEs y consumidores que necesitan emitir o verificar facturas.</li>
             <li><strong>Calculadora de Sueldo Neto y Retenciones IRPF 2026:</strong> Estima de forma minuciosa la nómina mensual y anual ajustada a los tramos de IRPF y las cotizaciones obligatorias a la Seguridad Social (mecanismo de equidad intergeneracional, contingencias comunes y desempleo).</li>
@@ -830,7 +583,6 @@
         </ul>
 
         <h3>2. Biometría y Salud: Algoritmos Avalados por la Comunidad Médica</h3>
-        <p>El cuidado corporal y la planificación nutricional deben fundamentarse en estándares científicos contrastados. Nuestras utilidades del área de salud aplican fórmulas reconocidas internacionalmente:</p>
         <ul>
             <li><strong>Índice de Masa Corporal (IMC):</strong> Clasifica el estado nutricional según los criterios oficiales de la Organización Mundial de la Salud (OMS) y la Sociedad Española para el Estudio de la Obesidad (SEEDO).</li>
             <li><strong>Tasa Metabólica Basal (TMB) y Calorías Diarias (TDEE):</strong> Utiliza las ecuaciones de Mifflin-St Jeor y Harris-Benedict para determinar las calorías necesarias para el mantenimiento, pérdida de grasa o ganancia de masa muscular según tu nivel de actividad física.</li>
@@ -854,11 +606,9 @@
     <!-- English Content -->
     <article class="seo-container" id="seo-en" style="display: none;">
         <h2>Complete Guide to Free Online Calculators (2026)</h2>
-        
         <p>In today's digital environment, having fast, accurate, and reliable calculation tools is essential for financial decision-making, health tracking, and solving academic or daily problems. Our platform offers a comprehensive suite of over 25 specialized calculators designed to meet the legislative, tax, and personal needs of users worldwide with specific updates for 2026.</p>
 
         <h3>1. Financial & Tax Calculators: Fiscal Precision & Transparency</h3>
-        <p>Personal and business economic management requires absolute mathematical accuracy. Our financial tools incorporate updated official parameters to ensure exact results:</p>
         <ul>
             <li><strong>VAT & Reverse VAT Calculator:</strong> Breakdown tax base and VAT amounts applying current rates. Ideal for freelancers, SMEs, and consumers who need to issue or verify invoices.</li>
             <li><strong>Net Salary & Income Tax Calculator 2026:</strong> Accurately estimate monthly and annual take-home pay adjusted for tax brackets and mandatory social security contributions.</li>
@@ -867,7 +617,6 @@
         </ul>
 
         <h3>2. Biometrics & Health: Medically Approved Algorithms</h3>
-        <p>Personal care and nutritional planning must be grounded in proven scientific standards. Our health utilities apply internationally recognized formulas:</p>
         <ul>
             <li><strong>Body Mass Index (BMI):</strong> Classify nutritional status according to official World Health Organization (WHO) standards.</li>
             <li><strong>Basal Metabolic Rate (BMR) & Daily Calories (TDEE):</strong> Use Mifflin-St Jeor and Harris-Benedict equations to determine daily calorie needs for maintenance, fat loss, or muscle gain based on activity level.</li>
@@ -887,12 +636,27 @@
             <p><strong>Is my data stored when making calculations?</strong><br>No. All processing happens directly inside your browser. We guarantee maximum confidentiality and privacy.</p>
         </div>
     </article>
-</section>
-<!-- Footer (Exactamente según la solicitud) -->
-<div class="footer-bottom">
-        <p>© 2026 PooreYoutuber. All Rights Reserved.</p>
-        <p data-es="Herramientas 100% gratuitas sin inicio de sesión." data-en="100% free tools with no login required.">Herramientas 100% gratuitas sin inicio de sesión.</p>
+
+    <!-- AD 4 (Autorelaxed Layout) - 1st Time -->
+    <div class="ad-container">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7020422718957281" data-ad-slot="6179756920"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
+</section>
+
+<!-- AD 1 (Office Display) - 2nd Time (Above footer) -->
+<div class="ad-container">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7020422718957281" data-ad-slot="1310573623" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<!-- Footer -->
+<div class="footer-bottom">
+    <p>© 2026 PooreYoutuber. All Rights Reserved.</p>
+    <p data-es="Herramientas 100% gratuitas sin inicio de sesión." data-en="100% free tools with no login required.">Herramientas 100% gratuitas sin inicio de sesión.</p>
+</div>
 
 <script>
     let currentLanguage = 'es';
