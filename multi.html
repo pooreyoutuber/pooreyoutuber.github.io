@@ -425,46 +425,16 @@
             color: var(--primary);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-
-            .tabs {
-                gap: 0.5rem;
-                padding-bottom: 0.8rem;
-            }
-
-            .tab-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .guide-grid {
-                grid-template-columns: 1fr;
-            }
-
-            table {
-                font-size: 0.8rem;
-            }
-
-            th, td {
-                padding: 0.6rem;
-            }
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .card { padding: 1.5rem; }
+            .tabs { gap: 0.5rem; padding-bottom: 0.8rem; }
+            .tab-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+            .guide-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 0.6rem; }
         }
     </style>
 </head>
@@ -555,7 +525,7 @@
                     <label data-es="Número de pagas" data-en="Number of payments">Número de pagas</label>
                     <select id="pagas1">
                         <option value="12" data-es="12 pagas" data-en="12 payments">12 pagas</option>
-                        <option value="14" data-es="14 pagas" data-en="14 payments" selected>14 pagas</option>
+                        <option value="14" data-es="14 pagas" data-en="14 payments">14 pagas</option>
                     </select>
                 </div>
 
@@ -664,7 +634,7 @@
                     <label data-es="Número de pagas" data-en="Number of payments">Número de pagas</label>
                     <select id="pagas2">
                         <option value="12" data-es="12 pagas" data-en="12 payments">12 pagas</option>
-                        <option value="14" data-es="14 pagas" data-en="14 payments" selected>14 pagas</option>
+                        <option value="14" data-es="14 pagas" data-en="14 payments">14 pagas</option>
                     </select>
                 </div>
 
@@ -823,7 +793,7 @@
                 <tr>
                     <td>€50.000,00</td>
                     <td>−€3.235,00</td>
-                    <td>−€10.425,75</span></td>
+                    <td>−€10.425,75</td>
                     <td><span class="amount">€36.339,25</span></td>
                     <td><span class="amount">€2.595,66</span></td>
                     <td>20,9%</td>
@@ -831,7 +801,7 @@
                 <tr>
                     <td>€60.000,00</td>
                     <td>−€3.811,74</td>
-                    <td>−€13.723,89</span></td>
+                    <td>−€13.723,89</td>
                     <td><span class="amount">€42.464,37</span></td>
                     <td><span class="amount">€3.033,17</span></td>
                     <td>22,9%</td>
@@ -839,7 +809,7 @@
                 <tr>
                     <td>€80.000,00</td>
                     <td>−€3.811,74</td>
-                    <td>−€21.858,95</span></td>
+                    <td>−€21.858,95</td>
                     <td><span class="amount">€54.329,31</span></td>
                     <td><span class="amount">€3.880,67</span></td>
                     <td>27,3%</td>
@@ -847,7 +817,7 @@
                 <tr>
                     <td>€100.000,00</td>
                     <td>−€3.811,74</td>
-                    <td>−€30.458,95</span></td>
+                    <td>−€30.458,95</td>
                     <td><span class="amount">€65.729,31</span></td>
                     <td><span class="amount">€4.694,95</span></td>
                     <td>30,5%</td>
@@ -861,6 +831,26 @@
 <script>
     let currentLang = 'es';
 
+    const ccaaIRPF = {
+        madrid: 0.21,
+        andalucia: 0.23,
+        aragon: 0.22,
+        asturias: 0.22,
+        baleares: 0.22,
+        canarias: 0.22,
+        cantabria: 0.22,
+        'castilla-la-mancha': 0.22,
+        'castilla-leon': 0.22,
+        valencia: 0.23,
+        extremadura: 0.22,
+        galicia: 0.22,
+        rioja: 0.22,
+        murcia: 0.22,
+        navarra: 0.22,
+        'pais-vasco': 0.21,
+        cataluna: 0.245
+    };
+
     function toggleLang() {
         currentLang = currentLang === 'es' ? 'en' : 'es';
         const btn = document.querySelector('.lang-toggle');
@@ -868,7 +858,11 @@
         
         document.querySelectorAll('[data-es][data-en]').forEach(el => {
             const text = el.getAttribute(`data-${currentLang}`);
-            if (['OPTION', 'BUTTON', 'LABEL', 'A', 'SPAN', 'H1', 'H2', 'H3', 'P', 'TH'].includes(el.tagName)) {
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'A' || el.tagName === 'SPAN') {
+                el.textContent = text;
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P') {
+                el.textContent = text;
+            } else if (el.tagName === 'TH') {
                 el.textContent = text;
             }
         });
@@ -887,50 +881,31 @@
     }
 
     function formatCurrency(value) {
-        return '€' + parseFloat(value).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return '€' + parseFloat(value).toFixed(2).replace('.', ',');
     }
 
-    // Accurate Spanish Salary Deductions Calculation Logic
-    function computeTaxDetails(bruto, ccaa, married, contract, kids) {
-        if (bruto <= 0) return { ss: 0, irpf: 0, neto: 0, effective: 0 };
+    function calculateSS(bruto, contract) {
+        const maxBaseAnnual = 4909.50 * 12; // €58,914 max annual cap
+        const baseCotizacion = Math.min(bruto, maxBaseAnnual);
+        const ssRate = contract === 'temporal' ? 0.0652 : 0.0647;
+        return baseCotizacion * ssRate;
+    }
 
-        // 1. Social Security (SS)
-        const ssRate = contract === 'temporal' ? 0.0652 : 0.0647; // ~6.47% standard employee rate
-        const maxSSBase = 58848; // Max annual capping base
-        const ssBase = Math.min(bruto, maxSSBase);
-        const ss = ssBase * ssRate;
+    function getIRPFBrackets(baseAfterSS, ccaa, married, kids) {
+        if (baseAfterSS <= 0) return 0;
 
-        // 2. Base Rendimiento del Trabajo
-        let gastosDeducibles = 2000;
-        let baseRendimiento = Math.max(0, bruto - ss - gastosDeducibles);
-
-        // Work income reduction (Reducción por obtención de rendimientos del trabajo)
-        if (bruto < 19747.5) {
-            let reduccion = 6498 - (1.14 * Math.max(0, bruto - 14047.5));
-            baseRendimiento = Math.max(0, baseRendimiento - Math.max(0, reduccion));
-        }
-
-        // Exemption Limit (Mínimo Exento de Retención)
-        let exentoBase = 15876;
-        if (kids === 1) exentoBase = 17200;
-        if (kids >= 2) exentoBase = 18500 + ((kids - 2) * 1000);
-        if (married) exentoBase += 1000;
-
-        if (bruto <= exentoBase) {
-            return { ss: ss, irpf: 0, neto: bruto - ss, effective: (ss / bruto) * 100 };
-        }
-
-        // 3. Minimum Personal and Family Allowance (Mínimo Personal y Familiar)
         let minimoPersonal = 5550;
-        let minimoHijos = 0;
-        if (kids === 1) minimoHijos = 2400;
-        else if (kids === 2) minimoHijos = 2400 + 2700;
-        else if (kids === 3) minimoHijos = 2400 + 2700 + 4000;
-        else if (kids > 3) minimoHijos = 2400 + 2700 + 4000 + ((kids - 3) * 4500);
+        if (married) {
+            minimoPersonal += 3400;
+        }
 
-        let minimoTotal = minimoPersonal + minimoHijos;
+        if (kids === 1) minimoPersonal += 2400;
+        else if (kids === 2) minimoPersonal += 2400 + 2700;
+        else if (kids === 3) minimoPersonal += 2400 + 2700 + 4000;
+        else if (kids >= 4) minimoPersonal += 2400 + 2700 + 4000 + ((kids - 3) * 4500);
 
-        // Scale Tramos IRPF
+        const ccaaFactor = ccaaIRPF[ccaa] || 0.22;
+
         const brackets = [
             { limit: 12450, rate: 0.19 },
             { limit: 20200, rate: 0.24 },
@@ -940,29 +915,24 @@
             { limit: Infinity, rate: 0.47 }
         ];
 
-        function applyBrackets(taxableAmount) {
+        function computeTax(amount) {
             let tax = 0;
             let prevLimit = 0;
             for (let b of brackets) {
-                if (taxableAmount > prevLimit) {
-                    let chunk = Math.min(taxableAmount, b.limit) - prevLimit;
-                    tax += chunk * b.rate;
+                if (amount > prevLimit) {
+                    let chunk = Math.min(amount, b.limit) - prevLimit;
+                    let adjustedRate = b.rate * (ccaaFactor / 0.22);
+                    tax += chunk * adjustedRate;
                     prevLimit = b.limit;
-                } else {
-                    break;
-                }
+                } else break;
             }
             return tax;
         }
 
-        let cuotaBruta = applyBrackets(baseRendimiento);
-        let cuotaMinimo = applyBrackets(minimoTotal);
-        let irpf = Math.max(0, cuotaBruta - cuotaMinimo);
+        let totalTaxBase = computeTax(baseAfterSS);
+        let minimoTax = computeTax(minimoPersonal);
 
-        let neto = bruto - ss - irpf;
-        let effective = ((ss + irpf) / bruto) * 100;
-
-        return { ss, irpf, neto, effective };
+        return Math.max(0, totalTaxBase - minimoTax);
     }
 
     function calculateNettoGross() {
@@ -971,60 +941,60 @@
         const married = document.getElementById('married1').value === 'married';
         const contract = document.getElementById('contract1').value;
         const kids = parseInt(document.getElementById('kids1').value) || 0;
-        const pagas = parseInt(document.getElementById('pagas1').value) || 14;
+        const pagas = parseInt(document.getElementById('pagas1').value) || 12;
 
-        const res = computeTaxDetails(bruto, ccaa, married, contract, kids);
-        const netoMensual = res.neto / pagas;
+        const ss = calculateSS(bruto, contract);
+        const baseAfterSS = bruto - ss;
+        const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+        const neto = bruto - ss - irpf;
+        const effective = (ss + irpf) / bruto * 100;
+        const netoMensual = neto / pagas;
 
         document.getElementById('bruto1-result').textContent = formatCurrency(bruto);
-        document.getElementById('ss1-result').textContent = '-' + formatCurrency(res.ss);
-        document.getElementById('irpf1-result').textContent = '-' + formatCurrency(res.irpf);
-        document.getElementById('neto1-result').textContent = formatCurrency(res.neto);
-        document.getElementById('neto1-monthly').textContent = currentLang === 'es' 
-            ? `(${formatCurrency(netoMensual)}/mes con ${pagas} pagas)` 
-            : `(${formatCurrency(netoMensual)}/month with ${pagas} payments)`;
-        document.getElementById('effective1-result').textContent = res.effective.toFixed(1) + '%';
+        document.getElementById('ss1-result').textContent = formatCurrency(ss);
+        document.getElementById('irpf1-result').textContent = formatCurrency(irpf);
+        document.getElementById('neto1-result').textContent = formatCurrency(neto);
+        document.getElementById('neto1-monthly').textContent = currentLang === 'es' ? `(${formatCurrency(netoMensual)}/mes con ${pagas} pagas)` : `(${formatCurrency(netoMensual)}/month with ${pagas} payments)`;
+        document.getElementById('effective1-result').textContent = (isNaN(effective) ? 0 : effective).toFixed(1) + '%';
         document.getElementById('result1').style.display = 'block';
     }
 
     function calculateGrossToNet() {
-        const targetNeto = parseFloat(document.getElementById('neto2').value) || 0;
+        const neto = parseFloat(document.getElementById('neto2').value) || 0;
         const ccaa = document.getElementById('ccaa2').value;
         const married = document.getElementById('married2').value === 'married';
         const contract = document.getElementById('contract2').value;
         const kids = parseInt(document.getElementById('kids2').value) || 0;
-        const pagas = parseInt(document.getElementById('pagas2').value) || 14;
+        const pagas = parseInt(document.getElementById('pagas2').value) || 12;
 
-        if (targetNeto <= 0) return;
-
-        // Binary search for exact gross salary matching the desired net
-        let minBruto = targetNeto;
-        let maxBruto = targetNeto * 3;
-        let calculatedBruto = targetNeto;
-        let res = computeTaxDetails(calculatedBruto, ccaa, married, contract, kids);
+        let bruto = neto;
+        let prevBruto = 0;
 
         for (let i = 0; i < 50; i++) {
-            calculatedBruto = (minBruto + maxBruto) / 2;
-            res = computeTaxDetails(calculatedBruto, ccaa, married, contract, kids);
+            const ss = calculateSS(bruto, contract);
+            const baseAfterSS = bruto - ss;
+            const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+            const netoCalc = bruto - ss - irpf;
 
-            if (Math.abs(res.neto - targetNeto) < 0.01) break;
+            if (Math.abs(netoCalc - neto) < 0.01) break;
 
-            if (res.neto < targetNeto) {
-                minBruto = calculatedBruto;
-            } else {
-                maxBruto = calculatedBruto;
-            }
+            const ratio = neto / (netoCalc || 1);
+            bruto = bruto * ratio;
+
+            if (Math.abs(bruto - prevBruto) < 0.01) break;
+            prevBruto = bruto;
         }
 
-        const bruMensual = calculatedBruto / pagas;
+        const ss = calculateSS(bruto, contract);
+        const baseAfterSS = bruto - ss;
+        const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
+        const bruMensual = bruto / pagas;
 
-        document.getElementById('neto2-result').textContent = formatCurrency(targetNeto);
-        document.getElementById('ss2-result').textContent = '-' + formatCurrency(res.ss);
-        document.getElementById('irpf2-result').textContent = '-' + formatCurrency(res.irpf);
-        document.getElementById('bruto2-result').textContent = formatCurrency(calculatedBruto);
-        document.getElementById('bruto2-monthly').textContent = currentLang === 'es' 
-            ? `(${formatCurrency(bruMensual)}/mes con ${pagas} pagas)` 
-            : `(${formatCurrency(bruMensual)}/month with ${pagas} payments)`;
+        document.getElementById('neto2-result').textContent = formatCurrency(neto);
+        document.getElementById('ss2-result').textContent = formatCurrency(ss);
+        document.getElementById('irpf2-result').textContent = formatCurrency(irpf);
+        document.getElementById('bruto2-result').textContent = formatCurrency(bruto);
+        document.getElementById('bruto2-monthly').textContent = currentLang === 'es' ? `(${formatCurrency(bruMensual)}/mes con ${pagas} pagas)` : `(${formatCurrency(bruMensual)}/month with ${pagas} payments)`;
         document.getElementById('result2').style.display = 'block';
     }
 
