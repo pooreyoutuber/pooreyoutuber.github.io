@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Sueldo Neto 2026-2027</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZPMC525FGT');
+    </script>
+
+     <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xz0usv8l2h");
+      </script>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+  
+    <script async src="https://fundingchoicesmessages.google.com/i/pub-7020422718957281?ers=1"></script>
+    <script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
+
     <style>
         * {
             margin: 0;
@@ -425,75 +447,16 @@
             color: var(--primary);
         }
 
-        /* Breakdown Section */
-        .breakdown {
-            background: var(--bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .breakdown-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.6rem 0;
-            font-size: 0.95rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .breakdown-row:last-child {
-            border-bottom: none;
-        }
-
-        .breakdown-label {
-            color: var(--text-light);
-        }
-
-        .breakdown-value {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-
-            .tabs {
-                gap: 0.5rem;
-                padding-bottom: 0.8rem;
-            }
-
-            .tab-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .guide-grid {
-                grid-template-columns: 1fr;
-            }
-
-            table {
-                font-size: 0.8rem;
-            }
-
-            th, td {
-                padding: 0.6rem;
-            }
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .card { padding: 1.5rem; }
+            .tabs { gap: 0.5rem; padding-bottom: 0.8rem; }
+            .tab-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+            .guide-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 0.6rem; }
         }
     </style>
 </head>
@@ -943,10 +906,28 @@
         return '€' + parseFloat(value).toFixed(2).replace('.', ',');
     }
 
+    function calculateSS(bruto, contract) {
+        const maxBaseAnnual = 4909.50 * 12; // €58,914 max annual cap
+        const baseCotizacion = Math.min(bruto, maxBaseAnnual);
+        const ssRate = contract === 'temporal' ? 0.0652 : 0.0647;
+        return baseCotizacion * ssRate;
+    }
+
     function getIRPFBrackets(baseAfterSS, ccaa, married, kids) {
-        let minusKids = kids * 2400;
-        let baseAfterKids = Math.max(0, baseAfterSS - minusKids);
-        
+        if (baseAfterSS <= 0) return 0;
+
+        let minimoPersonal = 5550;
+        if (married) {
+            minimoPersonal += 3400;
+        }
+
+        if (kids === 1) minimoPersonal += 2400;
+        else if (kids === 2) minimoPersonal += 2400 + 2700;
+        else if (kids === 3) minimoPersonal += 2400 + 2700 + 4000;
+        else if (kids >= 4) minimoPersonal += 2400 + 2700 + 4000 + ((kids - 3) * 4500);
+
+        const ccaaFactor = ccaaIRPF[ccaa] || 0.22;
+
         const brackets = [
             { limit: 12450, rate: 0.19 },
             { limit: 20200, rate: 0.24 },
@@ -956,20 +937,24 @@
             { limit: Infinity, rate: 0.47 }
         ];
 
-        let irpf = 0;
-        let prevLimit = 0;
-
-        for (let bracket of brackets) {
-            if (baseAfterKids > prevLimit) {
-                let taxableInBracket = Math.min(baseAfterKids, bracket.limit) - prevLimit;
-                irpf += taxableInBracket * bracket.rate;
-                prevLimit = bracket.limit;
-            } else {
-                break;
+        function computeTax(amount) {
+            let tax = 0;
+            let prevLimit = 0;
+            for (let b of brackets) {
+                if (amount > prevLimit) {
+                    let chunk = Math.min(amount, b.limit) - prevLimit;
+                    let adjustedRate = b.rate * (ccaaFactor / 0.22);
+                    tax += chunk * adjustedRate;
+                    prevLimit = b.limit;
+                } else break;
             }
+            return tax;
         }
 
-        return Math.max(0, irpf);
+        let totalTaxBase = computeTax(baseAfterSS);
+        let minimoTax = computeTax(minimoPersonal);
+
+        return Math.max(0, totalTaxBase - minimoTax);
     }
 
     function calculateNettoGross() {
@@ -980,9 +965,7 @@
         const kids = parseInt(document.getElementById('kids1').value) || 0;
         const pagas = parseInt(document.getElementById('pagas1').value) || 12;
 
-        const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
-        const ss = bruto * ssRate;
-        
+        const ss = calculateSS(bruto, contract);
         const baseAfterSS = bruto - ss;
         const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
         const neto = bruto - ss - irpf;
@@ -994,7 +977,7 @@
         document.getElementById('irpf1-result').textContent = formatCurrency(irpf);
         document.getElementById('neto1-result').textContent = formatCurrency(neto);
         document.getElementById('neto1-monthly').textContent = currentLang === 'es' ? `(${formatCurrency(netoMensual)}/mes con ${pagas} pagas)` : `(${formatCurrency(netoMensual)}/month with ${pagas} payments)`;
-        document.getElementById('effective1-result').textContent = effective.toFixed(1) + '%';
+        document.getElementById('effective1-result').textContent = (isNaN(effective) ? 0 : effective).toFixed(1) + '%';
         document.getElementById('result1').style.display = 'block';
     }
 
@@ -1009,24 +992,22 @@
         let bruto = neto;
         let prevBruto = 0;
 
-        for (let i = 0; i < 20; i++) {
-            const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
-            const ss = bruto * ssRate;
+        for (let i = 0; i < 50; i++) {
+            const ss = calculateSS(bruto, contract);
             const baseAfterSS = bruto - ss;
             const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
             const netoCalc = bruto - ss - irpf;
 
-            if (Math.abs(netoCalc - neto) < 1) break;
+            if (Math.abs(netoCalc - neto) < 0.01) break;
 
-            const ratio = neto / netoCalc;
+            const ratio = neto / (netoCalc || 1);
             bruto = bruto * ratio;
 
-            if (Math.abs(bruto - prevBruto) < 1) break;
+            if (Math.abs(bruto - prevBruto) < 0.01) break;
             prevBruto = bruto;
         }
 
-        const ssRate = contract === 'temporal' ? 0.0647 : 0.0647;
-        const ss = bruto * ssRate;
+        const ss = calculateSS(bruto, contract);
         const baseAfterSS = bruto - ss;
         const irpf = getIRPFBrackets(baseAfterSS, ccaa, married, kids);
         const bruMensual = bruto / pagas;
