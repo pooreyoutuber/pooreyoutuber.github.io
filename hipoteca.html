@@ -1005,7 +1005,13 @@
         const downpay = parseFloat(document.getElementById(`downpay${tab}`).value) || 0;
         const capital = price - downpay;
         const years = parseInt(document.getElementById(`years${tab}`).value) || 25;
-        const rate = parseFloat(document.getElementById(`rate${tab}` || `fixedrate${tab}` || `varrate${tab}`).value) || 3.2;
+        
+        let rateInput = document.getElementById(`rate${tab}`);
+        if (!rateInput) {
+            rateInput = document.getElementById(`fixedrate${tab}`);
+        }
+        const rate = rateInput ? parseFloat(rateInput.value) || 3.2 : 3.2;
+        
         const ccaa = parseFloat(document.getElementById(`ccaa${tab}`).value) || 0.06;
         const type = document.getElementById(`type${tab}`).value;
         const income = parseFloat(document.getElementById(`income${tab}`).value) || 3000;
@@ -1027,7 +1033,11 @@
         document.getElementById(`capital${tab}`).textContent = formatCurrency(capital);
         document.getElementById(`interest${tab}`).textContent = formatCurrency(totalInterest);
         document.getElementById(`totalcost${tab}`).textContent = formatCurrency(capital + totalInterest);
-        document.getElementById(`tae${tab}`).textContent = rate.toFixed(2) + '% / ~' + (rate + 0.15).toFixed(2) + '%';
+        
+        const taeElement = document.getElementById(`tae${tab}`);
+        if (taeElement) {
+            taeElement.textContent = rate.toFixed(2) + '% / ~' + (rate + 0.15).toFixed(2) + '%';
+        }
 
         const ratioPercentage = Math.min(100, debtRatio);
         document.getElementById(`ratio${tab}`).style.width = ratioPercentage + '%';
