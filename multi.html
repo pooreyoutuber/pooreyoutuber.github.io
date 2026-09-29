@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de IRPF 2026-2027</title>
+    <title>Calculadora de Ahorro 2026</title>
     <style>
         * {
             margin: 0;
@@ -93,49 +93,6 @@
             font-size: 1rem;
         }
 
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-            overflow-x: auto;
-            padding-bottom: 1rem;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 0.8rem 1.2rem;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-light);
-            transition: all 0.3s;
-            white-space: nowrap;
-            position: relative;
-        }
-
-        .tab-btn.active {
-            color: var(--primary);
-        }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1rem;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--primary);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -188,33 +145,53 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .spinner {
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.8rem;
+        }
+
+        .radio-option {
+            flex: 1;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
             display: flex;
             align-items: center;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .spinner button {
-            background: var(--bg);
-            border: none;
-            padding: 0.5rem 0.8rem;
+            gap: 0.5rem;
             cursor: pointer;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .spinner input {
-            border: none;
-            text-align: center;
-            width: 80px;
             padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0;
+            transition: all 0.3s;
         }
 
-        .spinner input:focus {
-            outline: none;
-            box-shadow: none;
+        .radio-option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .radio-option input[type="radio"]:checked + label::before {
+            content: '✓';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .radio-option label span {
+            flex: 1;
         }
 
         .btn {
@@ -243,40 +220,28 @@
             margin-top: 1.5rem;
         }
 
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .result-row:last-child {
-            border-bottom: none;
-        }
-
-        .result-label {
-            color: var(--text-dark);
-            font-weight: 600;
-        }
-
-        .result-value {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
-
-        .result-highlight {
-            display: flex;
-            justify-content: space-between;
+        .result-item {
             padding: 1rem;
-            background: rgba(99, 102, 241, 0.1);
+            background: white;
             border-radius: 8px;
-            margin: 1rem 0;
             border-left: 3px solid var(--primary);
         }
 
-        .result-highlight-value {
-            font-size: 1.5rem;
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--primary);
         }
@@ -301,9 +266,54 @@
             margin-bottom: 0.5rem;
         }
 
-        .info-box a {
-            color: #92400e;
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .chart-label-text {
+            color: var(--text-dark);
             font-weight: 600;
+        }
+
+        .chart-label-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .chart-bar-bg {
+            height: 40px;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 0.8rem;
+        }
+
+        .chart-bar-value {
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
         }
 
         .guide-section {
@@ -342,6 +352,28 @@
             font-size: 0.9rem;
             color: var(--text-light);
             line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .guide-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .guide-card li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .guide-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
         }
 
         table {
@@ -372,10 +404,6 @@
             background: #f8fafc;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
         .amount {
             font-weight: 700;
             color: var(--primary);
@@ -398,12 +426,12 @@
                 grid-template-columns: 1fr;
             }
 
-            table {
-                font-size: 0.8rem;
+            .result-grid {
+                grid-template-columns: 1fr;
             }
 
-            th, td {
-                padding: 0.6rem;
+            .radio-group {
+                flex-direction: column;
             }
         }
     </style>
@@ -412,404 +440,216 @@
 
 <header>
     <div class="header-content">
-        <a href="index.html" class="logo">💰 CalculadorasMX</a>
+        <a href="index.html" class="logo">🏦 CalculadorasMX</a>
         <button class="lang-toggle active" onclick="toggleLang()" data-es="ES" data-en="EN">ES</button>
     </div>
 </header>
 
 <div class="container">
-    <h1 data-es="Calculadora de IRPF 2026-2027" data-en="IRPF Tax Calculator 2026-2027">Calculadora de IRPF 2026-2027</h1>
-    <p class="subtitle" data-es="Tramos AEAT · Todas las CCAA · Retenciones + Simulador de Renta" data-en="AEAT Brackets · All Regions · Withholdings + Tax Return Simulator">Tramos AEAT · Todas las CCAA · Retenciones + Simulador de Renta</p>
+    <h1 data-es="Calculadora de Ahorro 2026" data-en="Savings Calculator 2026">Calculadora de Ahorro 2026</h1>
+    <p class="subtitle" data-es="Interés Compuesto · Aportaciones Periódicas · Rentabilidad Esperada" data-en="Compound Interest · Periodic Contributions · Expected Returns">Interés Compuesto · Aportaciones Periódicas · Rentabilidad Esperada</p>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(0)" data-es="💼 Retención en nómina" data-en="💼 Payroll Withholding">💼 Retención en nómina</button>
-        <button class="tab-btn" onclick="switchTab(1)" data-es="📄 Simulador Renta" data-en="📄 Tax Return Simulator">📄 Simulador Renta</button>
-        <button class="tab-btn" onclick="switchTab(2)" data-es="🧾 IRPF Autónomos" data-en="🧾 Self-Employed IRPF">🧾 IRPF Autónomos</button>
-    </div>
+    <div class="grid-2">
+        <div class="card">
+            <h2 data-es="Simula tu plan de ahorro" data-en="Simulate your savings plan">Simula tu plan de ahorro</h2>
 
-    <!-- Tab 1: Payroll Withholding -->
-    <div class="tab-content active">
-        <div class="grid-2">
-            <div class="card">
-                <h2 data-es="Retención IRPF en nómina" data-en="IRPF Payroll Withholding">Retención IRPF en nómina</h2>
+            <div class="form-group">
+                <label data-es="Capital inicial (€)" data-en="Initial capital (€)">Capital inicial (€)</label>
+                <input type="number" id="initial" placeholder="10000" step="1000" min="0" value="10000">
+            </div>
 
-                <div class="form-group">
-                    <label data-es="Salario bruto anual (€)" data-en="Annual gross salary (€)">Salario bruto anual (€)</label>
-                    <input type="number" id="salary1" placeholder="30000" step="1000" min="0" value="30000">
-                </div>
+            <div class="form-group">
+                <label data-es="Aportación mensual (€)" data-en="Monthly contribution (€)">Aportación mensual (€)</label>
+                <input type="number" id="monthly" placeholder="500" step="50" min="0" value="500">
+            </div>
 
-                <div class="form-group">
-                    <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
-                    <select id="ccaa1">
-                        <option value="madrid" data-es="Madrid" data-en="Madrid" selected>Madrid</option>
-                        <option value="cataluna" data-es="Cataluña" data-en="Catalonia">Cataluña</option>
-                        <option value="andalucia" data-es="Andalucía" data-en="Andalusia">Andalucía</option>
-                        <option value="valencia" data-es="C. Valenciana" data-en="Valencian Community">C. Valenciana</option>
-                        <option value="galicia" data-es="Galicia" data-en="Galicia">Galicia</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label data-es="Rentabilidad anual (%)" data-en="Annual return (%)">Rentabilidad anual (%)</label>
+                <input type="number" id="rate" placeholder="4.0" step="0.1" min="0" max="20" value="4.0">
+                <small style="color: var(--text-light); margin-top: 0.3rem; display: block;" data-es="Cuentas remuneradas: 2-3,5% · Fondos indexados: 6-9% · Depósitos a plazo: 2-4%" data-en="Savings accounts: 2-3.5% · Index funds: 6-9% · Fixed deposits: 2-4%">Cuentas remuneradas: 2-3,5% · Fondos indexados: 6-9% · Depósitos a plazo: 2-4%</small>
+            </div>
 
-                <div class="form-group">
-                    <label data-es="Tipo de contrato" data-en="Contract type">Tipo de contrato</label>
-                    <select id="contract1">
-                        <option value="indefinido" data-es="Indefinido" data-en="Permanent" selected>Indefinido</option>
-                        <option value="temporal" data-es="Temporal" data-en="Temporary">Temporal</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label data-es="Período (años)" data-en="Period (years)">Período (años)</label>
+                <input type="number" id="years" placeholder="10" step="1" min="1" max="50" value="10">
+            </div>
 
-                <div class="form-group">
-                    <label data-es="Estado civil" data-en="Marital status">Estado civil</label>
-                    <select id="marital1">
-                        <option value="single" data-es="Soltero/a" data-en="Single" selected>Soltero/a</option>
-                        <option value="married" data-es="Casado/a" data-en="Married">Casado/a</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label data-es="Número de pagas" data-en="Number of payments">Número de pagas</label>
-                    <select id="pagas1">
-                        <option value="12" data-es="12 pagas" data-en="12 payments">12 pagas</option>
-                        <option value="14" data-es="14 pagas" data-en="14 payments" selected>14 pagas</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label data-es="Hijos menores de 25 años" data-en="Children under 25">Hijos menores de 25 años</label>
-                    <div class="spinner">
-                        <button onclick="updateValue('kids1', -1)">−</button>
-                        <input type="number" id="kids1" value="0" min="0" readonly>
-                        <button onclick="updateValue('kids1', 1)">+</button>
+            <div class="form-group">
+                <label data-es="Capitalización" data-en="Capitalization">Capitalización</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="monthly-cap" name="capitalization" value="monthly" checked>
+                        <label for="monthly-cap"><span data-es="Mensual" data-en="Monthly">Mensual</span></label>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label data-es="Plan de pensiones (€/año)" data-en="Pension plan (€/year)">Plan de pensiones (€/año)</label>
-                    <input type="number" id="pension1" placeholder="0" step="100" min="0" value="0">
-                </div>
-
-                <button class="btn" onclick="calculateWithholding()" data-es="📊 Calcular retención" data-en="📊 Calculate withholding">📊 Calcular retención</button>
-
-                <div id="result1" class="result-box" style="display: none;">
-                    <div class="result-highlight">
-                        <span data-es="Retención IRPF anual" data-en="Annual IRPF withholding">Retención IRPF anual</span>
-                        <span class="result-highlight-value" id="withholding1">€0</span>
+                    <div class="radio-option">
+                        <input type="radio" id="quarterly-cap" name="capitalization" value="quarterly">
+                        <label for="quarterly-cap"><span data-es="Trimestral" data-en="Quarterly">Trimestral</span></label>
                     </div>
-
-                    <div class="result-row">
-                        <span class="result-label" data-es="Base liquidable" data-en="Taxable base">Base liquidable</span>
-                        <span class="result-value" id="taxbase1">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Cuota IRPF" data-en="IRPF amount">Cuota IRPF</span>
-                        <span class="result-value" id="quota1">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Tipo efectivo" data-en="Effective rate">Tipo efectivo</span>
-                        <span class="result-value" id="effective1">0%</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Tipo marginal" data-en="Marginal rate">Tipo marginal</span>
-                        <span class="result-value" id="marginal1">0%</span>
+                    <div class="radio-option">
+                        <input type="radio" id="annual-cap" name="capitalization" value="annual">
+                        <label for="annual-cap"><span data-es="Anual" data-en="Annual">Anual</span></label>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <div class="info-box">
-                    <h3>⚠️ <span data-es="Resultados orientativos" data-en="Guidance only">Resultados orientativos</span></h3>
-                    <p data-es="El IRPF exacto depende de muchas circunstancias personales. Estos resultados son estimaciones basadas en los tramos 2026. Para mayor precisión usa el" data-en="Exact IRPF depends on many personal circumstances. These results are estimates based on 2026 brackets. For greater accuracy use the"> <a href="https://sede.agenciatributaria.gob.es/" target="_blank" data-es="simulador oficial de la Agencia Tributaria" data-en="official Tax Agency simulator">simulador oficial de la Agencia Tributaria</a>.</p>
+            <button class="btn" onclick="calculateSavings()" data-es="🏦 Calcular ahorro" data-en="🏦 Calculate savings">🏦 Calcular ahorro</button>
+
+            <div id="result" class="result-box" style="display: none;">
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label" data-es="Ahorrado total" data-en="Total saved">Ahorrado total</div>
+                        <div class="result-value" id="totalSaved">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Intereses ganados" data-en="Interest earned">Intereses ganados</div>
+                        <div class="result-value" id="totalInterest">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Capital aportado" data-en="Capital contributed">Capital aportado</div>
+                        <div class="result-value" id="totalCapital">€0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label" data-es="Rentabilidad efectiva" data-en="Effective return">Rentabilidad efectiva</div>
+                        <div class="result-value" id="effectiveReturn">0%</div>
+                    </div>
                 </div>
+
+                <div style="background: white; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                        <span style="font-weight: 600; color: var(--text-dark);" data-es="Desglose:" data-en="Breakdown:">Desglose:</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: #10b981; border-radius: 4px;"></div>
+                        <span style="flex: 1; color: var(--text-light);" data-es="Capital aportado" data-en="Capital contributed">Capital aportado</span>
+                        <span style="font-weight: 600;" id="breakdown-capital">€0</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <div style="width: 20px; height: 20px; background: #3b82f6; border-radius: 4px;"></div>
+                        <span style="flex: 1; color: var(--text-light);" data-es="Intereses" data-en="Interest">Intereses</span>
+                        <span style="font-weight: 600;" id="breakdown-interest">€0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-box">
+                <h3>⚠️ <span data-es="Simulación orientativa" data-en="Guidance simulation">Simulación orientativa</span></h3>
+                <p data-es="Interés compuesto constante. Los rendimientos reales de inversiones no están garantizados y pueden variar. Consulta con un asesor financiero antes de invertir." data-en="Constant compound interest. Actual investment returns are not guaranteed and may vary. Consult a financial advisor before investing.">Interés compuesto constante. Los rendimientos reales de inversiones no están garantizados y pueden variar. Consulta con un asesor financiero antes de invertir.</p>
+            </div>
+
+            <div class="guide-card">
+                <h3>💡 <span data-es="Regla del 72" data-en="Rule of 72">Regla del 72</span></h3>
+                <p data-es="Divide 72 entre tu tasa de interés anual para estimar cuántos años tardará tu dinero en duplicarse:" data-en="Divide 72 by your annual interest rate to estimate how many years it takes your money to double:">Divide 72 entre tu tasa de interés anual para estimar cuántos años tardará tu dinero en duplicarse:</p>
+                <ul>
+                    <li data-es="Al 2% → 36 años" data-en="At 2% → 36 years">Al 2% → 36 años</li>
+                    <li data-es="Al 4% → 18 años" data-en="At 4% → 18 years">Al 4% → 18 años</li>
+                    <li data-es="Al 6% → 12 años" data-en="At 6% → 12 years">Al 6% → 12 años</li>
+                    <li data-es="Al 8% → 9 años" data-en="At 8% → 9 years">Al 8% → 9 años</li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- Tab 2: Tax Return Simulator -->
-    <div class="tab-content">
-        <div class="grid-2">
-            <div class="card">
-                <h2 data-es="Simulador de Declaración de la Renta" data-en="Tax Return Simulator">Simulador de Declaración de la Renta</h2>
-
-                <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);" data-es="Rendimientos del Trabajo" data-en="Employment Income">Rendimientos del Trabajo</h3>
-
-                    <div class="form-group">
-                        <label data-es="Ingresos brutos trabajo (€)" data-en="Gross employment income (€)">Ingresos brutos trabajo (€)</label>
-                        <input type="number" id="work2" placeholder="30000" step="1000" min="0" value="30000">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Retenciones ya pagadas (€)" data-en="Withholdings already paid (€)">Retenciones ya pagadas (€)</label>
-                        <input type="number" id="retained2" placeholder="4500" step="100" min="0" value="4500">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);" data-es="Rendimientos del Capital (Ahorro)" data-en="Savings Income">Rendimientos del Capital (Ahorro)</h3>
-
-                    <div class="form-group">
-                        <label data-es="Intereses / Dividendos (€)" data-en="Interest / Dividends (€)">Intereses / Dividendos (€)</label>
-                        <input type="number" id="interest2" placeholder="0" step="100" min="0" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Ganancias patrimoniales (€)" data-en="Capital gains (€)">Ganancias patrimoniales (€)</label>
-                        <input type="number" id="gains2" placeholder="0" step="100" min="0" value="0">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);" data-es="Deducciones y Familia" data-en="Deductions & Family">Deducciones y Familia</h3>
-
-                    <div class="form-group">
-                        <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
-                        <select id="ccaa2">
-                            <option value="madrid" data-es="Madrid" data-en="Madrid" selected>Madrid</option>
-                            <option value="cataluna" data-es="Cataluña" data-en="Catalonia">Cataluña</option>
-                            <option value="andalucia" data-es="Andalucía" data-en="Andalusia">Andalucía</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Hijos" data-en="Children">Hijos</label>
-                        <div class="spinner">
-                            <button onclick="updateValue('kids2', -1)">−</button>
-                            <input type="number" id="kids2" value="0" min="0" readonly>
-                            <button onclick="updateValue('kids2', 1)">+</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Plan de pensiones (€/año)" data-en="Pension plan (€/year)">Plan de pensiones (€/año)</label>
-                        <input type="number" id="pension2" placeholder="0" step="100" min="0" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Donativos a ONGs deducibles (€)" data-en="Deductible donations (€)">Donativos a ONGs deducibles (€)</label>
-                        <input type="number" id="donations2" placeholder="0" step="100" min="0" value="0">
-                    </div>
-                </div>
-
-                <button class="btn" onclick="calculateTaxReturn()" data-es="📄 Simular declaración" data-en="📄 Simulate tax return">📄 Simular declaración</button>
-
-                <div id="result2" class="result-box" style="display: none;">
-                    <div class="result-highlight">
-                        <span id="result2-label" data-es="A devolver" data-en="Refund due">A devolver</span>
-                        <span class="result-highlight-value" id="refund2">€0</span>
-                    </div>
-
-                    <div class="result-row">
-                        <span class="result-label" data-es="Base imponible total" data-en="Total taxable base">Base imponible total</span>
-                        <span class="result-value" id="totalbase2">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Cuota íntegra" data-en="Total tax amount">Cuota íntegra</span>
-                        <span class="result-value" id="totalquota2">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Retenciones pagadas" data-en="Withholdings paid">Retenciones pagadas</span>
-                        <span class="result-value" id="paidretained2">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Diferencia" data-en="Difference">Diferencia</span>
-                        <span class="result-value" id="diff2">€0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="info-box">
-                    <h3>💡 <span data-es="Cómo funciona" data-en="How it works">Cómo funciona</span></h3>
-                    <p data-es="Se suman todos los ingresos (trabajo, ahorro, capital), se restan deducciones y reducciones personales/familiares, se aplican los tramos IRPF, y se compara con las retenciones ya pagadas." data-en="All income is summed (employment, savings, capital), deductions and personal/family reductions are subtracted, IRPF brackets are applied, and compared with withholdings already paid.">Se suman todos los ingresos (trabajo, ahorro, capital), se restan deducciones y reducciones personales/familiares, se aplican los tramos IRPF, y se compara con las retenciones ya pagadas.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab 3: Self-Employed IRPF -->
-    <div class="tab-content">
-        <div class="grid-2">
-            <div class="card">
-                <h2 data-es="IRPF para Autónomos" data-en="Self-Employed IRPF">IRPF para Autónomos</h2>
-
-                <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);" data-es="Ingresos y Gastos" data-en="Income & Expenses">Ingresos y Gastos</h3>
-
-                    <div class="form-group">
-                        <label data-es="Facturación bruta anual (€)" data-en="Annual gross revenue (€)">Facturación bruta anual (€)</label>
-                        <input type="number" id="revenue3" placeholder="50000" step="1000" min="0" value="50000">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Gastos deducibles anuales (€)" data-en="Deductible expenses (€)">Gastos deducibles anuales (€)</label>
-                        <input type="number" id="expenses3" placeholder="15000" step="1000" min="0" value="15000">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Cuota SS autónomo (€/año)" data-en="Self-employed SS (€/year)">Cuota SS autónomo (€/año)</label>
-                        <input type="number" id="ss3" placeholder="2395" step="100" min="0" value="2395">
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Retenciones aplicadas (%)" data-en="Applied withholdings (%)">Retenciones aplicadas (%)</label>
-                        <input type="number" id="withhold3" placeholder="15" step="0.5" min="0" max="100" value="15">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);" data-es="Situación Personal" data-en="Personal Situation">Situación Personal</h3>
-
-                    <div class="form-group">
-                        <label data-es="Comunidad Autónoma" data-en="Autonomous Community">Comunidad Autónoma</label>
-                        <select id="ccaa3">
-                            <option value="madrid" data-es="Madrid" data-en="Madrid" selected>Madrid</option>
-                            <option value="cataluna" data-es="Cataluña" data-en="Catalonia">Cataluña</option>
-                            <option value="andalucia" data-es="Andalucía" data-en="Andalusia">Andalucía</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Hijos" data-en="Children">Hijos</label>
-                        <div class="spinner">
-                            <button onclick="updateValue('kids3', -1)">−</button>
-                            <input type="number" id="kids3" value="0" min="0" readonly>
-                            <button onclick="updateValue('kids3', 1)">+</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label data-es="Plan de pensiones (€/año)" data-en="Pension plan (€/year)">Plan de pensiones (€/año)</label>
-                        <input type="number" id="pension3" placeholder="0" step="100" min="0" value="0">
-                    </div>
-                </div>
-
-                <button class="btn" onclick="calculateSelfEmployed()" data-es="🧾 Calcular IRPF autónomo" data-en="🧾 Calculate self-employed IRPF">🧾 Calcular IRPF autónomo</button>
-
-                <div id="result3" class="result-box" style="display: none;">
-                    <div class="result-highlight">
-                        <span data-es="IRPF a pagar" data-en="IRPF to pay">IRPF a pagar</span>
-                        <span class="result-highlight-value" id="irpfdue3">€0</span>
-                    </div>
-
-                    <div class="result-row">
-                        <span class="result-label" data-es="Beneficio neto" data-en="Net profit">Beneficio neto</span>
-                        <span class="result-value" id="profit3">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Base liquidable" data-en="Taxable base">Base liquidable</span>
-                        <span class="result-value" id="base3">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Cuota IRPF" data-en="IRPF amount">Cuota IRPF</span>
-                        <span class="result-value" id="quota3">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="SS autónomo" data-en="Self-employed SS">SS autónomo</span>
-                        <span class="result-value" id="ss3-result">€0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label" data-es="Total a pagar" data-en="Total to pay">Total a pagar</span>
-                        <span class="result-value" id="total3">€0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="info-box">
-                    <h3>🧾 <span data-es="Autónomos" data-en="Self-Employed">Autónomos</span></h3>
-                    <p data-es="Como autónomo pagas Seguridad Social (~€2.400/año) + IRPF sobre el beneficio neto. El beneficio es ingresos - gastos deducibles - retenciones." data-en="As self-employed you pay Social Security (~€2,400/year) + IRPF on net profit. Profit is income - deductible expenses - withholdings.">Como autónomo pagas Seguridad Social (~€2.400/año) + IRPF sobre el beneficio neto. El beneficio es ingresos - gastos deducibles - retenciones.</p>
-                    <p data-es="Los gastos deducibles incluyen alquiler local, suministros, material, software, etc." data-en="Deductible expenses include rent, utilities, materials, software, etc.">Los gastos deducibles incluyen alquiler local, suministros, material, software, etc.</p>
-                </div>
-            </div>
-        </div>
+    <!-- Chart Section -->
+    <div class="chart-container" id="chartContainer" style="display: none;">
+        <h3 data-es="Evolución de tu ahorro (años seleccionados)" data-en="Savings evolution (selected years)">Evolución de tu ahorro (años seleccionados)</h3>
+        
+        <div id="chartBars"></div>
     </div>
 
     <!-- Guide Section -->
     <div class="guide-section">
-        <h2 data-es="¿Qué es el IRPF y cómo funciona?" data-en="What is IRPF and how does it work?">¿Qué es el IRPF y cómo funciona?</h2>
+        <h2 data-es="¿Cómo funciona el interés compuesto?" data-en="How does compound interest work?">¿Cómo funciona el interés compuesto?</h2>
 
         <div class="guide-grid">
             <div class="guide-card">
-                <h3 data-es="Impuesto Progresivo" data-en="Progressive Tax">Impuesto Progresivo</h3>
-                <p data-es="El IRPF es progresivo: a mayor renta, mayor porcentaje. Pero cada tramo solo aplica a la parte de renta que cae dentro de él. Subir de tramo nunca significa ganar menos neto." data-en="IRPF is progressive: higher income, higher percentage. But each bracket only applies to the portion of income within it. Moving up a bracket never means earning less net.">El IRPF es progresivo: a mayor renta, mayor porcentaje. Pero cada tramo solo aplica a la parte de renta que cae dentro de él. Subir de tramo nunca significa ganar menos neto.</p>
+                <h3 data-es="Interés Compuesto" data-en="Compound Interest">Interés Compuesto</h3>
+                <p data-es="Tus intereses generan nuevos intereses cada período. Con aportaciones mensuales constantes, el efecto se multiplica enormemente con el tiempo — especialmente en horizontes de 10, 20 o 30 años." data-en="Your interest earns new interest each period. With constant monthly contributions, the effect multiplies greatly over time — especially over 10, 20 or 30 year horizons.">Tus intereses generan nuevos intereses cada período. Con aportaciones mensuales constantes, el efecto se multiplica enormemente con el tiempo — especialmente en horizontes de 10, 20 o 30 años.</p>
+                <p style="margin-top: 1rem; font-weight: 600; color: var(--text-dark);" data-es="Cuanto antes empieces, más interés compuesto acumularás." data-en="The sooner you start, the more compound interest you'll accumulate.">Cuanto antes empieces, más interés compuesto acumularás.</p>
             </div>
 
             <div class="guide-card">
-                <h3 data-es="Tipo Efectivo vs Marginal" data-en="Effective vs Marginal Rate">Tipo Efectivo vs Marginal</h3>
-                <p data-es="Tipo marginal: porcentaje sobre el último euro ganado. Tipo efectivo: porcentaje real sobre la totalidad de ingresos. El efectivo siempre es menor porque los primeros euros tributan a menos." data-en="Marginal rate: percentage on your last euro earned. Effective rate: real percentage on total income. Effective is always lower because early euros are taxed less.">Tipo marginal: porcentaje sobre el último euro ganado. Tipo efectivo: porcentaje real sobre la totalidad de ingresos. El efectivo siempre es menor porque los primeros euros tributan a menos.</p>
+                <h3 data-es="Cuentas Remuneradas" data-en="Savings Accounts">Cuentas Remuneradas</h3>
+                <p data-es="Rentabilidad: 2-3,5% TAE. Sin riesgo, con liquidez inmediata. Hasta 100.000€ garantizados por el FGD (Fondo de Garantía de Depósitos)." data-en="Return: 2-3.5% APY. No risk, immediate liquidity. Up to €100,000 guaranteed by DGF.">Rentabilidad: 2-3,5% TAE. Sin riesgo, con liquidez inmediata. Hasta 100.000€ garantizados por el FGD (Fondo de Garantía de Depósitos).</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Bancos:" data-en="Banks:">Bancos:</strong> ING, Banco Sabadell, Abanca, Openbank, etc.</p>
             </div>
 
             <div class="guide-card">
-                <h3 data-es="Mínimo Personal y Familiar" data-en="Personal & Family Minimum">Mínimo Personal y Familiar</h3>
-                <p data-es="En 2026: mínimo personal €5.550. Por hijos menores de 25 años: 1er hijo +€2.400, 2º +€2.700, 3º +€4.000, 4º +€4.500. Estos importes quedan libres de impuestos." data-en="In 2026: personal minimum €5,550. Per child under 25: 1st +€2,400, 2nd +€2,700, 3rd +€4,000, 4th +€4,500. These amounts are tax-free.">En 2026: mínimo personal €5.550. Por hijos menores de 25 años: 1er hijo +€2.400, 2º +€2.700, 3º +€4.000, 4º +€4.500. Estos importes quedan libres de impuestos.</p>
+                <h3 data-es="Fondos Indexados" data-en="Index Funds">Fondos Indexados</h3>
+                <p data-es="Replican un índice como S&P 500 o MSCI World. Rentabilidad histórica ~7-9% anual a largo plazo. Mayor potencial pero con mayor volatilidad." data-en="Replicate an index like S&P 500 or MSCI World. Historical return ~7-9% annually long-term. Higher potential but more volatility.">Replican un índice como S&P 500 o MSCI World. Rentabilidad histórica ~7-9% anual a largo plazo. Mayor potencial pero con mayor volatilidad.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Brokers:" data-en="Brokers:">Brokers:</strong> MyInvestor, Indexa Capital, eToro, etc.</p>
             </div>
 
             <div class="guide-card">
-                <h3 data-es="Deducciones Deducibles" data-en="Deductible Deductions">Deducciones Deducibles</h3>
-                <p data-es="Plan de pensiones (máx €2.000 empleados), gasto de trabajo €2.000, gastos de movilidad geográfica, donativos a ONGs, etc. Reducen la base liquidable." data-en="Pension plan (max €2,000 employees), work expenses €2,000, mobility expenses, donations to NGOs, etc. These reduce taxable income.">Plan de pensiones (máx €2.000 empleados), gasto de trabajo €2.000, gastos de movilidad geográfica, donativos a ONGs, etc. Reducen la base liquidable.</p>
+                <h3 data-es="Planes de Pensiones" data-en="Pension Plans">Planes de Pensiones</h3>
+                <p data-es="Reducen la base del IRPF hasta €1.500/año (autónomos €2.000). Liquidez limitada hasta jubilación. Ideal para planificación a largo plazo." data-en="Reduce IRPF base up to €1,500/year (self-employed €2,000). Limited liquidity until retirement. Ideal for long-term planning.">Reducen la base del IRPF hasta €1.500/año (autónomos €2.000). Liquidez limitada hasta jubilación. Ideal para planificación a largo plazo.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Productos:" data-en="Products:">Productos:</strong> Seguros Ahorro, Fondos de Pensiones, etc.</p>
             </div>
 
             <div class="guide-card">
-                <h3 data-es="Base del Ahorro (IRPF 2026)" data-en="Savings Base (IRPF 2026)">Base del Ahorro (IRPF 2026)</h3>
-                <p data-es="Dividendos, intereses, plusvalías: tributan en base del ahorro a tipos más bajos (19% hasta €6.000, 21% hasta €50.000, 23% hasta €200.000)." data-en="Dividends, interest, capital gains: taxed in savings base at lower rates (19% up to €6,000, 21% up to €50,000, 23% up to €200,000).">Dividendos, intereses, plusvalías: tributan en base del ahorro a tipos más bajos (19% hasta €6.000, 21% hasta €50.000, 23% hasta €200.000).</p>
+                <h3 data-es="Depósitos a Plazo Fijo" data-en="Fixed Term Deposits">Depósitos a Plazo Fijo</h3>
+                <p data-es="Rentabilidad: 2-4% a 1-3 años. Sin riesgo pero sin liquidez antes del vencimiento. Ideal para dinero que no necesitas a corto plazo." data-en="Return: 2-4% over 1-3 years. No risk but no liquidity before maturity. Ideal for money you don't need short-term.">Rentabilidad: 2-4% a 1-3 años. Sin riesgo pero sin liquidez antes del vencimiento. Ideal para dinero que no necesitas a corto plazo.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);"><strong data-es="Duración:" data-en="Duration:">Duración:</strong> 1, 2, 3 años (típicamente)</p>
             </div>
 
             <div class="guide-card">
-                <h3 data-es="Cuándo Declarar" data-en="When to File">Cuándo Declarar</h3>
-                <p data-es="Obligado si: rendimientos trabajo >€22.000 (1 pagador) o >€15.000 (2+ pagadores). Aunque no obligado, puede convenir si tienes derecho a devolución o deducciones especiales." data-en="Required if: employment income >€22,000 (1 employer) or >€15,000 (2+ employers). Even if not required, it may be advantageous if you're due a refund or have special deductions.">Obligado si: rendimientos trabajo >€22.000 (1 pagador) o >€15.000 (2+ pagadores). Aunque no obligado, puede convenir si tienes derecho a devolución o deducciones especiales.</p>
+                <h3 data-es="Capitalización vs Aportaciones" data-en="Capitalization vs Contributions">Capitalización vs Aportaciones</h3>
+                <p data-es="Mensual: máximo interés compuesto (12 veces/año). Trimestral: intermedio (4 veces/año). Anual: menor efecto (1 vez/año)." data-en="Monthly: maximum compound interest (12x/year). Quarterly: intermediate (4x/year). Annual: lower effect (1x/year).">Mensual: máximo interés compuesto (12 veces/año). Trimestral: intermedio (4 veces/año). Anual: menor efecto (1 vez/año).</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);" data-es="Las aportaciones mensuales amplían el efecto compuesto." data-en="Monthly contributions amplify the compound effect.">Las aportaciones mensuales amplían el efecto compuesto.</p>
             </div>
         </div>
     </div>
 
-    <!-- Brackets Table -->
+    <!-- Comparison Table -->
     <div class="guide-section">
-        <h2 data-es="Tramos IRPF 2026-2027" data-en="IRPF Brackets 2026-2027">Tramos IRPF 2026-2027</h2>
+        <h2 data-es="Comparativa de inversiones en España 2026" data-en="Investment Comparison Spain 2026">Comparativa de inversiones en España 2026</h2>
 
         <table>
             <thead>
                 <tr>
-                    <th data-es="Base liquidable" data-en="Taxable base">Base liquidable</th>
-                    <th data-es="Tipo estatal" data-en="State rate">Tipo estatal</th>
-                    <th data-es="Tipo autonómico aprox." data-en="Regional rate approx.">Tipo autonómico aprox.</th>
-                    <th data-es="Tipo total" data-en="Total rate">Tipo total</th>
+                    <th data-es="Producto" data-en="Product">Producto</th>
+                    <th data-es="Rentabilidad esperada" data-en="Expected return">Rentabilidad esperada</th>
+                    <th data-es="Riesgo" data-en="Risk">Riesgo</th>
+                    <th data-es="Liquidez" data-en="Liquidity">Liquidez</th>
+                    <th data-es="Ventajas fiscales" data-en="Tax benefits">Ventajas fiscales</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>0 € – 12.450 €</td>
-                    <td>9,50%</td>
-                    <td>9,50%</td>
-                    <td><span class="amount">19%</span></td>
+                    <td data-es="Cuenta Remunerada" data-en="Savings Account">Cuenta Remunerada</td>
+                    <td><span class="amount">2-3,5%</span></td>
+                    <td data-es="Nulo" data-en="None">Nulo</td>
+                    <td data-es="Inmediata" data-en="Immediate">Inmediata</td>
+                    <td data-es="Ninguna" data-en="None">Ninguna</td>
                 </tr>
                 <tr>
-                    <td>12.450 € – 20.200 €</td>
-                    <td>12%</td>
-                    <td>12%</td>
-                    <td><span class="amount">24%</span></td>
+                    <td data-es="Depósito a Plazo" data-en="Fixed Deposit">Depósito a Plazo</td>
+                    <td><span class="amount">2-4%</span></td>
+                    <td data-es="Nulo" data-en="None">Nulo</td>
+                    <td data-es="A vencimiento" data-en="At maturity">A vencimiento</td>
+                    <td data-es="Ninguna" data-en="None">Ninguna</td>
                 </tr>
                 <tr>
-                    <td>20.200 € – 35.200 €</td>
-                    <td>15%</td>
-                    <td>15%</td>
-                    <td><span class="amount">30%</span></td>
+                    <td data-es="Fondos Indexados" data-en="Index Funds">Fondos Indexados</td>
+                    <td><span class="amount">6-9%</span></td>
+                    <td data-es="Bajo-Medio" data-en="Low-Medium">Bajo-Medio</td>
+                    <td data-es="T+2 días" data-en="T+2 days">T+2 días</td>
+                    <td data-es="Pérdidas deducibles" data-en="Losses deductible">Pérdidas deducibles</td>
                 </tr>
                 <tr>
-                    <td>35.200 € – 60.000 €</td>
-                    <td>18,50%</td>
-                    <td>18,50%</td>
-                    <td><span class="amount">37%</span></td>
+                    <td data-es="Plan Pensiones" data-en="Pension Plan">Plan Pensiones</td>
+                    <td><span class="amount">4-6%</span></td>
+                    <td data-es="Bajo-Medio" data-en="Low-Medium">Bajo-Medio</td>
+                    <td data-es="Jubilación" data-en="Retirement">Jubilación</td>
+                    <td><span class="amount">Reducción IRPF €1.500</span></td>
                 </tr>
                 <tr>
-                    <td>60.000 € – 300.000 €</td>
-                    <td>22,50%</td>
-                    <td>22,50%</td>
-                    <td><span class="amount">45%</span></td>
-                </tr>
-                <tr>
-                    <td>Más de 300.000 €</td>
-                    <td>24,50%</td>
-                    <td>22,50%</td>
-                    <td><span class="amount">47%</span></td>
+                    <td data-es="Acciones" data-en="Stocks">Acciones</td>
+                    <td><span class="amount">8-10%+</span></td>
+                    <td data-es="Alto" data-en="High">Alto</td>
+                    <td data-es="Inmediata" data-en="Immediate">Inmediata</td>
+                    <td data-es="Pérdidas deducibles" data-en="Losses deductible">Pérdidas deducibles</td>
                 </tr>
             </tbody>
         </table>
@@ -820,17 +660,6 @@
 <script>
     let currentLang = 'es';
 
-    function getMinHijos(kids) {
-        let total = 0;
-        for (let i = 1; i <= kids; i++) {
-            if (i === 1) total += 2400;
-            else if (i === 2) total += 2700;
-            else if (i === 3) total += 4000;
-            else total += 4500;
-        }
-        return total;
-    }
-
     function toggleLang() {
         currentLang = currentLang === 'es' ? 'en' : 'es';
         const btn = document.querySelector('.lang-toggle');
@@ -838,180 +667,108 @@
 
         document.querySelectorAll('[data-es][data-en]').forEach(el => {
             const text = el.getAttribute(`data-${currentLang}`);
-            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN') {
+            if (el.tagName === 'OPTION' || el.tagName === 'BUTTON' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'SMALL' || el.tagName === 'LI') {
                 el.textContent = text;
-            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'TH') {
+            } else if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'TH' || el.tagName === 'TD') {
                 el.textContent = text;
             }
         });
-    }
-
-    function switchTab(index) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-content')[index].classList.add('active');
-        document.querySelectorAll('.tab-btn')[index].classList.add('active');
-    }
-
-    function updateValue(id, change) {
-        const elem = document.getElementById(id);
-        elem.value = Math.max(0, parseInt(elem.value) + change);
     }
 
     function formatCurrency(value) {
         return '€' + parseFloat(value).toFixed(2).replace('.', ',');
     }
 
-    function calculateIRPF(base) {
-        const brackets = [
-            { limit: 12450, rate: 0.19 },
-            { limit: 20200, rate: 0.24 },
-            { limit: 35200, rate: 0.30 },
-            { limit: 60000, rate: 0.37 },
-            { limit: 300000, rate: 0.45 },
-            { limit: Infinity, rate: 0.47 }
-        ];
+    function calculateSavings() {
+        const initial = parseFloat(document.getElementById('initial').value) || 0;
+        const monthly = parseFloat(document.getElementById('monthly').value) || 0;
+        const rate = parseFloat(document.getElementById('rate').value) / 100 || 0;
+        const years = parseInt(document.getElementById('years').value) || 10;
+        const capitalization = document.querySelector('input[name="capitalization"]:checked').value;
 
-        let irpf = 0;
-        let prevLimit = 0;
-        let marginalRate = 0;
+        let periods = years * 12;
+        let periodRate = rate / 12;
+        let contributionPerPeriod = monthly; // Mensual by default
 
-        for (let bracket of brackets) {
-            if (base > prevLimit) {
-                let taxableInBracket = Math.min(base, bracket.limit) - prevLimit;
-                irpf += taxableInBracket * bracket.rate;
-                marginalRate = bracket.rate;
-                prevLimit = bracket.limit;
-            } else {
-                break;
+        if (capitalization === 'quarterly') {
+            periods = years * 4;
+            periodRate = rate / 4;
+            contributionPerPeriod = monthly * 3; // 3 months contribution in a quarter
+        } else if (capitalization === 'annual') {
+            periods = years;
+            periodRate = rate;
+            contributionPerPeriod = monthly * 12; // 12 months contribution in a year
+        }
+
+        let balance = initial;
+        let totalContributed = initial;
+        const yearlyData = [];
+
+        for (let i = 0; i < periods; i++) {
+            balance = balance * (1 + periodRate) + contributionPerPeriod;
+            totalContributed += contributionPerPeriod;
+
+            if (capitalization === 'monthly' && (i + 1) % 12 === 0) {
+                yearlyData.push({
+                    year: (i + 1) / 12,
+                    balance: balance,
+                    contributed: totalContributed
+                });
+            } else if (capitalization === 'quarterly' && (i + 1) % 4 === 0) {
+                yearlyData.push({
+                    year: (i + 1) / 4,
+                    balance: balance,
+                    contributed: totalContributed
+                });
+            } else if (capitalization === 'annual') {
+                yearlyData.push({
+                    year: i + 1,
+                    balance: balance,
+                    contributed: totalContributed
+                });
             }
         }
 
-        return { irpf, marginalRate };
+        const totalSaved = balance;
+        const totalInterest = totalSaved - totalContributed;
+        const effectiveReturn = (totalInterest / totalContributed) * 100;
+
+        document.getElementById('totalSaved').textContent = formatCurrency(totalSaved);
+        document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+        document.getElementById('totalCapital').textContent = formatCurrency(totalContributed);
+        document.getElementById('effectiveReturn').textContent = effectiveReturn.toFixed(1) + '%';
+        document.getElementById('breakdown-capital').textContent = formatCurrency(totalContributed);
+        document.getElementById('breakdown-interest').textContent = formatCurrency(totalInterest);
+        document.getElementById('result').style.display = 'block';
+
+        // Generate chart
+        generateChart(yearlyData, totalSaved);
     }
 
-    function calculateSavingsIRPF(base) {
-        const brackets = [
-            { limit: 6000, rate: 0.19 },
-            { limit: 50000, rate: 0.21 },
-            { limit: 200000, rate: 0.23 },
-            { limit: 300000, rate: 0.27 },
-            { limit: Infinity, rate: 0.28 }
-        ];
-        
-        let irpf = 0;
-        let prevLimit = 0;
-        
-        for (let bracket of brackets) {
-            if (base > prevLimit) {
-                let taxable = Math.min(base, bracket.limit) - prevLimit;
-                irpf += taxable * bracket.rate;
-                prevLimit = bracket.limit;
-            } else {
-                break;
-            }
-        }
-        return irpf;
-    }
+    function generateChart(yearlyData, maxValue) {
+        const chartBars = document.getElementById('chartBars');
+        chartBars.innerHTML = '';
 
-    function getIRPFQuota(base, minimums) {
-        const { irpf: baseTax, marginalRate } = calculateIRPF(base);
-        const { irpf: minTax } = calculateIRPF(minimums);
-        return { irpf: Math.max(0, baseTax - minTax), marginalRate };
-    }
+        const step = Math.max(1, Math.floor(yearlyData.length / 8));
+        const selectedData = yearlyData.filter((_, i) => i % step === 0 || i === yearlyData.length - 1);
 
-    function calculateWithholding() {
-        const salary = parseFloat(document.getElementById('salary1').value) || 0;
-        const kids = parseInt(document.getElementById('kids1').value) || 0;
-        const pension = parseFloat(document.getElementById('pension1').value) || 0;
+        selectedData.forEach(data => {
+            const percentage = (data.balance / maxValue) * 100;
+            const html = `
+                <div class="chart-bar">
+                    <div class="chart-label">
+                        <span class="chart-label-text">${data.year.toFixed(0)} año${data.year !== 1 ? 's' : ''}</span>
+                        <span class="chart-label-value">${formatCurrency(data.balance)}</span>
+                    </div>
+                    <div class="chart-bar-bg" style="width: ${percentage}%">
+                        <span class="chart-bar-value">${percentage.toFixed(0)}%</span>
+                    </div>
+                </div>
+            `;
+            chartBars.innerHTML += html;
+        });
 
-        const gastoTrabajo = 2000;
-        const minPersonal = 5550;
-        const minHijos = getMinHijos(kids);
-
-        const base = Math.max(0, salary - gastoTrabajo - pension);
-        const minimums = minPersonal + minHijos;
-
-        const { irpf, marginalRate } = getIRPFQuota(base, minimums);
-        const effectiveRate = salary > 0 ? (irpf / salary) * 100 : 0;
-
-        document.getElementById('withholding1').textContent = formatCurrency(irpf);
-        document.getElementById('taxbase1').textContent = formatCurrency(base);
-        document.getElementById('quota1').textContent = formatCurrency(irpf);
-        document.getElementById('effective1').textContent = effectiveRate.toFixed(1) + '%';
-        document.getElementById('marginal1').textContent = (marginalRate * 100).toFixed(0) + '%';
-        document.getElementById('result1').style.display = 'block';
-    }
-
-    function calculateTaxReturn() {
-        const work = parseFloat(document.getElementById('work2').value) || 0;
-        const retained = parseFloat(document.getElementById('retained2').value) || 0;
-        const interest = parseFloat(document.getElementById('interest2').value) || 0;
-        const gains = parseFloat(document.getElementById('gains2').value) || 0;
-        const kids = parseInt(document.getElementById('kids2').value) || 0;
-        const pension = parseFloat(document.getElementById('pension2').value) || 0;
-        const donations = parseFloat(document.getElementById('donations2').value) || 0;
-
-        const gastoTrabajo = 2000;
-        const minPersonal = 5550;
-        const minHijos = getMinHijos(kids);
-        const minimums = minPersonal + minHijos;
-
-        const deductionsBase = gastoTrabajo + pension + donations;
-        const generalBase = Math.max(0, work - deductionsBase);
-        const savingsBase = interest + gains;
-
-        const { irpf: generalIrpf } = getIRPFQuota(generalBase, minimums);
-        const savingsIrpf = calculateSavingsIRPF(savingsBase);
-
-        const totalIrpf = generalIrpf + savingsIrpf;
-        const difference = retained - totalIrpf;
-
-        const label = document.getElementById('result2-label');
-        if (difference > 0) {
-            label.textContent = currentLang === 'es' ? 'A devolver' : 'Refund due';
-            document.getElementById('refund2').style.color = 'var(--success)';
-        } else {
-            label.textContent = currentLang === 'es' ? 'A pagar' : 'To pay';
-            document.getElementById('refund2').style.color = 'var(--danger)';
-        }
-
-        document.getElementById('refund2').textContent = formatCurrency(Math.abs(difference));
-        document.getElementById('totalbase2').textContent = formatCurrency(generalBase + savingsBase);
-        document.getElementById('totalquota2').textContent = formatCurrency(totalIrpf);
-        document.getElementById('paidretained2').textContent = formatCurrency(retained);
-        document.getElementById('diff2').textContent = formatCurrency(difference);
-        document.getElementById('result2').style.display = 'block';
-    }
-
-    function calculateSelfEmployed() {
-        const revenue = parseFloat(document.getElementById('revenue3').value) || 0;
-        const expenses = parseFloat(document.getElementById('expenses3').value) || 0;
-        const ss = parseFloat(document.getElementById('ss3').value) || 0;
-        const withhold = parseFloat(document.getElementById('withhold3').value) || 0;
-        const kids = parseInt(document.getElementById('kids3').value) || 0;
-        const pension = parseFloat(document.getElementById('pension3').value) || 0;
-
-        const profit = Math.max(0, revenue - expenses - ss); // SS quota deducts from profit!
-        const retentions = revenue * (withhold / 100);
-        
-        const minPersonal = 5550;
-        const minHijos = getMinHijos(kids);
-        const minimums = minPersonal + minHijos;
-
-        const base = Math.max(0, profit - pension);
-        const { irpf } = getIRPFQuota(base, minimums);
-
-        const irpfToPay = Math.max(0, irpf - retentions);
-        const totalToPay = irpfToPay + ss;
-
-        document.getElementById('irpfdue3').textContent = formatCurrency(irpfToPay);
-        document.getElementById('profit3').textContent = formatCurrency(profit);
-        document.getElementById('base3').textContent = formatCurrency(base);
-        document.getElementById('quota3').textContent = formatCurrency(irpf);
-        document.getElementById('ss3-result').textContent = formatCurrency(ss);
-        document.getElementById('total3').textContent = formatCurrency(totalToPay);
-        document.getElementById('result3').style.display = 'block';
+        document.getElementById('chartContainer').style.display = 'block';
     }
 </script>
 
