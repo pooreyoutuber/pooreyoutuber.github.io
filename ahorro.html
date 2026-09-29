@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Ahorro 2026</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZPMC525FGT');
+    </script>
+
+     <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xz0usv8l2h");
+      </script>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+  
+    <script async src="https://fundingchoicesmessages.google.com/i/pub-7020422718957281?ers=1"></script>
+    <script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
+
+   
     <style>
         * {
             margin: 0;
@@ -687,14 +710,17 @@
         const capitalization = document.querySelector('input[name="capitalization"]:checked').value;
 
         let periods = years * 12;
-        let monthlyRate = rate / 12;
+        let periodRate = rate / 12;
+        let contributionPerPeriod = monthly; // Mensual by default
 
         if (capitalization === 'quarterly') {
             periods = years * 4;
-            monthlyRate = rate / 4;
+            periodRate = rate / 4;
+            contributionPerPeriod = monthly * 3; // 3 months contribution in a quarter
         } else if (capitalization === 'annual') {
             periods = years;
-            monthlyRate = rate;
+            periodRate = rate;
+            contributionPerPeriod = monthly * 12; // 12 months contribution in a year
         }
 
         let balance = initial;
@@ -702,8 +728,8 @@
         const yearlyData = [];
 
         for (let i = 0; i < periods; i++) {
-            balance = balance * (1 + monthlyRate) + monthly;
-            totalContributed += monthly;
+            balance = balance * (1 + periodRate) + contributionPerPeriod;
+            totalContributed += contributionPerPeriod;
 
             if (capitalization === 'monthly' && (i + 1) % 12 === 0) {
                 yearlyData.push({
@@ -717,7 +743,7 @@
                     balance: balance,
                     contributed: totalContributed
                 });
-            } else if (capitalization === 'annual' && (i + 1) === (i + 1)) {
+            } else if (capitalization === 'annual') {
                 yearlyData.push({
                     year: i + 1,
                     balance: balance,
