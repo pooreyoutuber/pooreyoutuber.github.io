@@ -140,6 +140,19 @@
             background: #dee2e6;
         }
 
+        .btn-method {
+            background: #fff0f3;
+            color: var(--primary);
+            border: 1px solid var(--accent);
+            margin-bottom: 15px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-method:hover {
+            background: #ffe3e8;
+        }
+
         .error-message {
             color: var(--primary);
             font-weight: 600;
@@ -191,42 +204,42 @@
             font-size: 3.2rem;
             font-weight: 800;
             color: var(--primary);
-            margin: 10px 0;
+            margin: 5px 0 10px;
         }
 
         .score-message {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #333;
         }
 
-        /* Breakdown Details */
-        details {
-            margin-top: 20px;
+        /* Method Panel Content */
+        .method-panel {
+            display: none;
             text-align: left;
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 12px 15px;
+            padding: 15px 18px;
             border: 1px solid #e9ecef;
-        }
-
-        summary {
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--primary);
-            outline: none;
-        }
-
-        .breakdown-content {
-            margin-top: 15px;
+            margin: 15px 0 20px;
             font-size: 0.9rem;
             line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .method-panel h3 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
         }
 
         .step-title {
             font-weight: 700;
-            margin-top: 10px;
+            margin-top: 12px;
             color: #495057;
         }
 
@@ -237,6 +250,7 @@
             font-family: monospace;
             margin: 5px 0 10px;
             word-break: break-all;
+            white-space: pre-wrap;
         }
 
         /* Share Section */
@@ -317,9 +331,15 @@
     </div>
 
     <div class="result-box" id="resultBox">
+        <button class="btn btn-method" id="toggleMethodBtn" onclick="toggleMethodPanel()">📖 Show Method</button>
+        
         <h2>Your Love Score</h2>
         <div class="score-display" id="scoreDisplay">0% ❤️</div>
         <p class="score-message" id="scoreMessage"></p>
+
+        <div class="method-panel" id="methodPanel">
+            <!-- Dynamically injected method details -->
+        </div>
 
         <div class="share-section">
             <div class="share-title">Share Result:</div>
@@ -330,13 +350,6 @@
                 <button class="share-btn bg-x" onclick="shareX()">X (Twitter)</button>
             </div>
         </div>
-
-        <details>
-            <summary>How was my score calculated?</summary>
-            <div class="breakdown-content" id="breakdownContent">
-                <!-- Calculated details dynamically appended here -->
-            </div>
-        </details>
     </div>
 </main>
 
@@ -345,70 +358,108 @@
 </footer>
 
 <script>
-    // Pure algorithm function separate from UI
+    // Escape HTML to prevent XSS vulnerability when rendering user inputs
+    function escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Pure algorithm function that strictly adheres to the requested reduction logic
     function calculateLoveScore(input) {
-        // 1. Normalize
         const normalized = input.toLowerCase().replace(/[^a-z]/g, '');
         
         if (normalized.length === 0) {
             return { error: "NO_LETTERS" };
         }
 
-        // 2. Count Frequencies alphabetically
+        // Count frequencies alphabetically
         const counts = {};
         for (let char of normalized) {
             counts[char] = (counts[char] || 0) + 1;
         }
 
         const sortedKeys = Object.keys(counts).sort();
-        const activeSequence = sortedKeys.map(key => counts[key]);
+        
+        // Build starting number sequence (flatten multi-digit counts safely as single digit values)
+        let startingSeq = [];
+        for (let key of sortedKeys) {
+            let countVal = counts[key];
+            let digits = countVal.toString().split('').map(Number);
+            startingSeq.push(...digits);
+        }
 
-        // 3. Reduction Process
-        let currentSeq = [...activeSequence];
-        const reductionSteps = [];
-        reductionSteps.push([...currentSeq]);
+        // Handle case where input sequence is already 2 or fewer digits
+        if (startingSeq.length <= 2) {
+            let scoreVal = parseInt(startingSeq.join(''), 10);
+            return {
+                normalized,
+                counts,
+                startingSeq,
+                rounds: [],
+                score: scoreVal
+            };
+        }
 
-        while (currentSeq.length > 2) {
-            let nextSeq = [];
-            let len = currentSeq.length;
+        let currentDigits = [...startingSeq];
+        const rounds = [];
+        let maxRounds = 100; // Safeguard against potential infinite loops
+
+        while (currentDigits.length > 2 && maxRounds > 0) {
+            maxRounds--;
+            let len = currentDigits.length;
             let half = Math.floor(len / 2);
+            let equations = [];
+            let roundResults = []; // Numbers created in this round (can contain sums >= 10, e.g., 13)
 
             for (let i = 0; i < half; i++) {
-                let sum = currentSeq[i] + currentSeq[len - 1 - i];
-                // Split numbers >= 10 into single digits (Standard school method rule)
-                if (sum >= 10) {
-                    let digits = sum.toString().split('').map(Number);
-                    nextSeq.push(...digits);
-                } else {
-                    nextSeq.push(sum);
+                let left = currentDigits[i];
+                let right = currentDigits[len - 1 - i];
+                let sum = left + right;
+                equations.push(`${left} + ${right} = ${sum}`);
+                roundResults.push(sum); // KEPT intact as multi-digit number for this round
+            }
+
+            // Middle element carry forward when odd
+            if (len % 2 !== 0) {
+                let mid = currentDigits[half];
+                equations.push(`Middle digit ${mid} carried forward`);
+                roundResults.push(mid);
+            }
+
+            rounds.push({
+                roundNumber: rounds.length + 1,
+                equations: equations,
+                resultSequence: [...roundResults]
+            });
+
+            // Prepare for NEXT round: split multi-digit sum numbers into individual digits
+            let nextDigits = [];
+            for (let num of roundResults) {
+                let numStr = num.toString();
+                for (let char of numStr) {
+                    nextDigits.push(parseInt(char, 10));
                 }
             }
 
-            // Middle number if length is odd
-            if (len % 2 !== 0) {
-                nextSeq.push(currentSeq[half]);
-            }
-
-            currentSeq = nextSeq;
-            reductionSteps.push([...currentSeq]);
-
-            // Safeguard against infinite loops in edge cases
-            if (reductionSteps.length > 50) break;
+            currentDigits = nextDigits;
         }
 
-        // Final percentage assembly
-        let finalPercentage = parseInt(currentSeq.join(''), 10);
-        
+        let finalScore = parseInt(currentDigits.join(''), 10);
+
         return {
             normalized,
             counts,
-            activeSequence,
-            reductionSteps,
-            score: finalPercentage
+            startingSeq,
+            rounds,
+            score: finalScore
         };
     }
 
-    // Interactive Functions & UI Handling
+    // Handle calculation trigger
     function processCalculation() {
         const inputVal = document.getElementById('loveInput').value;
         const errElement = document.getElementById('errorMessage');
@@ -426,11 +477,11 @@
         const resultData = calculateLoveScore(inputVal);
 
         if (resultData.error === "NO_LETTERS") {
-            showError("Please enter some letters.");
+            showError("Please enter a sentence containing English letters (A-Z).");
             return;
         }
 
-        // Loading animation
+        // Show spinner animation
         loadingBox.style.display = 'block';
 
         setTimeout(() => {
@@ -443,11 +494,539 @@
         const resultBox = document.getElementById('resultBox');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const scoreMessage = document.getElementById('scoreMessage');
-        const breakdownContent = document.getElementById('breakdownContent');
+        const toggleBtn = document.getElementById('toggleMethodBtn');
+        const methodPanel = document.getElementById('methodPanel');
+
+        // Reset Method Panel State on every new calculation
+        methodPanel.Here is the fully updated single-file HTML code for your Love Percentage Calculator. 
+
+The algorithm logic has been updated to keep sums $\ge 10$ intact during the reduction round and only break them down into individual digits for subsequent rounds, odd-length center numbers are properly carried down, the **📖 Show Method** toggle button and dynamic explanation panel have been added above the score display, and all user input is sanitized to prevent cross-site scripting (XSS).
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Percentage Calculator – Fun Love Test</title>
+    <meta name="description" content="Calculate your love percentage with this fun school-style Love Calculator. Enter a name or sentence and discover your playful love score instantly.">
+    <meta name="robots" content="index, follow">
+    
+    <style>
+        :root {
+            --primary: #e63946;
+            --primary-hover: #d62839;
+            --secondary: #ff758f;
+            --accent: #ffb3c1;
+            --bg-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-main: #2b2d42;
+            --text-muted: #6c757d;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 15px;
+        }
+
+        .calculator-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 750px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--secondary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 2;
+            min-width: 180px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .error-message {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
+
+        /* Loading Animation */
+        .loading-box {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Result Box */
+        .result-box {
+            display: none;
+            text-align: center;
+            background: #fff;
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px dashed var(--secondary);
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-display {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .score-message {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Show Method Button & Panel */
+        .method-toggle-btn {
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            color: #495057;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .method-toggle-btn:hover {
+            background: #e9ecef;
+            color: var(--primary);
+        }
+
+        .method-panel {
+            display: none;
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .method-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: var(--primary);
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        .step-section {
+            margin-bottom: 12px;
+        }
+
+        .step-heading {
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .code-block {
+            background: #eef2f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 5px 0 10px;
+            word-break: break-all;
+        }
+
+        .round-box {
+            background: #fff;
+            border-left: 3px solid var(--secondary);
+            padding: 8px 12px;
+            margin: 6px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* Share Section */
+        .share-section {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .share-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .bg-whatsapp { background-color: #25D366; }
+        .bg-facebook { background-color: #1877F2; }
+        .bg-x { background-color: #000000; }
+        .bg-copy { background-color: #6c757d; }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+        }
+
+        @media (max-width: 480px) {
+            .calculator-card { padding: 20px 15px; }
+            .score-display { font-size: 2.5rem; }
+            .button-group { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="calculator-card">
+    <header class="header">
+        <h1>❤️ Love Percentage Calculator</h1>
+        <p>A fun, nostalgic school-style love game!</p>
+    </header>
+
+    <div class="input-section">
+        <label for="loveInput">Enter a sentence:</label>
+        <textarea id="loveInput" placeholder="Example: Oliver and Joe Goldberg like each other"></textarea>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="button-group">
+        <button class="btn btn-primary" id="calcBtn" onclick="processCalculation()">Calculate Love % ❤️</button>
+        <button class="btn btn-secondary" onclick="insertExample()">Try Example</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div class="loading-box" id="loadingBox">
+        <div class="spinner"></div>
+        <p>Calculating love connection...</p>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <button class="method-toggle-btn" id="methodToggleBtn" onclick="toggleMethod()">📖 Show Method</button>
+        
+        <div class="method-panel" id="methodPanel">
+            <!-- Dynamically populated calculation details -->
+        </div>
+
+        <h2>Your Love Score</h2>
+        <div class="score-display" id="scoreDisplay">0% ❤️</div>
+        <p class="score-message" id="scoreMessage"></p>
+
+        <div class="share-section">
+            <div class="share-title">Share Result:</div>
+            <div class="share-buttons">
+                <button class="share-btn bg-copy" onclick="copyResult()">📋 Copy Result</button>
+                <button class="share-btn bg-whatsapp" onclick="shareWhatsApp()">WhatsApp</button>
+                <button class="share-btn bg-facebook" onclick="shareFacebook()">Facebook</button>
+                <button class="share-btn bg-x" onclick="shareX()">X (Twitter)</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="disclaimer">
+    This Love Calculator is made for fun and entertainment only. The percentage is generated using a playful calculation method and does not scientifically measure love or relationship compatibility.
+</footer>
+
+<script>
+    // Helper to safely sanitize HTML input
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function (m) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[m];
+        });
+    }
+
+    // Pure algorithm function separate from UI
+    function calculateLoveScore(input) {
+        // 1. Normalize: keep alphabetic English letters only
+        const rawNormalized = input.toLowerCase().replace(/[^a-z]/g, '');
+        
+        if (rawNormalized.length === 0) {
+            return { error: "NO_LETTERS" };
+        }
+
+        // 2. Count Frequencies alphabetically
+        const counts = {};
+        for (let char of rawNormalized) {
+            counts[char] = (counts[char] || 0) + 1;
+        }
+
+        const sortedKeys = Object.keys(counts).sort();
+        
+        // Build starting sequence of digits
+        let startSequence = [];
+        for (let key of sortedKeys) {
+            let val = counts[key];
+            if (val >= 10) {
+                // Safely convert frequencies >= 10 to digits for starting sequence
+                startSequence.push(...val.toString().split('').map(Number));
+            } else {
+                startSequence.push(val);
+            }
+        }
+
+        // 3. Reduction Process
+        let currentDigits = [...startSequence];
+        const rounds = [];
+        let safetyCounter = 0;
+
+        while (currentDigits.length > 2 && safetyCounter < 100) {
+            safetyCounter++;
+            let equations = [];
+            let nextSequence = []; // Array of number results (e.g. [13, 15])
+            let len = currentDigits.length;
+            let half = Math.floor(len / 2);
+
+            for (let i = 0; i < half; i++) {
+                let d1 = currentDigits[i];
+                let d2 = currentDigits[len - 1 - i];
+                let sum = d1 + d2;
+                
+                equations.push(`${d1} + ${d2} = ${sum}`);
+                nextSequence.push(sum); // Sum (even if >= 10) remains whole integer in current sequence
+            }
+
+            // Carry middle digit unchanged if length is odd
+            if (len % 2 !== 0) {
+                let mid = currentDigits[half];
+                equations.push(`Middle digit carried: ${mid}`);
+                nextSequence.push(mid);
+            }
+
+            rounds.push({
+                roundNumber: rounds.length + 1,
+                inputDigits: [...currentDigits],
+                equations: equations,
+                resultingSequence: [...nextSequence]
+            });
+
+            // Convert resulting sequence items into digits for the NEXT round
+            let nextDigits = [];
+            for (let num of nextSequence) {
+                if (num >= 10) {
+                    nextDigits.push(...num.toString().split('').map(Number));
+                } else {
+                    nextDigits.push(num);
+                }
+            }
+
+            currentDigits = nextDigits;
+        }
+
+        // Final two-digit score
+        let scoreStr = currentDigits.join('');
+        let finalScore = parseInt(scoreStr, 10);
+        if (isNaN(finalScore)) finalScore = 0;
+
+        return {
+            normalizedText: rawNormalized.toUpperCase(),
+            counts: counts,
+            activeSequence: startSequence,
+            rounds: rounds,
+            finalScore: finalScore
+        };
+    }
+
+    // Interactive Functions & UI Handling
+    function processCalculation() {
+        const inputVal = document.getElementById('loveInput').value;
+        const errElement = document.getElementById('errorMessage');
+        const resultBox = document.getElementById('resultBox');
+        const loadingBox = document.getElementById('loadingBox');
+
+        errElement.style.display = 'none';
+        resultBox.style.display = 'none';
+
+        // Always hide method panel on new calculation
+        const methodPanel = document.getElementById('methodPanel');
+        const methodBtn = document.getElementById('methodToggleBtn');
+        methodPanel.style.display = 'none';
+        methodBtn.innerText = '📖 Show Method';
+
+        if (!inputVal.trim()) {
+            showError("Please enter a sentence or names first.");
+            return;
+        }
+
+        const resultData = calculateLoveScore(inputVal);
+
+        if (resultData.error === "NO_LETTERS") {
+            showError("Please enter some alphabetic letters.");
+            return;
+        }
+
+        loadingBox.style.display = 'block';
+
+        setTimeout(() => {
+            loadingBox.style.display = 'none';
+            displayResult(resultData);
+        }, 400);
+    }
+
+    function displayResult(data) {
+        const resultBox = document.getElementById('resultBox');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreMessage = document.getElementById('scoreMessage');
 
         // Smooth score count-up
         let currentVal = 0;
-        let targetVal = data.score;
+        let targetVal = data.finalScore;
         scoreDisplay.innerText = "0% ❤️";
 
         resultBox.style.display = 'block';
@@ -469,32 +1048,68 @@
         else if (targetVal <= 60) msg = "Something interesting is happening! 💕";
         else if (targetVal <= 80) msg = "Looks like there is a strong connection! ❤️";
         else if (targetVal < 100) msg = "Wow! That's a serious love score! 💖";
-        else msg = "Perfect 100%! ❤️‍‍🔥";
+        else msg = "Perfect 100%! ❤️‍🔥";
 
         scoreMessage.innerText = msg;
 
-        // Build Explanation / Breakdown HTML
-        let letterCountsHTML = Object.keys(data.counts).sort().map(k => `${k.toUpperCase()} → ${data.counts[k]}`).join(', ');
+        // Render Method Content safely
+        buildMethodPanel(data);
+    }
 
-        let reductionStepsHTML = data.reductionSteps.map((step, idx) => {
-            return `<div>Step ${idx + 1}: <span class="code-block">${step.join(' ')}</span></div>`;
+    function buildMethodPanel(data) {
+        const methodPanel = document.getElementById('methodPanel');
+        
+        let sortedKeys = Object.keys(data.counts).sort();
+        let letterList = sortedKeys.map(k => `${k.toUpperCase()} → ${data.counts[k]}`).join('<br>');
+
+        let roundsHTML = data.rounds.map((r, idx) => {
+            let isLast = idx === data.rounds.length - 1;
+            let seqLabel = isLast ? "Final Sequence:" : "New Sequence:";
+            return `
+                <div class="round-box">
+                    <div class="step-heading">Round ${r.roundNumber}</div>
+                    <div>${r.equations.join('<br>')}</div>
+                    <div style="margin-top:4px; font-weight:600;">${seqLabel} <span class="code-block">${r.resultingSequence.join(' ')}</span></div>
+                </div>
+            `;
         }).join('');
 
-        breakdownContent.innerHTML = `
-            <div class="step-title">1. Normalized Sentence:</div>
-            <div class="code-block">${data.normalized}</div>
-            
-            <div class="step-title">2. Letter Frequencies:</div>
-            <div class="code-block">${letterCountsHTML}</div>
-
-            <div class="step-title">3. Active Sequence:</div>
-            <div class="code-block">${data.activeSequence.join(' → ')}</div>
-
-            <div class="step-title">4. Reduction Steps:</div>
-            ${reductionStepsHTML}
-            
-            <div class="step-title">Final Calculated Score: ${data.score}%</div>
+        methodPanel.innerHTML = `
+            <div class="method-title">Calculation Method</div>
+            <div class="step-section">
+                <div class="step-heading">1. Letters Used</div>
+                <div class="code-block">${escapeHtml(data.normalizedText)}</div>
+            </div>
+            <div class="step-section">
+                <div class="step-heading">2. Letter Frequencies</div>
+                <div>${letterList}</div>
+            </div>
+            <div class="step-section">
+                <div class="step-heading">3. Starting Number Sequence</div>
+                <div class="code-block">${data.activeSequence.join(' ')}</div>
+            </div>
+            <div class="step-section">
+                <div class="step-heading">4. Reduction</div>
+                ${roundsHTML}
+            </div>
+            <div class="step-section" style="margin-bottom:0;">
+                <div class="step-heading">5. Final Result</div>
+                <div style="font-weight:700; color:var(--primary); font-size:1.1rem;">${data.finalScore}%</div>
+            </div>
         `;
+    }
+
+    function toggleMethod() {
+        const methodPanel = document.getElementById('methodPanel');
+        const methodBtn = document.getElementById('methodToggleBtn');
+
+        if (methodPanel.style.display === 'block') {
+            methodPanel.style.display = 'none';
+            methodBtn.innerText = '📖 Show Method';
+        } else {
+            methodPanel.style.display = 'block';
+            methodBtn.innerText = '🔽 Hide Method';
+        }
     }
 
     function showError(msg) {
@@ -526,15 +1141,15 @@
     }
 
     function shareWhatsApp() {
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(getShareText() + " " + window.location.href)}`, '_blank');
+        window.open(`[https://api.whatsapp.com/send?text=$](https://api.whatsapp.com/send?text=$){encodeURIComponent(getShareText() + " " + window.location.href)}`, '_blank');
     }
 
     function shareFacebook() {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+        window.open(`[https://www.facebook.com/sharer/sharer.php?u=$](https://www.facebook.com/sharer/sharer.php?u=$){encodeURIComponent(window.location.href)}`, '_blank');
     }
 
     function shareX() {
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        window.open(`[https://twitter.com/intent/tweet?text=$](https://twitter.com/intent/tweet?text=$){encodeURIComponent(getShareText())}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
 
     // Keyboard trigger (Ctrl+Enter or Cmd+Enter)
