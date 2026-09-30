@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Percentage Calculator – Fun Love Test</title>
-    <meta name="description" content="Calculate your love percentage with this fun school-style Love Calculator. Enter a name or sentence and discover your playful love score instantly.">
+    <title id="metaTitle">Love Percentage Calculator – Fun Love Test</title>
+    <meta name="description" id="metaDesc" content="Calculate your love percentage with this fun school-style Love Calculator. Enter a name or sentence and discover your playful love score instantly.">
     <meta name="robots" content="index, follow">
     
     <style>
@@ -38,509 +38,24 @@
             padding: 20px 15px;
         }
 
-        .calculator-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
+        .lang-container {
             width: 100%;
             max-width: 750px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            margin-bottom: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            color: var(--primary);
-            margin-bottom: 8px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .input-section {
-            margin-bottom: 20px;
-        }
-
-        .input-section label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        textarea {
-            width: 100%;
-            height: 90px;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1rem;
-            resize: vertical;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            border-color: var(--secondary);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            flex: 2;
-            min-width: 180px;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: #e9ecef;
-            color: var(--text-main);
-            flex: 1;
-        }
-
-        .btn-secondary:hover {
-            background: #dee2e6;
-        }
-
-        .btn-method {
-            background: #fff0f3;
-            color: var(--primary);
-            border: 1px solid var(--accent);
-            margin-bottom: 15px;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        .btn-method:hover {
-            background: #ffe3e8;
-        }
-
-        .error-message {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: none;
-            text-align: center;
-        }
-
-        /* Loading Animation */
-        .loading-box {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Result Box */
-        .result-box {
-            display: none;
-            text-align: center;
-            background: #fff;
-            padding: 25px;
-            border-radius: 14px;
-            border: 1px dashed var(--secondary);
-            margin-top: 15px;
-            animation: fadeIn 0.4s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .score-display {
-            font-size: 3.2rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 5px 0 10px;
-        }
-
-        .score-message {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* Method Panel Content */
-        .method-panel {
-            display: none;
-            text-align: left;
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px 18px;
-            border: 1px solid #e9ecef;
-            margin: 15px 0 20px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .method-panel h3 {
-            color: var(--primary);
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
-        }
-
-        .step-title {
-            font-weight: 700;
-            margin-top: 12px;
-            color: #495057;
-        }
-
-        .code-block {
-            background: #eef2f5;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-family: monospace;
-            margin: 5px 0 10px;
-            word-break: break-all;
-            white-space: pre-wrap;
-        }
-
-        /* Share Section */
-        .share-section {
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-
-        .share-title {
-            font-size: 0.9rem;
-            font-weight: 600;
+            justify-content: flex-end;
             margin-bottom: 10px;
-            color: var(--text-muted);
         }
 
-        .share-buttons {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .share-btn {
-            padding: 8px 14px;
-            font-size: 0.85rem;
+        .lang-select {
+            padding: 6px 12px;
             border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .bg-whatsapp { background-color: #25D366; }
-        .bg-facebook { background-color: #1877F2; }
-        .bg-x { background-color: #000000; }
-        .bg-copy { background-color: #6c757d; }
-
-        .disclaimer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 600px;
-        }
-
-        @media (max-width: 480px) {
-            .calculator-card { padding: 20px 15px; }
-            .score-display { font-size: 2.5rem; }
-            .button-group { flex-direction: column; }
-            .btn { width: 100%; }
-        }
-    </style>
-</head>
-<body>
-
-<main class="calculator-card">
-    <header class="header">
-        <h1>❤️ Love Percentage Calculator</h1>
-        <p>A fun, nostalgic school-style love game!</p>
-    </header>
-
-    <div class="input-section">
-        <label for="loveInput">Enter a sentence:</label>
-        <textarea id="loveInput" placeholder="Example: Oliver and Joe Goldberg like each other"></textarea>
-    </div>
-
-    <div id="errorMessage" class="error-message"></div>
-
-    <div class="button-group">
-        <button class="btn btn-primary" id="calcBtn" onclick="processCalculation()">Calculate Love % ❤️</button>
-        <button class="btn btn-secondary" onclick="insertExample()">Try Example</button>
-        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
-    </div>
-
-    <div class="loading-box" id="loadingBox">
-        <div class="spinner"></div>
-        <p>Calculating love connection...</p>
-    </div>
-
-    <div class="result-box" id="resultBox">
-        <button class="btn btn-method" id="toggleMethodBtn" onclick="toggleMethodPanel()">📖 Show Method</button>
-        
-        <h2>Your Love Score</h2>
-        <div class="score-display" id="scoreDisplay">0% ❤️</div>
-        <p class="score-message" id="scoreMessage"></p>
-
-        <div class="method-panel" id="methodPanel">
-            <!-- Dynamically injected method details -->
-        </div>
-
-        <div class="share-section">
-            <div class="share-title">Share Result:</div>
-            <div class="share-buttons">
-                <button class="share-btn bg-copy" onclick="copyResult()">📋 Copy Result</button>
-                <button class="share-btn bg-whatsapp" onclick="shareWhatsApp()">WhatsApp</button>
-                <button class="share-btn bg-facebook" onclick="shareFacebook()">Facebook</button>
-                <button class="share-btn bg-x" onclick="shareX()">X (Twitter)</button>
-            </div>
-        </div>
-    </div>
-</main>
-
-<footer class="disclaimer">
-    This Love Calculator is made for fun and entertainment only. The percentage is generated using a playful calculation method and does not scientifically measure love or relationship compatibility.
-</footer>
-
-<script>
-    // Escape HTML to prevent XSS vulnerability when rendering user inputs
-    function escapeHtml(text) {
-        return String(text)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // Pure algorithm function that strictly adheres to the requested reduction logic
-    function calculateLoveScore(input) {
-        const normalized = input.toLowerCase().replace(/[^a-z]/g, '');
-        
-        if (normalized.length === 0) {
-            return { error: "NO_LETTERS" };
-        }
-
-        // Count frequencies alphabetically
-        const counts = {};
-        for (let char of normalized) {
-            counts[char] = (counts[char] || 0) + 1;
-        }
-
-        const sortedKeys = Object.keys(counts).sort();
-        
-        // Build starting number sequence (flatten multi-digit counts safely as single digit values)
-        let startingSeq = [];
-        for (let key of sortedKeys) {
-            let countVal = counts[key];
-            let digits = countVal.toString().split('').map(Number);
-            startingSeq.push(...digits);
-        }
-
-        // Handle case where input sequence is already 2 or fewer digits
-        if (startingSeq.length <= 2) {
-            let scoreVal = parseInt(startingSeq.join(''), 10);
-            return {
-                normalized,
-                counts,
-                startingSeq,
-                rounds: [],
-                score: scoreVal
-            };
-        }
-
-        let currentDigits = [...startingSeq];
-        const rounds = [];
-        let maxRounds = 100; // Safeguard against potential infinite loops
-
-        while (currentDigits.length > 2 && maxRounds > 0) {
-            maxRounds--;
-            let len = currentDigits.length;
-            let half = Math.floor(len / 2);
-            let equations = [];
-            let roundResults = []; // Numbers created in this round (can contain sums >= 10, e.g., 13)
-
-            for (let i = 0; i < half; i++) {
-                let left = currentDigits[i];
-                let right = currentDigits[len - 1 - i];
-                let sum = left + right;
-                equations.push(`${left} + ${right} = ${sum}`);
-                roundResults.push(sum); // KEPT intact as multi-digit number for this round
-            }
-
-            // Middle element carry forward when odd
-            if (len % 2 !== 0) {
-                let mid = currentDigits[half];
-                equations.push(`Middle digit ${mid} carried forward`);
-                roundResults.push(mid);
-            }
-
-            rounds.push({
-                roundNumber: rounds.length + 1,
-                equations: equations,
-                resultSequence: [...roundResults]
-            });
-
-            // Prepare for NEXT round: split multi-digit sum numbers into individual digits
-            let nextDigits = [];
-            for (let num of roundResults) {
-                let numStr = num.toString();
-                for (let char of numStr) {
-                    nextDigits.push(parseInt(char, 10));
-                }
-            }
-
-            currentDigits = nextDigits;
-        }
-
-        let finalScore = parseInt(currentDigits.join(''), 10);
-
-        return {
-            normalized,
-            counts,
-            startingSeq,
-            rounds,
-            score: finalScore
-        };
-    }
-
-    // Handle calculation trigger
-    function processCalculation() {
-        const inputVal = document.getElementById('loveInput').value;
-        const errElement = document.getElementById('errorMessage');
-        const resultBox = document.getElementById('resultBox');
-        const loadingBox = document.getElementById('loadingBox');
-
-        errElement.style.display = 'none';
-        resultBox.style.display = 'none';
-
-        if (!inputVal.trim()) {
-            showError("Please enter a sentence first.");
-            return;
-        }
-
-        const resultData = calculateLoveScore(inputVal);
-
-        if (resultData.error === "NO_LETTERS") {
-            showError("Please enter a sentence containing English letters (A-Z).");
-            return;
-        }
-
-        // Show spinner animation
-        loadingBox.style.display = 'block';
-
-        setTimeout(() => {
-            loadingBox.style.display = 'none';
-            displayResult(resultData);
-        }, 400);
-    }
-
-    function displayResult(data) {
-        const resultBox = document.getElementById('resultBox');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const scoreMessage = document.getElementById('scoreMessage');
-        const toggleBtn = document.getElementById('toggleMethodBtn');
-        const methodPanel = document.getElementById('methodPanel');
-
-        // Reset Method Panel State on every new calculation
-        methodPanel.Here is the fully updated single-file HTML code for your Love Percentage Calculator. 
-
-The algorithm logic has been updated to keep sums $\ge 10$ intact during the reduction round and only break them down into individual digits for subsequent rounds, odd-length center numbers are properly carried down, the **📖 Show Method** toggle button and dynamic explanation panel have been added above the score display, and all user input is sanitized to prevent cross-site scripting (XSS).
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Percentage Calculator – Fun Love Test</title>
-    <meta name="description" content="Calculate your love percentage with this fun school-style Love Calculator. Enter a name or sentence and discover your playful love score instantly.">
-    <meta name="robots" content="index, follow">
-    
-    <style>
-        :root {
-            --primary: #e63946;
-            --primary-hover: #d62839;
-            --secondary: #ff758f;
-            --accent: #ffb3c1;
-            --bg-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --text-main: #2b2d42;
-            --text-muted: #6c757d;
-            --border-radius: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
+            font-weight: 600;
             color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 15px;
+            cursor: pointer;
+            outline: none;
+            backdrop-filter: blur(5px);
         }
 
         .calculator-card {
@@ -810,6 +325,49 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         .bg-x { background-color: #000000; }
         .bg-copy { background-color: #6c757d; }
 
+        /* Description Article */
+        .description-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 750px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+            color: var(--text-main);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .description-card h2 {
+            color: var(--primary);
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 6px;
+        }
+
+        .description-card h3 {
+            color: var(--text-main);
+            font-size: 1.1rem;
+            margin: 18px 0 8px;
+        }
+
+        .description-card p {
+            margin-bottom: 12px;
+        }
+
+        .description-card ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .description-card li {
+            margin-bottom: 6px;
+        }
+
         .disclaimer {
             text-align: center;
             font-size: 0.8rem;
@@ -818,7 +376,7 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         }
 
         @media (max-width: 480px) {
-            .calculator-card { padding: 20px 15px; }
+            .calculator-card, .description-card { padding: 20px 15px; }
             .score-display { font-size: 2.5rem; }
             .button-group { flex-direction: column; }
             .btn { width: 100%; }
@@ -827,28 +385,38 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
 </head>
 <body>
 
+<div class="lang-container">
+    <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)">
+        <option value="en" selected>English 🌐</option>
+        <option value="es">Español 🇪🇸</option>
+        <option value="zh">中文 🇨🇳</option>
+        <option value="ru">Русский 🇷🇺</option>
+        <option value="ar">العربية 🇸🇦</option>
+    </select>
+</div>
+
 <main class="calculator-card">
     <header class="header">
-        <h1>❤️ Love Percentage Calculator</h1>
-        <p>A fun, nostalgic school-style love game!</p>
+        <h1 id="uiMainTitle">❤️ Love Percentage Calculator</h1>
+        <p id="uiSubTitle">A fun, nostalgic school-style love game!</p>
     </header>
 
     <div class="input-section">
-        <label for="loveInput">Enter a sentence:</label>
+        <label for="loveInput" id="uiInputLabel">Enter a sentence:</label>
         <textarea id="loveInput" placeholder="Example: Oliver and Joe Goldberg like each other"></textarea>
     </div>
 
     <div id="errorMessage" class="error-message"></div>
 
     <div class="button-group">
-        <button class="btn btn-primary" id="calcBtn" onclick="processCalculation()">Calculate Love % ❤️</button>
-        <button class="btn btn-secondary" onclick="insertExample()">Try Example</button>
-        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+        <button class="btn btn-primary" id="calcBtn" onclick="processCalculation()">Calculate Love % ❤️️</button>
+        <button class="btn btn-secondary" id="uiExampleBtn" onclick="insertExample()">Try Example</button>
+        <button class="btn btn-secondary" id="uiClearBtn" onclick="clearAll()">Clear</button>
     </div>
 
     <div class="loading-box" id="loadingBox">
         <div class="spinner"></div>
-        <p>Calculating love connection...</p>
+        <p id="uiLoadingText">Calculating love connection...</p>
     </div>
 
     <div class="result-box" id="resultBox">
@@ -858,14 +426,14 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
             <!-- Dynamically populated calculation details -->
         </div>
 
-        <h2>Your Love Score</h2>
+        <h2 id="uiResultHeader">Your Love Score</h2>
         <div class="score-display" id="scoreDisplay">0% ❤️</div>
         <p class="score-message" id="scoreMessage"></p>
 
         <div class="share-section">
-            <div class="share-title">Share Result:</div>
+            <div class="share-title" id="uiShareTitle">Share Result:</div>
             <div class="share-buttons">
-                <button class="share-btn bg-copy" onclick="copyResult()">📋 Copy Result</button>
+                <button class="share-btn bg-copy" id="uiCopyBtn" onclick="copyResult()">📋 Copy Result</button>
                 <button class="share-btn bg-whatsapp" onclick="shareWhatsApp()">WhatsApp</button>
                 <button class="share-btn bg-facebook" onclick="shareFacebook()">Facebook</button>
                 <button class="share-btn bg-x" onclick="shareX()">X (Twitter)</button>
@@ -874,14 +442,260 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
     </div>
 </main>
 
-<footer class="disclaimer">
+<article class="description-card">
+    <h2>About the Love Percentage Calculator</h2>
+    <p>Welcome to the ultimate Love Percentage Calculator! This tool is designed to bring back fond childhood memories of playing pencil-and-paper relationship games during school breaks. Whether you want to test your crush's name, see how compatible two fictional characters are, or simply enjoy a lighthearted moment with friends, this online generator offers an instant and entertaining way to calculate a romantic affinity percentage.</p>
+    
+    <h3>How to Use the Calculator</h3>
+    <p>Using this calculator is exceptionally straightforward and quick:</p>
+    <ul>
+        <li><strong>Enter Names or Sentences:</strong> Type any phrase into the text field above, such as "Romeo and Juliet" or "Oliver and Joe Goldberg like each other".</li>
+        <li><strong>Click Calculate:</strong> Press the red "Calculate Love %" button or hit <code>Ctrl + Enter</code> on your keyboard.</li>
+        <li><strong>View Your Score:</strong> Watch the live digital counter tally up your final percentage alongside a fun compatibility message.</li>
+        <li><strong>Explore the Breakdown:</strong> Click the "📖 Show Method" button to examine step-by-step mathematical reduction rounds of your specific input sequence.</li>
+        <li><strong>Share the Fun:</strong> Use the convenient direct share buttons to send your results to WhatsApp, Facebook, X (formerly Twitter), or copy the raw score text to your clipboard.</li>
+    </ul>
+
+    <h3>Understanding the Mathematical Algorithm</h3>
+    <p>It is important to remember that this tool relies strictly on a deterministic recreational algorithm based on standard letter frequencies—it is purely a mathematical game and not a scientific compatibility test. Here is how the magic works under the hood:</p>
+    <p>1. <strong>Letter Extraction:</strong> The system takes your raw input text, strips away non-alphabetic characters or numbers, and converts all letters into a single unified sequence.</p>
+    <p>2. <strong>Frequency Counting:</strong> Every unique letter present in the sentence is counted and sorted in alphabetical order to establish a starting number sequence (e.g., <code>5 6 9 8</code>).</p>
+    <p>3. <strong>Fold-and-Sum Inward Reduction:</strong> The sequence is reduced round by round by pairing the first digit with the last digit, the second digit with the second-to-last digit, and so on.</p>
+    <p>4. <strong>Two-Digit Round Handling:</strong> If an addition yields a two-digit sum (for example, <code>5 + 8 = 13</code> and <code>6 + 9 = 15</code>), that sum remains as a full number (<code>13 15</code>) for that specific round sequence display. For the subsequent round, it is expanded into individual digits (<code>1 3 1 5</code>) for further pairing until exactly two digits remain (e.g., <code>64</code>, yielding <code>64%</code>).</p>
+
+    <h3>Key Benefits & Purpose</h3>
+    <ul>
+        <li><strong>100% Entertainment & Fun:</strong> Created strictly as a playful nostalgia game for social fun, icebreakers, and casual amusement.</li>
+        <li><strong>Complete Transparency:</strong> Unlike random number generators, our tool provides full mathematical breakdown transparency so you can trace every single addition step.</li>
+        <li><strong>Multi-Language Support:</strong> Seamlessly switch between English, Spanish, Chinese, Russian, and Arabic with a single click.</li>
+        <li><strong>Privacy Safe & Free:</strong> Everything runs locally inside your browser—no personal names or text inputs are ever sent to external databases or stored on servers.</li>
+    </ul>
+</article>
+
+<footer class="disclaimer" id="uiDisclaimer">
     This Love Calculator is made for fun and entertainment only. The percentage is generated using a playful calculation method and does not scientifically measure love or relationship compatibility.
 </footer>
 
 <script>
-    // Helper to safely sanitize HTML input
+    // Language translations dictionary
+    const translations = {
+        en: {
+            title: "Love Percentage Calculator – Fun Love Test",
+            metaDesc: "Calculate your love percentage with this fun school-style Love Calculator. Enter a name or sentence and discover your playful love score instantly.",
+            mainTitle: "❤️ Love Percentage Calculator",
+            subTitle: "A fun, nostalgic school-style love game!",
+            inputLabel: "Enter a sentence:",
+            placeholder: "Example: Oliver and Joe Goldberg like each other",
+            calcBtn: "Calculate Love % ❤️",
+            exampleBtn: "Try Example",
+            clearBtn: "Clear",
+            loadingText: "Calculating love connection...",
+            showMethod: "📖 Show Method",
+            hideMethod: "🔽 Hide Method",
+            resultHeader: "Your Love Score",
+            shareTitle: "Share Result:",
+            copyBtn: "📋 Copy Result",
+            errEmpty: "Please enter a sentence or names first.",
+            errNoLetters: "Please enter a sentence containing English letters (A-Z).",
+            disclaimer: "This Love Calculator is made for fun and entertainment only. The percentage is generated using a playful calculation method and does not scientifically measure love or relationship compatibility.",
+            copiedAlert: "Result copied to clipboard!",
+            msg1: "Looks like the stars are keeping this one mysterious! ✨",
+            msg2: "There might be a little spark! 💫",
+            msg3: "Something interesting is happening! 💕",
+            msg4: "Looks like there is a strong connection! ❤️",
+            msg5: "Wow! That's a serious love score! 💖",
+            msg6: "Perfect 100%! ❤️‍🔥",
+            methodTitle: "Calculation Method",
+            step1: "1. Letters Used",
+            step2: "2. Letter Frequencies",
+            step3: "3. Starting Number Sequence",
+            step4: "4. Reduction",
+            step5: "5. Final Result",
+            roundText: "Round",
+            carriedText: "Middle digit carried:"
+        },
+        es: {
+            title: "Calculadora de Porcentaje de Amor – Prueba Divertida",
+            metaDesc: "Calcula tu porcentaje de amor con esta divertida calculadora al estilo escolar. Ingresa un nombre o frase y descubre tu puntaje al instante.",
+            mainTitle: "❤️ Calculadora de Amor",
+            subTitle: "¡Un juego de amor nostálgico y divertido al estilo escolar!",
+            inputLabel: "Ingresa una frase o nombres:",
+            placeholder: "Ejemplo: Romeo y Julieta se quieren mucho",
+            calcBtn: "Calcular Amor % ❤️",
+            exampleBtn: "Ver Ejemplo",
+            clearBtn: "Limpiar",
+            loadingText: "Calculando la conexión de amor...",
+            showMethod: "📖 Ver Método",
+            hideMethod: "🔽 Ocultar Método",
+            resultHeader: "Tu Puntaje de Amor",
+            shareTitle: "Compartir Resultado:",
+            copyBtn: "📋 Copiar Resultado",
+            errEmpty: "Por favor ingresa una frase o nombres primero.",
+            errNoLetters: "Por favor ingresa una frase que contenga letras alfabéticas.",
+            disclaimer: "Esta calculadora de amor está hecha solo para entretenimiento y diversión. El porcentaje se genera mediante un método divertido y no mide científicamente la compatibilidad.",
+            copiedAlert: "¡Resultado copiado al portapapeles!",
+            msg1: "¡Parece que las estrellas mantienen esto en misterio! ✨",
+            msg2: "¡Podría haber una pequeña chispa! 💫",
+            msg3: "¡Algo interesante está pasando! 💕",
+            msg4: "¡Parece que hay una fuerte conexión! ❤️",
+            msg5: "¡Guau! ¡Ese es un puntaje de amor serio! 💖",
+            msg6: "¡100% Perfecto! ❤️‍🔥",
+            methodTitle: "Método de Cálculo",
+            step1: "1. Letras Utilizadas",
+            step2: "2. Frecuencias de Letras",
+            step3: "3. Secuencia Numérica Inicial",
+            step4: "4. Reducción Paso a Paso",
+            step5: "5. Resultado Final",
+            roundText: "Ronda",
+            carriedText: "Dígito central conservado:"
+        },
+        zh: {
+            title: "爱心百分比计算器 – 趣味爱情测试",
+            metaDesc: "使用这款复古校园风格的爱心计算器计算您的爱情百分比。输入姓名或句子，即刻获取您的爱情得分。",
+            mainTitle: "❤️ 爱情百分比计算器",
+            subTitle: "一款充满怀旧校园风的趣味爱情小游戏！",
+            inputLabel: "输入句子或姓名：",
+            placeholder: "示例：罗密欧与朱丽叶真心相爱",
+            calcBtn: "计算爱情百分比 ❤️",
+            exampleBtn: "试用示例",
+            clearBtn: "清空",
+            loadingText: "正在计算爱情契合度...",
+            showMethod: "📖 查看计算方法",
+            hideMethod: "🔽 隐藏计算方法",
+            resultHeader: "您的爱情得分",
+            shareTitle: "分享结果：",
+            copyBtn: "📋 复制结果",
+            errEmpty: "请先输入句子或姓名。",
+            errNoLetters: "请输入包含英文字母的句子。",
+            disclaimer: "本爱情计算器仅供娱乐。该百分比是通过趣味计算方法生成的，不具备科学测量恋爱契合度的功能。",
+            copiedAlert: "结果已复制到剪贴板！",
+            msg1: "看来星象还在保持神秘！ ✨",
+            msg2: "可能有一点小火花哦！ 💫",
+            msg3: "似乎有有趣的事情发生！ 💕",
+            msg4: "看来你们之间有很强的吸引力！ ❤️",
+            msg5: "哇！这是一个超高的爱情得分！ 💖",
+            msg6: "完美 100%！ ❤️‍🔥",
+            methodTitle: "详细计算步骤",
+            step1: "1. 使用的字母",
+            step2: "2. 字母出现频率",
+            step3: "3. 初始数字序列",
+            step4: "4. 逐步递减计算",
+            step5: "5. 最终结果",
+            roundText: "第",
+            carriedText: "中间数字保留："
+        },
+        ru: {
+            title: "Калькулятор Процента Любви – Веселый Тест",
+            metaDesc: "Рассчитайте свой процент любви с помощью этого веселого калькулятора в школьном стиле. Введите имена и узнайте результат.",
+            mainTitle: "❤️ Калькулятор Процента Любви",
+            subTitle: "Веселая ностальгическая игра в школьном стиле!",
+            inputLabel: "Введите фразу или имена:",
+            placeholder: "Пример: Ромео и Джульетта любят друг друга",
+            calcBtn: "Рассчитать Любовь % ❤️",
+            exampleBtn: "Пример",
+            clearBtn: "Очистить",
+            loadingText: "Вычисляем любовную связь...",
+            showMethod: "📖 Показать Метод",
+            hideMethod: "🔽 Скрыть Метод",
+            resultHeader: "Ваш Результат Любви",
+            shareTitle: "Поделиться результатом:",
+            copyBtn: "📋 Скопировать",
+            errEmpty: "Пожалуйста, сначала введите фразу или имена.",
+            errNoLetters: "Пожалуйста, введите фразу, содержащую буквы.",
+            disclaimer: "Этот калькулятор создан исключительно для развлечения. Процент рассчитывается с помощью игры и не является научным измерением совместимости.",
+            copiedAlert: "Результат скопирован в буфер обмена!",
+            msg1: "Похоже, звезды пока хранят тайну! ✨",
+            msg2: "Возможно, здесь есть маленькая искра! 💫",
+            msg3: "Происходит что-то интересное! 💕",
+            msg4: "Похоже, между вами сильная связь! ❤️",
+            msg5: "Ого! Это очень высокий результат! 💖",
+            msg6: "Идеальные 100%! ❤️‍🔥",
+            methodTitle: "Метод Вычисления",
+            step1: "1. Использованные буквы",
+            step2: "2. Частота букв",
+            step3: "3. Начальная последовательность",
+            step4: "4. Пошаговое сокращение",
+            step5: "5. Финальный результат",
+            roundText: "Раунд",
+            carriedText: "Средняя цифра перенесена:"
+        },
+        ar: {
+            title: "حاسبة نسبة الحب – اختبار الحب الممتع",
+            metaDesc: "احسب نسبة الحب باستخدام حاسبة الحب الممتعة على الطريقة المدرسية. أدخل الاسم أو الجملة واكتشف النتيجة فوراً.",
+            mainTitle: "❤️ حاسبة نسبة الحب",
+            subTitle: "لعبة حب ممتعة ومستوحاة من أيام المدرسة!",
+            inputLabel: "أدخل جملة أو أسماء:",
+            placeholder: "مثال: قيس وليلى يحبان بعضهما",
+            calcBtn: "احسب نسبة الحب % ❤️",
+            exampleBtn: "تجربة مثال",
+            clearBtn: "مسح",
+            loadingText: "جاري حساب توافق الحب...",
+            showMethod: "📖 عرض طريقة الحساب",
+            hideMethod: "🔽 إخفاء طريقة الحساب",
+            resultHeader: "نتيجة الحب الخاصة بك",
+            shareTitle: "مشاركة النتيجة:",
+            copyBtn: "📋 نسخ النتيجة",
+            errEmpty: "يرجى إدخال جملة أو أسماء أولاً.",
+            errNoLetters: "يرجى إدخال جملة تحتوي على حروف أبدية.",
+            disclaimer: "تم إنشاء حاسبة الحب هذه للتسلية والترفيه فقط. يتم توليد النسبة باستخدام طريقة حسابية مرحة ولا تقيس التوافق بشكل علمي.",
+            copiedAlert: "تم نسخ النتيجة إلى الحافظة!",
+            msg1: "يبدو أن النجوم تحتفظ بالسر لنفسها! ✨",
+            msg2: "قد تكون هناك شرارة صغيرة! 💫",
+            msg3: "شيء مثير للأهتمام يحدث! 💕",
+            msg4: "يبدو أن هناك ترابطاً قوياً! ❤️",
+            msg5: "واو! هذه نسبة حب عالية جداً! 💖",
+            msg6: "100% مثالية! ❤️‍🔥",
+            methodTitle: "طريقة الحساب بالتفصيل",
+            step1: "1. الحروف المستخدمة",
+            step2: "2. تكرار الحروف",
+            step3: "3. التسلسل الرقمي الأولي",
+            step4: "4. خطوات الاختزال",
+            step5: "5. النتيجة النهائية",
+            roundText: "الجولة",
+            carriedText: "الرقم الأوسط المتبقي:"
+        }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage(langKey) {
+        currentLang = langKey;
+        const langData = translations[langKey] || translations['en'];
+
+        document.getElementById('metaTitle').innerText = langData.title;
+        document.getElementById('metaDesc').setAttribute('content', langData.metaDesc);
+        document.getElementById('uiMainTitle').innerText = langData.mainTitle;
+        document.getElementById('uiSubTitle').innerText = langData.subTitle;
+        document.getElementById('uiInputLabel').innerText = langData.inputLabel;
+        document.getElementById('loveInput').placeholder = langData.placeholder;
+        document.getElementById('calcBtn').innerText = langData.calcBtn;
+        document.getElementById('uiExampleBtn').innerText = langData.exampleBtn;
+        document.getElementById('uiClearBtn').innerText = langData.clearBtn;
+        document.getElementById('uiLoadingText').innerText = langData.loadingText;
+        document.getElementById('uiResultHeader').innerText = langData.resultHeader;
+        document.getElementById('uiShareTitle').innerText = langData.shareTitle;
+        document.getElementById('uiCopyBtn').innerText = langData.copyBtn;
+        document.getElementById('uiDisclaimer').innerText = langData.disclaimer;
+
+        const methodBtn = document.getElementById('methodToggleBtn');
+        const methodPanel = document.getElementById('methodPanel');
+        if (methodPanel.style.display === 'block') {
+            methodBtn.innerText = langData.hideMethod;
+        } else {
+            methodBtn.innerText = langData.showMethod;
+        }
+
+        // Adjust text alignment for RTL languages like Arabic
+        if (langKey === 'ar') {
+            document.body.style.direction = 'rtl';
+        } else {
+            document.body.style.direction = 'ltr';
+        }
+    }
+
+    // Escape HTML to prevent XSS vulnerability
     function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, function (m) {
+        return String(str).replace(/[&<>"']/g, function (m) {
             return {
                 '&': '&amp;',
                 '<': '&lt;',
@@ -892,16 +706,15 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         });
     }
 
-    // Pure algorithm function separate from UI
+    // Nostalgic School-Style Algorithm
     function calculateLoveScore(input) {
-        // 1. Normalize: keep alphabetic English letters only
         const rawNormalized = input.toLowerCase().replace(/[^a-z]/g, '');
         
         if (rawNormalized.length === 0) {
             return { error: "NO_LETTERS" };
         }
 
-        // 2. Count Frequencies alphabetically
+        // Count frequencies alphabetically
         const counts = {};
         for (let char of rawNormalized) {
             counts[char] = (counts[char] || 0) + 1;
@@ -909,19 +722,17 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
 
         const sortedKeys = Object.keys(counts).sort();
         
-        // Build starting sequence of digits
+        // Build starting sequence of numbers
         let startSequence = [];
         for (let key of sortedKeys) {
             let val = counts[key];
             if (val >= 10) {
-                // Safely convert frequencies >= 10 to digits for starting sequence
                 startSequence.push(...val.toString().split('').map(Number));
             } else {
                 startSequence.push(val);
             }
         }
 
-        // 3. Reduction Process
         let currentDigits = [...startSequence];
         const rounds = [];
         let safetyCounter = 0;
@@ -929,7 +740,7 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         while (currentDigits.length > 2 && safetyCounter < 100) {
             safetyCounter++;
             let equations = [];
-            let nextSequence = []; // Array of number results (e.g. [13, 15])
+            let nextSequence = []; // Array of sum numbers (e.g., [13, 15])
             let len = currentDigits.length;
             let half = Math.floor(len / 2);
 
@@ -939,13 +750,14 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
                 let sum = d1 + d2;
                 
                 equations.push(`${d1} + ${d2} = ${sum}`);
-                nextSequence.push(sum); // Sum (even if >= 10) remains whole integer in current sequence
+                nextSequence.push(sum); // KEPT as whole number (e.g. 13) for current round sequence
             }
 
             // Carry middle digit unchanged if length is odd
             if (len % 2 !== 0) {
                 let mid = currentDigits[half];
-                equations.push(`Middle digit carried: ${mid}`);
+                const langData = translations[currentLang] || translations['en'];
+                equations.push(`${langData.carriedText} ${mid}`);
                 nextSequence.push(mid);
             }
 
@@ -956,7 +768,7 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
                 resultingSequence: [...nextSequence]
             });
 
-            // Convert resulting sequence items into digits for the NEXT round
+            // Convert resulting sequence items into digits for the NEXT round (e.g. 13 15 -> 1 3 1 5)
             let nextDigits = [];
             for (let num of nextSequence) {
                 if (num >= 10) {
@@ -969,7 +781,6 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
             currentDigits = nextDigits;
         }
 
-        // Final two-digit score
         let scoreStr = currentDigits.join('');
         let finalScore = parseInt(scoreStr, 10);
         if (isNaN(finalScore)) finalScore = 0;
@@ -983,31 +794,31 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         };
     }
 
-    // Interactive Functions & UI Handling
     function processCalculation() {
         const inputVal = document.getElementById('loveInput').value;
         const errElement = document.getElementById('errorMessage');
         const resultBox = document.getElementById('resultBox');
         const loadingBox = document.getElementById('loadingBox');
+        const langData = translations[currentLang] || translations['en'];
 
         errElement.style.display = 'none';
         resultBox.style.display = 'none';
 
-        // Always hide method panel on new calculation
+        // Keep method panel default hidden on calculation
         const methodPanel = document.getElementById('methodPanel');
         const methodBtn = document.getElementById('methodToggleBtn');
         methodPanel.style.display = 'none';
-        methodBtn.innerText = '📖 Show Method';
+        methodBtn.innerText = langData.showMethod;
 
         if (!inputVal.trim()) {
-            showError("Please enter a sentence or names first.");
+            showError(langData.errEmpty);
             return;
         }
 
         const resultData = calculateLoveScore(inputVal);
 
         if (resultData.error === "NO_LETTERS") {
-            showError("Please enter some alphabetic letters.");
+            showError(langData.errNoLetters);
             return;
         }
 
@@ -1023,8 +834,8 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         const resultBox = document.getElementById('resultBox');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const scoreMessage = document.getElementById('scoreMessage');
+        const langData = translations[currentLang] || translations['en'];
 
-        // Smooth score count-up
         let currentVal = 0;
         let targetVal = data.finalScore;
         scoreDisplay.innerText = "0% ❤️";
@@ -1041,33 +852,33 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
             }
         }, 30);
 
-        // Score Messages
         let msg = "";
-        if (targetVal <= 20) msg = "Looks like the stars are keeping this one mysterious! ✨";
-        else if (targetVal <= 40) msg = "There might be a little spark! 💫";
-        else if (targetVal <= 60) msg = "Something interesting is happening! 💕";
-        else if (targetVal <= 80) msg = "Looks like there is a strong connection! ❤️";
-        else if (targetVal < 100) msg = "Wow! That's a serious love score! 💖";
-        else msg = "Perfect 100%! ❤️‍🔥";
+        if (targetVal <= 20) msg = langData.msg1;
+        else if (targetVal <= 40) msg = langData.msg2;
+        else if (targetVal <= 60) msg = langData.msg3;
+        else if (targetVal <= 80) msg = langData.msg4;
+        else if (targetVal < 100) msg = langData.msg5;
+        else msg = langData.msg6;
 
         scoreMessage.innerText = msg;
 
-        // Render Method Content safely
         buildMethodPanel(data);
     }
 
     function buildMethodPanel(data) {
         const methodPanel = document.getElementById('methodPanel');
+        const langData = translations[currentLang] || translations['en'];
         
         let sortedKeys = Object.keys(data.counts).sort();
         let letterList = sortedKeys.map(k => `${k.toUpperCase()} → ${data.counts[k]}`).join('<br>');
 
         let roundsHTML = data.rounds.map((r, idx) => {
             let isLast = idx === data.rounds.length - 1;
+            let roundLabel = (currentLang === 'zh') ? `第 ${r.roundNumber} 轮` : `${langData.roundText} ${r.roundNumber}`;
             let seqLabel = isLast ? "Final Sequence:" : "New Sequence:";
             return `
                 <div class="round-box">
-                    <div class="step-heading">Round ${r.roundNumber}</div>
+                    <div class="step-heading">${roundLabel}</div>
                     <div>${r.equations.join('<br>')}</div>
                     <div style="margin-top:4px; font-weight:600;">${seqLabel} <span class="code-block">${r.resultingSequence.join(' ')}</span></div>
                 </div>
@@ -1075,25 +886,25 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         }).join('');
 
         methodPanel.innerHTML = `
-            <div class="method-title">Calculation Method</div>
+            <div class="method-title">${langData.methodTitle}</div>
             <div class="step-section">
-                <div class="step-heading">1. Letters Used</div>
+                <div class="step-heading">${langData.step1}</div>
                 <div class="code-block">${escapeHtml(data.normalizedText)}</div>
             </div>
             <div class="step-section">
-                <div class="step-heading">2. Letter Frequencies</div>
+                <div class="step-heading">${langData.step2}</div>
                 <div>${letterList}</div>
             </div>
             <div class="step-section">
-                <div class="step-heading">3. Starting Number Sequence</div>
+                <div class="step-heading">${langData.step3}</div>
                 <div class="code-block">${data.activeSequence.join(' ')}</div>
             </div>
             <div class="step-section">
-                <div class="step-heading">4. Reduction</div>
+                <div class="step-heading">${langData.step4}</div>
                 ${roundsHTML}
             </div>
             <div class="step-section" style="margin-bottom:0;">
-                <div class="step-heading">5. Final Result</div>
+                <div class="step-heading">${langData.step5}</div>
                 <div style="font-weight:700; color:var(--primary); font-size:1.1rem;">${data.finalScore}%</div>
             </div>
         `;
@@ -1102,13 +913,14 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
     function toggleMethod() {
         const methodPanel = document.getElementById('methodPanel');
         const methodBtn = document.getElementById('methodToggleBtn');
+        const langData = translations[currentLang] || translations['en'];
 
         if (methodPanel.style.display === 'block') {
             methodPanel.style.display = 'none';
-            methodBtn.innerText = '📖 Show Method';
+            methodBtn.innerText = langData.showMethod;
         } else {
             methodPanel.style.display = 'block';
-            methodBtn.innerText = '🔽 Hide Method';
+            methodBtn.innerText = langData.hideMethod;
         }
     }
 
@@ -1129,30 +941,48 @@ The algorithm logic has been updated to keep sums $\ge 10$ intact during the red
         document.getElementById('resultBox').style.display = "none";
     }
 
-    // Share Options
+    // Sharing URLs Fixes (Strict URL & Text Encoding)
     function getShareText() {
         const scoreText = document.getElementById('scoreDisplay').innerText;
-        return `I got ${scoreText} on the Love Percentage Calculator! Try yours here:`;
+        return `I got ${scoreText} on the Love Percentage Calculator! Check your score here:`;
     }
 
     function copyResult() {
-        navigator.clipboard.writeText(getShareText() + " " + window.location.href);
-        alert("Result copied to clipboard!");
+        const langData = translations[currentLang] || translations['en'];
+        const textToCopy = getShareText() + " " + window.location.href;
+        
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert(langData.copiedAlert);
+            });
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert(langData.copiedAlert);
+        }
     }
 
     function shareWhatsApp() {
-        window.open(`[https://api.whatsapp.com/send?text=$](https://api.whatsapp.com/send?text=$){encodeURIComponent(getShareText() + " " + window.location.href)}`, '_blank');
+        const text = encodeURIComponent(getShareText() + " " + window.location.href);
+        window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
     }
 
     function shareFacebook() {
-        window.open(`[https://www.facebook.com/sharer/sharer.php?u=$](https://www.facebook.com/sharer/sharer.php?u=$){encodeURIComponent(window.location.href)}`, '_blank');
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener,noreferrer');
     }
 
     function shareX() {
-        window.open(`[https://twitter.com/intent/tweet?text=$](https://twitter.com/intent/tweet?text=$){encodeURIComponent(getShareText())}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        const text = encodeURIComponent(getShareText());
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
     }
 
-    // Keyboard trigger (Ctrl+Enter or Cmd+Enter)
+    // Keyboard support
     document.getElementById('loveInput').addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             processCalculation();
