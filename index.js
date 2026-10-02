@@ -445,7 +445,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.8-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -486,7 +486,7 @@ Requested Change: "${requestedChange}"`;
     
     try {
           const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.8-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
