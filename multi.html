@@ -179,7 +179,7 @@ $("go").onclick=async()=>{
  if(!val||val<=0)return say("Enter a valid target size.",1);
  const target=val*($("tu").value==="GB"?1073741824:1048576);
  if(target>=src.size)return say("Target is not smaller than the original ("+fmt(src.size)+"). Enter a smaller size.",1);
- const total=target*0.93*8,audio=meta.d>0?(total/meta.d>200000?96000:48000):96000;
+ const total=target*0.97*8,audio=meta.d>0?(total/meta.d>200000?96000:48000):96000;
  let vb=total/meta.d-audio;
  if(vb<60000)return say("Target is too small for this video's length. Enter a larger size.",1);
  const fps=30,bpp=0.07,pix=vb/(fps*bpp);
@@ -191,22 +191,36 @@ $("go").onclick=async()=>{
  $("go").disabled=true;$("dl").style.display="none";$("out").style.display="none";$("bar").style.display="block";$("fill").style.width="0";
  say("Compressing… keep this tab open.");
  try{
-  const v=document.createElement("video");v.src=url;v.playsInline=true;v.preload="auto";
-  await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=j});
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d");
-  const stream=cv.captureStream(fps);
-  try{const ac=new (window.AudioContext||window.webkitAudioContext)();const s=ac.createMediaElementSource(v);const d=ac.createMediaStreamDestination();s.connect(d);
-   d.stream.getAudioTracks().forEach(t=>stream.addTrack(t));}catch(e){}
-  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(vb),audioBitsPerSecond:audio});
-  const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
-  const done=new Promise(r=>rec.onstop=r);
-  rec.start(1000);
-  let run=true;
-  const draw=()=>{if(!run)return;cx.drawImage(v,0,0,W,H);$("fill").style.width=Math.min(99,v.currentTime/meta.d*100)+"%";
-   v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw)};
-  v.onended=()=>{run=false;setTimeout(()=>rec.stop(),300)};
-  await v.play();draw();await done;
-  outBlob=new Blob(ch,{type:mime.split(";")[0]});
+  const encode=async(vbr,label)=>{
+   say(label+" Keep this tab open.");$("fill").style.width="0";
+   const v=document.createElement("video");v.src=url;v.playsInline=true;v.preload="auto";
+   await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=j});
+   const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d");
+   const stream=cv.captureStream(fps);
+   try{const ac=new (window.AudioContext||window.webkitAudioContext)();const s=ac.createMediaElementSource(v);const d=ac.createMediaStreamDestination();s.connect(d);
+    d.stream.getAudioTracks().forEach(t=>stream.addTrack(t));}catch(e){}
+   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(vbr),audioBitsPerSecond:audio});
+   const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+   const done=new Promise(r=>rec.onstop=r);
+   rec.start(1000);
+   let run=true;
+   const draw=()=>{if(!run)return;cx.drawImage(v,0,0,W,H);$("fill").style.width=Math.min(99,v.currentTime/meta.d*100)+"%";
+    v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw)};
+   v.onended=()=>{run=false;setTimeout(()=>rec.stop(),300)};
+   await v.play();draw();await done;
+   return new Blob(ch,{type:mime.split(";")[0]});
+  };
+  let best=null,cur=vb;
+  for(let p=1;p<=3;p++){
+   const b=await encode(cur,"Pass "+p+" of up to 3: matching your target size…");
+   if(b.size<=target&&(!best||b.size>best.size))best=b;
+   if(b.size<=target&&b.size>=target*0.9)break;
+   if(p===3)break;
+   const f=Math.min(4,Math.max(0.3,(target*0.96-audio*meta.d/8)/Math.max(1,b.size-audio*meta.d/8)));
+   cur=cur*f;
+   if(cur<40000)break;
+  }
+  outBlob=best||await encode(cur*0.8,"Final pass…");
   $("fill").style.width="100%";
   $("ns").textContent=fmt(outBlob.size);
   $("sv").textContent=Math.max(0,(1-outBlob.size/src.size)*100).toFixed(0)+"%";
