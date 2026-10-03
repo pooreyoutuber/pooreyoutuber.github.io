@@ -1,621 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Video Compressor | Reduce Video Size Online</title>
-    <meta name="description" content="Free online video compressor tool. Upload your video, set your custom target size in MB or GB, and compress without losing significant quality. 100% local processing for privacy.">
-    <!-- Tailwind CSS for UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FFmpeg for client-side video processing -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>
-    <style>
-        .drag-active {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased">
-
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">VideoShrink Pro</h1>
-            <nav class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
-                <a href="#" class="hover:text-blue-600">Home</a>
-                <a href="#how-to-use" class="hover:text-blue-600">How to Use</a>
-                <a href="#about" class="hover:text-blue-600">About</a>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Main Tool Section -->
-    <main class="max-w-3xl mx-auto px-4 py-12">
-        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10 border border-gray-100">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Compress Video to Custom Size</h2>
-                <p class="text-gray-500">Upload your video, set your desired file size, and download.</p>
-            </div>
-
-            <!-- Upload Area -->
-            <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:bg-gray-50 transition duration-200">
-                <input type="file" id="video-upload" class="hidden" accept="video/mp4,video/x-m4v,video/*">
-                <div id="upload-content">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="text-lg font-medium text-gray-700">Click to upload or drag and drop</p>
-                    <p class="text-sm text-gray-500 mt-1">MP4, WebM, MOV, AVI (Max 2GB)</p>
-                </div>
-            </div>
-
-            <!-- Configuration Area (Hidden initially) -->
-            <div id="config-area" class="hidden mt-8 space-y-6">
-                <!-- File Info -->
-                <div class="bg-blue-50 rounded-lg p-4 flex justify-between items-center border border-blue-100">
-                    <div>
-                        <p class="text-sm font-semibold text-blue-900 truncate max-w-[200px] md:max-w-xs" id="file-name">video.mp4</p>
-                        <p class="text-xs text-blue-700 mt-1">Ready for compression</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs text-blue-700 uppercase tracking-wider">Original Size</p>
-                        <p class="text-xl font-bold text-blue-900" id="actual-size">0.00 MB</p>
-                    </div>
-                </div>
-
-                <!-- Target Size Input -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Target File Size</label>
-                    <div class="flex shadow-sm rounded-lg">
-                        <input type="number" id="target-size" placeholder="e.g. 25" class="flex-1 block w-full min-w-0 rounded-none rounded-l-lg sm:text-sm border-gray-300 p-3 border focus:ring-blue-500 focus:border-blue-500" min="0.1" step="0.1">
-                        <select id="size-unit" class="inline-flex items-center px-4 rounded-none rounded-r-lg border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="MB">MB</option>
-                            <option value="GB">GB</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Action Button -->
-                <button id="compress-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-md transition duration-200 flex justify-center items-center">
-                    <span id="btn-text">Compress & Download</span>
-                    <span id="btn-loader" class="loader ml-3 hidden"></span>
-                </button>
-
-                <!-- Progress Bar -->
-                <div id="progress-container" class="hidden">
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600 font-medium">Compressing...</span>
-                        <span id="progress-text" class="text-blue-600 font-bold">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2 text-center" id="status-message">Initializing engine...</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- SEO Content Section (600+ Words) -->
-    <article class="max-w-4xl mx-auto px-4 py-16 text-gray-700 leading-relaxed space-y-8" id="about">
-        
-        <section>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4" id="how-to-use">The Ultimate Video Compressor: Shrink Files Without Compromising Quality</h2>
-            <p class="mb-4">In today's digital landscape, high-definition videos dominate our devices, social media feeds, and professional communications. While 4K and 1080p resolutions offer stunning visual fidelity, they also consume massive amounts of storage space and require substantial bandwidth to share. Whether you are a digital marketer in New York, a vlogger in London, or a student in Mumbai, managing large video files is a universal challenge. This is where our advanced <strong>Video Compressor</strong> tool steps in. Designed with user experience and technical precision in mind, this tool allows you to take full control over your media files by setting a precise target size in MB or GB.</p>
-            <p>Unlike basic online converters that guess the compression ratio, our tool puts the power in your hands. If you have an email attachment limit of 25MB, simply upload your heavy video, type "25" in the target box, select "MB," and let the algorithm do the heavy lifting. By utilizing advanced bitrate calculation equations, the tool optimizes the video codec to hit your exact size requirement while retaining the highest possible visual clarity.</p>
-        </section>
-
-        <section>
-            <h3 class="text-2xl font-semibold text-gray-900 mb-3">How to Use the Video Compressor Tool</h3>
-            <p class="mb-4">We have engineered the user interface to be incredibly intuitive. You do not need to be a technical expert to compress a video. Follow these simple steps for flawless execution:</p>
-            <ol class="list-decimal pl-6 space-y-3 mb-4">
-                <li><strong>Upload Your File:</strong> Start by dragging and dropping your video file into the designated upload zone at the top of the page. Alternatively, click the area to open your device's file explorer. We support major formats including MP4, WebM, MOV, and AVI.</li>
-                <li><strong>Analyze Actual Size:</strong> Once uploaded, the tool instantly analyzes your file and displays its original size. This immediate feedback helps you understand exactly how much compression is required.</li>
-                <li><strong>Set Custom Target Size:</strong> Below the original size, you will find an input box. Enter your desired final file size. You can use the dropdown menu to toggle between Megabytes (MB) and Gigabytes (GB).</li>
-                <li><strong>Compress and Download:</strong> Click the "Compress & Download" button. Our robustHere is the complete, single-file HTML solution for your Video Compressor tool. It includes a modern, highly responsive User Interface (UI), accurate file size detection, a target size input, and a complete 600+ word SEO-optimized article below the tool to rank well on search engines.
-
-*Note: True exact-size video compression in a web browser requires server-side processing (like FFmpeg or Python) or strict WebAssembly server headers. This tool provides a 100% working **frontend UI, realistic bitrate calculations, file parsing, and a simulated compression process** so you have a perfect, ready-to-use template that you can later connect to a backend API if needed.*
-
-Save the code below as **`Compress.html`**:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Video Compressor - Reduce Video Size Online</title>
-    <meta name="description" content="Free online video compressor tool. Upload your video, set your custom target size in MB or GB, and compress videos instantly without losing quality.">
-    <meta name="robots" content="index, follow">
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg-color: #F9FAFB;
-            --card-bg: #FFFFFF;
-            --text-main: #111827;
-            --text-muted: #6B7280;
-            --border-color: #E5E7EB;
-            --success: #10B981;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
-        }
-
-        header {
-            background: var(--primary);
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        /* Tool UI */
-        .tool-box {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .upload-area {
-            border: 2px dashed var(--primary);
-            border-radius: 8px;
-            padding: 3rem 1rem;
-            background: #EEF2FF;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .upload-area:hover {
-            background: #E0E7FF;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .upload-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .settings-area {
-            display: none;
-            margin-top: 2rem;
-            text-align: left;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .file-info {
-            background: #F3F4F6;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .file-info span {
-            font-weight: 600;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .input-flex {
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="number"] {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        select {
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-            background: white;
-            cursor: pointer;
-        }
-
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn:disabled {
-            background: #9CA3AF;
-            cursor: not-allowed;
-        }
-
-        .btn-success {
-            background: var(--success);
-            text-decoration: none;
-            text-align: center;
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            display: none;
-            margin-top: 1.5rem;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: var(--border-color);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.2s ease;
-        }
-        .progress-text {
-            text-align: center;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        /* Result Area */
-        .result-area {
-            display: none;
-            margin-top: 1.5rem;
-        }
-
-        /* SEO Content */
-        .seo-content {
-            margin-top: 4rem;
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .seo-content h2 {
-            color: var(--primary);
-            margin: 2rem 0 1rem;
-            font-size: 1.8rem;
-        }
-
-        .seo-content h3 {
-            margin: 1.5rem 0 0.8rem;
-            font-size: 1.4rem;
-            color: #374151;
-        }
-
-        .seo-content p {
-            margin-bottom: 1rem;
-            color: var(--text-muted);
-        }
-        
-        .seo-content ul {
-            margin: 1rem 0 1rem 2rem;
-            color: var(--text-muted);
-        }
-
-        .seo-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem;
-            margin-top: 2rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border-color);
-        }
-
-        @media(max-width: 768px) {
-            .seo-content { padding: 1.5rem; }
-            .tool-box { padding: 1.5rem; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Online Video Compressor – Reduce Video Size to MB or GB | No Upload</title>
+<meta name="description" content="Compress any video online for free. See the original file size, enter your target size in MB or GB, and download the compressed video. Private, fast, runs in your browser.">
+<meta name="keywords" content="video compressor, compress video online, reduce video size, compress video to MB, shrink video file, free video compressor">
+<meta name="robots" content="index, follow, max-snippet:-1">
+<link rel="canonical" href="https://example.com/compress.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Free Online Video Compressor – Set Your Own Target Size">
+<meta property="og:description" content="Upload a video, choose the size in MB or GB, and download. 100% private – files never leave your device.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"SoftwareApplication","name":"Video Compressor","applicationCategory":"MultimediaApplication","operatingSystem":"Any (Web Browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free browser-based video compressor with custom target size in MB or GB."},
+{"@type":"HowTo","name":"How to compress a video online","step":[{"@type":"HowToStep","text":"Upload your video file."},{"@type":"HowToStep","text":"Check the original size shown."},{"@type":"HowToStep","text":"Enter the target size in MB or GB."},{"@type":"HowToStep","text":"Click Compress, then Download."}]},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Is this video compressor free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is completely free with no sign-up, watermark or file limit set by the tool."}},
+{"@type":"Question","name":"Are my videos uploaded to a server?","acceptedAnswer":{"@type":"Answer","text":"No. Compression happens locally in your browser, so your video stays private."}},
+{"@type":"Question","name":"Can I choose the exact output size?","acceptedAnswer":{"@type":"Answer","text":"Yes. Enter a target in MB or GB. The result is very close to it, usually slightly smaller."}},
+{"@type":"Question","name":"Why does compression take as long as the video?","acceptedAnswer":{"@type":"Answer","text":"The video is re-encoded in real time by your browser, so keep the tab open until it finishes."}}]}]}
+</script>
+<style>
+:root{--bg:#0e1116;--card:#171c24;--line:#2a3140;--tx:#e8ecf3;--mu:#97a1b3;--ac:#2fd4a7;--ac2:#4c8dff}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.7 "Segoe UI",system-ui,Arial,sans-serif;background:radial-gradient(1200px 500px at 50% -10%,#1b2a3f,var(--bg));color:var(--tx)}
+header{text-align:center;padding:48px 16px 8px}
+h1{font-size:clamp(28px,5vw,44px);margin:0 0 10px;line-height:1.2}
+header p{color:var(--mu);max-width:640px;margin:0 auto}
+main{max-width:760px;margin:24px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+#drop{border:2px dashed var(--line);border-radius:14px;padding:36px 16px;text-align:center;cursor:pointer;transition:.2s}
+#drop:hover,#drop.on,#drop:focus{border-color:var(--ac);background:#1a2430;outline:none}
+#drop b{display:block;font-size:18px}#drop span{color:var(--mu);font-size:14px}
+.ico{font-size:40px}
+#panel{display:none;margin-top:20px}
+video{width:100%;max-height:260px;border-radius:12px;background:#000}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.stat{background:#10141b;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.stat small{color:var(--mu);display:block;font-size:12px}.stat strong{font-size:17px;word-break:break-all}
+#orig{color:var(--ac)}
+label{font-weight:600;display:block;margin-bottom:6px}
+.row{display:flex;gap:10px}
+input,select{background:#10141b;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px}
+input{flex:1;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;color:#06231b;background:linear-gradient(90deg,var(--ac),#7be8c8)}
+button:disabled{opacity:.5;cursor:not-allowed}
+#dl{display:none;background:linear-gradient(90deg,var(--ac2),#8ab4ff);color:#fff}
+.bar{height:10px;background:#10141b;border-radius:99px;overflow:hidden;margin-top:14px;display:none}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+#msg{margin-top:12px;color:var(--mu);font-size:14px;min-height:20px}
+#msg.err{color:#ff8a8a}
+article{margin-top:40px;color:#c9d1de}
+article h2{font-size:26px;margin:34px 0 8px;color:var(--tx)}
+article h3{font-size:19px;margin:22px 0 4px;color:var(--ac)}
+article li{margin-bottom:6px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 16px}
+@media(max-width:520px){.stats{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
+<header>
+<h1>Free Online Video Compressor</h1>
+<p>Upload a video, see its real size, type the size you want in MB or GB, and download. No sign-up. No server upload.</p>
+</header>
+<main>
+<section class="card" aria-label="Video compressor tool">
+<div id="drop" tabindex="0" role="button" aria-label="Choose a video file">
+<div class="ico">🎬</div><b>Click or drop your video here</b><span>MP4, MOV, WebM, MKV, AVI and more (browser-supported formats)</span>
+<input type="file" id="file" accept="video/*" hidden>
+</div>
+<div id="panel">
+<video id="pv" controls muted playsinline></video>
+<div class="stats">
+<div class="stat"><small>Original size</small><strong id="orig">–</strong></div>
+<div class="stat"><small>Duration</small><strong id="dur">–</strong></div>
+<div class="stat"><small>Resolution</small><strong id="res">–</strong></div>
+</div>
+<label for="tv">Target size</label>
+<div class="row">
+<input type="number" id="tv" min="0.1" step="any" placeholder="e.g. 20">
+<select id="tu" aria-label="Unit"><option>MB</option><option>GB</option></select>
+</div>
+<button id="go">Compress video</button>
+<div class="bar" id="bar"><i id="fill"></i></div>
+<div id="msg"></div>
+<div class="stats" id="out" style="display:none">
+<div class="stat"><small>New size</small><strong id="ns">–</strong></div>
+<div class="stat"><small>Saved</small><strong id="sv">–</strong></div>
+<div class="stat"><small>Format</small><strong id="fm">–</strong></div>
+</div>
+<button id="dl">Download compressed video</button>
+</div>
+</section>
 
-    <header>
-        <h1>Custom Video Compressor</h1>
-        <p>Reduce video file size perfectly without losing quality.</p>
-    </header>
+<article>
+<h2>Compress Video Online to Any Size You Want</h2>
+<p>Large video files are hard to share. Email services reject attachments above 25 MB, messaging apps limit uploads, and cloud storage fills up quickly. This free online video compressor solves the problem in a simple way: you upload a video, the tool shows its exact original size, and you decide how big the final file should be. Enter a number in megabytes or gigabytes, press one button, and download the result. Everything runs inside your own browser, so your footage is never sent to a server.</p>
 
-    <div class="container">
-        <!-- Tool Section -->
-        <div class="tool-box">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Drag & Drop Video Here or Click to Upload</div>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">Supports MP4, WebM, MOV, AVI</p>
-                <input type="file" id="videoInput" accept="video/*">
-            </div>
+<h2>How to Use the Video Compressor</h2>
+<ol>
+<li><strong>Upload your video.</strong> Click the upload box or drag a file onto it. The tool instantly displays the original file size, duration and resolution.</li>
+<li><strong>Enter the size you need.</strong> Type a value in the target size box and choose MB or GB. For example, type 20 and select MB to get a file of about 20 MB.</li>
+<li><strong>Click Compress video.</strong> The video is re-encoded in your browser. A progress bar shows how far along it is. Keep the tab open and visible until it reaches 100%.</li>
+<li><strong>Download.</strong> When finished, the new size and the amount saved appear. Click the download button to save the compressed file.</li>
+</ol>
 
-            <div class="settings-area" id="settingsArea">
-                <div class="file-info">
-                    <div>Original File: <span id="fileName">video.mp4</span></div>
-                    <div>Actual Size: <span id="originalSize" style="color: var(--primary);">0 MB</span></div>
-                </div>
+<h2>Key Benefits</h2>
+<h3>You control the final size</h3>
+<p>Most compressors give only vague options such as low, medium or high quality. Here you choose the exact target, which is useful when a platform has a strict limit like 8 MB, 25 MB or 100 MB.</p>
+<h3>Private by design</h3>
+<p>Your video never leaves your device. There is no upload, no waiting for a server queue, and no risk of personal clips being stored by a third party. This makes the tool suitable for family videos, work recordings and confidential material.</p>
+<h3>Free, with no watermark</h3>
+<p>There are no accounts, subscriptions or logos burned into your video. Use the tool as often as you like.</p>
+<h3>Works on any modern device</h3>
+<p>The compressor runs in Chrome, Edge, Firefox and Safari on desktop and many mobile devices. Nothing needs to be installed.</p>
+<h3>Smart quality balance</h3>
+<p>The tool calculates the bitrate needed to reach your target size. If the target is very small, it also reduces the resolution so the picture stays clean instead of turning blocky.</p>
 
-                <div class="input-group">
-                    <label for="targetSize">Enter Desired Target Size:</label>
-                    <div class="input-flex">
-                        <input type="number" id="targetSize" placeholder="e.g., 50" min="0.1" step="0.1">
-                        <select id="sizeUnit">
-                            <option value="MB">MB</option>
-                            <option value="GB">GB</option>
-                        </select>
-                    </div>
-                </div>
+<h2>When Should You Compress a Video?</h2>
+<ul>
+<li>Sending clips by email, WhatsApp, Telegram or Slack.</li>
+<li>Uploading assignments, application videos or portfolio reels to sites with size limits.</li>
+<li>Saving phone storage by shrinking old recordings.</li>
+<li>Making website videos load faster, which improves user experience and SEO.</li>
+<li>Reducing mobile data use when sharing videos on slow connections.</li>
+</ul>
 
-                <button class="btn" id="compressBtn">Compress Video</button>
+<h2>Tips for the Best Results</h2>
+<ul>
+<li>Choose a realistic target. Shrinking a 1 GB video to 5 MB will cause visible quality loss.</li>
+<li>Keep the browser tab active while compressing, because background tabs can be slowed down.</li>
+<li>Compression time is roughly equal to the video length, since the browser processes it in real time.</li>
+<li>If your target is larger than the original, the tool will warn you, as compression cannot add quality.</li>
+</ul>
 
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">Compressing... 0%</div>
-                </div>
+<h2>Frequently Asked Questions</h2>
+<details><summary>Is this video compressor free?</summary><p>Yes. It is completely free, with no sign-up and no watermark.</p></details>
+<details><summary>Is my video uploaded anywhere?</summary><p>No. All processing happens locally in your browser, so your file stays private.</p></details>
+<details><summary>How accurate is the target size?</summary><p>The result is usually within a few percent of your target and normally slightly smaller, because the tool leaves a safety margin for container overhead.</p></details>
+<details><summary>Which format will the output be?</summary><p>The tool uses MP4 when your browser supports it, otherwise WebM. Both play on almost all devices and platforms.</p></details>
+<details><summary>Why is compression taking so long?</summary><p>The video is encoded in real time, so a 10-minute video needs about 10 minutes. Keep the tab open.</p></details>
+</article>
+</main>
+<footer>© Free Video Compressor – compress video online to MB or GB, privately in your browser.</footer>
 
-                <div class="result-area" id="resultArea">
-                    <div class="file-info" style="background: #D1FAE5; color: #065F46;">
-                        Compression Complete! Target met successfully.
-                    </div>
-                    <a href="#" class="btn btn-success" id="downloadBtn" download="compressed_video.mp4">Download Compressed Video</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEO Content Section -->
-        <div class="seo-content">
-            <h2>Ultimate Free Video Compressor Tool</h2>
-            <p>Welcome to the most efficient and user-friendly <strong>Video Compressor</strong> available online. In today's digital era, high-resolution cameras on our smartphones and professional equipment produce massive video files. These large files take up valuable storage space, consume significant bandwidth, and can be incredibly frustrating to upload to social media platforms, send via email, or share with colleagues.</p>
-            <p>Our custom video compression tool solves this problem elegantly by allowing you to define the <em>exact</em> target size you want for your video. Whether you need an MP4 shrunk down to fit a 25MB email attachment limit or a 2GB raw file compressed to 500MB for faster web hosting, this tool provides the precision you need.</p>
-
-            <h2>How to Use This Video Compressor?</h2>
-            <p>We believe in intuitive design and straightforward functionality. You don't need any technical skills or software installation to compress your videos. Just follow these simple steps:</p>
-            <ul>
-                <li><strong>Step 1: Upload Your Video.</strong> Click on the upload box above or drag and drop your video file (MP4, WebM, MOV, AVI) directly into the designated area.</li>
-                <li><strong>Step 2: Check Original Size.</strong> Our tool instantly scans your file and displays its actual original size directly on your screen. This helps you understand how much compression is required.</li>
-                <li><strong>Step 3: Enter Custom Target Size.</strong> In the input box provided, type the specific file size you want to achieve. Use the dropdown menu to select whether the unit is in Megabytes (MB) or Gigabytes (GB).</li>
-                <li><strong>Step 4: Compress and Download.</strong> Click the "Compress Video" button. Our advanced algorithm processes the bitrate based on your requested size. Once the progress bar reaches 100%, a secure download link will appear. Click it to save your freshly compressed video to your device.</li>
-            </ul>
-
-            <h2>Key Benefits of Compressing Videos</h2>
-            <h3>1. Save Device Storage</h3>
-            <p>4K and 1080p videos consume enormous amounts of hard drive and cloud storage space. By compressing your videos, you can save gigabytes of data on your smartphone, PC, or Google Drive, making room for more important files and memories without having to pay for expensive storage upgrades.</p>
-
-            <h3>2. Faster Uploads and Sharing</h3>
-            <p>Waiting hours for a single video to upload to YouTube, Instagram, or WhatsApp is highly unproductive. Smaller file sizes ensure lightning-fast upload speeds. Additionally, most email clients (like Gmail and Outlook) have a strict 20MB to 25MB attachment limit. Our tool helps you bypass these restrictions effortlessly by specifying your exact target size.</p>
-
-            <h3>3. Improved Website Performance</h3>
-            <p>If you are a web developer or content creator, you know that heavy background videos can significantly slow down website loading speeds, leading to higher bounce rates and poor SEO rankings. Compressing web videos ensures a smooth, buffer-free user experience, keeping your audience engaged.</p>
-
-            <h2>Experience, Expertise, Authoritativeness, and Trustworthiness (E-E-A-T)</h2>
-            <p>When dealing with personal videos or confidential business media, security and efficiency are paramount. Our tool was developed by web media experts focused on optimal video encoding parameters. We utilize calculated bitrate adjustments that strike the perfect balance between retaining visual fidelity and reducing digital footprints.</p>
-            <p>Furthermore, we respect your privacy. <strong>Your privacy is our priority.</strong> No hidden tracking or unauthorized cloud saving is performed. The user interface acts rapidly in your browser ecosystem to ensure maximum efficiency. We strive to provide a reliable, authoritative, and trustworthy web utility that professionals and everyday users can rely on 24/7, completely free of charge.</p>
-
-            <h2>Frequently Asked Questions (FAQs)</h2>
-            <h3>Will my video lose quality?</h3>
-            <p>Video compression inherently involves a slight reduction in bitrate. However, our optimized encoding logic ensures that the visual quality remains as high as possible while strictly adhering to your custom size limit. For best results, avoid compressing a file to less than 10% of its original size.</p>
-            
-            <h3>What video formats are supported?</h3>
-            <p>You can upload almost any standard video format, including MP4, AVI, MOV, WebM, and MKV. The system is designed to handle modern web video containers smoothly.</p>
-
-            <h3>Is there a limit on file size?</h3>
-            <p>Our frontend tool is designed to handle large files, but performance depends on your device's memory and browser limitations. For optimal performance, we recommend uploading files up to 2GB.</p>
-        </div>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 Free Video Compressor. All rights reserved. Designed for optimal speed and privacy.</p>
-    </footer>
-
-    <script>
-        // DOM Elements
-        const videoInput = document.getElementById('videoInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const settingsArea = document.getElementById('settingsArea');
-        const fileName = document.getElementById('fileName');
-        const originalSize = document.getElementById('originalSize');
-        const targetSize = document.getElementById('targetSize');
-        const sizeUnit = document.getElementById('sizeUnit');
-        const compressBtn = document.getElementById('compressBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const resultArea = document.getElementById('resultArea');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        let currentFile = null;
-        let originalSizeBytes = 0;
-
-        // Format bytes to MB/GB
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Handle File Selection
-        videoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('video/')) {
-                currentFile = file;
-                originalSizeBytes = file.size;
-                
-                // Update UI
-                fileName.textContent = file.name;
-                originalSize.textContent = formatBytes(originalSizeBytes);
-                settingsArea.style.display = 'block';
-                resultArea.style.display = 'none';
-                progressContainer.style.display = 'none';
-                
-                // Auto-suggest target size (half of original)
-                const originalInMB = originalSizeBytes / (1024 * 1024);
-                if(originalInMB > 1024) {
-                    targetSize.value = (originalInMB / 1024 / 2).toFixed(2);
-                    sizeUnit.value = "GB";
-                } else {
-                    targetSize.value = (originalInMB / 2).toFixed(2);
-                    sizeUnit.value = "MB";
-                }
-            } else {
-                alert("Please select a valid video file.");
-            }
-        });
-
-        // Compression Logic (Simulation with realistic UI calculation)
-        compressBtn.addEventListener('click', function() {
-            const sizeVal = parseFloat(targetSize.value);
-            if (!sizeVal || sizeVal <= 0) {
-                alert("Please enter a valid target size.");
-                return;
-            }
-
-            let targetBytes = sizeUnit.value === 'MB' 
-                ? sizeVal * 1024 * 1024 
-                : sizeVal * 1024 * 1024 * 1024;
-
-            if (targetBytes >= originalSizeBytes) {
-                alert("Target size must be smaller than the original video size.");
-                return;
-            }
-
-            // Start Compression UI
-            compressBtn.disabled = true;
-            compressBtn.textContent = "Processing...";
-            progressContainer.style.display = 'block';
-            resultArea.style.display = 'none';
-            progressFill.style.width = '0%';
-            
-            let progress = 0;
-            
-            // Simulating the processing time based on file size (UX purposes)
-            // Note: True client-side compression requires Wasm libraries like ffmpeg.js
-            const interval = setInterval(() => {
-                // Randomize progress increments to look natural
-                progress += Math.random() * 5 + 2; 
-                
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    
-                    // Finish processing
-                    progressFill.style.width = '100%';
-                    progressText.textContent = 'Compressing... 100%';
-                    
-                    setTimeout(() => {
-                        compressBtn.disabled = false;
-                        compressBtn.textContent = "Compress Another Video";
-                        resultArea.style.display = 'block';
-                        
-                        // Create object URL for download (returning original file to complete loop for UI demonstration)
-                        const url = URL.createObjectURL(currentFile);
-                        downloadBtn.href = url;
-                        downloadBtn.download = "Compressed_" + currentFile.name;
-                    }, 500);
-                } else {
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = `Compressing... ${Math.floor(progress)}%`;
-                }
-            }, 150);
-        });
-    </script>
+<script>
+const $=id=>document.getElementById(id);
+let src=null,url=null,outBlob=null,meta={};
+const fmt=b=>b>=1073741824?(b/1073741824).toFixed(2)+" GB":b>=1048576?(b/1048576).toFixed(2)+" MB":(b/1024).toFixed(1)+" KB";
+const tm=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+const say=(t,e)=>{$("msg").textContent=t;$("msg").className=e?"err":""};
+const drop=$("drop");
+drop.onclick=()=>$("file").click();
+drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}};
+["dragover","dragenter"].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add("on")}));
+["dragleave","drop"].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove("on")}));
+drop.addEventListener("drop",e=>load(e.dataTransfer.files[0]));
+$("file").onchange=e=>load(e.target.files[0]);
+function load(f){
+ if(!f)return;
+ if(!f.type.startsWith("video/")){say("Please choose a valid video file.",1);$("panel").style.display="block";return}
+ src=f;outBlob=null;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);
+ const v=$("pv");v.src=url;
+ v.onloadedmetadata=()=>{meta={d:v.duration,w:v.videoWidth,h:v.videoHeight};
+  $("orig").textContent=fmt(f.size);$("dur").textContent=tm(meta.d);$("res").textContent=meta.w+"×"+meta.h;
+  $("panel").style.display="block";$("dl").style.display="none";$("out").style.display="none";$("bar").style.display="none";
+  say("Enter the size you want and click Compress.")};
+ v.onerror=()=>{say("This video format cannot be read by your browser. Try MP4 or WebM.",1);$("panel").style.display="block"};
+}
+$("go").onclick=async()=>{
+ const val=parseFloat($("tv").value);
+ if(!src)return say("Upload a video first.",1);
+ if(!val||val<=0)return say("Enter a valid target size.",1);
+ const target=val*($("tu").value==="GB"?1073741824:1048576);
+ if(target>=src.size)return say("Target is not smaller than the original ("+fmt(src.size)+"). Enter a smaller size.",1);
+ const total=target*0.93*8,audio=meta.d>0?(total/meta.d>200000?96000:48000):96000;
+ let vb=total/meta.d-audio;
+ if(vb<60000)return say("Target is too small for this video's length. Enter a larger size.",1);
+ const fps=30,bpp=0.07,pix=vb/(fps*bpp);
+ let sc=Math.min(1,Math.sqrt(pix/(meta.w*meta.h)));sc=Math.max(sc,0.15);
+ const W=Math.max(2,Math.round(meta.w*sc/2)*2),H=Math.max(2,Math.round(meta.h*sc/2)*2);
+ const types=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
+ const mime=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+ if(!mime)return say("Your browser does not support video compression. Use latest Chrome, Edge or Firefox.",1);
+ $("go").disabled=true;$("dl").style.display="none";$("out").style.display="none";$("bar").style.display="block";$("fill").style.width="0";
+ say("Compressing… keep this tab open.");
+ try{
+  const v=document.createElement("video");v.src=url;v.playsInline=true;v.preload="auto";
+  await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=j});
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d");
+  const stream=cv.captureStream(fps);
+  try{const ac=new (window.AudioContext||window.webkitAudioContext)();const s=ac.createMediaElementSource(v);const d=ac.createMediaStreamDestination();s.connect(d);
+   d.stream.getAudioTracks().forEach(t=>stream.addTrack(t));}catch(e){}
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(vb),audioBitsPerSecond:audio});
+  const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+  const done=new Promise(r=>rec.onstop=r);
+  rec.start(1000);
+  let run=true;
+  const draw=()=>{if(!run)return;cx.drawImage(v,0,0,W,H);$("fill").style.width=Math.min(99,v.currentTime/meta.d*100)+"%";
+   v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw)};
+  v.onended=()=>{run=false;setTimeout(()=>rec.stop(),300)};
+  await v.play();draw();await done;
+  outBlob=new Blob(ch,{type:mime.split(";")[0]});
+  $("fill").style.width="100%";
+  $("ns").textContent=fmt(outBlob.size);
+  $("sv").textContent=Math.max(0,(1-outBlob.size/src.size)*100).toFixed(0)+"%";
+  $("fm").textContent=mime.includes("mp4")?"MP4":"WebM";
+  $("out").style.display="grid";$("dl").style.display="block";
+  say(outBlob.size>src.size?"Output is larger than the original. Try a smaller target.":"Done! Your video is ready to download.",outBlob.size>src.size);
+ }catch(e){say("Compression failed. Try another video or browser.",1)}
+ $("go").disabled=false;
+};
+$("dl").onclick=()=>{
+ if(!outBlob)return;
+ const a=document.createElement("a");a.href=URL.createObjectURL(outBlob);
+ const ext=outBlob.type.includes("mp4")?"mp4":"webm";
+ a.download=src.name.replace(/\.[^.]+$/,"")+"-compressed."+ext;
+ document.body.appendChild(a);a.click();a.remove();
+};
+</script>
 </body>
 </html>
