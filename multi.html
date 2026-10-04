@@ -1,242 +1,864 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Online Video Compressor – Reduce Video Size to MB or GB | No Upload</title>
-<meta name="description" content="Compress any video online for free. See the original file size, enter your target size in MB or GB, and download the compressed video. Private, fast, runs in your browser.">
-<meta name="keywords" content="video compressor, compress video online, reduce video size, compress video to MB, shrink video file, free video compressor">
-<meta name="robots" content="index, follow, max-snippet:-1">
-<link rel="canonical" href="https://example.com/compress.html">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Free Online Video Compressor – Set Your Own Target Size">
-<meta property="og:description" content="Upload a video, choose the size in MB or GB, and download. 100% private – files never leave your device.">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[
-{"@type":"SoftwareApplication","name":"Video Compressor","applicationCategory":"MultimediaApplication","operatingSystem":"Any (Web Browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free browser-based video compressor with custom target size in MB or GB."},
-{"@type":"HowTo","name":"How to compress a video online","step":[{"@type":"HowToStep","text":"Upload your video file."},{"@type":"HowToStep","text":"Check the original size shown."},{"@type":"HowToStep","text":"Enter the target size in MB or GB."},{"@type":"HowToStep","text":"Click Compress, then Download."}]},
-{"@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"Is this video compressor free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is completely free with no sign-up, watermark or file limit set by the tool."}},
-{"@type":"Question","name":"Are my videos uploaded to a server?","acceptedAnswer":{"@type":"Answer","text":"No. Compression happens locally in your browser, so your video stays private."}},
-{"@type":"Question","name":"Can I choose the exact output size?","acceptedAnswer":{"@type":"Answer","text":"Yes. Enter a target in MB or GB. The result is very close to it, usually slightly smaller."}},
-{"@type":"Question","name":"Why does compression take as long as the video?","acceptedAnswer":{"@type":"Answer","text":"The video is re-encoded in real time by your browser, so keep the tab open until it finishes."}}]}]}
-</script>
-<style>
-:root{--bg:#0e1116;--card:#171c24;--line:#2a3140;--tx:#e8ecf3;--mu:#97a1b3;--ac:#2fd4a7;--ac2:#4c8dff}
-*{box-sizing:border-box}
-body{margin:0;font:16px/1.7 "Segoe UI",system-ui,Arial,sans-serif;background:radial-gradient(1200px 500px at 50% -10%,#1b2a3f,var(--bg));color:var(--tx)}
-header{text-align:center;padding:48px 16px 8px}
-h1{font-size:clamp(28px,5vw,44px);margin:0 0 10px;line-height:1.2}
-header p{color:var(--mu);max-width:640px;margin:0 auto}
-main{max-width:760px;margin:24px auto;padding:0 16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-#drop{border:2px dashed var(--line);border-radius:14px;padding:36px 16px;text-align:center;cursor:pointer;transition:.2s}
-#drop:hover,#drop.on,#drop:focus{border-color:var(--ac);background:#1a2430;outline:none}
-#drop b{display:block;font-size:18px}#drop span{color:var(--mu);font-size:14px}
-.ico{font-size:40px}
-#panel{display:none;margin-top:20px}
-video{width:100%;max-height:260px;border-radius:12px;background:#000}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
-.stat{background:#10141b;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
-.stat small{color:var(--mu);display:block;font-size:12px}.stat strong{font-size:17px;word-break:break-all}
-#orig{color:var(--ac)}
-label{font-weight:600;display:block;margin-bottom:6px}
-.row{display:flex;gap:10px}
-input,select{background:#10141b;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px}
-input{flex:1;min-width:0}
-input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
-button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;color:#06231b;background:linear-gradient(90deg,var(--ac),#7be8c8)}
-button:disabled{opacity:.5;cursor:not-allowed}
-#dl{display:none;background:linear-gradient(90deg,var(--ac2),#8ab4ff);color:#fff}
-.bar{height:10px;background:#10141b;border-radius:99px;overflow:hidden;margin-top:14px;display:none}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
-#msg{margin-top:12px;color:var(--mu);font-size:14px;min-height:20px}
-#msg.err{color:#ff8a8a}
-article{margin-top:40px;color:#c9d1de}
-article h2{font-size:26px;margin:34px 0 8px;color:var(--tx)}
-article h3{font-size:19px;margin:22px 0 4px;color:var(--ac)}
-article li{margin-bottom:6px}
-details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:8px 0}
-summary{cursor:pointer;font-weight:600}
-footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 16px}
-@media(max-width:520px){.stats{grid-template-columns:1fr}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Free PDF Compressor & Image Compressor Online – Compress to KB or MB</title>
+    
+    <meta name="description" content="Free PDF and image compressor online. Compress PDF, JPG, PNG and WEBP files to a target size in KB or MB. Fast browser-based compression with no file upload.">
+    <meta name="author" content="PooreYoutuber">
+    <meta name="robots" content="index, follow">
+
+    <link rel="canonical" href="https://pooreyoutuber.github.io/pdf-compress.html">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Free PDF Compressor & Image Compressor Online – Compress to KB or MB">
+    <meta property="og:description" content="Free PDF and image compressor online. Compress PDF, JPG, PNG and WEBP files to a target size in KB or MB. Fast browser-based compression with no file upload.">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/pdf-compress.html">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://pooreyoutuber.github.io/images/pdf-compressor.webp">
+    <meta property="og:site_name" content="PooreYoutuber">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free PDF Compressor & Image Compressor Online">
+    <meta name="twitter:description" content="Free browser-based tool to compress PDF documents and images to your target size in KB or MB.">
+    <meta name="twitter:image" content="https://pooreyoutuber.github.io/images/pdf-compressor.webp">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <!-- WebApplication Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://pooreyoutuber.github.io/pdf-compress.html#webapp",
+          "name": "Free PDF & Image Compressor Online",
+          "url": "https://pooreyoutuber.github.io/pdf-compress.html",
+          "image": "https://pooreyoutuber.github.io/images/pdf-compressor.webp",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires HTML5, WebGL, JavaScript compatible browser",
+          "softwareVersion": "1.0",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "A free browser-based file compression utility designed to shrink PDF documents, JPG, PNG, and WEBP images toward a specific target size in KB or MB.",
+          "featureList": [
+            "Compress PDF to KB or MB",
+            "Compress JPG images",
+            "Compress PNG images",
+            "Compress WEBP images",
+            "Target file size compression",
+            "Browser-based file processing"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://pooreyoutuber.github.io/pdf-compress.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How can I compress a PDF to 100KB?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Upload your PDF, enter 100 KB as the target size, and click 'Compress File'. The tool attempts to reduce the PDF toward the requested target size."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I compress an image to 50KB?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, you can upload a JPG, PNG, or WEBP image, specify 50KB as your target, and compress it directly in your browser."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this PDF compressor free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, this online file compressor is completely free to use without any subscription or watermarks."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are my files uploaded to a server?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Your files are processed directly in your browser. They are never uploaded to any external server."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use this compressor on mobile?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, this tool works perfectly on mobile browsers allowing you to reduce photo or PDF sizes straight from your phone."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I compress PNG and WEBP images?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, aside from PDF and JPG, this tool fully supports reducing the file size of PNG and WEBP images."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What happens if my PDF cannot reach the target size?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "If the exact target cannot be reached without severely breaking the document, the tool returns the smallest practical size it can produce."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- Breadcrumb Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://pooreyoutuber.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "PDF & Image Compressor",
+          "item": "https://pooreyoutuber.github.io/pdf-compress.html"
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --green: #10b981;
+            --red: #e11d48;
+            --amber: #f59e0b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 16px; line-height: 1.6; }
+        .container { max-width: 860px; margin: 24px auto; }
+
+        /* Top Navigation Header (Left: Brand Logo, Right: Home Button) */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 10px 4px;
+        }
+        .brand-logo {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .home-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f5f3ff;
+        }
+        
+        header { text-align: center; margin-bottom: 32px; }
+        header h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; font-weight: 700; }
+        header p { color: var(--muted); font-size: 0.95rem; }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.07);
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .privacy-notice {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #34d399;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* Upload Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 32px 16px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f3ff;
+            transition: background .25s;
+        }
+        .drop-zone:hover, .drop-zone.over { background: #ede9fe; }
+        .drop-zone svg { display: block; margin: 0 auto 10px; }
+        .drop-zone p { font-weight: 600; font-size: 0.95rem; }
+        .drop-zone small { color: var(--muted); font-size: .8rem; }
+        #fileInput { display: none; }
+
+        /* File Info */
+        .file-info {
+            display: none;
+            margin-top: 18px;
+            padding: 13px 15px;
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            font-size: .9rem;
+        }
+        .file-info p { margin-bottom: 3px; }
+        .file-info strong { color: var(--text); }
+
+        /* Controls: Always Visible Now */
+        .controls {
+            display: grid;
+            margin-top: 18px;
+            align-items: flex-end;
+            gap: 12px;
+            grid-template-columns: 1fr auto;
+        }
+        label.ctrl-label { display: block; font-weight: 600; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+        .size-inputs { display: flex; gap: 8px; }
+        input[type=number], select {
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .95rem;
+            outline: none;
+            background: var(--card);
+            transition: border-color .2s;
+        }
+        input[type=number]:focus, select:focus { border-color: var(--primary); }
+        input[type=number] { flex: 1; width: 100%; }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            white-space: nowrap;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+        /* Progress */
+        .progress-wrap { display: none; margin-top: 18px; }
+        .progress-text { font-size: .83rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+        .progress-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; width: 0; transition: width .3s ease; }
+
+        /* Result Box */
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+        .result-box.ok  { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .result-box.warn{ background: #fffbeb; border: 1px solid #fcd34d; }
+        .result-box h3 { font-size: 1rem; margin-bottom: 10px; }
+        .result-box.ok   h3 { color: var(--green); }
+        .result-box.warn h3 { color: var(--amber); }
+
+        .size-row { display: flex; align-items: center; gap: 14px; font-size: .9rem; margin-bottom: 14px; flex-wrap: wrap; }
+        .sz-old { color: var(--red); text-decoration: line-through; }
+        .sz-arrow { color: var(--muted); }
+        .sz-new { color: var(--green); font-weight: 700; font-size: 1.05rem; }
+
+        .btn-dl {
+            display: inline-block;
+            background: var(--green);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: .93rem;
+            transition: opacity .2s;
+            text-align: center;
+        }
+        .btn-dl:hover { opacity: .88; }
+
+        .tool-helper-text { text-align: center; font-size: 0.9rem; color: var(--muted); margin-top: 15px; }
+
+        /* SEO Editorial Article Styling Fix */
+        .seo-content { 
+            background: var(--card); 
+            border-radius: 16px; 
+            padding: 28px; 
+            border: 1px solid var(--border); 
+            margin-bottom: 32px;
+        }
+        .seo-content h2 { font-size: 1.4rem; margin-bottom: 12px; margin-top: 20px; color: var(--text); }
+        .seo-content h2:first-child { margin-top: 0; }
+        .seo-content h3 { font-size: 1.1rem; color: var(--primary); margin: 20px 0 8px; }
+        .seo-content h4 { font-size: 0.98rem; color: var(--text); margin: 14px 0 6px; font-weight: 600; }
+        .seo-content p, .seo-content li { color: var(--muted); font-size: .95rem; margin-bottom: 10px; line-height: 1.6; }
+        .seo-content ul { margin-left: 20px; }
+
+        /* Visible FAQ Section */
+        .faq-container {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+        .faq-container h2 { font-size: 1.4rem; margin-bottom: 16px; color: var(--text); }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-item h3 { font-size: 1rem; color: var(--text); margin-bottom: 6px; font-weight: 600; }
+        .faq-item p { color: var(--muted); font-size: 0.92rem; }
+
+        /* Internal Linking Grid */
+        .internal-tools {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+        .internal-tools h3 { font-size: 1.1rem; margin-bottom: 14px; color: var(--text); }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        .tool-link {
+            display: block;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+        }
+        .tool-link:hover { background: #ede9fe; border-color: var(--primary); }
+
+        @media(max-width:580px){
+            header h1 { font-size: 1.5rem; }
+            .controls { grid-template-columns: 1fr; }
+            .btn-primary { width: 100%; }
+            .size-inputs { flex-direction: row; }
+            .seo-content, .card, .faq-container { padding: 18px; }
+        }
+    </style>
 </head>
 <body>
-<header>
-<h1>Free Online Video Compressor</h1>
-<p>Upload a video, see its real size, type the size you want in MB or GB, and download. No sign-up. No server upload.</p>
-</header>
-<main>
-<section class="card" aria-label="Video compressor tool">
-<div id="drop" tabindex="0" role="button" aria-label="Choose a video file">
-<div class="ico">🎬</div><b>Click or drop your video here</b><span>MP4, MOV, WebM, MKV, AVI and more (browser-supported formats)</span>
-<input type="file" id="file" accept="video/*" hidden>
+<div class="container">
+
+     <nav class="top-navbar">
+        <span class="brand-logo">PooreYoutuber</span>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">
+            🏠 Home
+        </a>
+    </nav>
+
+    
+    <header>
+        <h1>Free PDF & Image Compressor Online – Compress PDF to KB or MB</h1>
+        <p>Compress PDF, JPG, PNG, and WEBP files online to a target size in KB or MB.<br>Free, fast, and secure browser-based file compression with no upload required.</p>
+    </header>
+
+    <main>
+        <div class="card">
+            
+            <div class="privacy-notice">
+                🔒 Your files are processed directly in your browser. They are not uploaded to our compression server.
+            </div>
+
+            <div class="drop-zone" id="dropZone" onclick="fileInput.click()">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & Drop your file here or <span style="color:var(--primary);font-weight:700;">Browse</span></p>
+                <small>Supports: PDF, JPG, JPEG, PNG, WEBP</small>
+                <input type="file" id="fileInput" accept="image/*,application/pdf">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <p><strong>Name:</strong> <span id="fileName"></span></p>
+                <p><strong>Type:</strong> <span id="fileType"></span></p>
+                <p><strong>Current Size:</strong> <span id="currentSize" style="color:var(--red);font-weight:600;"></span></p>
+            </div>
+
+            <div class="controls" id="controlBox">
+                <div>
+                    <label class="ctrl-label" for="targetSize">Target Size:</label>
+                    <div class="size-inputs">
+                        <input type="number" id="targetSize" placeholder="e.g. 50" min="1" step="any">
+                        <select id="sizeUnit">
+                            <option value="KB">KB</option>
+                            <option value="MB">MB</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" id="compressBtn">Compress File</button>
+            </div>
+
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-text" id="progressText">Processing…</div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="result-box" id="resultBox">
+                <h3 id="resultTitle"></h3>
+                <div class="size-row">
+                    <span class="sz-old" id="szOld"></span>
+                    <span class="sz-arrow">→</span>
+                    <span class="sz-new" id="szNew"></span>
+                </div>
+                <a href="#" class="btn-dl" id="dlLink" download>⬇ Download Compressed File</a>
+            </div>
+
+            <p class="tool-helper-text">
+                Use this free file size reducer when an application, website, email, or upload form requires a smaller PDF or image file.
+            </p>
+        </div>
+
+        <article class="seo-content">
+            
+            <h2>What is a PDF Compressor?</h2>
+            <p>A PDF compressor is an online tool that reduces the file size of a PDF while attempting to preserve readable document quality. This tool lets users choose a target size in KB or MB and processes the file in the browser.</p>
+
+            <h2>Free PDF & Image Compressor Online</h2>
+            <p>Handling large file sizes can be difficult when submitting official applications, uploading documents to web portals, or optimizing media assets for websites. Our free browser-based File Compressor helps adjust document and image sizes toward your required target.</p>
+            
+            <h2>How to Compress a PDF to KB or MB</h2>
+            <p>Different websites have varying file size restrictions. You can utilize this tool to reach your desired size effectively.</p>
+
+            <h3>Compress PDF to 50KB</h3>
+            <p>Need to upload a document with a strict 50KB limit? Use this online PDF compressor to reduce a PDF toward your required target size directly in your browser.</p>
+
+            <h3>Compress PDF to 100KB</h3>
+            <p>Yes, you can compress a PDF to 100KB. Upload your PDF, enter 100 KB as the target size, and click "Compress File". The tool attempts to reduce the PDF toward the requested target size. If the exact target cannot be reached, it returns the smallest practical result.</p>
+
+            <h3>Compress PDF to 200KB</h3>
+            <p>Larger documents with multiple pages can easily be resized. Just set your target to 200KB and the tool will automatically adjust the render quality to hit the required file weight.</p>
+
+            <h2>How to Compress an Image to KB</h2>
+            <p>Just like documents, photos often need reduction before they can be uploaded online.</p>
+
+            <h3>Compress JPG to 50KB</h3>
+            <p>Optimize your JPEG images for profile picture uploads or web form requirements by scaling the quality to hit a precise 50KB limit.</p>
+
+            <h3>Compress PNG to 100KB</h3>
+            <p>PNG graphics can be heavy. Convert and scale down your transparent PNGs without downloading extra applications.</p>
+
+            <h3>Compress WEBP Images</h3>
+            <p>Next-generation WEBP formats are already optimized, but our tool can further squeeze them if your platform demands even smaller sizes.</p>
+
+            <h2>How to Use This File Compressor</h2>
+            <p>Follow these quick steps to optimize your files:</p>
+            <ul>
+                <li><strong>Upload Your File:</strong> Drag and drop your file into the drop zone, or browse to select your PDF, JPG, PNG, or WEBP.</li>
+                <li><strong>Choose Target Size:</strong> Enter the numeric size you need (e.g., 50 or 100) and choose KB or MB.</li>
+                <li><strong>Compress and Download:</strong> Hit compress and let the browser handle the heavy lifting. Save the final file once processed.</li>
+            </ul>
+
+            <h2>Benefits of Using This Online Compressor</h2>
+            
+            <h3>Free to Use</h3>
+            <p>No hidden fees or subscriptions. Resize as many documents and images as you need.</p>
+
+            <h3>Browser-Based Processing</h3>
+            <p>Your files are not sent to any remote server. Everything happens client-side, ensuring complete privacy.</p>
+
+            <h3>No Software Installation</h3>
+            <p>Forget about installing bulky software on your PC or phone. It works seamlessly within your web browser.</p>
+
+            <h3>PDF and Image Support</h3>
+            <p>Manage documents and common image extensions in a single clean webpage without switching utilities.</p>
+
+            <h2>PDF ka Size Kaise Kam Kare?</h2>
+            <p>Agar aap PDF ka size KB ya MB me kam karna chahte hain, to bas apni PDF file upar upload kare, apna target size enter kare aur "Compress File" button par click kare. Tool aapke PDF ko required size ke kareeb compress kar dega bina quality ko bohot zyada kharab kiye.</p>
+
+            <h2>Photo ka Size KB Me Kaise Kam Kare?</h2>
+            <p>JPG, PNG ya WEBP photo upload karke required target size KB me enter kare. Ye free tool aapki image ko browser ke andar hi process karta hai, isliye aapki photo safe rehti hai aur kisi server par upload nahi hoti.</p>
+        </article>
+
+        <section class="faq-container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <h3>How can I compress a PDF to 100KB?</h3>
+                <p>Upload your PDF, enter 100 KB as the target size, and click 'Compress File'. The tool attempts to reduce the PDF toward the requested target size.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I compress an image to 50KB?</h3>
+                <p>Yes, you can upload a JPG, PNG, or WEBP image, specify 50KB as your target, and compress it directly in your browser.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is this PDF compressor free?</h3>
+                <p>Yes, this online file compressor is completely free to use without any subscription or watermarks.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Are my files uploaded to a server?</h3>
+                <p>No. Your files are processed directly in your browser. They are never uploaded to any external server, ensuring complete data privacy.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I use this compressor on mobile?</h3>
+                <p>Yes, this tool works perfectly on mobile browsers allowing you to reduce photo or PDF sizes straight from your smartphone or tablet.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I compress PNG and WEBP images?</h3>
+                <p>Yes, aside from PDF and JPG, this tool fully supports reducing the file size of PNG and WEBP images.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What happens if my PDF cannot reach the target size?</h3>
+                <p>If the exact target cannot be reached without severely breaking the document, the tool returns the smallest practical size it can produce based on image re-rasterization limits.</p>
+            </div>
+        </section>
+
+        <section class="internal-tools">
+            <h3>Explore Related Tools</h3>
+            <div class="tools-grid">
+                <a href="https://pooreyoutuber.github.io/youtube-thumbnail.html" class="tool-link">YouTube Thumbnail Downloader</a>
+                <a href="https://pooreyoutuber.github.io/pdf-compress.html" class="tool-link">Compress PDF Online</a>
+                <a href="https://pooreyoutuber.github.io/website-ads5.html" class="tool-link">SEO Analytics Helper</a>
+                <a href="https://pooreyoutuber.github.io/multi-browser.html" class="tool-link">Multi Browser Tool</a>
+                <a href="https://pooreyoutuber.github.io/youtube-sine.html" class="tool-link">TubeVelocity Hub</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer style="text-align: center; margin-top: 30px; padding: 20px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem;">
+        <p>&copy; 2026 PooreYoutuber. All Rights Reserved. Use of this tool is subject to our terms of service. Free forever, no login required.</p>
+    </footer>
 </div>
-<div id="panel">
-<video id="pv" controls muted playsinline></video>
-<div class="stats">
-<div class="stat"><small>Original size</small><strong id="orig">–</strong></div>
-<div class="stat"><small>Duration</small><strong id="dur">–</strong></div>
-<div class="stat"><small>Resolution</small><strong id="res">–</strong></div>
-</div>
-<label for="tv">Target size</label>
-<div class="row">
-<input type="number" id="tv" min="0.1" step="any" placeholder="e.g. 20">
-<select id="tu" aria-label="Unit"><option>MB</option><option>GB</option></select>
-</div>
-<button id="go">Compress video</button>
-<div class="bar" id="bar"><i id="fill"></i></div>
-<div id="msg"></div>
-<div class="stats" id="out" style="display:none">
-<div class="stat"><small>New size</small><strong id="ns">–</strong></div>
-<div class="stat"><small>Saved</small><strong id="sv">–</strong></div>
-<div class="stat"><small>Format</small><strong id="fm">–</strong></div>
-</div>
-<button id="dl">Download compressed video</button>
-</div>
-</section>
-
-<article>
-<h2>Compress Video Online to Any Size You Want</h2>
-<p>Large video files are hard to share. Email services reject attachments above 25 MB, messaging apps limit uploads, and cloud storage fills up quickly. This free online video compressor solves the problem in a simple way: you upload a video, the tool shows its exact original size, and you decide how big the final file should be. Enter a number in megabytes or gigabytes, press one button, and download the result. Everything runs inside your own browser, so your footage is never sent to a server.</p>
-
-<h2>How to Use the Video Compressor</h2>
-<ol>
-<li><strong>Upload your video.</strong> Click the upload box or drag a file onto it. The tool instantly displays the original file size, duration and resolution.</li>
-<li><strong>Enter the size you need.</strong> Type a value in the target size box and choose MB or GB. For example, type 20 and select MB to get a file of about 20 MB.</li>
-<li><strong>Click Compress video.</strong> The video is re-encoded in your browser. A progress bar shows how far along it is. Keep the tab open and visible until it reaches 100%.</li>
-<li><strong>Download.</strong> When finished, the new size and the amount saved appear. Click the download button to save the compressed file.</li>
-</ol>
-
-<h2>Key Benefits</h2>
-<h3>You control the final size</h3>
-<p>Most compressors give only vague options such as low, medium or high quality. Here you choose the exact target, which is useful when a platform has a strict limit like 8 MB, 25 MB or 100 MB.</p>
-<h3>Private by design</h3>
-<p>Your video never leaves your device. There is no upload, no waiting for a server queue, and no risk of personal clips being stored by a third party. This makes the tool suitable for family videos, work recordings and confidential material.</p>
-<h3>Free, with no watermark</h3>
-<p>There are no accounts, subscriptions or logos burned into your video. Use the tool as often as you like.</p>
-<h3>Works on any modern device</h3>
-<p>The compressor runs in Chrome, Edge, Firefox and Safari on desktop and many mobile devices. Nothing needs to be installed.</p>
-<h3>Smart quality balance</h3>
-<p>The tool calculates the bitrate needed to reach your target size. If the target is very small, it also reduces the resolution so the picture stays clean instead of turning blocky.</p>
-
-<h2>When Should You Compress a Video?</h2>
-<ul>
-<li>Sending clips by email, WhatsApp, Telegram or Slack.</li>
-<li>Uploading assignments, application videos or portfolio reels to sites with size limits.</li>
-<li>Saving phone storage by shrinking old recordings.</li>
-<li>Making website videos load faster, which improves user experience and SEO.</li>
-<li>Reducing mobile data use when sharing videos on slow connections.</li>
-</ul>
-
-<h2>Tips for the Best Results</h2>
-<ul>
-<li>Choose a realistic target. Shrinking a 1 GB video to 5 MB will cause visible quality loss.</li>
-<li>Keep the browser tab active while compressing, because background tabs can be slowed down.</li>
-<li>Compression time is roughly equal to the video length, since the browser processes it in real time.</li>
-<li>If your target is larger than the original, the tool will warn you, as compression cannot add quality.</li>
-</ul>
-
-<h2>Frequently Asked Questions</h2>
-<details><summary>Is this video compressor free?</summary><p>Yes. It is completely free, with no sign-up and no watermark.</p></details>
-<details><summary>Is my video uploaded anywhere?</summary><p>No. All processing happens locally in your browser, so your file stays private.</p></details>
-<details><summary>How accurate is the target size?</summary><p>The result is usually within a few percent of your target and normally slightly smaller, because the tool leaves a safety margin for container overhead.</p></details>
-<details><summary>Which format will the output be?</summary><p>The tool uses MP4 when your browser supports it, otherwise WebM. Both play on almost all devices and platforms.</p></details>
-<details><summary>Why is compression taking so long?</summary><p>The video is encoded in real time, so a 10-minute video needs about 10 minutes. Keep the tab open.</p></details>
-</article>
-</main>
-<footer>© Free Video Compressor – compress video online to MB or GB, privately in your browser.</footer>
 
 <script>
-const $=id=>document.getElementById(id);
-let src=null,url=null,outBlob=null,meta={};
-const fmt=b=>b>=1073741824?(b/1073741824).toFixed(2)+" GB":b>=1048576?(b/1048576).toFixed(2)+" MB":(b/1024).toFixed(1)+" KB";
-const tm=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
-const say=(t,e)=>{$("msg").textContent=t;$("msg").className=e?"err":""};
-const drop=$("drop");
-drop.onclick=()=>$("file").click();
-drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}};
-["dragover","dragenter"].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add("on")}));
-["dragleave","drop"].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove("on")}));
-drop.addEventListener("drop",e=>load(e.dataTransfer.files[0]));
-$("file").onchange=e=>load(e.target.files[0]);
-function load(f){
- if(!f)return;
- if(!f.type.startsWith("video/")){say("Please choose a valid video file.",1);$("panel").style.display="block";return}
- src=f;outBlob=null;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);
- const v=$("pv");v.src=url;
- v.onloadedmetadata=()=>{meta={d:v.duration,w:v.videoWidth,h:v.videoHeight};
-  $("orig").textContent=fmt(f.size);$("dur").textContent=tm(meta.d);$("res").textContent=meta.w+"×"+meta.h;
-  $("panel").style.display="block";$("dl").style.display="none";$("out").style.display="none";$("bar").style.display="none";
-  say("Enter the size you want and click Compress.")};
- v.onerror=()=>{say("This video format cannot be read by your browser. Try MP4 or WebM.",1);$("panel").style.display="block"};
+// PDF.js worker setup
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// DOM Elements
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const fileInfo    = document.getElementById('fileInfo');
+const fileName    = document.getElementById('fileName');
+const fileType    = document.getElementById('fileType');
+const currentSize = document.getElementById('currentSize');
+const controlBox  = document.getElementById('controlBox');
+const compressBtn = document.getElementById('compressBtn');
+const progressWrap= document.getElementById('progressWrap');
+const progressText= document.getElementById('progressText');
+const progressFill= document.getElementById('progressFill');
+const resultBox   = document.getElementById('resultBox');
+const resultTitle = document.getElementById('resultTitle');
+const szOld       = document.getElementById('szOld');
+const szNew       = document.getElementById('szNew');
+const dlLink      = document.getElementById('dlLink');
+
+let selectedFile = null;
+
+// Drag & Drop Listeners
+['dragenter','dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
+['dragleave','drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
+dropZone.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); fileInput.value=''; });
+
+// Helper Functions
+function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' Bytes';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
 }
-$("go").onclick=async()=>{
- const val=parseFloat($("tv").value);
- if(!src)return say("Upload a video first.",1);
- if(!val||val<=0)return say("Enter a valid target size.",1);
- const target=val*($("tu").value==="GB"?1073741824:1048576);
- if(target>=src.size)return say("Target is not smaller than the original ("+fmt(src.size)+"). Enter a smaller size.",1);
- const total=target*0.97*8,audio=meta.d>0?(total/meta.d>200000?96000:48000):96000;
- let vb=total/meta.d-audio;
- if(vb<60000)return say("Target is too small for this video's length. Enter a larger size.",1);
- const fps=30,bpp=0.07,pix=vb/(fps*bpp);
- let sc=Math.min(1,Math.sqrt(pix/(meta.w*meta.h)));sc=Math.max(sc,0.15);
- const W=Math.max(2,Math.round(meta.w*sc/2)*2),H=Math.max(2,Math.round(meta.h*sc/2)*2);
- const types=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
- const mime=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
- if(!mime)return say("Your browser does not support video compression. Use latest Chrome, Edge or Firefox.",1);
- $("go").disabled=true;$("dl").style.display="none";$("out").style.display="none";$("bar").style.display="block";$("fill").style.width="0";
- say("Compressing… keep this tab open.");
- try{
-  const encode=async(vbr,label)=>{
-   say(label+" Keep this tab open.");$("fill").style.width="0";
-   const v=document.createElement("video");v.src=url;v.playsInline=true;v.preload="auto";
-   await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=j});
-   const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d");
-   const stream=cv.captureStream(fps);
-   try{const ac=new (window.AudioContext||window.webkitAudioContext)();const s=ac.createMediaElementSource(v);const d=ac.createMediaStreamDestination();s.connect(d);
-    d.stream.getAudioTracks().forEach(t=>stream.addTrack(t));}catch(e){}
-   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(vbr),audioBitsPerSecond:audio});
-   const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
-   const done=new Promise(r=>rec.onstop=r);
-   rec.start(1000);
-   let run=true;
-   const draw=()=>{if(!run)return;cx.drawImage(v,0,0,W,H);$("fill").style.width=Math.min(99,v.currentTime/meta.d*100)+"%";
-    v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw)};
-   v.onended=()=>{run=false;setTimeout(()=>rec.stop(),300)};
-   await v.play();draw();await done;
-   return new Blob(ch,{type:mime.split(";")[0]});
-  };
-  let best=null,cur=vb;
-  for(let p=1;p<=3;p++){
-   const b=await encode(cur,"Pass "+p+" of up to 3: matching your target size…");
-   if(b.size<=target&&(!best||b.size>best.size))best=b;
-   if(b.size<=target&&b.size>=target*0.9)break;
-   if(p===3)break;
-   const f=Math.min(4,Math.max(0.3,(target*0.96-audio*meta.d/8)/Math.max(1,b.size-audio*meta.d/8)));
-   cur=cur*f;
-   if(cur<40000)break;
-  }
-  outBlob=best||await encode(cur*0.8,"Final pass…");
-  $("fill").style.width="100%";
-  $("ns").textContent=fmt(outBlob.size);
-  $("sv").textContent=Math.max(0,(1-outBlob.size/src.size)*100).toFixed(0)+"%";
-  $("fm").textContent=mime.includes("mp4")?"MP4":"WebM";
-  $("out").style.display="grid";$("dl").style.display="block";
-  say(outBlob.size>src.size?"Output is larger than the original. Try a smaller target.":"Done! Your video is ready to download.",outBlob.size>src.size);
- }catch(e){say("Compression failed. Try another video or browser.",1)}
- $("go").disabled=false;
-};
-$("dl").onclick=()=>{
- if(!outBlob)return;
- const a=document.createElement("a");a.href=URL.createObjectURL(outBlob);
- const ext=outBlob.type.includes("mp4")?"mp4":"webm";
- a.download=src.name.replace(/\.[^.]+$/,"")+"-compressed."+ext;
- document.body.appendChild(a);a.click();a.remove();
-};
+
+function setProgress(pct, label) {
+    progressFill.style.width = pct + '%';
+    progressText.textContent = label;
+}
+
+function showResult(blob, origSize, filename, reached) {
+    progressWrap.style.display = 'none';
+    compressBtn.disabled = false;
+
+    const url = URL.createObjectURL(blob);
+    dlLink.href = url;
+    dlLink.download = filename;
+    szOld.textContent = fmt(origSize);
+    szNew.textContent = fmt(blob.size);
+
+    resultBox.className = 'result-box ' + (reached ? 'ok' : 'warn');
+    resultTitle.textContent = reached
+        ? '✅ Compressed successfully!'
+        : '⚠️ Best possible compression applied (target not fully reached)';
+    resultBox.style.display = 'block';
+}
+
+// File Pick Handler
+function handleFile(file) {
+    selectedFile = file;
+    fileName.textContent    = file.name;
+    fileType.textContent    = file.type || 'Unknown';
+    currentSize.textContent = fmt(file.size);
+    fileInfo.style.display  = 'block';
+    resultBox.style.display = 'none';
+    progressWrap.style.display = 'none';
+}
+
+// Compression Trigger
+compressBtn.addEventListener('click', async () => {
+    if (!selectedFile) {
+        alert('Please select a PDF or Image file first.');
+        return;
+    }
+
+    const val  = parseFloat(document.getElementById('targetSize').value);
+    const unit = document.getElementById('sizeUnit').value;
+    if (!val || val <= 0) { alert('Please enter a valid target size.'); return; }
+
+    let targetBytes = val * 1024;
+    if (unit === 'MB') targetBytes *= 1024;
+
+    if (targetBytes >= selectedFile.size) {
+        alert('Target size is already equal to or larger than current file size.');
+        return;
+    }
+
+    compressBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    resultBox.style.display    = 'none';
+    setProgress(5, 'Starting…');
+
+    try {
+        if (selectedFile.type === 'application/pdf') {
+            await compressPDF(selectedFile, targetBytes);
+        } else if (selectedFile.type.startsWith('image/')) {
+            await compressImage(selectedFile, targetBytes);
+        } else {
+            alert('Unsupported file type.'); 
+            compressBtn.disabled = false;
+            progressWrap.style.display = 'none';
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error during compression: ' + err.message);
+        compressBtn.disabled = false;
+        progressWrap.style.display = 'none';
+    }
+});
+
+// Image Compression Logic
+function dataURItoBlob(dataURI) {
+    const [head, data] = dataURI.split(',');
+    const mime = head.match(/:(.*?);/)[1];
+    const raw  = atob(data);
+    const buf  = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return new Blob([buf], { type: mime });
+}
+
+function compressImage(file, targetBytes) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Cannot read file'));
+        reader.onload  = e => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Cannot load image'));
+            img.onload  = () => {
+                setProgress(20, 'Analyzing image…');
+                const canvas = document.createElement('canvas');
+                const ctx    = canvas.getContext('2d');
+                const origW  = img.width, origH = img.height;
+
+                const scaleSteps = [];
+                for (let s = 1.0; s >= 0.05; s -= 0.02) scaleSteps.push(parseFloat(s.toFixed(2)));
+
+                let bestUnder = null;
+                let smallestSeen = null;
+                const closeEnough = targetBytes * 0.02;
+
+                for (let i = 0; i < scaleSteps.length; i++) {
+                    const scale = scaleSteps[i];
+                    canvas.width  = Math.max(1, Math.round(origW * scale));
+                    canvas.height = Math.max(1, Math.round(origH * scale));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    let lo = 0.01, hi = 0.98, foundAtScale = null;
+                    for (let iter = 0; iter < 25; iter++) {
+                        const mid  = (lo + hi) / 2;
+                        const blob = dataURItoBlob(canvas.toDataURL('image/jpeg', mid));
+                        if (blob.size <= targetBytes) { foundAtScale = blob; lo = mid; }
+                        else hi = mid;
+                        if (hi - lo < 0.0015) break;
+                    }
+
+                    if (foundAtScale && (!bestUnder || foundAtScale.size > bestUnder.size)) {
+                        bestUnder = foundAtScale;
+                    }
+
+                    const probe = dataURItoBlob(canvas.toDataURL('image/jpeg', 0.01));
+                    if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
+
+                    setProgress(20 + Math.round((i / scaleSteps.length) * 65), `Optimizing resolution…`);
+
+                    if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
+                }
+
+                const finalBlob = bestUnder || smallestSeen;
+                const reached   = !!bestUnder;
+
+                setProgress(95, 'Saving…');
+                const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.jpg';
+                showResult(finalBlob, file.size, outName, reached);
+                resolve();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// PDF Compression Logic
+async function compressPDF(file, targetBytes) {
+    setProgress(8, 'Loading PDF…');
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfJS       = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages    = pdfJS.numPages;
+
+    setProgress(15, `Loaded ${numPages} page(s). Rendering…`);
+
+    const scales = [2.0, 1.75, 1.5, 1.3, 1.15, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3];
+
+    let bestUnder = null;
+    let smallestSeen = null;
+    const closeEnough = targetBytes * 0.02;
+
+    for (let si = 0; si < scales.length; si++) {
+        const scale = scales[si];
+        setProgress(15 + Math.round((si / scales.length) * 65), `Rendering page layouts…`);
+
+        const pageCanvases = [];
+        for (let p = 1; p <= numPages; p++) {
+            const page     = await pdfJS.getPage(p);
+            const viewport = page.getViewport({ scale });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = Math.round(viewport.width);
+            canvas.height  = Math.round(viewport.height);
+            const ctx      = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            pageCanvases.push(canvas);
+        }
+
+        let lo = 0.01, hi = 0.98, foundBlob = null;
+        for (let iter = 0; iter < 22; iter++) {
+            const mid  = (lo + hi) / 2;
+            const blob = await buildPdfFromCanvases(pageCanvases, mid);
+
+            if (blob.size <= targetBytes) { foundBlob = blob; lo = mid; }
+            else hi = mid;
+            if (hi - lo < 0.002) break;
+        }
+
+        if (foundBlob && (!bestUnder || foundBlob.size > bestUnder.size)) {
+            bestUnder = foundBlob;
+        }
+
+        const probe = await buildPdfFromCanvases(pageCanvases, 0.01);
+        if (!smallestSeen || probe.size < smallestSeen.size) smallestSeen = probe;
+
+        if (bestUnder && (targetBytes - bestUnder.size) <= closeEnough) break;
+    }
+
+    const finalBlob = bestUnder || smallestSeen;
+    const reached   = !!bestUnder;
+
+    setProgress(97, 'Saving PDF…');
+    const outName = file.name.replace(/\.[^.]+$/, '') + '_compressed.pdf';
+    showResult(finalBlob, file.size, outName, reached);
+}
+
+async function buildPdfFromCanvases(canvases, quality) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    for (const canvas of canvases) {
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+        const jpegBytes   = base64ToBytes(jpegDataUrl.split(',')[1]);
+        const jpegImage   = await pdfDoc.embedJpg(jpegBytes);
+        const page        = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
+        page.drawImage(jpegImage, { x: 0, y: 0, width: jpegImage.width, height: jpegImage.height });
+    }
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    return new Blob([bytes], { type: 'application/pdf' });
+}
+
+function base64ToBytes(b64) {
+    const raw = atob(b64);
+    const buf = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+    return buf;
+}
 </script>
 </body>
 </html>
