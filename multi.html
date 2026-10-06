@@ -182,8 +182,14 @@
         .result-section { margin-top: 15px; padding-top: 20px; border-top: 2px dashed var(--border-color); display: none; }
         .result-section img { width: 100%; height: auto; max-height: 500px; object-fit: contain; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 12px; background: rgba(0,0,0,0.03); }
         .res-badge { display: inline-block; font-size: 0.85rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 16px; }
-        .btn-download { display: inline-block; width: 100%; padding: 16px; background: var(--accent-blue); color: white; text-decoration: none; border-radius: 14px; font-weight: 700; transition: opacity 0.2s; text-align: center; }
+        .btn-download { display: inline-block; width: 100%; padding: 16px; background: var(--accent-blue); color: white; text-decoration: none; border-radius: 14px; font-weight: 700; transition: opacity 0.2s; text-align: center; cursor: pointer; }
         .btn-download:hover { opacity: 0.9; }
+
+        /* Gallery Styling for Multi-Image Support */
+        .gallery-container { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .gallery-card { border: 1px solid var(--border-color); border-radius: 8px; padding: 4px; cursor: pointer; background: var(--card-bg); text-align: center; }
+        .gallery-card img { width: 100%; height: 70px; object-fit: cover; border-radius: 6px; margin-bottom: 4px; }
+        .gallery-card span { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .seo-content { text-align: left; }
         .seo-content h2, .seo-content h3 { color: var(--text-main); margin: 20px 0 10px 0; }
@@ -275,9 +281,15 @@
 
                 <!-- Extracted Image Output Area -->
                 <div id="output" class="result-section">
-                    <img id="thumbnail" src="" alt="YouTube Thumbnail Preview" loading="lazy">
+                    <img id="thumbnail" src="" alt="Thumbnail Preview" loading="lazy">
                     <div class="res-badge" id="resBadge"></div>
-                    <a id="downloadLink" class="btn-download" href="#" onclick="downloadCurrentImage(); return false;">Download Thumbnail</a>
+                    <a id="downloadLink" class="btn-download" href="#" onclick="downloadCurrentImage(); return false;">Download Highest Quality</a>
+                    
+                    <!-- Multi-Image Discovery Gallery -->
+                    <div id="galleryWrapper" style="display:none; margin-top: 20px;">
+                        <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main);">All Discovered Image Candidates:</h4>
+                        <div id="galleryContainer" class="gallery-container"></div>
+                    </div>
                 </div>
 
                 <!-- In-Tool Ad Unit -->
@@ -369,7 +381,6 @@
 
 <script>
     function extractMediaParameters(url) {
-        // Direct Image Bypass Logic Added Here
         if (url.match(/\.(jpeg|jpg|gif|png|webp|svg|bmp)(\?.*)?$/i)) {
             return { platform: 'direct_image', id: null, pageUrl: url };
         }
@@ -384,19 +395,9 @@
             if (instaMatch) return { platform: 'instagram', id: instaMatch[2], pageUrl: url };
         }
 
-        if (url.includes('facebook.com') || url.includes('fb.watch')) {
-            return { platform: 'facebook', id: null, pageUrl: url };
-        }
-
-        if (url.includes('tiktok.com')) {
-            return { platform: 'tiktok', id: null, pageUrl: url };
-        }
-
-        if (url.includes('pinterest.com') || url.includes('pin.it')) {
-            return { platform: 'pinterest', id: null, pageUrl: url };
-        }
-
-        // Added X (Twitter), Snapchat, and Google support 
+        if (url.includes('facebook.com') || url.includes('fb.watch')) return { platform: 'facebook', id: null, pageUrl: url };
+        if (url.includes('tiktok.com')) return { platform: 'tiktok', id: null, pageUrl: url };
+        if (url.includes('pinterest.com') || url.includes('pin.it')) return { platform: 'pinterest', id: null, pageUrl: url };
         if (url.includes('twitter.com') || url.includes('x.com')) return { platform: 'x (twitter)', id: null, pageUrl: url };
         if (url.includes('snapchat.com')) return { platform: 'snapchat', id: null, pageUrl: url };
         if (url.includes('google.com') || url.includes('share.google') || url.includes('goo.gl')) return { platform: 'google', id: null, pageUrl: url };
@@ -419,18 +420,40 @@
 
     let currentImageUrl = null;
 
-    function showResult(imageUrl, label) {
+    function showResult(imageUrl, label, candidates = []) {
         const imgNode = document.getElementById('thumbnail');
         const outSection = document.getElementById('output');
         const badge = document.getElementById('resBadge');
+        const galWrapper = document.getElementById('galleryWrapper');
+        const galContainer = document.getElementById('galleryContainer');
 
         currentImageUrl = imageUrl;
         imgNode.src = imageUrl;
         badge.textContent = label || '';
         outSection.style.display = 'block';
+
+        if (candidates && candidates.length > 1) {
+            galContainer.innerHTML = '';
+            candidates.slice(0, 12).forEach((cand, idx) => {
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                card.onclick = () => {
+                    currentImageUrl = cand.url;
+                    imgNode.src = cand.url;
+                    badge.textContent = `Selected: ${cand.width && cand.height ? cand.width + 'x' + cand.height : 'Option ' + (idx + 1)}`;
+                };
+                card.innerHTML = `<img src="${cand.url}" loading="lazy"><span>${cand.width && cand.height ? cand.width + 'x' + cand.height : 'Option ' + (idx + 1)}</span>`;
+                galContainer.appendChild(card);
+            });
+            galWrapper.style.display = 'block';
+        } else {
+            galWrapper.style.display = 'none';
+        }
+
         outSection.scrollIntoView({ behavior: 'smooth' });
     }
 
+    // Advanced Protected & Hotlink-resistant Download Engine
     async function downloadCurrentImage() {
         if (!currentImageUrl) return;
         const linkNode = document.getElementById('downloadLink');
@@ -448,7 +471,11 @@
             try {
                 blob = await fetchAsBlob(currentImageUrl);
             } catch (e) {
-                blob = await fetchAsBlob('https://api.allorigins.win/raw?url=' + encodeURIComponent(currentImageUrl));
+                try {
+                    blob = await fetchAsBlob('https://api.allorigins.win/raw?url=' + encodeURIComponent(currentImageUrl));
+                } catch(err) {
+                    blob = await fetchAsBlob('https://corsproxy.io/?' + encodeURIComponent(currentImageUrl));
+                }
             }
 
             const objectUrl = URL.createObjectURL(blob);
@@ -462,7 +489,7 @@
             URL.revokeObjectURL(objectUrl);
         } catch (e) {
             window.open(currentImageUrl, '_blank', 'noopener');
-            setStatus('Direct download blocked by host — opened in new tab. Right-click to save.', 'error');
+            setStatus('Direct download blocked by host — opened in new tab. Right-click or long-press to save.', 'error');
         } finally {
             linkNode.textContent = originalLabel;
         }
@@ -506,42 +533,141 @@
         attempt();
     }
 
-    async function tryOgImageExtraction(pageUrl, platformLabel) {
+    // Universal Multi-Source Discovery Engine & Quality Scorer
+    async function universalImageDiscovery(pageUrl, platformLabel) {
         try {
-            const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(pageUrl);
-            const res = await fetch(proxied);
-            if (!res.ok) throw new Error('network');
-            const html = await res.text();
+            let html = '';
+            let finalResolvedUrl = pageUrl;
 
-            const metaPatterns = [
-                /<meta[^>]+property=["']og:image:secure_url["'][^>]+content=["']([^"']+)["']/i,
-                /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
-                /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
-                /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
-                /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i
-            ];
-
-            let imageUrl = null;
-            for (const pattern of metaPatterns) {
-                const match = html.match(pattern);
-                if (match && match[1]) { imageUrl = match[1]; break; }
+            // Step 1: Proxy Fetch & Redirect Handling
+            try {
+                const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(pageUrl);
+                const res = await fetch(proxied);
+                if (!res.ok) throw new Error('network');
+                html = await res.text();
+            } catch (err) {
+                const altProxied = 'https://corsproxy.io/?' + encodeURIComponent(pageUrl);
+                const res = await fetch(altProxied);
+                if (!res.ok) throw new Error('network fallback');
+                html = await res.text();
             }
 
-            if (!imageUrl) {
-                const imgMatch = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-                if (imgMatch && imgMatch[1]) imageUrl = imgMatch[1];
+            const rawCandidates = [];
+
+            // Helper to clean and validate URL
+            const cleanUrl = (raw) => {
+                if (!raw) return null;
+                try {
+                    let cleaned = raw.replace(/&amp;/g, '&').trim();
+                    return new URL(cleaned, finalResolvedUrl).href;
+                } catch(e) { return null; }
+            };
+
+            // 1. OG & Meta Tags
+            const metaRegex = /<meta[^>]+(?:property|name)=["'](?:og:image|og:image:secure_url|twitter:image|twitter:image:src)["'][^>]+content=["']([^"']+)["']/gi;
+            let match;
+            while ((match = metaRegex.exec(html)) !== null) {
+                if (match[1]) rawCandidates.push(cleanUrl(match[1]));
+            }
+            const altMetaRegex = /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|og:image:secure_url|twitter:image|twitter:image:src)["']/gi;
+            while ((match = altMetaRegex.exec(html)) !== null) {
+                if (match[1]) rawCandidates.push(cleanUrl(match[1]));
             }
 
-            if (imageUrl) {
-                imageUrl = new URL(imageUrl, pageUrl).href;
-                imageUrl = imageUrl.replace(/&amp;/g, '&'); // Fix for encoded URLs added here
-                setStatus(`Image extracted for ${platformLabel}.`, 'success');
-                showResult(imageUrl, 'Preview Image');
+            // 2. JSON-LD Schemas
+            const jsonLdMatches = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+            if (jsonLdMatches) {
+                jsonLdMatches.forEach(script => {
+                    try {
+                        const content = script.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, '');
+                        const parsed = JSON.parse(content);
+                        const findImages = (obj) => {
+                            if (!obj) return;
+                            if (typeof obj === 'string' && obj.match(/\.(jpg|jpeg|png|webp|avif)/i)) {
+                                rawCandidates.push(cleanUrl(obj));
+                            } else if (Array.isArray(obj)) {
+                                obj.forEach(findImages);
+                            } else if (typeof obj === 'object') {
+                                if (obj.image) findImages(obj.image);
+                                if (obj.url && typeof obj.url === 'string' && obj.url.match(/\.(jpg|jpeg|png|webp)/i)) rawCandidates.push(cleanUrl(obj.url));
+                                if (obj.thumbnailUrl) findImages(obj.thumbnailUrl);
+                            }
+                        };
+                        findImages(parsed);
+                    } catch(e) {}
+                });
+            }
+
+            // 3. SRCSET Extraction (Responsive Images)
+            const srcsetRegex = /srcset=["']([^"']+)["']/gi;
+            while ((match = srcsetRegex.exec(html)) !== null) {
+                const entries = match[1].split(',');
+                entries.forEach(entry => {
+                    const parts = entry.trim().split(/\s+/);
+                    if (parts[0]) rawCandidates.push(cleanUrl(parts[0]));
+                });
+            }
+
+            // 4. Data-src, Data-original & Standard IMG SRCs
+            const imgRegex = /<img[^>]+(?:src|data-src|data-original|data-highres)=["']([^"']+)["']/gi;
+            while ((match = imgRegex.exec(html)) !== null) {
+                if (match[1] && !match[1].startsWith('data:image')) rawCandidates.push(cleanUrl(match[1]));
+            }
+
+            // 5. Preload Images
+            const linkRegex = /<link[^>]+rel=["']preload["'][^>]+href=["']([^"']+)["'][^>]+as=["']image["']/gi;
+            while ((match = linkRegex.exec(html)) !== null) {
+                if (match[1]) rawCandidates.push(cleanUrl(match[1]));
+            }
+
+            // Deduplicate candidate URLs
+            const uniqueUrls = [...new Set(rawCandidates.filter(Boolean))];
+
+            if (uniqueUrls.length === 0) {
+                setStatus(`No public images found on this ${platformLabel} link.`, 'error');
+                document.getElementById('fetchBtn').disabled = false;
+                return;
+            }
+
+            setStatus(`Analyzing ${uniqueUrls.length} image candidates for highest resolution...`, 'info');
+
+            // Measure dimensions and natural quality score for all candidates
+            const evaluatedCandidates = await Promise.all(
+                uniqueUrls.slice(0, 20).map(url => {
+                    return new Promise(resolve => {
+                        const img = new Image();
+                        img.onload = () => {
+                            resolve({ url, width: img.naturalWidth, height: img.naturalHeight, area: img.naturalWidth * img.naturalHeight });
+                        };
+                        img.onerror = () => {
+                            resolve({ url, width: 0, height: 0, area: 0 });
+                        };
+                        img.src = url;
+                    });
+                })
+            );
+
+            // Filter out broken candidates and sort by largest dimension (width x height)
+            const validCandidates = evaluatedCandidates
+                .filter(c => c.area > 0)
+                .sort((a, b) => b.area - a.area);
+
+            if (validCandidates.length > 0) {
+                const best = validCandidates[0];
+                const resLabel = (best.width > 0 && best.height > 0) 
+                    ? `Highest Resolution Available: ${best.width} × ${best.height}`
+                    : `Highest Available Cover Image`;
+
+                setStatus(`Extracted highest quality image from ${platformLabel}.`, 'success');
+                showResult(best.url, resLabel, validCandidates);
             } else {
-                setStatus(`No public cover image found on this ${platformLabel} link.`, 'error');
+                // Fallback if cross-origin image loading fails dimension checks
+                setStatus(`Image extracted for ${platformLabel}.`, 'success');
+                showResult(uniqueUrls[0], 'Best Available Quality');
             }
+
         } catch (e) {
-            setStatus(`Could not access this ${platformLabel} link. (Blocked by host or private)`, 'error'); // Better error message added
+            setStatus(`Could not access this ${platformLabel} link. (Blocked by host or private)`, 'error');
         } finally {
             document.getElementById('fetchBtn').disabled = false;
         }
@@ -570,13 +696,12 @@
             setStatus('Checking YouTube thumbnail qualities...', 'info');
             tryYoutubeResolutions(target.id);
         } else if (target.platform === 'direct_image') {
-            // Direct image handler added here
             setStatus('Direct Image loaded successfully.', 'success');
             showResult(target.pageUrl, 'Direct HD Image');
             btn.disabled = false;
         } else {
-            setStatus('Extracting cover image...', 'info');
-            tryOgImageExtraction(target.pageUrl, target.platform);
+            setStatus(`Discovering all high-resolution images for ${target.platform}...`, 'info');
+            universalImageDiscovery(target.pageUrl, target.platform);
         }
     }
 
