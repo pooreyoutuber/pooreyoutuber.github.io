@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to JPG Converter - Free, Fast & Secure Online Tool | Pooreyoutuber</title>
+    <meta name="description" content="Convert PDF documents to high-quality JPG images instantly in your browser. Supports batch conversions, client-side privacy, and ZIP downloads with Pooreyoutuber.">
+    <meta name="keywords" content="PDF to JPG, convert PDF to JPG online, batch PDF converter, free PDF image extractor, secure client-side PDF converter, Pooreyoutuber tools">
+    <meta name="author" content="Pooreyoutuber">
+    <link rel="canonical" href="https://pooreyoutuber.github.io/pdf-tojpg.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/pdf-tojpg.html">
+    <meta property="og:title" content="PDF to JPG Converter - Fast & Secure | Pooreyoutuber">
+    <meta property="og:description" content="Convert multiple PDFs to high-resolution JPG images right inside your browser. No files are uploaded to any server. Completely free and secure.">
+
+    <!-- Schema Markup (JSON-LD) for SEO / E-E-A-T -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PDF to JPG Converter by Pooreyoutuber",
+      "url": "https://pooreyoutuber.github.io/pdf-tojpg.html",
+      "description": "Convert single or multiple PDF documents to high-quality JPG images directly inside your web browser.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Pooreyoutuber",
+        "url": "https://pooreyoutuber.github.io/"
+      }
+    }
+    </script>
+
+    <!-- PDF.js and JSZip CDN Links -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header Styles (Provided Design) --- */
+        .header {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .header .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-controls nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-controls a, .dropbtn {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-controls a:hover, .dropdown:hover .dropbtn {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .badge-new {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 150px;
+            box-shadow: var(--shadow);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-dark);
+            padding: 10px 14px;
+            display: block;
+            border-radius: 0;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex-grow: 1;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .tool-title {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        /* Upload Area */
+        .drop-zone {
+            border: 2px dashed var(--primary-color);
+            background-color: #eff6ff;
+            border-radius: var(--radius);
+            padding: 2.5rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            background-color: #dbeafe;
+        }
+
+        .drop-zone-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone-text {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Selected Files List Display */
+        .selected-files-list {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 250px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .file-item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .file-item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .file-item-icon {
+            font-size: 1.5rem;
+        }
+
+        .file-item-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .file-item-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 450px;
+        }
+
+        .file-item-size {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .remove-file-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .remove-file-btn:hover {
+            background: #fca5a5;
+            color: #b91c1c;
+        }
+
+        /* Options and Controls */
+        .controls-area {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .quality-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .quality-selector select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-weight: 600;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 8px;
+            height: 12px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.2s ease;
+        }
+
+        .status-text {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Output Gallery */
+        .output-gallery {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .image-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid var(--border-color);
+            object-fit: contain;
+            max-height: 220px;
+            background: #f1f5f9;
+        }
+
+        .image-card-info {
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .image-card-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .download-single-btn {
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .download-single-btn:hover {
+            background: #059669;
+        }
+
+        /* --- SEO & Content Section --- */
+        .seo-section {
+            margin-top: 3rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .seo-section h2 {
+            font-size: 1.6rem;
+            color: var(--text-dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .seo-section h3 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .seo-section p, .seo-section ul, .seo-section ol {
+            color: #334155;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .seo-section ul, .seo-section ol {
+            padding-left: 1.5rem;
+        }
+
+        .seo-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .tool-card, .seo-section {
+                padding: 1.5rem;
+            }
+
+            .controls-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .file-item-name {
+                max-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="header">
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+        <div class="nav-controls">
+            <nav>
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Tool Container -->
+    <div class="container">
+        <div class="tool-card">
+            <h1 class="tool-title">PDF to JPG Converter</h1>
+            <p class="tool-subtitle">Convert single or multiple PDF documents into high-quality JPG images directly inside your browser.</p>
+
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-icon">📄➡️🖼️</div>
+                <div class="drop-zone-text">Drag & Drop your PDF file(s) here</div>
+                <div class="drop-zone-subtext">or click to browse from your device (Supports multiple files)</div>
+                <input type="file" id="file-input" accept="application/pdf" multiple>
+            </div>
+
+            <!-- List to display selected PDF files -->
+            <div class="selected-files-list" id="selected-files-list"></div>
+
+            <div class="controls-area">
+                <div class="quality-selector">
+                    <label for="render-scale">Image Resolution / Quality:</label>
+                    <select id="render-scale">
+                        <option value="1">Standard (100 DPI)</option>
+                        <option value="1.5" selected>High Quality (150 DPI)</option>
+                        <option value="2">Ultra HD (200 DPI)</option>
+                    </select>
+                </div>
+                <button class="btn" id="convert-btn" disabled>Convert to JPG</button>
+                <button class="btn" id="download-zip-btn" style="display:none; background-color: #059669;">Download All as ZIP</button>
+            </div>
+
+            <div class="progress-bar-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="status-text" id="status-text"></div>
+
+            <div class="output-gallery" id="output-gallery"></div>
+        </div>
+
+        <!-- Comprehensive Description Section (600+ Words) -->
+        <article class="seo-section">
+            <h2>Fast, Private, and Free Online PDF to JPG Converter by Pooreyoutuber</h2>
+            <p>Welcome to the ultimate <strong>PDF to JPG Converter</strong> brought to you by <strong>Pooreyoutuber</strong>. Converting document formats should be seamless, private, and effortless. Whether you are managing legal documents, scanning design portfolios, extracting illustrations from eBooks, or prepping presentations, our Web tool transforms your PDF pages into crisp, high-resolution JPG images within seconds.</p>
+
+            <h2>How to Use the PDF to JPG Converter</h2>
+            <p>Converting your PDF documents to image formats on Pooreyoutuber is quick and straightforward. Simply follow these easy steps:</p>
+            <ol>
+                <li><strong>Select or Drag & Drop PDF Files:</strong> Click on the upload region to select one or multiple PDF files from your smartphone, tablet, or desktop. Alternatively, drag and drop your PDFs directly into the drop area. You will immediately see a list of selected PDF files with their names and sizes.</li>
+                <li><strong>Choose Quality Settings:</strong> Select your preferred output resolution (Standard 100 DPI, High Quality 150 DPI, or Ultra HD 200 DPI). Higher DPI settings produce clearer image rendering for text-heavy documents.</li>
+                <li><strong>Click 'Convert to JPG':</strong> Press the primary conversion button. Our browser engine immediately reads and processes every page of your PDF file locally.</li>
+                <li><strong>Download Individual Images or a Combined ZIP:</strong> View real-time thumbnails of extracted JPG images. Download specific pages individually or click the <strong>Download All as ZIP</strong> button to grab all extracted images simultaneously in one compressed file.</li>
+            </ol>
+
+            <h2>Key Features & Key Benefits of Using Pooreyoutuber Tools</h2>
+            <p>We built this Web utility specifically to address speed, reliability, and security concerns associated with server-based online converters. Here is why thousands of creators and professionals trust <strong>Pooreyoutuber</strong> tools:</p>
+
+            <h3>1. 100% Client-Side Privacy (Zero Server Uploads)</h3>
+            <p>Unlike conventional web converters that upload your confidential PDFs to remote cloud servers, Pooreyoutuber processes your files entirely within your web browser using HTML5 Canvas and JavaScript libraries (PDF.js). Your confidential files, sensitive agreements, and personal photos never leave your device, ensuring total privacy and data security under regulations like GDPR and India's DPDP Act.</p>
+
+            <h3>2. Multi-File Batch Processing & Instant File Preview</h3>
+            <p>Need to extract pages from multiple PDF files simultaneously? Our tool supports true batch processing. Upload multiple PDFs at once, review the selected file list with size details, remove unwanted files, and convert them together.</p>
+
+            <h3>3. High-DPI Image Quality Control</h3>
+            <p>Maintain pixel perfection. Choose standard output for smaller image sizes, or scale up to Ultra HD (200 DPI) to retain sharp typography, vector graphics, logos, and intricate designs during the conversion process.</p>
+
+            <h3>4. Instant ZIP Packaging</h3>
+            <p>Instead of manually clicking save dozens of times for lengthy documents, our built-in JSZip integration packages all rendered images into a single `.zip` file with one click, saving you time and bandwidth.</p>
+
+            <h3>5. No Registration, Limits, or Software Installation Required</h3>
+            <p>You don't need to sign up, provide email addresses, pay subscriptions, or install heavy desktop software like Adobe Acrobat. Access this page on Chrome, Safari, Firefox, Edge, or mobile browsers, and get your work done instantly.</p>
+
+            <h2>About Pooreyoutuber Platform</h2>
+            <p>At <strong>Pooreyoutuber</strong>, we aim to build fast, lightweight, and user-centric web tools that simplify daily online tasks for creators, students, developers, and online workers. From educational guides, tech insights, YouTube publishing helpers, and interactive web calculators to file utility suites, we focus on delivering high-performance tools that respects user privacy and functionality.</p>
+        </article>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Configure PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        // DOM Element Handles
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const selectedFilesList = document.getElementById('selected-files-list');
+        const convertBtn = document.getElementById('convert-btn');
+        const downloadZipBtn = document.getElementById('download-zip-btn');
+        const renderScaleSelect = document.getElementById('render-scale');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const statusText = document.getElementById('status-text');
+        const outputGallery = document.getElementById('output-gallery');
+
+        let selectedFiles = [];
+        let convertedImages = []; // Stores { fileName, blob, dataUrl }
+
+        // Helper to format file sizes
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Trigger file input click (prevent click if clicked inside file list)
+        dropZone.addEventListener('click', (e) => {
+            fileInput.click();
+        });
+
+        // Drag & Drop Handling
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelection(Array.from(e.dataTransfer.files));
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(Array.from(e.target.files));
+            }
+        });
+
+        function handleFileSelection(files) {
+            const pdfFiles = files.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+            if (pdfFiles.length === 0) {
+                alert('Please select valid PDF file(s).');
+                return;
+            }
+
+            // Append new files without duplicating exact same files
+            pdfFiles.forEach(newFile => {
+                if (!selectedFiles.some(f => f.name === newFile.name && f.size === newFile.size)) {
+                    selectedFiles.push(newFile);
+                }
+            });
+
+            updateSelectedFilesUI();
+        }
+
+        function updateSelectedFilesUI() {
+            selectedFilesList.innerHTML = '';
+
+            if (selectedFiles.length === 0) {
+                convertBtn.disabled = true;
+                statusText.textContent = '';
+                return;
+            }
+
+            selectedFiles.forEach((file, index) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'file-item-card';
+
+                itemCard.innerHTML = `
+                    <div class="file-item-info">
+                        <span class="file-item-icon">📄</span>
+                        <div class="file-item-details">
+                            <span class="file-item-name" title="${file.name}">${file.name}</span>
+                            <span class="file-item-size">${formatBytes(file.size)}</span>
+                        </div>
+                    </div>
+                    <button class="remove-file-btn" data-index="${index}" title="Remove file">✕ Remove</button>
+                `;
+
+                selectedFilesList.appendChild(itemCard);
+            });
+
+            // Attach event listeners for remove buttons
+            document.querySelectorAll('.remove-file-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent file input click
+                    const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+                    selectedFiles.splice(indexToRemove, 1);
+                    updateSelectedFilesUI();
+                });
+            });
+
+            convertBtn.disabled = false;
+            outputGallery.innerHTML = '';
+            downloadZipBtn.style.display = 'none';
+            statusText.textContent = `${selectedFiles.length} PDF file(s) ready for conversion.`;
+        }
+
+        // Conversion Engine
+        convertBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            convertBtn.disabled = true;
+            downloadZipBtn.style.display = 'none';
+            outputGallery.innerHTML = '';
+            convertedImages = [];
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const scale = parseFloat(renderScaleSelect.value);
+            let totalPages = 0;
+            let processedPages = 0;
+
+            // Pre-count total pages across all files for percentage calculation
+            statusText.textContent = 'Analyzing PDF pages...';
+            const pdfDocs = [];
+            for (let file of selectedFiles) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    pdfDocs.push({ name: file.name, doc: pdfDoc });
+                    totalPages += pdfDoc.numPages;
+                } catch (err) {
+                    console.error('Error loading PDF:', err);
+                    alert(`Failed to load ${file.name}. It might be encrypted or corrupted.`);
+                }
+            }
+
+            if (totalPages === 0) {
+                statusText.textContent = 'No readable PDF pages found.';
+                convertBtn.disabled = false;
+                return;
+            }
+
+            // Render pages to canvas and export to JPG
+            for (let pdfObj of pdfDocs) {
+                const cleanBaseName = pdfObj.name.replace(/\.[^/.]+$/, "");
+                for (let pageNum = 1; pageNum <= pdfObj.doc.numPages; pageNum++) {
+                    statusText.textContent = `Processing ${pdfObj.name} - Page ${pageNum} of ${pdfObj.doc.numPages}...`;
+                    
+                    const page = await pdfObj.doc.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: scale });
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                    // Convert canvas to JPG Blob
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+                    const imgName = `${cleanBaseName}_page_${pageNum}.jpg`;
+
+                    convertedImages.push({
+                        fileName: imgName,
+                        blob: blob,
+                        dataUrl: dataUrl
+                    });
+
+                    // Render Preview Card
+                    renderImageCard(imgName, dataUrl, blob);
+
+                    processedPages++;
+                    const progressPercent = Math.round((processedPages / totalPages) * 100);
+                    progressBar.style.width = `${progressPercent}%`;
+                }
+            }
+
+            statusText.textContent = `Successfully converted ${convertedImages.length} page(s) to JPG!`;
+            convertBtn.disabled = false;
+            if (convertedImages.length > 0) {
+                downloadZipBtn.style.display = 'inline-flex';
+            }
+        });
+
+        // UI Gallery Renderer
+        function renderImageCard(title, src, blob) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = title;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'image-card-info';
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'image-card-title';
+            titleSpan.textContent = title;
+
+            const downloadLink = document.createElement('a');
+            downloadLink.className = 'download-single-btn';
+            downloadLink.textContent = 'Download JPG';
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = title;
+
+            infoDiv.appendChild(titleSpan);
+            infoDiv.appendChild(downloadLink);
+
+            card.appendChild(img);
+            card.appendChild(infoDiv);
+
+            outputGallery.appendChild(card);
+        }
+
+        // Batch Download as ZIP
+        downloadZipBtn.addEventListener('click', async () => {
+            if (convertedImages.length === 0) return;
+
+            statusText.textContent = 'Generating ZIP archive...';
+            const zip = new JSZip();
+
+            convertedImages.forEach(img => {
+                zip.file(img.fileName, img.blob);
+            });
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const zipUrl = URL.createObjectURL(zipBlob);
+
+            const a = document.createElement('a');
+            a.href = zipUrl;
+            a.download = 'Pooreyoutuber_Converted_Images.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            statusText.textContent = 'ZIP download started!';
+        });
+    </script>
+</body>
+</html>
