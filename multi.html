@@ -189,7 +189,7 @@
             border: 2px dashed var(--primary-color);
             background-color: #eff6ff;
             border-radius: var(--radius);
-            padding: 3rem 1.5rem;
+            padding: 2.5rem 1.5rem;
             cursor: pointer;
             transition: background-color 0.3s ease;
             position: relative;
@@ -202,7 +202,7 @@
         .drop-zone-icon {
             font-size: 3rem;
             color: var(--primary-color);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .drop-zone-text {
@@ -214,11 +214,82 @@
         .drop-zone-subtext {
             font-size: 0.875rem;
             color: var(--text-muted);
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
         }
 
         #file-input {
             display: none;
+        }
+
+        /* Selected Files List Display */
+        .selected-files-list {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 250px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .file-item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .file-item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .file-item-icon {
+            font-size: 1.5rem;
+        }
+
+        .file-item-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .file-item-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 450px;
+        }
+
+        .file-item-size {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .remove-file-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .remove-file-btn:hover {
+            background: #fca5a5;
+            color: #b91c1c;
         }
 
         /* Options and Controls */
@@ -410,6 +481,10 @@
             .btn {
                 justify-content: center;
             }
+
+            .file-item-name {
+                max-width: 180px;
+            }
         }
     </style>
 </head>
@@ -448,6 +523,9 @@
                 <input type="file" id="file-input" accept="application/pdf" multiple>
             </div>
 
+            <!-- List to display selected PDF files -->
+            <div class="selected-files-list" id="selected-files-list"></div>
+
             <div class="controls-area">
                 <div class="quality-selector">
                     <label for="render-scale">Image Resolution / Quality:</label>
@@ -477,7 +555,7 @@
             <h2>How to Use the PDF to JPG Converter</h2>
             <p>Converting your PDF documents to image formats on Pooreyoutuber is quick and straightforward. Simply follow these easy steps:</p>
             <ol>
-                <li><strong>Select or Drag & Drop PDF Files:</strong> Click on the upload region to select one or multiple PDF files from your smartphone, tablet, or desktop. Alternatively, drag and drop your PDFs directly into the drop area.</li>
+                <li><strong>Select or Drag & Drop PDF Files:</strong> Click on the upload region to select one or multiple PDF files from your smartphone, tablet, or desktop. Alternatively, drag and drop your PDFs directly into the drop area. You will immediately see a list of selected PDF files with their names and sizes.</li>
                 <li><strong>Choose Quality Settings:</strong> Select your preferred output resolution (Standard 100 DPI, High Quality 150 DPI, or Ultra HD 200 DPI). Higher DPI settings produce clearer image rendering for text-heavy documents.</li>
                 <li><strong>Click 'Convert to JPG':</strong> Press the primary conversion button. Our browser engine immediately reads and processes every page of your PDF file locally.</li>
                 <li><strong>Download Individual Images or a Combined ZIP:</strong> View real-time thumbnails of extracted JPG images. Download specific pages individually or click the <strong>Download All as ZIP</strong> button to grab all extracted images simultaneously in one compressed file.</li>
@@ -489,8 +567,8 @@
             <h3>1. 100% Client-Side Privacy (Zero Server Uploads)</h3>
             <p>Unlike conventional web converters that upload your confidential PDFs to remote cloud servers, Pooreyoutuber processes your files entirely within your web browser using HTML5 Canvas and JavaScript libraries (PDF.js). Your confidential files, sensitive agreements, and personal photos never leave your device, ensuring total privacy and data security under regulations like GDPR and India's DPDP Act.</p>
 
-            <h3>2. Multi-File Batch Processing</h3>
-            <p>Need to extract pages from multiple PDF files simultaneously? Our tool supports true batch processing. Upload multiple PDFs at once, convert them together, and receive all converted pages organized with clear file titles.</p>
+            <h3>2. Multi-File Batch Processing & Instant File Preview</h3>
+            <p>Need to extract pages from multiple PDF files simultaneously? Our tool supports true batch processing. Upload multiple PDFs at once, review the selected file list with size details, remove unwanted files, and convert them together.</p>
 
             <h3>3. High-DPI Image Quality Control</h3>
             <p>Maintain pixel perfection. Choose standard output for smaller image sizes, or scale up to Ultra HD (200 DPI) to retain sharp typography, vector graphics, logos, and intricate designs during the conversion process.</p>
@@ -514,6 +592,7 @@
         // DOM Element Handles
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
+        const selectedFilesList = document.getElementById('selected-files-list');
         const convertBtn = document.getElementById('convert-btn');
         const downloadZipBtn = document.getElementById('download-zip-btn');
         const renderScaleSelect = document.getElementById('render-scale');
@@ -525,8 +604,20 @@
         let selectedFiles = [];
         let convertedImages = []; // Stores { fileName, blob, dataUrl }
 
-        // Trigger file input click
-        dropZone.addEventListener('click', () => fileInput.click());
+        // Helper to format file sizes
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Trigger file input click (prevent click if clicked inside file list)
+        dropZone.addEventListener('click', (e) => {
+            fileInput.click();
+        });
 
         // Drag & Drop Handling
         dropZone.addEventListener('dragover', (e) => {
@@ -557,13 +648,57 @@
                 return;
             }
 
-            selectedFiles = pdfFiles;
-            dropZone.querySelector('.drop-zone-text').textContent = `${selectedFiles.length} file(s) selected`;
-            dropZone.querySelector('.drop-zone-subtext').textContent = selectedFiles.map(f => f.name).join(', ');
+            // Append new files without duplicating exact same files
+            pdfFiles.forEach(newFile => {
+                if (!selectedFiles.some(f => f.name === newFile.name && f.size === newFile.size)) {
+                    selectedFiles.push(newFile);
+                }
+            });
+
+            updateSelectedFilesUI();
+        }
+
+        function updateSelectedFilesUI() {
+            selectedFilesList.innerHTML = '';
+
+            if (selectedFiles.length === 0) {
+                convertBtn.disabled = true;
+                statusText.textContent = '';
+                return;
+            }
+
+            selectedFiles.forEach((file, index) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'file-item-card';
+
+                itemCard.innerHTML = `
+                    <div class="file-item-info">
+                        <span class="file-item-icon">📄</span>
+                        <div class="file-item-details">
+                            <span class="file-item-name" title="${file.name}">${file.name}</span>
+                            <span class="file-item-size">${formatBytes(file.size)}</span>
+                        </div>
+                    </div>
+                    <button class="remove-file-btn" data-index="${index}" title="Remove file">✕ Remove</button>
+                `;
+
+                selectedFilesList.appendChild(itemCard);
+            });
+
+            // Attach event listeners for remove buttons
+            document.querySelectorAll('.remove-file-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent file input click
+                    const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+                    selectedFiles.splice(indexToRemove, 1);
+                    updateSelectedFilesUI();
+                });
+            });
+
             convertBtn.disabled = false;
             outputGallery.innerHTML = '';
             downloadZipBtn.style.display = 'none';
-            statusText.textContent = 'Files ready for conversion.';
+            statusText.textContent = `${selectedFiles.length} PDF file(s) ready for conversion.`;
         }
 
         // Conversion Engine
