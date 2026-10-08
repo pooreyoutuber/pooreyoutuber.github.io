@@ -760,10 +760,10 @@ h1 {
   // ffmpeg.js exposes window.FFmpegWASM; util exposes window.FFmpegUtil (toBlobURL, fetchFile).
   // core provides the WebAssembly encoder (includes libx264 and AAC).
   const CDN = {
-    ffmpeg: 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
-    util: 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js',
-    coreJs: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-    coreWasm: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm'
+    ffmpeg: 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js',
+    util: 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js',
+    coreJs: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js',
+    coreWasm: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.wasm'
   };
 
   const ICON = {
@@ -1463,15 +1463,20 @@ h1 {
       const data = await raceWithCancel(ff.readFile('output.mp4'), job);
       if (!data || !data.length) throw new Error('empty-output');
 
-      const blob = new Blob([data], { type: 'video/mp4' });
+      const blob = new Blob([data.buffer || data], { type: 'video/mp4' });
       state.resultUrl = URL.createObjectURL(blob);
       showResult(blob, start, length);
     } catch (err) {
       if (job.cancelled) {
         showMsg(dom.trimMsg, 'Trimming was cancelled. Your video is still loaded, so you can adjust the selection and try again.', 'info');
       } else {
-        console.warn('Trim failed:', err); // technical details stay in the console only
-        showMsg(dom.trimMsg, 'We couldn’t process this video in your browser. Please try another MP4 file, or try a shorter clip.', 'error');
+        console.error('Video trim failed:', err);
+        const message = err && err.message ? String(err.message) : '';
+        let userMessage = 'We couldn’t process this video in your browser. Please try another MP4 file, or try a shorter clip.';
+        if (/Failed to load|engine-missing|core|wasm|worker/i.test(message)) {
+          userMessage = 'The video processing engine could not be loaded. Please check your internet connection, refresh the page, and try again.';
+        }
+        showMsg(dom.trimMsg, userMessage, 'error');
       }
     } finally {
       state.job = null;
