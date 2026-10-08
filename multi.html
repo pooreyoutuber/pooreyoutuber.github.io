@@ -760,7 +760,11 @@ h1 {
   // ffmpeg.js exposes window.FFmpegWASM; util exposes window.FFmpegUtil (toBlobURL, fetchFile).
   // core provides the WebAssembly encoder (includes libx264 and AAC).
   const CDN = {
-    ffmpeg: 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js',
+    // FFmpeg 0.12.10 UMD + matching single-thread core.
+    // The FFmpeg wrapper is loaded as a normal script; its worker is fetched
+    // into a Blob URL so GitHub Pages does not need a separate worker.js file.
+    ffmpeg: 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
+    ffmpegWorker: 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
     util: 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js',
     coreJs: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js',
     coreWasm: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.wasm'
@@ -1314,6 +1318,15 @@ h1 {
     });
   }
 
+  /** Fetch a remote asset and turn it into a same-origin Blob URL for a Worker/core. */
+  async function remoteBlobURL(url, mime) {
+    const res = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status} while loading ${url}`);
+    const blob = await res.blob();
+    if (!blob.size) throw new Error('Empty asset received from ' + url);
+    return URL.createObjectURL(new Blob([blob], { type: mime }));
+  }
+
   /** Loads FFmpeg.wasm only when needed. Returns a ready instance. */
   async function ensureEngine() {
     if (state.ffmpeg) return state.ffmpeg;
@@ -1321,23 +1334,45 @@ h1 {
 
     const gen = state.engineGen;
     state.engineLoading = (async () => {
+      console.info('[Video Trim] Loading FFmpeg.wasm…', CDN);
+
       if (!window.FFmpegWASM) await loadScript(CDN.ffmpeg);
       if (!window.FFmpegUtil) await loadScript(CDN.util);
-      if (!window.FFmpegWASM || !window.FFmpegUtil) throw new Error('engine-missing');
+
+      console.info('[Video Trim] FFmpeg globals:', {
+        FFmpegWASM: !!window.FFmpegWASM,
+        FFmpegClass: !!window.FFmpegWASM?.FFmpeg,
+        FFmpegUtil: !!window.FFmpegUtil,
+        fetchFile: !!window.FFmpegUtil?.fetchFile,
+        toBlobURL: !!window.FFmpegUtil?.toBlobURL
+      });
+
+      if (!window.FFmpegWASM?.FFmpeg) throw new Error('FFmpegWASM.FFmpeg is missing');
+      if (!window.FFmpegUtil?.fetchFile || !window.FFmpegUtil?.toBlobURL) {
+        throw new Error('FFmpegUtil.fetchFile/toBlobURL is missing');
+      }
 
       const ff = new window.FFmpegWASM.FFmpeg();
+      ff.on('log', ({ message }) => console.log('[FFmpeg]', message));
       ff.on('progress', handleEngineProgress);
 
-      // toBlobURL fetches the core files and exposes them as same-origin blob URLs
-      const coreURL = await window.FFmpegUtil.toBlobURL(CDN.coreJs, 'text/javascript');
-      const wasmURL = await window.FFmpegUtil.toBlobURL(CDN.coreWasm, 'application/wasm');
-      await ff.load({ coreURL, wasmURL });
+      // Explicitly provide the FFmpeg wrapper worker. In a standalone GitHub
+      // Pages HTML there is normally no local ./worker.js, which is the
+      // default expected by @ffmpeg/ffmpeg 0.12.x.
+      const workerURL = await remoteBlobURL(CDN.ffmpegWorker, 'text/javascript');
+
+      const coreURL = await remoteBlobURL(CDN.coreJs, 'text/javascript');
+      const wasmURL = await remoteBlobURL(CDN.coreWasm, 'application/wasm');
+
+      console.info('[Video Trim] Loading FFmpeg core…');
+      await ff.load({ coreURL, wasmURL, classWorkerURL: workerURL });
+      console.info('[Video Trim] FFmpeg core loaded successfully.');
 
       if (gen !== state.engineGen) {
-        // The user cancelled or left the page while loading
         try { ff.terminate(); } catch (_) {}
         throw new Error('engine-released');
       }
+
       state.ffmpeg = ff;
       return ff;
     })();
@@ -1463,20 +1498,15 @@ h1 {
       const data = await raceWithCancel(ff.readFile('output.mp4'), job);
       if (!data || !data.length) throw new Error('empty-output');
 
-      const blob = new Blob([data.buffer || data], { type: 'video/mp4' });
+      const blob = new Blob([data], { type: 'video/mp4' });
       state.resultUrl = URL.createObjectURL(blob);
       showResult(blob, start, length);
     } catch (err) {
       if (job.cancelled) {
         showMsg(dom.trimMsg, 'Trimming was cancelled. Your video is still loaded, so you can adjust the selection and try again.', 'info');
       } else {
-        console.error('Video trim failed:', err);
-        const message = err && err.message ? String(err.message) : '';
-        let userMessage = 'We couldn’t process this video in your browser. Please try another MP4 file, or try a shorter clip.';
-        if (/Failed to load|engine-missing|core|wasm|worker/i.test(message)) {
-          userMessage = 'The video processing engine could not be loaded. Please check your internet connection, refresh the page, and try again.';
-        }
-        showMsg(dom.trimMsg, userMessage, 'error');
+        console.warn('Trim failed:', err); // technical details stay in the console only
+        showMsg(dom.trimMsg, 'We couldn’t process this video in your browser. Please try another MP4 file, or try a shorter clip.', 'error');
       }
     } finally {
       state.job = null;
