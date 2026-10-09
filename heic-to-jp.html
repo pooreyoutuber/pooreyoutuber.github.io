@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free HEIC to JPG Converter Online - Convert Apple HEIC Photos to JPEG Instantly | PooreYoutuber</title>
+    <meta name="description" content="Convert HEIC to JPG online for free. Fast, secure, and private HEIC to JPEG converter that works entirely in your browser. No upload to server. Perfect for iPhone photos. Supports multiple files, quality control, and instant download.">
+    <meta name="keywords" content="heic to jpg, heic to jpeg, convert heic to jpg, heic converter, apple heic converter, iphone photo converter, heic to jpg online free, convert heic to jpeg, heif to jpg, online heic converter">
+    <meta name="author" content="PooreYoutuber">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/heic-to-jpg-converter.html">
+    <meta property="og:title" content="Free HEIC to JPG Converter Online - Convert Apple HEIC Photos to JPEG">
+    <meta property="og:description" content="Convert HEIC to JPG instantly in your browser. Free, private, no server upload. Perfect for iPhone and iPad photos.">
+    <meta property="og:image" content="https://pooreyoutuber.github.io/og-heic.jpg">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free HEIC to JPG Converter Online">
+    <meta name="twitter:description" content="Convert HEIC to JPG instantly in your browser. Free, private, no server upload.">
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://pooreyoutuber.github.io/heic-to-jpg-converter.html">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "HEIC to JPG Converter",
+      "description": "Free online tool to convert HEIC/HEIF images to JPG/JPEG format entirely in the browser. No file upload required.",
+      "url": "https://pooreyoutuber.github.io/heic-to-jpg-converter.html",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "PooreYoutuber",
+        "url": "https://pooreyoutuber.github.io/"
+      },
+      "featureList": ["HEIC to JPG conversion", "Multiple file support", "Quality control", "Client-side processing", "No registration required"]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .logo:hover {
+            color: var(--primary-light);
+        }
+
+        .nav-controls nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .home-btn, .article-btn, .donate-coffee-btn, .dropbtn {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .home-btn:hover, .article-btn:hover, .donate-coffee-btn:hover, .dropbtn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .badge-new {
+            background: var(--danger);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-left: 4px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: var(--bg-card);
+            min-width: 180px;
+            box-shadow: var(--shadow);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            z-index: 100;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .dropdown-content a {
+            color: var(--text);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .dropdown-content a:hover {
+            background: var(--bg-hover);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* ===== MAIN ===== */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== TOOL CARD ===== */
+        .tool-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            margin: 24px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(99, 102, 241, 0.05);
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.12);
+            transform: scale(1.01);
+        }
+
+        .upload-zone.has-files {
+            border-style: solid;
+            border-color: var(--primary);
+            padding: 30px 20px;
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-zone h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-list {
+            margin: 0 24px 20px;
+            display: none;
+        }
+
+        .file-list.show {
+            display: block;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .file-item .icon {
+            font-size: 1.5rem;
+        }
+
+        .file-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-item .name {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-item .size {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .file-item .remove {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .file-item .remove:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 0 24px 24px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .quality-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .quality-control label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .quality-control input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            height: 6px;
+        }
+
+        .quality-value {
+            background: var(--bg);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 48px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Progress */
+        .progress-section {
+            display: none;
+            padding: 0 24px 24px;
+        }
+
+        .progress-section.show {
+            display: block;
+        }
+
+        .progress-bar-wrap {
+            background: var(--bg);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Results */
+        .results {
+            display: none;
+            padding: 0 24px 24px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .result-item {
+            background: var(--bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .result-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+            background: #000;
+        }
+
+        .result-item .meta {
+            padding: 10px;
+        }
+
+        .result-item .meta .name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+
+        .result-item .meta .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .result-item .meta .actions a,
+        .result-item .meta .actions button {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-download {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 50px;
+        }
+
+        .feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .feature:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature h4 {
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .feature p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Description Section */
+        .description {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 40px 30px;
+            margin-bottom: 40px;
+        }
+
+        .description h2 {
+            font-size: 1.7rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description h3 {
+            font-size: 1.25rem;
+            margin: 28px 0 12px;
+            color: var(--primary-light);
+        }
+
+        .description p {
+            margin-bottom: 16px;
+            color: #cbd5e1;
+            font-size: 1.02rem;
+        }
+
+        .description ul, .description ol {
+            margin: 12px 0 20px 24px;
+            color: #cbd5e1;
+        }
+
+        .description li {
+            margin-bottom: 8px;
+        }
+
+        .description strong {
+            color: var(--text);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 10px 14px;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .home-btn, .article-btn, .donate-coffee-btn, .dropbtn {
+                padding: 7px 11px;
+                font-size: 0.82rem;
+            }
+
+            .container {
+                padding: 20px 14px 40px;
+            }
+
+            .upload-zone {
+                margin: 16px;
+                padding: 40px 16px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0 16px 20px;
+            }
+
+            .btn-group {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .description {
+                padding: 28px 18px;
+            }
+
+            .file-list {
+                margin: 0 16px 16px;
+            }
+
+            .progress-section, .results {
+                padding: 0 16px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-controls nav {
+                gap: 6px;
+            }
+
+            .home-btn, .article-btn, .donate-coffee-btn, .dropbtn {
+                padding: 6px 9px;
+                font-size: 0.78rem;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀 PooreYoutuber</a>
+        <div class="nav-controls">
+            <nav style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+                <div class="dropdown">
+                    <button class="dropbtn">🛒 Shop ▾</button>
+                    <div class="dropdown-content">
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                    </div>
+                </div>
+                <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>HEIC to JPG Converter</h1>
+            <p>Convert Apple HEIC photos to JPG instantly. Free, private & works offline in your browser. No uploads.</p>
+        </div>
+
+        <!-- TOOL -->
+        <div class="tool-card">
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple>
+                <span class="upload-icon">📷</span>
+                <h3>Drop HEIC files here</h3>
+                <p>or click to browse • Supports multiple files • HEIC & HEIF</p>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <div class="controls">
+                <div class="quality-control">
+                    <label for="quality">JPG Quality:</label>
+                    <input type="range" id="quality" min="0.5" max="1" step="0.05" value="0.92">
+                    <span class="quality-value" id="qualityValue">92%</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="clearBtn" style="display:none;">Clear All</button>
+                    <button class="btn btn-primary" id="convertBtn" disabled>
+                        <span id="btnText">Convert to JPG</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="progress-section" id="progressSection">
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText">Converting...</div>
+            </div>
+
+            <div class="results" id="results">
+                <h3>✅ Converted Images</h3>
+                <div class="result-grid" id="resultGrid"></div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <div class="icon">🔒</div>
+                <h4>100% Private</h4>
+                <p>All conversion happens in your browser. Files never leave your device.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">⚡</div>
+                <h4>Lightning Fast</h4>
+                <p>Powered by WebAssembly. Convert multiple HEIC photos in seconds.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📱</div>
+                <h4>Any Device</h4>
+                <p>Works perfectly on desktop, tablet and mobile browsers.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🆓</div>
+                <h4>Completely Free</h4>
+                <p>No limits, no registration, no watermarks. Convert as many as you want.</p>
+            </div>
+        </div>
+
+        <!-- LONG DESCRIPTION -->
+        <div class="description">
+            <h2>How to Convert HEIC to JPG Online – Complete Guide</h2>
+            
+            <p>Apple introduced the HEIC (High Efficiency Image Container) format with iOS 11 to replace the traditional JPEG format. While HEIC offers superior compression and better image quality at smaller file sizes, it creates compatibility issues. Many devices, websites, email clients, and older software still cannot open or display HEIC files properly. This is where a reliable <strong>HEIC to JPG converter</strong> becomes essential.</p>
+
+            <p>Our free online HEIC to JPG Converter solves this problem instantly. Unlike many other tools that require you to upload your photos to a remote server, this tool performs the entire conversion process right inside your web browser using advanced WebAssembly technology. Your photos never leave your device, ensuring complete privacy and security.</p>
+
+            <h3>Why Convert HEIC to JPG?</h3>
+            
+            <p>There are several practical reasons why converting HEIC images to JPG is often necessary:</p>
+            
+            <ul>
+                <li><strong>Universal Compatibility:</strong> JPG is supported by virtually every device, browser, social media platform, and software application in the world. HEIC is still not fully supported outside the Apple ecosystem.</li>
+                <li><strong>Sharing Photos Easily:</strong> When you send HEIC photos via email, WhatsApp, or upload them to websites that don’t support the format, recipients may not be able to view them. Converting to JPG ensures everyone can open your photos.</li>
+                <li><strong>Editing Software Support:</strong> Many photo editing programs, especially older versions or free tools, do not support HEIC natively. Converting to JPG allows seamless editing.</li>
+                <li><strong>Printing Services:</strong> Most online and offline photo printing services still prefer or only accept JPG/JPEG files.</li>
+                <li><strong>Website & Blog Uploads:</strong> Content management systems and website builders often have limited HEIC support. JPG remains the safest choice for web use.</li>
+            </ul>
+
+            <h3>How to Use This HEIC to JPG Converter</h3>
+            
+            <p>Using our tool is extremely simple and takes only a few seconds:</p>
+            
+            <ol>
+                <li><strong>Select or Drop Your Files:</strong> Click the upload area or drag and drop one or multiple HEIC/HEIF files from your computer, phone, or tablet.</li>
+                <li><strong>Adjust Quality (Optional):</strong> Use the quality slider to choose the output JPG quality. Higher quality means larger file size but better image detail. The default 92% offers an excellent balance.</li>
+                <li><strong>Click Convert:</strong> Press the “Convert to JPG” button. The tool will process each file using powerful client-side technology.</li>
+                <li><strong>Download Your JPG Files:</strong> Once conversion is complete, preview thumbnails will appear. Click the Download button next to each image to save the JPG file to your device.</li>
+            </ol>
+
+            <p>You can convert multiple photos at once. There is no file size limit imposed by the tool itself (though very large files depend on your device’s memory). The conversion works entirely offline after the page has loaded.</p>
+
+            <h3>Key Benefits of Using Our Online Converter</h3>
+            
+            <ul>
+                <li><strong>Complete Privacy:</strong> No files are uploaded to any server. Everything stays on your device.</li>
+                <li><strong>No Installation Required:</strong> Works directly in Chrome, Firefox, Edge, Safari, and other modern browsers.</li>
+                <li><strong>Batch Conversion:</strong> Convert dozens of HEIC photos in one go.</li>
+                <li><strong>Quality Control:</strong> Choose the exact JPG quality you need.</li>
+                <li><strong>Mobile Friendly:</strong> Fully responsive design works beautifully on smartphones and tablets.</li>
+                <li><strong>Free Forever:</strong> No hidden costs, no premium plans, no watermarks.</li>
+                <li><strong>Fast Performance:</strong> Powered by optimized WebAssembly (libheif), delivering quick results even on mid-range devices.</li>
+            </ul>
+
+            <h3>Understanding HEIC vs JPG</h3>
+            
+            <p>HEIC (also known as HEIF – High Efficiency Image File Format) uses advanced compression algorithms that can reduce file size by up to 50% compared to JPG while maintaining similar or better visual quality. This is why Apple adopted it as the default format for photos on iPhone and iPad.</p>
+
+            <p>However, JPG (or JPEG) has been the industry standard for decades. It is universally supported and remains the most practical format for sharing, printing, and web publishing. Converting HEIC to JPG does not significantly reduce quality when done at high settings (90% or above), making it the ideal solution for everyday use.</p>
+
+            <h3>Tips for Best Results</h3>
+            
+            <ul>
+                <li>For social media and messaging, 85–90% quality is usually more than enough and keeps file sizes small.</li>
+                <li>For printing or archival purposes, use 95–100% quality.</li>
+                <li>If you have many photos, convert them in smaller batches if your device has limited RAM.</li>
+                <li>Always keep the original HEIC files as a backup if storage space allows, since they contain the highest possible quality.</li>
+            </ul>
+
+            <h3>Is This Tool Safe?</h3>
+            
+            <p>Yes. Because the conversion happens entirely inside your browser using JavaScript and WebAssembly, your photos are never transmitted over the internet. This makes our HEIC to JPG converter one of the safest options available. You can even use it offline once the page is loaded.</p>
+
+            <p>Whether you need to convert a single iPhone photo or an entire album, this free online tool provides a fast, private, and reliable solution. Bookmark the page and use it whenever you need to make your Apple photos compatible with the rest of the world.</p>
+
+            <p>Start converting your HEIC files to JPG right now – no signup, no waiting, and no compromises on quality or privacy.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 <a href="https://pooreyoutuber.github.io/">PooreYoutuber</a> • Free Online Tools • Made with ❤️</p>
+        <p style="margin-top:8px;font-size:0.8rem;">This tool processes files locally in your browser. No data is uploaded to any server.</p>
+    </footer>
+
+    <!-- heic-to library (IIFE build) -->
+    <script src="https://cdn.jsdelivr.net/npm/heic-to@1.6.5/dist/iife/heic-to.js"></script>
+    
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const convertBtn = document.getElementById('convertBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const qualitySlider = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const results = document.getElementById('results');
+        const resultGrid = document.getElementById('resultGrid');
+        const btnText = document.getElementById('btnText');
+
+        let selectedFiles = [];
+
+        // Quality display
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = Math.round(qualitySlider.value * 100) + '%';
+        });
+
+        // Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, () => uploadZone.classList.add('dragover'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('dragover'));
+        });
+
+        uploadZone.addEventListener('drop', e => {
+            const files = Array.from(e.dataTransfer.files).filter(f => 
+                f.name.toLowerCase().endsWith('.heic') || 
+                f.name.toLowerCase().endsWith('.heif') ||
+                f.type === 'image/heic' || 
+                f.type === 'image/heif'
+            );
+            if (files.length) addFiles(files);
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                addFiles(Array.from(fileInput.files));
+                fileInput.value = '';
+            }
+        });
+
+        function addFiles(files) {
+            selectedFiles = [...selectedFiles, ...files];
+            renderFileList();
+            updateUI();
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+            updateUI();
+        }
+
+        function renderFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.classList.remove('show');
+                fileList.innerHTML = '';
+                uploadZone.classList.remove('has-files');
+                return;
+            }
+
+            uploadZone.classList.add('has-files');
+            fileList.classList.add('show');
+            fileList.innerHTML = selectedFiles.map((file, i) => `
+                <div class="file-item">
+                    <span class="icon">🖼️</span>
+                    <div class="info">
+                        <div class="name">${escapeHtml(file.name)}</div>
+                        <div class="size">${formatSize(file.size)}</div>
+                    </div>
+                    <button class="remove" onclick="removeFile(${i})" title="Remove">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function updateUI() {
+            convertBtn.disabled = selectedFiles.length === 0;
+            clearBtn.style.display = selectedFiles.length > 0 ? 'inline-flex' : 'none';
+        }
+
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            renderFileList();
+            updateUI();
+            results.classList.remove('show');
+            resultGrid.innerHTML = '';
+            progressSection.classList.remove('show');
+        });
+
+        convertBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            convertBtn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Converting...';
+            progressSection.classList.add('show');
+            results.classList.remove('show');
+            resultGrid.innerHTML = '';
+
+            const quality = parseFloat(qualitySlider.value);
+            const total = selectedFiles.length;
+            let completed = 0;
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                progressText.textContent = `Converting ${i + 1} of ${total}: ${file.name}`;
+                progressBar.style.width = `${((i) / total) * 100}%`;
+
+                try {
+                    const jpegBlob = await HeicTo({
+                        blob: file,
+                        type: 'image/jpeg',
+                        quality: quality
+                    });
+
+                    const url = URL.createObjectURL(jpegBlob);
+                    const jpgName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.innerHTML = `
+                        <img src="${url}" alt="${escapeHtml(jpgName)}" loading="lazy">
+                        <div class="meta">
+                            <div class="name" title="${escapeHtml(jpgName)}">${escapeHtml(jpgName)}</div>
+                            <div class="actions">
+                                <a class="btn-download" href="${url}" download="${escapeHtml(jpgName)}">Download</a>
+                            </div>
+                        </div>
+                    `;
+                    resultGrid.appendChild(item);
+                } catch (err) {
+                    console.error('Conversion failed for', file.name, err);
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.innerHTML = `
+                        <div style="height:140px;display:flex;align-items:center;justify-content:center;background:#1e293b;color:#ef4444;font-size:0.9rem;padding:10px;text-align:center;">
+                            Failed to convert<br>${escapeHtml(file.name)}
+                        </div>
+                        <div class="meta">
+                            <div class="name">${escapeHtml(file.name)}</div>
+                        </div>
+                    `;
+                    resultGrid.appendChild(item);
+                }
+
+                completed++;
+                progressBar.style.width = `${(completed / total) * 100}%`;
+            }
+
+            progressText.textContent = `Done! Converted ${completed} of ${total} files.`;
+            progressBar.style.width = '100%';
+            results.classList.add('show');
+            btnText.textContent = 'Convert to JPG';
+            convertBtn.disabled = false;
+
+            // Smooth scroll to results
+            setTimeout(() => {
+                results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+        });
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Make removeFile global for onclick
+        window.removeFile = removeFile;
+    </script>
+</body>
+</html>
+HEIC to JPG Converter Tool with UI and SEO Description - Grok
