@@ -665,7 +665,7 @@
             }
             .container { padding: 24px 14px 50px; }
             .upload-zone { margin: 16px; padding: 36px 16px; }
-            .file-info, .options-row, .progress-section, .transcript-area, .actions, .note { margin-left: 16px; margin-right: 16px; padding-left: 0; padding-right: 0; }
+            .file-info, .options-row, .progress-section, .transcript-area, .actions, .note { margin-left: 16px; margin-right: 16px; }
             .actions { padding: 0 16px 20px; flex-direction: column; }
             .btn { width: 100%; justify-content: center; }
             .description { padding: 28px 18px; }
@@ -722,7 +722,7 @@
             </div>
 
             <div class="note" id="noteBox">
-                ⏳ First time use downloads a small AI model (~40–80 MB). After that it works offline and much faster.
+                ⏳ First time use downloads a small AI model (~40 MB). After that it works offline and much faster. Best results with clear speech under 10 minutes.
             </div>
 
             <div class="file-info" id="fileInfo">
@@ -898,7 +898,6 @@
 
         let currentFile = null;
         let transcriber = null;
-        let isModelLoading = false;
 
         // Drag & Drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
@@ -962,6 +961,57 @@
             transcriptText.value = '';
         });
 
+        // Properly decode audio file to Float32Array at 16kHz mono
+        async function decodeAudioFile(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            
+            let audioBuffer;
+            try {
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+            } catch (e) {
+                // Some browsers need a copy
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            }
+
+            // Mix to mono if needed
+            const channelData = audioBuffer.getChannelData(0);
+            let monoData;
+
+            if (audioBuffer.numberOfChannels > 1) {
+                monoData = new Float32Array(audioBuffer.length);
+                for (let i = 0; i < audioBuffer.length; i++) {
+                    let sum = 0;
+                    for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+                        sum += audioBuffer.getChannelData(ch)[i];
+                    }
+                    monoData[i] = sum / audioBuffer.numberOfChannels;
+                }
+            } else {
+                monoData = channelData;
+            }
+
+            // Resample to 16kHz if needed
+            const targetSampleRate = 16000;
+            if (audioBuffer.sampleRate !== targetSampleRate) {
+                const ratio = audioBuffer.sampleRate / targetSampleRate;
+                const newLength = Math.round(monoData.length / ratio);
+                const resampled = new Float32Array(newLength);
+                for (let i = 0; i < newLength; i++) {
+                    const srcIndex = i * ratio;
+                    const idx = Math.floor(srcIndex);
+                    const frac = srcIndex - idx;
+                    const a = monoData[idx] || 0;
+                    const b = monoData[idx + 1] || a;
+                    resampled[i] = a + (b - a) * frac;
+                }
+                monoData = resampled;
+            }
+
+            await audioContext.close();
+            return monoData;
+        }
+
         transcribeBtn.addEventListener('click', async () => {
             if (!currentFile) return;
 
@@ -974,8 +1024,7 @@
             try {
                 // Load model if needed
                 if (!transcriber) {
-                    isModelLoading = true;
-                    progressText.textContent = 'Downloading Whisper model... this may take a minute on first use';
+                    progressText.textContent = 'Downloading Whisper model... please wait (only once)';
                     
                     transcriber = await pipeline(
                         'automatic-speech-recognition',
@@ -983,61 +1032,87 @@
                         {
                             progress_callback: (progress) => {
                                 if (progress.status === 'progress' && progress.total) {
-                                    const pct = Math.min(40, Math.round((progress.loaded / progress.total) * 35) + 5);
+                                    const pct = Math.min(35, Math.round((progress.loaded / progress.total) * 30) + 5);
                                     progressBar.style.width = pct + '%';
                                     progressText.textContent = `Downloading model: ${Math.round((progress.loaded / progress.total) * 100)}%`;
+                                } else if (progress.status === 'done') {
+                                    progressBar.style.width = '40%';
+                                    progressText.textContent = 'Model loaded successfully';
                                 }
                             }
                         }
                     );
-                    isModelLoading = false;
                 }
 
                 progressBar.style.width = '45%';
-                progressText.textContent = 'Reading audio file...';
+                progressText.textContent = 'Decoding audio file...';
 
-                // Read file as ArrayBuffer
-                const arrayBuffer = await currentFile.arrayBuffer();
-                
+                // Properly decode audio to Float32Array
+                const audioData = await decodeAudioFile(currentFile);
+
                 progressBar.style.width = '55%';
-                progressText.textContent = 'Transcribing audio... please wait';
+                progressText.textContent = 'Transcribing audio... this may take a moment';
 
-                // Run transcription
-                const language = langSelect.value === 'auto' ? null : langSelect.value;
-                
-                const result = await transcriber(arrayBuffer, {
-                    language: language === 'en' ? 'english' : language,
-                    task: 'transcribe',
+                // Language handling
+                const lang = langSelect.value;
+                const options = {
                     chunk_length_s: 30,
                     stride_length_s: 5,
-                    return_timestamps: false,
-                    callback_function: (item) => {
-                        // Optional progress during chunks
-                        if (item && item.status === 'progress') {
-                            const pct = 55 + Math.round((item.progress || 0) * 0.4);
-                            progressBar.style.width = Math.min(95, pct) + '%';
-                        }
-                    }
-                });
+                    return_timestamps: false
+                };
+
+                if (lang !== 'auto' && lang !== 'en') {
+                    options.language = lang;
+                    options.task = 'transcribe';
+                }
+
+                // Run transcription with Float32Array
+                const result = await transcriber(audioData, options);
 
                 progressBar.style.width = '100%';
                 progressText.textContent = 'Transcription complete!';
 
-                const text = result.text || (typeof result === 'string' ? result : JSON.stringify(result));
+                let text = '';
+                if (typeof result === 'string') {
+                    text = result;
+                } else if (result && result.text) {
+                    text = result.text;
+                } else if (Array.isArray(result)) {
+                    text = result.map(r => r.text || r).join(' ');
+                } else {
+                    text = JSON.stringify(result);
+                }
+
+                text = text.trim();
                 
-                transcriptText.value = text.trim();
+                if (!text) {
+                    text = '(No speech detected in the audio file. Try a clearer recording.)';
+                }
+
+                transcriptText.value = text;
                 transcriptArea.classList.add('show');
                 copyBtn.style.display = 'inline-flex';
                 downloadBtn.style.display = 'inline-flex';
                 
                 // Prepare download
-                const blob = new Blob([text.trim()], { type: 'text/plain' });
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+                    URL.revokeObjectURL(downloadBtn.href);
+                }
                 downloadBtn.href = URL.createObjectURL(blob);
                 downloadBtn.download = (currentFile.name.replace(/\.[^/.]+$/, '') || 'transcript') + '.txt';
 
             } catch (err) {
-                console.error(err);
-                progressText.textContent = 'Error: ' + (err.message || 'Failed to transcribe. Try a shorter or clearer audio file.');
+                console.error('Transcription error:', err);
+                let msg = err.message || 'Failed to transcribe';
+                
+                if (msg.includes('decode') || msg.includes('EncodingError')) {
+                    msg = 'Could not decode this audio file. Try converting it to MP3 or WAV first.';
+                } else if (msg.includes('memory') || msg.includes('out of memory')) {
+                    msg = 'Audio file is too large for this device. Try a shorter clip (under 5 minutes).';
+                }
+                
+                progressText.textContent = 'Error: ' + msg;
                 progressBar.style.width = '0%';
             } finally {
                 btnText.textContent = 'Transcribe Audio';
@@ -1047,10 +1122,16 @@
 
         copyBtn.addEventListener('click', () => {
             transcriptText.select();
-            document.execCommand('copy');
-            const original = copyBtn.textContent;
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => copyBtn.textContent = original, 1500);
+            navigator.clipboard.writeText(transcriptText.value).then(() => {
+                const original = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => copyBtn.textContent = original, 1500);
+            }).catch(() => {
+                document.execCommand('copy');
+                const original = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => copyBtn.textContent = original, 1500);
+            });
         });
 
         function formatSize(bytes) {
