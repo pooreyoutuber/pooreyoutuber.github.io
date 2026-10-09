@@ -722,7 +722,7 @@
             </div>
 
             <div class="note" id="noteBox">
-                ⏳ First time use downloads a small AI model (~40 MB). After that it works offline and much faster. Best results with clear speech under 10 minutes.
+                ⏳ First time downloads AI model (~75 MB). After that works offline. Best for clear speech. Songs/music may show limited lyrics.
             </div>
 
             <div class="file-info" id="fileInfo">
@@ -734,6 +734,13 @@
             </div>
 
             <div class="options-row" id="optionsRow">
+                <div class="option-group">
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect">
+                        <option value="Xenova/whisper-base.en" selected>Base (Better Quality)</option>
+                        <option value="Xenova/whisper-tiny.en">Tiny (Faster)</option>
+                    </select>
+                </div>
                 <div class="option-group">
                     <label for="langSelect">Language:</label>
                     <select id="langSelect">
@@ -1022,26 +1029,31 @@
             progressText.textContent = 'Loading AI model (first time only)...';
 
             try {
-                // Load model if needed
-                if (!transcriber) {
-                    progressText.textContent = 'Downloading Whisper model... please wait (only once)';
+                // Load or switch model
+                const selectedModel = document.getElementById('modelSelect').value;
+                
+                if (!transcriber || transcriber.model_id !== selectedModel) {
+                    progressText.textContent = 'Downloading Whisper model... please wait (only once per model)';
+                    progressBar.style.width = '10%';
                     
                     transcriber = await pipeline(
                         'automatic-speech-recognition',
-                        'Xenova/whisper-tiny.en',
+                        selectedModel,
                         {
                             progress_callback: (progress) => {
                                 if (progress.status === 'progress' && progress.total) {
-                                    const pct = Math.min(35, Math.round((progress.loaded / progress.total) * 30) + 5);
+                                    const pct = Math.min(40, Math.round((progress.loaded / progress.total) * 35) + 5);
                                     progressBar.style.width = pct + '%';
                                     progressText.textContent = `Downloading model: ${Math.round((progress.loaded / progress.total) * 100)}%`;
-                                } else if (progress.status === 'done') {
-                                    progressBar.style.width = '40%';
+                                } else if (progress.status === 'done' || progress.status === 'ready') {
+                                    progressBar.style.width = '45%';
                                     progressText.textContent = 'Model loaded successfully';
                                 }
                             }
                         }
                     );
+                    // store model id for comparison
+                    try { transcriber.model_id = selectedModel; } catch(e) {}
                 }
 
                 progressBar.style.width = '45%';
@@ -1056,13 +1068,18 @@
                 // Language handling
                 const lang = langSelect.value;
                 const options = {
-                    chunk_length_s: 30,
-                    stride_length_s: 5,
-                    return_timestamps: false
+                    chunk_length_s: 20,
+                    stride_length_s: 3,
+                    return_timestamps: false,
+                    // Force English model behavior when using .en models
                 };
 
-                if (lang !== 'auto' && lang !== 'en') {
-                    options.language = lang;
+                if (lang && lang !== 'auto') {
+                    if (lang === 'en') {
+                        options.language = 'english';
+                    } else {
+                        options.language = lang;
+                    }
                     options.task = 'transcribe';
                 }
 
