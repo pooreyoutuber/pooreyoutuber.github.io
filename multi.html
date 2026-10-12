@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Description Studio & Tags Generator | PooreYoutuber</title>
+    <title>YouTube Description Studio | Free SEO Description & Tags Generator</title>
 
-    <meta name="description" content="An advanced client-side YouTube Description and Tags Generator. Instantly create 10 distinct SEO descriptions, 20 unique hashtags, and keyword suggestions without logins or API keys.">
-    <meta name="keywords" content="YouTube description tool, YouTube tag generator, YouTube video optimizer, video description writer, channel growth software, YouTube SEO copywriter">
+    <meta name="description" content="Free YouTube Description Studio by PooreYoutuber. Generate 10 distinct, high-quality video descriptions (~500 words each), 20 relevant hashtags, and 20 SEO keywords from any video title. No login required.">
+    <meta name="keywords" content="YouTube description generator, YouTube tags generator, YouTube SEO tool, video description writer, YouTube metadata generator, free YouTube SEO, hashtag generator for YouTube, keyword suggestions for YouTube">
+    <meta name="author" content="PooreYoutuber">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pooreyoutuber.github.io/youtube-tool.html">
 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "@id": "https://pooreyoutuber.github.io/youtube-tool.html",
-      "name": "YouTube Description Studio & Tags Generator",
+      "name": "YouTube Description Studio",
       "url": "https://pooreyoutuber.github.io/youtube-tool.html",
-      "applicationCategory": "SEOApplication",
-      "operatingSystem": "All",
-      "browserRequirements": "Requires modern browser supporting async JS and clipboard APIs",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
       },
-      "description": "Professional YouTube description, hashtag, and keyword generator built for creators to scale channel metrics organically."
+      "description": "Free client-side tool that generates multiple high-quality YouTube video descriptions, hashtags, and SEO keywords from a single video title. Built by PooreYoutuber."
     }
     </script>
 
@@ -36,6 +37,7 @@
         gtag('config', 'G-ZPMC525FGT');
     </script>
 
+    <!-- Microsoft Clarity -->
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -43,235 +45,574 @@
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "xz0usv8l2h");
     </script>
-    
+
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-    
+
     <style>
         :root {
-            --bg-dark: #0b0f19;
-            --panel-bg: #111827;
-            --panel-card: #1f2937;
-            --primary-accent: #3b82f6;
-            --primary-hover: #2563eb;
-            --purple-accent: #8b5cf6;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border-color: #374151;
-            --accent-success: #10b981;
-            --accent-success-hover: #059669;
-            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.4);
+            --bg-dark: #0b1220;
+            --bg-panel: #111827;
+            --bg-card: #1a2332;
+            --bg-input: #0f172a;
+            --border: #1e293b;
+            --border-light: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-purple: #8b5cf6;
+            --accent-purple-hover: #7c3aed;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --success: #10b981;
+            --success-hover: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --radius: 12px;
+            --radius-lg: 16px;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-dark);
-            margin: 0; padding: 0;
-            min-height: 100vh;
-            color: var(--text-main);
+            color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
-        /* Custom Header Styles */
+        /* ===== HEADER ===== */
         .header {
-            background: var(--panel-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px;
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 1000;
+            background: #0f172a;
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
         }
 
-        .header .logo {
-            font-size: 22px; font-weight: 800; color: #ffffff; text-decoration: none;
-            display: flex; align-items: center; gap: 8px;
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
         }
+        .logo:hover { color: var(--accent-blue); }
 
         .nav-controls nav {
-            display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .nav-controls a, .dropbtn {
-            color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px;
-            background: transparent; border: none; cursor: pointer; transition: color 0.2s;
-            display: inline-flex; align-items: center; gap: 5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
         }
 
-        .nav-controls a:hover, .dropbtn:hover, .nav-controls a.home-btn {
-            color: var(--primary-accent);
+        .nav-controls a:hover, .dropbtn:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
         }
+
+        .home-btn { color: var(--accent-blue) !important; }
 
         .badge-new {
-            background: var(--primary-accent); color: white; font-size: 10px; padding: 2px 6px;
-            border-radius: 12px; font-weight: 700; text-transform: uppercase;
+            background: var(--accent-purple);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+            font-weight: 700;
+            vertical-align: middle;
         }
 
         .dropdown { position: relative; display: inline-block; }
+
         .dropdown-content {
-            display: none; position: absolute; right: 0; background: var(--panel-card);
-            min-width: 160px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color);
-            border-radius: 10px; z-index: 10; overflow: hidden;
+            display: none;
+            position: absolute;
+            right: 0;
+            background: var(--bg-card);
+            min-width: 180px;
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            z-index: 200;
+            overflow: hidden;
         }
+
         .dropdown-content a {
-            color: var(--text-main); padding: 12px 16px; text-decoration: none; display: block; font-size: 13px;
+            display: block;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
-        .dropdown-content a:hover { background: rgba(59, 130, 246, 0.1); color: var(--primary-accent); }
+
+        .dropdown-content a:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
         .dropdown:hover .dropdown-content { display: block; }
 
+        /* ===== MAIN ===== */
         .main-wrapper {
-            max-width: 1200px; margin: 40px auto; padding: 0 20px;
-            box-sizing: border-box;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
         }
 
-        .generator-card {
-            background: var(--panel-bg); border-radius: 24px;
-            padding: 40px; box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-        }
-
-        h1.tool-title {
-            font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 10px;
-            background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .hero {
             text-align: center;
+            margin-bottom: 36px;
         }
 
-        p.tool-subtitle {
-            color: var(--text-muted); text-align: center; margin-bottom: 30px; font-size: 15px;
+        .hero h1 {
+            font-size: clamp(1.75rem, 4vw, 2.4rem);
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.03em;
         }
 
-        .input-group { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
-
-        input[type="text"] {
-            flex-grow: 1; padding: 16px 20px; background: var(--panel-card);
-            border-radius: 14px; border: 2px solid var(--border-color);
-            font-size: 16px; font-weight: 500; color: white; outline: none;
-            transition: all 0.2s ease;
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 620px;
+            margin: 0 auto;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--primary-accent);
+        /* ===== INPUT PANEL ===== */
+        .input-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        #videoTitle {
+            flex: 1;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        #videoTitle:focus {
+            border-color: var(--accent-blue);
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
         }
 
-        button.generate-btn {
-            background: linear-gradient(135deg, var(--primary-accent) 0%, var(--purple-accent) 100%);
-            color: #ffffff; padding: 16px 32px; border: none; border-radius: 14px;
-            font-size: 16px; font-weight: 700; cursor: pointer;
-            transition: all 0.2s ease; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        #videoTitle::placeholder { color: var(--text-muted); }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
         }
 
-        button.generate-btn:hover {
-            opacity: 0.9; transform: translateY(-1px);
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 16px 28px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
         }
 
-        .master-controls {
-            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
         }
 
-        .action-btn {
-            background: var(--panel-card); color: var(--text-main); border: 1px solid var(--border-color);
-            padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .action-btn:hover { background: var(--border-color); color: white; }
-        .action-btn.danger { color: #f87171; border-color: rgba(248, 113, 113, 0.3); }
-        .action-btn.danger:hover { background: rgba(248, 113, 113, 0.1); }
-
-        .results-headline {
-            font-size: 22px; font-weight: 800; margin: 30px 0 20px 0;
-            display: flex; align-items: center; justify-content: space-between;
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            padding: 10px 16px;
+            font-size: 0.85rem;
         }
 
-        .output-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
-
-        .video-card {
-            background: var(--panel-card); border: 1px solid var(--border-color);
-            padding: 30px; border-radius: 18px; position: relative;
-            transition: all 0.2s ease;
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
         }
 
-        .video-card:hover { border-color: var(--primary-accent); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
-
-        .video-card h3 {
-            color: var(--text-main); margin-top: 0; font-size: 18px;
-            font-weight: 700; display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 10px;
+        .btn-success {
+            background: var(--success);
+            color: white;
+            padding: 10px 16px;
+            font-size: 0.85rem;
         }
 
-        .badge-style {
-            background: rgba(59, 130, 246, 0.15); color: #60a5fa;
-            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        .btn-success:hover { background: var(--success-hover); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            padding: 8px 14px;
+            font-size: 0.8rem;
         }
 
-        .badge-words {
-            background: rgba(139, 92, 246, 0.15); color: #c084fc;
-            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        .btn-outline:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
         }
 
-        .video-card textarea {
-            width: 100%; min-height: 220px; font-family: inherit; color: var(--text-main);
-            background: var(--bg-dark); padding: 16px; border-radius: 12px;
-            border: 1px solid var(--border-color); margin: 15px 0; font-size: 14px;
-            box-sizing: border-box; resize: vertical; outline: none;
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
         }
-        .video-card textarea:focus { border-color: var(--primary-accent); }
 
-        .tags-wrapper { margin: 15px 0; }
-        .tags-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+        /* ===== LOADING ===== */
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 48px 20px;
+        }
 
-        .tags-box {
-            color: #60a5fa; background: rgba(59, 130, 246, 0.08);
-            padding: 12px; border-radius: 10px; font-size: 13px;
-            font-weight: 500; border: 1px dashed rgba(59, 130, 246, 0.3);
+        .loading-state.active { display: block; }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-state p { color: var(--text-secondary); }
+
+        /* ===== RESULTS ===== */
+        #results { display: none; }
+
+        #results.visible { display: block; }
+
+        .meta-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .meta-section h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tags-box, .keywords-box {
+            background: var(--bg-input);
+            border: 1px dashed var(--border-light);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            line-height: 1.8;
             word-break: break-word;
+            margin-bottom: 14px;
         }
 
-        .card-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .keywords-box { color: var(--accent-purple); }
 
-        .copy-btn {
-            background: var(--accent-success); color: white;
-            padding: 10px 20px; border: none; border-radius: 10px;
-            font-size: 13px; font-weight: 700; cursor: pointer;
-            transition: background 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+        .meta-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .copy-btn:hover { background: var(--accent-success-hover); }
 
-        .regen-card-btn {
-            background: var(--panel-bg); color: var(--text-main);
-            border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 10px;
-            font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        .regen-card-btn:hover { background: var(--border-color); color: white; }
 
-        /* Toast Notification */
-        #toast {
-            visibility: hidden; min-width: 250px; background-color: var(--accent-success);
-            color: #fff; text-align: center; border-radius: 10px; padding: 14px;
-            position: fixed; z-index: 2000; left: 50%; bottom: 30px;
-            transform: translateX(-50%); font-size: 14px; font-weight: 600;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        .results-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
         }
-        #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
 
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
 
+        @media (min-width: 900px) {
+            .results-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .desc-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .desc-card:hover {
+            border-color: var(--border-light);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .style-badge {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .word-count {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent-blue);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .desc-text {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 320px;
+            overflow-y: auto;
+            flex: 1;
+            margin-bottom: 16px;
+            line-height: 1.65;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--success);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error { background: var(--danger); }
+
+        /* ===== EMPTY / ERROR ===== */
+        .empty-state, .error-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3, .error-state h3 {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* ===== ADS ===== */
+        .ad-container {
+            margin: 24px 0;
+            text-align: center;
+            min-height: 90px;
+        }
+
+        /* ===== INFO SECTION ===== */
+        .info-section {
+            margin-top: 48px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+        }
+
+        .info-section h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .info-section p {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+        }
+
+        .info-section h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 24px 0 10px;
+            color: var(--accent-blue);
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .tips-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .tip-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .tip-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .tip-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 32px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        footer a { color: var(--accent-blue); text-decoration: none; }
+
+        /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            .header { padding: 12px 15px; }
-            .input-group { flex-direction: column; }
-            button.generate-btn { width: 100%; }
-            .generator-card { padding: 20px; }
-            .card-buttons { flex-direction: column; }
-            .copy-btn, .regen-card-btn { width: 100%; justify-content: center; }
+            .header { height: auto; padding: 12px 16px; flex-direction: column; gap: 10px; }
+            .nav-controls nav { justify-content: center; }
+            .input-row { flex-direction: column; }
+            .btn-primary { width: 100%; }
+            .main-wrapper { padding: 20px 14px 40px; }
+            .input-panel { padding: 20px; }
+            .info-section { padding: 24px; }
+            .card-actions { flex-direction: column; }
+            .card-actions .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<!-- Custom Header -->
 <header class="header">
     <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
     <div class="nav-controls">
@@ -292,336 +633,778 @@
 </header>
 
 <div class="main-wrapper">
-    <div class="generator-card">
-        <h1 class="tool-title">YouTube Description & Tags Studio</h1>
-        <p class="tool-subtitle">Enter your video title to instantly generate 10 unique 500-word descriptions, 20 hashtags, and 20 SEO keywords.</p>
 
-        <div class="input-group">
-            <input type="text" id="videoTitle" placeholder="Enter Video Title (e.g., How to Build a Modern React App in 2026)">
-            <button class="generate-btn" onclick="generateAll()">Generate Descriptions</button>
+    <div class="hero">
+        <h1>YouTube Description Studio</h1>
+        <p>Enter any video title and instantly generate 10 distinct, long-form descriptions, 20 relevant hashtags, and 20 SEO keywords. Free, private, and fully offline-capable.</p>
+    </div>
+
+    <!-- Top Ad -->
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-7020422718957281"
+             data-ad-slot="1886848226"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="input-panel">
+        <div class="input-row">
+            <input type="text" id="videoTitle" placeholder="Enter your video title (e.g. How to Rank YouTube Videos Fast in 2026)" maxlength="200" autocomplete="off">
+            <button class="btn btn-primary" id="generateBtn" onclick="generateAll()">
+                <span id="genBtnText">Generate 10 Descriptions</span>
+            </button>
+        </div>
+        <div class="action-bar">
+            <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+            <button class="btn btn-secondary" id="regenerateAllBtn" onclick="generateAll()" style="display:none;">Regenerate All</button>
+            <button class="btn btn-secondary" id="exportTxtBtn" onclick="exportTXT()" style="display:none;">Export TXT</button>
+            <button class="btn btn-secondary" id="exportMdBtn" onclick="exportMarkdown()" style="display:none;">Export Markdown</button>
+        </div>
+    </div>
+
+    <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <p>Crafting 10 unique descriptions, hashtags & keywords…</p>
+    </div>
+
+    <div id="results">
+        <!-- Hashtags & Keywords -->
+        <div class="meta-section">
+            <h2>📌 Hashtags <span style="font-weight:500;font-size:0.85rem;color:var(--text-muted);">(20 unique)</span></h2>
+            <div class="tags-box" id="hashtagsBox"></div>
+            <div class="meta-actions">
+                <button class="btn btn-success" onclick="copyText(currentHashtags, 'Hashtags')">Copy Hashtags</button>
+            </div>
         </div>
 
-        <div id="master-controls-container"></div>
-        <div id="output"></div>
+        <div class="meta-section">
+            <h2>🔑 SEO Keywords <span style="font-weight:500;font-size:0.85rem;color:var(--text-muted);">(20 unique)</span></h2>
+            <div class="keywords-box" id="keywordsBox"></div>
+            <div class="meta-actions">
+                <button class="btn btn-success" onclick="copyText(currentKeywords, 'Keywords')">Copy Keywords</button>
+                <button class="btn btn-secondary" onclick="copyAllMeta()">Copy Hashtags + Keywords</button>
+            </div>
+        </div>
+
+        <div class="results-header">
+            <h2>📝 10 Description Variations</h2>
+            <button class="btn btn-secondary" onclick="copyAllDescriptions()">Copy All Descriptions</button>
+        </div>
+
+        <div class="results-grid" id="resultsGrid"></div>
+    </div>
+
+    <!-- Bottom Ad -->
+    <div class="ad-container" style="margin-top:32px;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-7020422718957281"
+             data-ad-slot="1886848226"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="info-section">
+        <h2>How to Get the Most from Your YouTube Descriptions</h2>
+        <p>A strong description helps viewers and the YouTube algorithm understand what your video is about. Use the generated text as a starting point, then personalize it with your own links, timestamps, and calls to action.</p>
+
+        <h3>Best practices</h3>
+        <p>Put the most important keywords near the beginning of the description. Add clear chapter timestamps if your video has sections. Include links to related videos, playlists, or resources. End with a friendly invitation to subscribe or comment. Avoid keyword stuffing — natural language performs better.</p>
+
+        <div class="tips-grid">
+            <div class="tip-card">
+                <h4>Length matters</h4>
+                <p>Descriptions around 200–500 words give the algorithm more context while remaining readable. The first 2–3 lines appear above the “Show more” fold.</p>
+            </div>
+            <div class="tip-card">
+                <h4>Hashtags & tags</h4>
+                <p>YouTube allows up to 15 hashtags in the description (3 appear above the title). Use the 20 generated hashtags and pick the most relevant ones.</p>
+            </div>
+            <div class="tip-card">
+                <h4>Keywords in tags</h4>
+                <p>Paste the SEO keywords into the YouTube Tags field (comma-separated). Focus on phrases people actually search for.</p>
+            </div>
+            <div class="tip-card">
+                <h4>Edit before publishing</h4>
+                <p>Always review and customize the output. Add your real social links, affiliate disclaimers, and any specific claims that match the actual video content.</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="toast">Copied successfully!</div>
+<footer>
+    Built by <a href="https://pooreyoutuber.github.io/">PooreYoutuber</a> · Free YouTube tools for creators · No login required
+</footer>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// Topic-aware styles corresponding to the 10 required writing approaches
-const writingStyles = [
-    { name: "Informative", focus: "factual breakdown, clear architecture, and systematic analysis" },
-    { name: "Conversational", focus: "engaging creator tone, community connection, and relatable storytelling" },
-    { name: "SEO-Focused", focus: "keyword optimization, discoverability metrics, and algorithmic growth" },
-    { name: "Storytelling", focus: "narrative arc, overcoming hurdles, and personal breakthrough experience" },
-    { name: "Educational", focus: "step-by-step masterclass methodology, core principles, and takeaways" },
-    { name: "Professional", focus: "enterprise-grade standards, industry authority, and robust best practices" },
-    { name: "Curiosity-Driven", focus: "hook-heavy insights, debunking myths, and secret methodologies" },
-    { name: "Benefits-Focused", focus: "value propositions, saving time, and maximizing productivity outcomes" },
-    { name: "Natural Creator", focus: "authentic vlogger style, direct advice, and energetic community vibes" },
-    { name: "Niche-Specific", focus: "deep technical execution, specialized workflows, and expert frameworks" }
+/* ============================================================
+   YouTube Description Studio – Modular Offline Generation Engine
+   Honest client-side system. No external AI API required.
+   Descriptions are constructed from topic-aware modules, not
+   random generic templates. No invented timestamps, stats, or
+   personal experiences.
+   ============================================================ */
+
+const STYLE_LABELS = [
+    "Informative",
+    "Conversational",
+    "SEO-Focused",
+    "Storytelling",
+    "Educational",
+    "Professional",
+    "Curiosity-Driven",
+    "Benefits-Focused",
+    "Natural Creator",
+    "Niche Creative"
 ];
 
-const ctas = [
-    "Don't forget to smash the LIKE button and SUBSCRIBE for more weekly insights!",
-    "Drop your questions in the comments below—I read and reply to everyone!",
-    "Share this video with someone who needs to see this strategy today.",
-    "Hit the notification bell so you never miss an upcoming upload!",
-    "What topic should we tackle next? Let me know in the comment section!"
-];
+const NICHE_KEYWORDS = {
+    gaming: ["game", "gaming", "gameplay", "walkthrough", "playthrough", "fortnite", "minecraft", "valorant", "gta", "roblox", "esports", "streamer", "xbox", "playstation", "nintendo", "pc gaming", "mobile game"],
+    education: ["learn", "tutorial", "how to", "explained", "course", "lesson", "study", "exam", "school", "college", "math", "science", "history", "geography", "english", "grammar", "coding class"],
+    technology: ["tech", "technology", "software", "app", "gadget", "phone", "laptop", "ai", "artificial intelligence", "coding", "programming", "python", "javascript", "web development", "cybersecurity", "blockchain"],
+    cooking: ["recipe", "cook", "cooking", "bake", "baking", "food", "kitchen", "ingredient", "dish", "meal", "cuisine", "chef", "dessert", "breakfast", "lunch", "dinner"],
+    fitness: ["workout", "fitness", "exercise", "gym", "yoga", "cardio", "strength", "muscle", "weight loss", "diet", "nutrition", "bodybuilding", "pilates", "running"],
+    travel: ["travel", "trip", "tour", "destination", "vacation", "hotel", "flight", "backpack", "vlog", "explore", "adventure", "city guide", "itinerary"],
+    music: ["music", "song", "cover", "instrument", "guitar", "piano", "beats", "producer", "singer", "lyrics", "album", "concert", "dj"],
+    business: ["business", "startup", "entrepreneur", "marketing", "sales", "finance", "money", "invest", "stock", "side hustle", "passive income", "brand"],
+    finance: ["finance", "money", "investing", "stock", "crypto", "bitcoin", "budget", "saving", "loan", "credit", "tax", "retirement", "wealth"],
+    diy: ["diy", "craft", "handmade", "build", "woodworking", "home improvement", "repair", "make", "project", "tutorial craft"],
+    entertainment: ["funny", "comedy", "reaction", "prank", "challenge", "vlog", "storytime", "drama", "movie", "review", "trailer"],
+    science: ["science", "physics", "chemistry", "biology", "space", "astronomy", "experiment", "research", "discovery"],
+    history: ["history", "historical", "ancient", "war", "civilization", "documentary", "timeline", "empire"],
+    podcast: ["podcast", "interview", "talk", "discussion", "episode", "guest", "conversation"]
+};
 
-let generatedResultsCache = [];
-
-function sanitize(str) {
-    const temp = document.createElement('div');
-    temp.textContent = str;
-    return temp.innerHTML;
-}
-
-function countWords(str) {
-    return str.trim().split(/\s+/).filter(Boolean).length;
-}
-
-function shuffleArray(array) {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+const NICHE_PHRASES = {
+    gaming: {
+        audience: "gamers and content creators",
+        value: "improve your gameplay, discover new strategies, and stay competitive",
+        tips: [
+            "Focus on clear communication of mechanics rather than just showing the final result.",
+            "Break complex strategies into smaller, repeatable steps that viewers can practice.",
+            "Mention common mistakes that cost players matches so the audience can avoid them.",
+            "Encourage viewers to test the tips in their own games and share results in the comments."
+        ]
+    },
+    education: {
+        audience: "students, lifelong learners, and educators",
+        value: "understand the topic more clearly and apply the knowledge with confidence",
+        tips: [
+            "Start with the big picture before diving into details so the structure is easy to follow.",
+            "Use simple language and real-world analogies whenever possible.",
+            "Highlight the most common points of confusion and address them directly.",
+            "Suggest practice exercises or follow-up resources so learning continues after the video."
+        ]
+    },
+    technology: {
+        audience: "tech enthusiasts, developers, and early adopters",
+        value: "stay up to date with practical insights and avoid common technical pitfalls",
+        tips: [
+            "Explain both the 'what' and the 'why' behind each recommendation.",
+            "Keep terminology accessible while still being accurate for experienced users.",
+            "Point out trade-offs so viewers can make informed decisions for their own use cases.",
+            "Encourage testing and verification rather than blind adoption of any single approach."
+        ]
+    },
+    cooking: {
+        audience: "home cooks and food lovers",
+        value: "prepare the dish successfully and enjoy the process",
+        tips: [
+            "List ingredients and approximate quantities clearly near the top of the description.",
+            "Mention substitutions for common dietary needs or missing items.",
+            "Share timing cues and visual cues that indicate the dish is ready.",
+            "Invite viewers to adapt the recipe and share their variations in the comments."
+        ]
+    },
+    fitness: {
+        audience: "people working on their health and fitness goals",
+        value: "train more effectively and stay consistent",
+        tips: [
+            "Emphasize proper form and safety before intensity.",
+            "Offer modifications for different fitness levels.",
+            "Remind viewers that progress takes time and consistency matters more than perfection.",
+            "Suggest tracking simple metrics so improvement becomes visible."
+        ]
+    },
+    travel: {
+        audience: "travelers and adventure seekers",
+        value: "plan better trips and experience destinations more meaningfully",
+        tips: [
+            "Highlight practical details such as timing, accessibility, and local context.",
+            "Balance inspiration with realistic expectations.",
+            "Mention cultural or safety considerations when relevant.",
+            "Encourage responsible travel and respect for local communities."
+        ]
+    },
+    music: {
+        audience: "musicians, producers, and music fans",
+        value: "improve skills, discover techniques, and deepen appreciation for the craft",
+        tips: [
+            "Describe the technique or concept without claiming exclusive secrets.",
+            "Suggest practice methods that build muscle memory and musical ear.",
+            "Keep the focus on creativity and expression rather than pure technical perfection.",
+            "Invite listeners to experiment and share their own interpretations."
+        ]
+    },
+    business: {
+        audience: "entrepreneurs, marketers, and professionals",
+        value: "make clearer decisions and apply practical frameworks",
+        tips: [
+            "Separate principles from tactics so the advice stays useful over time.",
+            "Acknowledge that results vary based on context, effort, and market conditions.",
+            "Encourage testing small changes before large commitments.",
+            "Point readers toward further learning rather than promising overnight success."
+        ]
+    },
+    finance: {
+        audience: "people interested in personal finance and investing",
+        value: "understand financial concepts and make more informed decisions",
+        tips: [
+            "Stress that this is educational content, not personalized financial advice.",
+            "Explain risks alongside potential benefits.",
+            "Use clear language and avoid unnecessary jargon.",
+            "Recommend consulting qualified professionals for individual situations."
+        ]
+    },
+    diy: {
+        audience: "makers, hobbyists, and home improvers",
+        value: "complete projects safely and with better results",
+        tips: [
+            "List required tools and materials early in the description.",
+            "Highlight safety precautions where relevant.",
+            "Break the process into logical stages that are easy to follow.",
+            "Encourage viewers to share their finished projects and adaptations."
+        ]
+    },
+    entertainment: {
+        audience: "viewers looking for enjoyable and engaging content",
+        value: "have a good time and feel connected to the creator",
+        tips: [
+            "Keep the tone light and inviting while still being clear about the video topic.",
+            "Invite comments and reactions to build community.",
+            "Mention related videos or playlists for continued watching.",
+            "Thank viewers for their time and support."
+        ]
+    },
+    science: {
+        audience: "curious minds and science enthusiasts",
+        value: "understand scientific ideas more clearly and appreciate how they apply to the real world",
+        tips: [
+            "Prioritize accuracy and clarity over hype.",
+            "Define key terms so newcomers can follow along.",
+            "Connect abstract concepts to everyday examples when possible.",
+            "Encourage critical thinking and further reading."
+        ]
+    },
+    history: {
+        audience: "history enthusiasts and lifelong learners",
+        value: "gain a clearer picture of past events and their lasting impact",
+        tips: [
+            "Present context before diving into specific events.",
+            "Acknowledge that historical interpretation can evolve with new evidence.",
+            "Keep the narrative engaging without sacrificing accuracy.",
+            "Suggest related topics or further resources for deeper exploration."
+        ]
+    },
+    podcast: {
+        audience: "listeners who enjoy thoughtful conversations",
+        value: "gain new perspectives and useful insights from the discussion",
+        tips: [
+            "Summarize the main themes of the episode without spoiling every detail.",
+            "Highlight guest expertise or unique angles when relevant.",
+            "Invite listeners to share their own thoughts in the comments.",
+            "Link to previous episodes or related conversations when available."
+        ]
+    },
+    general: {
+        audience: "viewers interested in this topic",
+        value: "understand the subject more clearly and take useful next steps",
+        tips: [
+            "Open with a clear statement of what the video covers.",
+            "Organize information so it is easy to scan and return to later.",
+            "Avoid over-promising results that depend on individual effort and context.",
+            "End with a simple invitation to engage — comment, subscribe, or watch related content."
+        ]
     }
-    return arr;
+};
+
+// Global state
+let currentTitle = "";
+let currentDescriptions = [];
+let currentHashtags = "";
+let currentKeywords = "";
+let currentNiche = "general";
+
+function detectNiche(title) {
+    const lower = title.toLowerCase();
+    let best = "general";
+    let maxHits = 0;
+    for (const [niche, words] of Object.entries(NICHE_KEYWORDS)) {
+        let hits = 0;
+        for (const w of words) {
+            if (lower.includes(w)) hits++;
+        }
+        if (hits > maxHits) {
+            maxHits = hits;
+            best = niche;
+        }
+    }
+    return best;
 }
 
-function buildDescriptionContent(title, styleObj, index) {
-    const cleanTitle = sanitize(title);
-    const words = cleanTitle.replace(/[^a-zA-Z0-9 ]/g, "").split(/\s+/).filter(w => w.length > 2);
-    const mainTopic = words[0] || "content";
+function extractKeywords(title) {
+    const stop = new Set(["the","a","an","and","or","but","in","on","at","to","for","of","with","by","from","is","are","was","were","be","been","being","have","has","had","do","does","did","will","would","could","should","may","might","must","shall","can","need","how","what","when","where","why","which","who","whom","this","that","these","those","i","you","he","she","it","we","they","my","your","his","her","its","our","their","me","him","us","them","not","no","yes","up","out","so","if","about","into","over","after","before","between","under","again","further","then","once","here","there","all","each","few","more","most","other","some","such","only","own","same","than","too","very","just","also"]);
+    return title
+        .toLowerCase()
+        .replace(/[^\w\s\u0900-\u097F]/g, " ")
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !stop.has(w));
+}
 
-    let paragraphs = [
-        `Welcome back creators and enthusiasts! In this comprehensive deep-dive, we are thoroughly exploring the core dimensions of "${cleanTitle}". Whether you are stepping into this niche for the first time or looking to refine your existing skills, this guide is built to provide maximum clarity through a ${styleObj.focus}.`,
-        `When tackling ${mainTopic}, most beginners fall into common traps due to a lack of structured frameworks. We spent considerable time analyzing real-world workflows, stress-testing methodologies, and compiling actionable data so you can bypass the trial-and-error phase entirely. By adopting the principles outlined in this session, you will notice an immediate improvement in your execution speed and overall quality standards.`,
-        `Let's break down the essential milestones covered in today's session:\n• Phase 1: Establishing foundational concepts and identifying key performance variables.\n• Phase 2: Executing practical, step-by-step workflows without unnecessary bottlenecks.\n• Phase 3: Troubleshooting frequent anomalies and ensuring long-term structural consistency.\n• Phase 4: Scaling your output efficiently using modern toolsets and automation strategies.`,
-        `Consistency and precision are the true drivers of sustainable success in any modern digital landscape. We walk through each step transparently, eliminating fluff and focusing strictly on high-impact insights. Take notes, apply these techniques directly to your active projects, and observe how quickly your performance metrics compound over time.`,
-        `📌 TIMESTAMPS & CHAPTER BREAKDOWN:\n0:00 - Introduction & Strategic Overview\n2:30 - Core Foundations & Setup\n6:45 - Live Execution & Walkthrough\n12:15 - Avoiding Fatal Mistakes\n18:40 - Summary & Next Steps`,
-        `🔗 CONNECT & SUPPORT:\n🔔 ${ctas[index % ctas.length]}\n🌐 Official Website: https://pooreyoutuber.github.io/\n📁 Explore More Tools: https://pooreyoutuber.github.io/youtube-tool.html`
+function wordCount(text) {
+    return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function expandToTarget(base, targetWords, nicheData, title) {
+    // Build additional modular paragraphs until we reach ~targetWords
+    const extras = [
+        `This video is designed for ${nicheData.audience} who want practical, actionable information rather than vague advice. The goal is to give you a clear overview of the topic so you can decide what to focus on next.`,
+        `As you watch, pay attention to the overall structure. Understanding the flow of ideas often helps more than memorizing isolated tips. Pause when something is unclear and rewatch key sections if needed.`,
+        `Everyone starts from a different place. Some viewers will already know parts of this material, while others are completely new. Use the parts that match your current level and skip or revisit sections as required.`,
+        `Applying what you learn matters more than consuming more content. After finishing the video, try one small action related to the topic. Even a short experiment builds real understanding.`,
+        `If you found this helpful, consider sharing it with someone else who might benefit. Community recommendations help good educational content reach the people who need it.`,
+        `Questions and thoughtful comments are always welcome. They help improve future videos and often spark useful discussions among viewers.`,
+        `Remember that results depend on consistent effort, context, and individual circumstances. Treat the information here as a starting point for your own exploration rather than a guaranteed formula.`,
+        `Related topics and deeper dives may appear in future videos. Subscribing and turning on notifications is the easiest way to stay updated when new content is published.`,
+        `Take notes if that helps you retain information. Writing down key points in your own words is one of the most effective ways to move knowledge from short-term to long-term memory.`,
+        `Finally, enjoy the process. Learning and creating are more sustainable when they feel interesting rather than forced. Find the aspects of this topic that genuinely engage you and build from there.`
     ];
 
-    // Expand paragraphs to reach approximately 500 words
-    let fullText = paragraphs.join("\n\n");
-    while (countWords(fullText) < 480) {
-        fullText += `\n\nAdditionally, maintaining strict adherence to best practices ensures robust resilience against shifting algorithms and industry standards. Continuous iteration is key to mastering ${mainTopic}.`;
+    let text = base;
+    let i = 0;
+    while (wordCount(text) < targetWords && i < extras.length * 2) {
+        text += "\n\n" + extras[i % extras.length];
+        i++;
     }
-
-    return fullText;
-}
-
-function generateHashtagsAndKeywords(title) {
-    const words = title.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").split(/\s+/).filter(w => w.length > 2);
-    const main = words[0] || "video";
-    const sub = words[1] || "tutorial";
-
-    // Exactly 20 distinct SEO Keywords
-    let keywordsSet = new Set([
-        title,
-        `${main} ${sub}`,
-        `how to ${main}`,
-        `${main} guide 2026`,
-        `best ${main} strategy`,
-        `${main} tips and tricks`,
-        `advanced ${main} workflow`,
-        `beginner ${main} tutorial`,
-        `professional ${main} setup`,
-        `${main} masterclass`,
-        `optimize ${main}`,
-        `scaling ${main} efficiently`,
-        `${main} case study`,
-        `complete ${main} walkthrough`,
-        `understanding ${main}`,
-        `top ${main} practices`,
-        `${main} execution guide`,
-        `troubleshooting ${main}`,
-        `future of ${main}`,
-        `${main} automation`
-    ]);
-
-    // Exactly 20 unique Hashtags
-    let hashtagsSet = new Set([
-        `#${main}`,
-        `#${main}${sub}`,
-        `#${sub}Tutorial`,
-        `#YouTubeSEO`,
-        `#ContentCreator`,
-        `#DigitalGrowth`,
-        `#CreatorEconomy`,
-        `#TechGuide`,
-        `#Optimization`,
-        `#Workflow`,
-        `#Masterclass`,
-        `#ViralTips`,
-        `#Strategy2026`,
-        `#LearningHub`,
-        `#Productivity`,
-        `#SuccessMindset`,
-        `#Automation`,
-        `#ProTips`,
-        `#CommunityFirst`,
-        `#NextGen`
-    ]);
-
-    return {
-        keywords: [...keywordsSet].slice(0, 20),
-        hashtags: [...hashtagsSet].slice(0, 20)
-    };
-}
-
-function generateAll() {
-    const titleInput = document.getElementById("videoTitle");
-    const title = titleInput.value.trim();
-    const output = document.getElementById("output");
-    const masterContainer = document.getElementById("master-controls-container");
-
-    if (!title) {
-        output.innerHTML = "<p style='color:#f87171; text-align:center; font-weight:bold;'>⚠️ Please enter a valid video title first!</p>";
-        masterContainer.innerHTML = "";
-        return;
+    // Final trim if massively over (rare)
+    const words = text.trim().split(/\s+/);
+    if (words.length > targetWords + 80) {
+        text = words.slice(0, targetWords + 40).join(" ") + "…";
     }
-
-    const { keywords, hashtags } = generateHashtagsAndKeywords(title);
-    generatedResultsCache = writingStyles.map((style, idx) => ({
-        id: idx + 1,
-        styleName: style.name,
-        description: buildDescriptionContent(title, style, idx),
-        keywords: keywords,
-        hashtags: hashtags
-    }));
-
-    renderMasterControls();
-    renderResults();
-    output.scrollIntoView({ behavior: 'smooth' });
+    return text;
 }
 
-function renderMasterControls() {
-    const container = document.getElementById("master-controls-container");
-    container.innerHTML = `
-        <div class="master-controls">
-            <button class="action-btn" onclick="copyAllDescriptions()">📋 Copy All Descriptions</button>
-            <button class="action-btn" onclick="copyAllHashtags()">🏷️ Copy All Hashtags (20)</button>
-            <button class="action-btn" onclick="copyAllKeywords()">🔑 Copy All Keywords (20)</button>
-            <button class="action-btn" onclick="exportFile('txt')">💾 Export TXT</button>
-            <button class="action-btn" onclick="exportFile('md')">📄 Export Markdown</button>
-            <button class="action-btn danger" onclick="clearAll()">🗑️ Clear All</button>
-        </div>
-    `;
+function buildDescription(title, styleIndex, niche) {
+    const nicheData = NICHE_PHRASES[niche] || NICHE_PHRASES.general;
+    const tips = nicheData.tips;
+    const t = title.trim();
+
+    const openings = [
+        // 0 Informative
+        `This video provides a clear and structured overview of "${t}". The goal is to help ${nicheData.audience} understand the core ideas and ${nicheData.value}.`,
+        // 1 Conversational
+        `Hey everyone — today we're talking about "${t}". If you've been looking for a straightforward explanation that actually helps you move forward, you're in the right place.`,
+        // 2 SEO-Focused
+        `Looking for reliable information on "${t}"? This video covers the essential points that ${nicheData.audience} search for when they want to ${nicheData.value}.`,
+        // 3 Storytelling
+        `Every useful skill or insight starts with curiosity. In this video we explore "${t}" and the practical path that helps people ${nicheData.value}.`,
+        // 4 Educational
+        `Welcome to this educational breakdown of "${t}". The material is organized so both beginners and more experienced viewers can follow along and extract value.`,
+        // 5 Professional
+        `This presentation examines "${t}" with a focus on clarity, accuracy, and practical application for ${nicheData.audience}.`,
+        // 6 Curiosity-Driven
+        `What does it really take to understand "${t}" at a useful level? This video unpacks the key elements so you can ${nicheData.value}.`,
+        // 7 Benefits-Focused
+        `If your goal is to ${nicheData.value}, this video on "${t}" is built to give you a clear roadmap and concrete next steps.`,
+        // 8 Natural Creator
+        `Thanks for clicking on this video about "${t}". I put this together to share useful information in a way that feels natural and easy to follow.`,
+        // 9 Niche Creative
+        `Let's dive into "${t}" from a practical angle. Whether you're just getting started or refining your approach, the ideas here are meant to help you ${nicheData.value}.`
+    ];
+
+    const bodies = [
+        // Informative
+        `The content is arranged to move from foundational concepts to more detailed considerations. You will see explanations of the main ideas, common approaches, and points that often cause confusion.\n\n${tips[0]}\n\n${tips[1]}\n\nAdditional context is provided so you can connect the ideas to your own situation. The emphasis stays on understanding rather than memorizing isolated facts.`,
+        // Conversational
+        `I'll walk you through the important parts without unnecessary complexity. Think of this as a conversation where we look at what actually matters for "${t}".\n\n${tips[0]}\n\n${tips[2]}\n\nFeel free to pause, rewatch, or skip ahead depending on what you already know. The description below also summarizes the main themes so you can return later.`,
+        // SEO
+        `Search interest around this topic continues to grow because people want practical guidance. This video addresses the questions that commonly appear when someone starts researching "${t}".\n\nKey themes include clarity of explanation, realistic expectations, and actionable takeaways.\n\n${tips[1]}\n\n${tips[3]}`,
+        // Storytelling
+        `The journey of learning anything new usually begins with a simple question. This video follows that path for "${t}" — starting with the basics and building toward a more complete picture.\n\nAlong the way you'll encounter practical observations that many people discover only after trial and error.\n\n${tips[0]}\n\n${tips[2]}`,
+        // Educational
+        `Learning works best when information is presented in a logical sequence. This video follows that principle for the topic of "${t}".\n\nYou will first see the broader context, then more specific considerations, and finally suggestions for applying the ideas.\n\n${tips[1]}\n\n${tips[3]}`,
+        // Professional
+        `The material is prepared with attention to accuracy and usefulness. Viewers who work with or study topics related to "${t}" should find a balanced overview that supports further independent research.\n\n${tips[0]}\n\n${tips[1]}\n\nNo exaggerated claims are made; the focus remains on clear explanation and realistic application.`,
+        // Curiosity
+        `Curiosity is the starting point for deeper understanding. If you've wondered about the details behind "${t}", this video aims to satisfy that curiosity with solid information.\n\n${tips[2]}\n\n${tips[3]}\n\nYou are encouraged to keep questioning and exploring beyond what is covered here.`,
+        // Benefits
+        `The main benefit of watching is a clearer mental model of "${t}". With that model you can ${nicheData.value} more effectively.\n\nSecondary benefits include knowing which resources or next steps are worth your time and which common approaches tend to create extra work.\n\n${tips[0]}\n\n${tips[1]}`,
+        // Natural Creator
+        `I wanted to create something that feels helpful rather than overwhelming. This video on "${t}" is the result of that intention.\n\nYou'll find explanations, a few practical suggestions, and space to form your own conclusions.\n\n${tips[2]}\n\n${tips[3]}`,
+        // Niche Creative
+        `Different people approach "${t}" from different angles. This video offers one practical perspective that many ${nicheData.audience} find useful.\n\nThe structure is flexible — use the parts that resonate and adapt the rest to your own style or goals.\n\n${tips[0]}\n\n${tips[2]}`
+    ];
+
+    const closings = [
+        `If this overview helped clarify the topic for you, consider leaving a comment with your own experience or questions. Your input helps shape future content.\n\nThank you for watching, and best of luck as you apply what you've learned.`,
+        `That's the core of what I wanted to share about "${t}". If you found value here, a like or subscribe helps the channel continue creating free resources.\n\nSee you in the next video!`,
+        `Use the information as a foundation and continue refining your approach over time. Consistent small improvements usually outperform occasional large efforts.\n\nThanks for your time and attention.`,
+        `Whether you are just starting or already experienced, revisiting fundamentals can reveal new insights. Keep exploring and stay curious.\n\nTake care and talk soon.`,
+        `Remember that understanding deepens with practice. Try one idea from this video in the coming days and notice what works for your situation.\n\nAppreciate you watching.`
+    ];
+
+    let desc = openings[styleIndex] + "\n\n" + bodies[styleIndex] + "\n\n" + closings[styleIndex % closings.length];
+
+    // Expand to approximately 500 words
+    desc = expandToTarget(desc, 480, nicheData, t);
+
+    // Light personalization note (no invented claims)
+    desc += `\n\n---\n📌 Video title: ${t}\n🔔 Subscribe for more content on related topics\n💬 Comment with your questions or experiences\n\n#${extractKeywords(t).slice(0,3).join(" #") || "YouTube"}`;
+
+    return desc;
 }
 
-function renderResults() {
-    const output = document.getElementById("output");
-    let html = `<h2 class='results-headline'><span>✨ 10 Distinct Description Variations</span> <span style="font-size:14px; color:var(--text-muted); font-weight:normal;">Target ~500 Words Each</span></h2><div class='output-grid'>`;
+function generateHashtags(title, niche) {
+    const words = extractKeywords(title);
+    const set = new Set();
 
-    generatedResultsCache.forEach((item, index) => {
-        const wordCount = countWords(item.description);
-        const tagsString = item.keywords.join(', ');
-        const hashtagsString = item.hashtags.join(' ');
-
-        html += `
-        <div class="video-card" id="card-${index}">
-            <h3>
-                <span>Variation ${item.id}: ${item.styleName}</span>
-                <div style="display:flex; gap:8px;">
-                    <span class="badge-style">${item.styleName}</span>
-                    <span class="badge-words">${wordCount} Words</span>
-                </div>
-            </h3>
-            <textarea id="desc-text-${index}">${item.description}</textarea>
-            
-            <div class="tags-wrapper">
-                <div class="tags-label">20 SEO Keywords (Comma Separated):</div>
-                <div class="tags-box">${tagsString}</div>
-            </div>
-
-            <div class="tags-wrapper">
-                <div class="tags-label">20 Unique Hashtags:</div>
-                <div class="tags-box">${hashtagsString}</div>
-            </div>
-
-            <div class="card-buttons">
-                <button class="copy-btn" onclick="copySingleCard(${index})">📋 Copy Description + Tags</button>
-                <button class="regen-card-btn" onclick="regenerateCard(${index})">🔄 Regenerate This Card</button>
-            </div>
-        </div>`;
+    // From title
+    words.forEach(w => {
+        if (set.size < 8) set.add("#" + w.replace(/\s+/g, ""));
     });
 
-    html += `</div>`;
-    output.innerHTML = html;
-}
-
-function showToast(message = "Copied successfully to clipboard!") {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.className = "show";
-    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-}
-
-function copyToClipboard(text, successMsg) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-            showToast(successMsg);
-        }).catch(() => {
-            fallbackCopy(text, successMsg);
-        });
-    } else {
-        fallbackCopy(text, successMsg);
+    // Combined phrases
+    if (words.length >= 2) {
+        set.add("#" + words[0] + words[1]);
     }
+    if (words.length >= 3) {
+        set.add("#" + words[0] + words[1] + words[2]);
+    }
+
+    // Niche-related
+    const nicheTags = {
+        gaming: ["#Gaming", "#Gameplay", "#Gamer", "#GameTips", "#Esports"],
+        education: ["#Learning", "#Education", "#Tutorial", "#StudyTips", "#HowTo"],
+        technology: ["#Tech", "#Technology", "#AI", "#Coding", "#Software"],
+        cooking: ["#Cooking", "#Recipe", "#Food", "#HomeCooking", "#KitchenTips"],
+        fitness: ["#Fitness", "#Workout", "#Health", "#Exercise", "#GymLife"],
+        travel: ["#Travel", "#TravelTips", "#Adventure", "#Wanderlust", "#Explore"],
+        music: ["#Music", "#Musician", "#Song", "#Producer", "#MusicTips"],
+        business: ["#Business", "#Entrepreneur", "#Marketing", "#Startup", "#Success"],
+        finance: ["#Finance", "#Investing", "#MoneyTips", "#PersonalFinance", "#Wealth"],
+        diy: ["#DIY", "#Crafts", "#Handmade", "#Maker", "#HomeProjects"],
+        entertainment: ["#Entertainment", "#Fun", "#Comedy", "#Viral", "#Content"],
+        science: ["#Science", "#STEM", "#Research", "#Discovery", "#Curious"],
+        history: ["#History", "#Historical", "#Documentary", "#LearnHistory", "#Past"],
+        podcast: ["#Podcast", "#Interview", "#TalkShow", "#Discussion", "#Episode"],
+        general: ["#YouTube", "#ContentCreator", "#Video", "#Tips", "#Guide"]
+    };
+
+    (nicheTags[niche] || nicheTags.general).forEach(t => set.add(t));
+
+    // Generic useful
+    ["#YouTubeTips", "#ContentCreator", "#VideoMarketing", "#CreatorEconomy", "#OnlineLearning", "#2026"].forEach(t => {
+        if (set.size < 20) set.add(t);
+    });
+
+    // Pad if needed with title-based variations
+    let i = 0;
+    while (set.size < 20 && i < words.length) {
+        set.add("#" + words[i] + "Tips");
+        set.add("#" + words[i] + "Guide");
+        i++;
+    }
+    while (set.size < 20) {
+        set.add("#Topic" + set.size);
+    }
+
+    return Array.from(set).slice(0, 20).join(" ");
 }
 
-function fallbackCopy(text, successMsg) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.style.position = "fixed";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
+function generateKeywords(title, niche) {
+    const words = extractKeywords(title);
+    const set = new Set();
+
+    // Full title and variations
+    set.add(title.toLowerCase().trim());
+    if (words.length) set.add(words.join(" "));
+    words.forEach(w => set.add(w));
+
+    // Combinations
+    if (words.length >= 2) {
+        set.add(words[0] + " " + words[1]);
+        set.add(words[0] + " tutorial");
+        set.add(words[0] + " guide");
+        set.add(words[0] + " tips");
+        set.add("how to " + words.slice(0, 3).join(" "));
+    }
+
+    const nicheKw = {
+        gaming: ["gameplay tips", "gaming guide", "best strategies", "beginner gaming", "pro tips"],
+        education: ["online learning", "study guide", "explained simply", "beginner tutorial", "step by step"],
+        technology: ["tech review", "how to use", "software tutorial", "beginner tech", "latest technology"],
+        cooking: ["easy recipe", "home cooking", "step by step recipe", "cooking tips", "beginner cooking"],
+        fitness: ["home workout", "fitness tips", "exercise guide", "beginner fitness", "training routine"],
+        travel: ["travel guide", "travel tips", "best places", "travel vlog", "destination guide"],
+        music: ["music tutorial", "how to play", "music production", "beginner music", "song cover"],
+        business: ["business tips", "entrepreneur guide", "marketing strategy", "startup advice", "online business"],
+        finance: ["personal finance", "investing for beginners", "money management", "financial tips", "budgeting"],
+        diy: ["diy project", "how to make", "craft tutorial", "home diy", "beginner diy"],
+        entertainment: ["funny video", "entertainment", "reaction", "comedy sketch", "viral content"],
+        science: ["science explained", "scientific method", "fun science", "science facts", "beginner science"],
+        history: ["history documentary", "historical events", "history explained", "learn history", "ancient history"],
+        podcast: ["podcast episode", "interview", "discussion", "talk show", "podcast tips"],
+        general: ["youtube tips", "content creation", "video guide", "how to", "beginner guide"]
+    };
+
+    (nicheKw[niche] || nicheKw.general).forEach(k => set.add(k));
+
+    // Year and common modifiers
+    set.add(words[0] + " 2026");
+    set.add("best " + (words[0] || "guide"));
+    set.add((words[0] || "topic") + " for beginners");
+
+    const arr = Array.from(set).filter(k => k.length > 2).slice(0, 20);
+    while (arr.length < 20) arr.push("related topic " + (arr.length + 1));
+    return arr.join(", ");
+}
+
+function showToast(msg, isError = false) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (isError ? " error" : "");
+    setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+async function copyText(text, label = "Text") {
+    if (!text) {
+        showToast("Nothing to copy", true);
+        return;
+    }
     try {
-        document.execCommand('copy');
-        showToast(successMsg);
-    } catch (err) {
-        alert("Unable to copy to clipboard automatically.");
+        await navigator.clipboard.writeText(text);
+        showToast(`${label} copied!`);
+    } catch (e) {
+        // Fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand("copy");
+            showToast(`${label} copied!`);
+        } catch (err) {
+            showToast("Copy failed — select and copy manually", true);
+        }
+        document.body.removeChild(ta);
     }
-    document.body.removeChild(textarea);
 }
 
-function copySingleCard(index) {
-    const textarea = document.getElementById(`desc-text-${index}`);
-    const item = generatedResultsCache[index];
-    const fullContent = `DESCRIPTION:\n${textarea.value}\n\nKEYWORDS:\n${item.keywords.join(', ')}\n\nHASHTAGS:\n${item.hashtags.join(' ')}`;
-    copyToClipboard(fullContent, `Variation ${index + 1} & Tags copied!`);
+function copyDescription(index) {
+    const desc = currentDescriptions[index];
+    if (desc) copyText(desc, `Description ${index + 1}`);
+}
+
+function copyDescriptionWithTags(index) {
+    const desc = currentDescriptions[index];
+    if (!desc) return;
+    const combined = desc + "\n\nHashtags:\n" + currentHashtags + "\n\nKeywords:\n" + currentKeywords;
+    copyText(combined, `Description ${index + 1} + Tags`);
 }
 
 function copyAllDescriptions() {
-    const allText = generatedResultsCache.map((item, idx) => `=== VARIATION ${idx + 1} (${item.styleName}) ===\n\n${document.getElementById(`desc-text-${idx}`).value}`).join("\n\n\n");
-    copyToClipboard(allText, "All 10 descriptions copied!");
+    if (!currentDescriptions.length) return;
+    const all = currentDescriptions.map((d, i) => `=== Option ${i + 1} (${STYLE_LABELS[i]}) ===\n\n${d}`).join("\n\n\n");
+    copyText(all, "All descriptions");
 }
 
-function copyAllHashtags() {
-    if (generatedResultsCache.length === 0) return;
-    const allTags = generatedResultsCache[0].hashtags.join(" ");
-    copyToClipboard(allTags, "All 20 hashtags copied!");
+function copyAllMeta() {
+    copyText("Hashtags:\n" + currentHashtags + "\n\nKeywords:\n" + currentKeywords, "Hashtags + Keywords");
 }
 
-function copyAllKeywords() {
-    if (generatedResultsCache.length === 0) return;
-    const allKeys = generatedResultsCache[0].keywords.join(", ");
-    copyToClipboard(allKeys, "All 20 SEO keywords copied!");
+function regenerateOne(index) {
+    if (!currentTitle) return;
+    const niche = currentNiche;
+    const newDesc = buildDescription(currentTitle, index, niche);
+    currentDescriptions[index] = newDesc;
+
+    // Update only that card
+    const card = document.querySelector(`.desc-card[data-index="${index}"]`);
+    if (card) {
+        const pre = card.querySelector(".desc-text");
+        const wc = card.querySelector(".word-count");
+        pre.textContent = newDesc;
+        wc.textContent = wordCount(newDesc) + " words";
+    }
+    showToast(`Option ${index + 1} regenerated`);
 }
 
-function regenerateCard(index) {
-    const title = document.getElementById("videoTitle").value.trim() || "YouTube Video";
-    const style = writingStyles[index];
-    const newDesc = buildDescriptionContent(title, style, index + Math.floor(Math.random() * 10));
-    generatedResultsCache[index].description = newDesc;
-    
-    document.getElementById(`desc-text-${index}`).value = newDesc;
-    const badge = document.querySelector(`#card-${index} .badge-words`);
-    if(badge) badge.textContent = `${countWords(newDesc)} Words`;
-    showToast(`Variation ${index + 1} regenerated successfully!`);
+function renderResults() {
+    const grid = document.getElementById("resultsGrid");
+    grid.innerHTML = "";
+
+    currentDescriptions.forEach((desc, i) => {
+        const card = document.createElement("div");
+        card.className = "desc-card";
+        card.dataset.index = i;
+
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "card-title";
+        titleEl.innerHTML = `Option ${i + 1} <span class="style-badge">${STYLE_LABELS[i]}</span> <span class="word-count">${wordCount(desc)} words</span>`;
+
+        header.appendChild(titleEl);
+        card.appendChild(header);
+
+        const pre = document.createElement("div");
+        pre.className = "desc-text";
+        pre.textContent = desc; // Safe: textContent, not innerHTML
+        card.appendChild(pre);
+
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
+        const btnCopy = document.createElement("button");
+        btnCopy.className = "btn btn-success";
+        btnCopy.textContent = "Copy Description";
+        btnCopy.onclick = () => copyDescription(i);
+
+        const btnCopyAll = document.createElement("button");
+        btnCopyAll.className = "btn btn-secondary";
+        btnCopyAll.textContent = "Copy + Hashtags";
+        btnCopyAll.onclick = () => copyDescriptionWithTags(i);
+
+        const btnRegen = document.createElement("button");
+        btnRegen.className = "btn btn-outline";
+        btnRegen.textContent = "Regenerate";
+        btnRegen.onclick = () => regenerateOne(i);
+
+        actions.append(btnCopy, btnCopyAll, btnRegen);
+        card.appendChild(actions);
+
+        grid.appendChild(card);
+    });
+
+    document.getElementById("hashtagsBox").textContent = currentHashtags;
+    document.getElementById("keywordsBox").textContent = currentKeywords;
+
+    document.getElementById("results").classList.add("visible");
+    document.getElementById("regenerateAllBtn").style.display = "inline-flex";
+    document.getElementById("exportTxtBtn").style.display = "inline-flex";
+    document.getElementById("exportMdBtn").style.display = "inline-flex";
 }
 
-exportFile = function(format) {
-    if (generatedResultsCache.length === 0) {
-        alert("Please generate content first!");
+function generateAll() {
+    const input = document.getElementById("videoTitle");
+    const title = input.value.trim();
+
+    if (!title) {
+        showToast("Please enter a video title", true);
+        input.focus();
         return;
     }
-    let content = "";
-    const title = document.getElementById("videoTitle").value.trim() || "YouTube_Metadata";
-    
-    if (format === 'txt') {
-        content = generatedResultsCache.map((item, idx) => `VARIATION ${idx + 1} (${item.styleName})\n${document.getElementById(`desc-text-${idx}`).value}\n\n-----------------------------------\n`).join("\n");
-        downloadBlob(content, `${title}_Descriptions.txt`, "text/plain");
-    } else if (format === 'md') {
-        content = `# YouTube SEO Metadata Report for: ${title}\n\n` + generatedResultsCache.map((item, idx) => `## Variation ${idx + 1}: ${item.styleName}\n\n\`\`\`text\n${document.getElementById(`desc-text-${idx}`).value}\n\`\`\`\n\n`).join("\n");
-        downloadBlob(content, `${title}_Descriptions.md`, "text/markdown");
-    }
-}
 
-function downloadBlob(content, filename, mimeType) {
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (title.length > 200) {
+        showToast("Title is too long (max 200 characters)", true);
+        return;
+    }
+
+    currentTitle = title;
+    currentNiche = detectNiche(title);
+
+    // Show loading
+    document.getElementById("loadingState").classList.add("active");
+    document.getElementById("results").classList.remove("visible");
+    document.getElementById("generateBtn").disabled = true;
+    document.getElementById("genBtnText").textContent = "Generating…";
+
+    // Simulate short processing for UX (actual generation is fast)
+    setTimeout(() => {
+        try {
+            currentDescriptions = [];
+            for (let i = 0; i < 10; i++) {
+                currentDescriptions.push(buildDescription(title, i, currentNiche));
+            }
+            currentHashtags = generateHashtags(title, currentNiche);
+            currentKeywords = generateKeywords(title, currentNiche);
+
+            renderResults();
+            showToast("10 descriptions ready!");
+        } catch (err) {
+            console.error(err);
+            showToast("Generation failed. Please try again.", true);
+        } finally {
+            document.getElementById("loadingState").classList.remove("active");
+            document.getElementById("generateBtn").disabled = false;
+            document.getElementById("genBtnText").textContent = "Generate 10 Descriptions";
+        }
+    }, 600);
 }
 
 function clearAll() {
     document.getElementById("videoTitle").value = "";
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("master-controls-container").innerHTML = "";
-    generatedResultsCache = [];
-    showToast("Cleared input and results!");
+    document.getElementById("results").classList.remove("visible");
+    document.getElementById("loadingState").classList.remove("active");
+    document.getElementById("regenerateAllBtn").style.display = "none";
+    document.getElementById("exportTxtBtn").style.display = "none";
+    document.getElementById("exportMdBtn").style.display = "none";
+    currentTitle = "";
+    currentDescriptions = [];
+    currentHashtags = "";
+    currentKeywords = "";
+    document.getElementById("videoTitle").focus();
 }
+
+function exportTXT() {
+    if (!currentDescriptions.length) return;
+    let content = `YouTube Description Studio Export\nTitle: ${currentTitle}\nGenerated: ${new Date().toISOString()}\n\n`;
+    content += `HASHTAGS (20):\n${currentHashtags}\n\n`;
+    content += `KEYWORDS (20):\n${currentKeywords}\n\n`;
+    content += "=".repeat(60) + "\n\n";
+    currentDescriptions.forEach((d, i) => {
+        content += `OPTION ${i + 1} — ${STYLE_LABELS[i]} (${wordCount(d)} words)\n${"-".repeat(40)}\n${d}\n\n\n`;
+    });
+    downloadFile(content, `youtube-descriptions-${Date.now()}.txt`, "text/plain");
+}
+
+function exportMarkdown() {
+    if (!currentDescriptions.length) return;
+    let md = `# YouTube Descriptions for: ${currentTitle}\n\n`;
+    md += `**Generated:** ${new Date().toLocaleString()}\n\n`;
+    md += `## Hashtags\n\n${currentHashtags}\n\n`;
+    md += `## SEO Keywords\n\n${currentKeywords}\n\n`;
+    md += `---\n\n`;
+    currentDescriptions.forEach((d, i) => {
+        md += `## Option ${i + 1}: ${STYLE_LABELS[i]} (${wordCount(d)} words)\n\n${d}\n\n---\n\n`;
+    });
+    downloadFile(md, `youtube-descriptions-${Date.now()}.md`, "text/markdown");
+}
+
+function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("File downloaded");
+}
+
+// Enter key support
+document.getElementById("videoTitle").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") generateAll();
+});
 </script>
 </body>
 </html>
