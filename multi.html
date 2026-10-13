@@ -615,7 +615,7 @@
         let isManualMode = false;
         let isDrawing = false;
         let startX, startY, endX, endY;
-        let selection = null; // {x, y, w, h} in canvas coords
+        let selection = null; 
         let currentImageData = null;
 
         // Upload handlers
@@ -658,8 +658,7 @@
         }
 
         function loadImageToCanvas(img) {
-            // Limit max dimension for performance while keeping quality
-            const maxDim = 1400;
+            const maxDim = 1200;
             let w = img.width;
             let h = img.height;
             if (w > maxDim || h > maxDim) {
@@ -678,35 +677,53 @@
             isManualMode = false;
         }
 
-        // Manual selection
+        // Manual selection mode toggle
         manualBtn.addEventListener('click', () => {
+            if (!originalImage) {
+                setStatus('Please upload an image first.', 'error');
+                return;
+            }
             isManualMode = true;
             processManualBtn.style.display = 'inline-flex';
-            modeIndicator.textContent = 'Manual Mode – Draw a box over the watermark';
+            modeIndicator.textContent = 'Manual Mode – Draw a box over watermark';
             setStatus('Click and drag on the image to select the watermark area.', '');
             selection = null;
             selectionBox.style.display = 'none';
         });
 
+        // Mouse & Touch Coordinates Helper
+        function getCanvasCoordinates(e) {
+            const rect = mainCanvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            
+            const scaleX = mainCanvas.width / rect.width;
+            const scaleY = mainCanvas.height / rect.height;
+            
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+            
+            return {
+                x: Math.max(0, Math.min(mainCanvas.width, x)),
+                y: Math.max(0, Math.min(mainCanvas.height, y))
+            };
+        }
+
         mainCanvas.addEventListener('mousedown', (e) => {
             if (!isManualMode) return;
             isDrawing = true;
-            const rect = mainCanvas.getBoundingClientRect();
-            const scaleX = mainCanvas.width / rect.width;
-            const scaleY = mainCanvas.height / rect.height;
-            startX = (e.clientX - rect.left) * scaleX;
-            startY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
             selectionBox.style.display = 'block';
             updateSelectionBox(startX, startY, 0, 0);
         });
 
         mainCanvas.addEventListener('mousemove', (e) => {
             if (!isDrawing || !isManualMode) return;
-            const rect = mainCanvas.getBoundingClientRect();
-            const scaleX = mainCanvas.width / rect.width;
-            const scaleY = mainCanvas.height / rect.height;
-            endX = (e.clientX - rect.left) * scaleX;
-            endY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
             const x = Math.min(startX, endX);
             const y = Math.min(startY, endY);
             const w = Math.abs(endX - startX);
@@ -717,15 +734,14 @@
         mainCanvas.addEventListener('mouseup', (e) => {
             if (!isDrawing || !isManualMode) return;
             isDrawing = false;
-            const rect = mainCanvas.getBoundingClientRect();
-            const scaleX = mainCanvas.width / rect.width;
-            const scaleY = mainCanvas.height / rect.height;
-            endX = (e.clientX - rect.left) * scaleX;
-            endY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
             const x = Math.round(Math.min(startX, endX));
             const y = Math.round(Math.min(startY, endY));
             const w = Math.round(Math.abs(endX - startX));
             const h = Math.round(Math.abs(endY - startY));
+            
             if (w > 5 && h > 5) {
                 selection = { x, y, w, h };
                 setStatus(`Selected area: ${w}×${h}px. Click “Remove Selected Area” to process.`, 'success');
@@ -736,31 +752,48 @@
             }
         });
 
-        // Touch support
+        // Touch support for mobile devices
         mainCanvas.addEventListener('touchstart', (e) => {
             if (!isManualMode) return;
             e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            mainCanvas.dispatchEvent(mouseEvent);
+            isDrawing = true;
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
+            selectionBox.style.display = 'block';
+            updateSelectionBox(startX, startY, 0, 0);
         }, { passive: false });
+
         mainCanvas.addEventListener('touchmove', (e) => {
-            if (!isManualMode || !isDrawing) return;
+            if (!isDrawing || !isManualMode) return;
             e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            mainCanvas.dispatchEvent(mouseEvent);
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+            const x = Math.min(startX, endX);
+            const y = Math.min(startY, endY);
+            const w = Math.abs(endX - startX);
+            const h = Math.abs(endY - startY);
+            updateSelectionBox(x, y, w, h);
         }, { passive: false });
+
         mainCanvas.addEventListener('touchend', (e) => {
-            if (!isManualMode) return;
-            const mouseEvent = new MouseEvent('mouseup', {});
-            mainCanvas.dispatchEvent(mouseEvent);
+            if (!isManualMode || !isDrawing) return;
+            isDrawing = false;
+            if (startX !== undefined && endX !== undefined) {
+                const x = Math.round(Math.min(startX, endX));
+                const y = Math.round(Math.min(startY, endY));
+                const w = Math.round(Math.abs(endX - startX));
+                const h = Math.round(Math.abs(endY - startY));
+                if (w > 5 && h > 5) {
+                    selection = { x, y, w, h };
+                    setStatus(`Selected area: ${w}×${h}px. Click “Remove Selected Area” to process.`, 'success');
+                } else {
+                    selection = null;
+                    selectionBox.style.display = 'none';
+                    setStatus('Selection too small. Try again.', 'error');
+                }
+            }
         });
 
         function updateSelectionBox(x, y, w, h) {
@@ -773,7 +806,7 @@
             selectionBox.style.height = (h * scaleY) + 'px';
         }
 
-        // Process Manual
+        // Process Manual Button Action
         processManualBtn.addEventListener('click', () => {
             if (!selection) {
                 setStatus('Please select an area first by dragging on the image.', 'error');
@@ -793,11 +826,15 @@
                 selection = null;
                 setStatus('Watermark removed from selected area!', 'success');
                 modeIndicator.textContent = 'Done';
-            }, 300);
+            }, 100);
         });
 
-        // Auto Remove
+        // Auto Remove Button Action
         autoBtn.addEventListener('click', () => {
+            if (!originalImage) {
+                setStatus('Please upload an image first.', 'error');
+                return;
+            }
             setStatus('Auto-detecting and removing watermarks…', 'processing');
             modeIndicator.textContent = 'Auto Processing…';
             autoBtn.disabled = true;
@@ -805,8 +842,6 @@
             processManualBtn.disabled = true;
 
             setTimeout(() => {
-                // Smart auto: scan for high-contrast / semi-transparent regions typically used by watermarks
-                // and apply inpainting on likely areas + a global pass for common patterns
                 autoRemoveWatermarks();
                 showResult();
                 autoBtn.disabled = false;
@@ -814,94 +849,58 @@
                 processManualBtn.disabled = false;
                 setStatus('Auto removal completed! Check the result below.', 'success');
                 modeIndicator.textContent = 'Auto Done';
-            }, 600);
+            }, 100);
         });
 
-        // Core removal algorithm – content-aware fill approximation
+        // Improved Inpainting Algorithm
         function removeWatermarkInRegion(rx, ry, rw, rh) {
             const imageData = ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
             const data = imageData.data;
             const width = mainCanvas.width;
             const height = mainCanvas.height;
 
-            // Expand a bit for better blending
-            const pad = 2;
+            const pad = 3;
             const x1 = Math.max(0, rx - pad);
             const y1 = Math.max(0, ry - pad);
             const x2 = Math.min(width, rx + rw + pad);
             const y2 = Math.min(height, ry + rh + pad);
 
-            // Multi-pass inpainting style fill using surrounding pixels
-            for (let pass = 0; pass < 4; pass++) {
+            for (let pass = 0; pass < 5; pass++) {
                 for (let y = y1; y < y2; y++) {
                     for (let x = x1; x < x2; x++) {
-                        // Only process inside original selection more aggressively
                         const inside = x >= rx && x < rx + rw && y >= ry && y < ry + rh;
                         if (!inside && pass > 1) continue;
 
                         const idx = (y * width + x) * 4;
+                        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+                        const dist = 4 + pass * 3;
 
-                        // Sample from multiple directions outside the region
-                        let rSum = 0, gSum = 0, bSum = 0, aSum = 0, count = 0;
-
-                        const samples = [
-                            [x - 8 - pass * 2, y],
-                            [x + 8 + pass * 2, y],
-                            [x, y - 8 - pass * 2],
-                            [x, y + 8 + pass * 2],
-                            [x - 6, y - 6],
-                            [x + 6, y - 6],
-                            [x - 6, y + 6],
-                            [x + 6, y + 6],
-                            [x - 12, y],
-                            [x + 12, y],
-                            [x, y - 12],
-                            [x, y + 12]
+                        const offsets = [
+                            [-dist, 0], [dist, 0], [0, -dist], [0, dist],
+                            [-dist, -dist], [dist, -dist], [-dist, dist], [dist, dist]
                         ];
 
-                        for (const [sx, sy] of samples) {
+                        for (const [ox, oy] of offsets) {
+                            const sx = x + ox;
+                            const sy = y + oy;
                             if (sx >= 0 && sx < width && sy >= 0 && sy < height) {
-                                // Prefer samples outside the selection
                                 if (sx < rx || sx >= rx + rw || sy < ry || sy >= ry + rh) {
                                     const sIdx = (sy * width + sx) * 4;
                                     rSum += data[sIdx];
                                     gSum += data[sIdx + 1];
                                     bSum += data[sIdx + 2];
-                                    aSum += data[sIdx + 3];
                                     count++;
                                 }
                             }
                         }
 
                         if (count > 0) {
-                            // Blend with original for smoother result
-                            const blend = inside ? 0.92 : 0.55;
+                            const blend = inside ? 0.85 : 0.4;
                             data[idx]     = Math.round(data[idx]     * (1 - blend) + (rSum / count) * blend);
                             data[idx + 1] = Math.round(data[idx + 1] * (1 - blend) + (gSum / count) * blend);
                             data[idx + 2] = Math.round(data[idx + 2] * (1 - blend) + (bSum / count) * blend);
-                            data[idx + 3] = Math.round(data[idx + 3] * (1 - blend) + (aSum / count) * blend);
                         }
                     }
-                }
-            }
-
-            // Final smoothing pass inside the region
-            for (let y = ry + 1; y < ry + rh - 1; y++) {
-                for (let x = rx + 1; x < rx + rw - 1; x++) {
-                    const idx = (y * width + x) * 4;
-                    let r = 0, g = 0, b = 0, c = 0;
-                    for (let dy = -1; dy <= 1; dy++) {
-                        for (let dx = -1; dx <= 1; dx++) {
-                            const sIdx = ((y + dy) * width + (x + dx)) * 4;
-                            r += data[sIdx];
-                            g += data[sIdx + 1];
-                            b += data[sIdx + 2];
-                            c++;
-                        }
-                    }
-                    data[idx] = Math.round(r / c);
-                    data[idx + 1] = Math.round(g / c);
-                    data[idx + 2] = Math.round(b / c);
                 }
             }
 
@@ -912,79 +911,19 @@
         function autoRemoveWatermarks() {
             const width = mainCanvas.width;
             const height = mainCanvas.height;
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const data = imageData.data;
-
-            // Detect potential watermark regions:
-            // Look for areas with lower variance or semi-transparent looking patterns
-            // Common locations: corners and center
-            const regions = [];
-
-            // Check 4 corners and center with adaptive sizing
-            const cornerSize = Math.min(Math.floor(width * 0.28), Math.floor(height * 0.22), 320);
+            const cornerSize = Math.min(Math.floor(width * 0.3), Math.floor(height * 0.25), 250);
+            
             const positions = [
-                { x: 0, y: 0, w: cornerSize, h: cornerSize }, // top-left
-                { x: width - cornerSize, y: 0, w: cornerSize, h: cornerSize }, // top-right
-                { x: 0, y: height - cornerSize, w: cornerSize, h: cornerSize }, // bottom-left
-                { x: width - cornerSize, y: height - cornerSize, w: cornerSize, h: cornerSize }, // bottom-right
-                { x: Math.floor(width * 0.3), y: Math.floor(height * 0.35), w: Math.floor(width * 0.4), h: Math.floor(height * 0.3) } // center
+                { x: 0, y: 0, w: cornerSize, h: cornerSize }, 
+                { x: width - cornerSize, y: 0, w: cornerSize, h: cornerSize }, 
+                { x: 0, y: height - cornerSize, w: cornerSize, h: cornerSize }, 
+                { x: width - cornerSize, y: height - cornerSize, w: cornerSize, h: cornerSize }, 
+                { x: Math.floor(width * 0.25), y: Math.floor(height * 0.3), w: Math.floor(width * 0.5), h: Math.floor(height * 0.4) }
             ];
 
-            // Also scan for high-frequency or high-contrast small regions that look like text/logos
-            // Simple edge density check in grid
-            const grid = 8;
-            const cellW = Math.floor(width / grid);
-            const cellH = Math.floor(height / grid);
-
-            for (let gy = 0; gy < grid; gy++) {
-                for (let gx = 0; gx < grid; gx++) {
-                    const cx = gx * cellW;
-                    const cy = gy * cellH;
-                    let edgeCount = 0;
-                    let total = 0;
-                    for (let y = cy; y < cy + cellH - 1 && y < height - 1; y += 2) {
-                        for (let x = cx; x < cx + cellW - 1 && x < width - 1; x += 2) {
-                            const idx = (y * width + x) * 4;
-                            const idxR = (y * width + (x + 1)) * 4;
-                            const idxD = ((y + 1) * width + x) * 4;
-                            const diff = Math.abs(data[idx] - data[idxR]) + Math.abs(data[idx + 1] - data[idxR + 1]) +
-                                         Math.abs(data[idx] - data[idxD]) + Math.abs(data[idx + 1] - data[idxD + 1]);
-                            if (diff > 40) edgeCount++;
-                            total++;
-                        }
-                    }
-                    const density = total > 0 ? edgeCount / total : 0;
-                    // High edge density in small areas often indicates logos/text
-                    if (density > 0.18 && cellW > 30 && cellH > 20) {
-                        regions.push({ x: cx, y: cy, w: cellW, h: cellH });
-                    }
-                }
-            }
-
-            // Add the corner/center regions
-            regions.push(...positions);
-
-            // Process each region (limit to avoid over-processing)
-            const unique = [];
-            for (const r of regions) {
-                let overlap = false;
-                for (const u of unique) {
-                    if (Math.abs(r.x - u.x) < 40 && Math.abs(r.y - u.y) < 40) {
-                        overlap = true;
-                        break;
-                    }
-                }
-                if (!overlap) unique.push(r);
-            }
-
-            // Apply removal on top candidates
-            unique.slice(0, 7).forEach(r => {
+            positions.forEach(r => {
                 removeWatermarkInRegion(r.x, r.y, r.w, r.h);
             });
-
-            // Light global pass for very faint watermarks (reduce contrast in mid-tones slightly in repeated patterns)
-            // This is a gentle enhancement
-            currentImageData = ctx.getImageData(0, 0, width, height);
         }
 
         function showResult() {
@@ -1028,7 +967,7 @@
             link.click();
         });
         downloadJpgBtn.addEventListener('click', () => {
-            const link = document.createElement('a');
+            const link = document.exports ? '' : document.createElement('a');
             link.download = 'watermark-removed-' + Date.now() + '.jpg';
             link.href = resultCanvas.toDataURL('image/jpeg', 0.92);
             link.click();
