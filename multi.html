@@ -1,1044 +1,794 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Video Trimmer - Free Browser-Based Video Cut & Trim Tool | Pooreyoutuber</title>
-    <meta name="description" content="Free online video trimmer that works 100% in your browser. Upload videos up to 20GB, set start and end times, trim precisely, and download instantly. No upload to servers, complete privacy. Perfect for YouTubers, content creators, and editors.">
-    <meta name="keywords" content="online video trimmer, free video cutter, browser video editor, trim video online, cut video without upload, video trim tool, mp4 trimmer, webm cutter, privacy video editor, client-side video trim">
-    <meta name="author" content="Pooreyoutuber">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://pooreyoutuber.github.io/video.html">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="Online Video Trimmer - Free Browser Video Cut Tool">
-    <meta property="og:description" content="Trim videos directly in your browser. Upload, set start/end times, download. Supports large files, 100% private, no server upload.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pooreyoutuber.github.io/video.html">
-    <meta property="og:site_name" content="Pooreyoutuber">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Online Video Trimmer - Free Browser Tool">
-    <meta name="twitter:description" content="Free, private, browser-based video trimmer. No uploads to any server.">
-    
-    <!-- Geo / Schema -->
-    <script type="application/ld+json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Online Video Trimmer - Cut Videos in Your Browser (Up to 20GB)</title>
+<meta name="description" content="Free online video trimmer. Cut and trim your videos directly in your browser with exact start and end times. Files never leave your device. Supports files up to 20GB.">
+<meta name="keywords" content="online video trimmer, trim video online, cut video, video cutter, free video trimmer, browser video editor, trim mp4 online, cut video without upload">
+<meta property="og:title" content="Free Online Video Trimmer - Cut Videos in Your Browser">
+<meta property="og:description" content="Trim any video in your browser. Set exact start and end times, preview, and download. No upload, no sign-up, up to 20GB.">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Free Online Video Trimmer",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any modern web browser (Chrome, Edge, Firefox, Safari)",
+  "description": "A free browser-based video trimmer that lets you cut videos by setting exact start and end times. Processing happens locally on your device and files up to 20GB are supported.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Trim video in the browser",
+    "Exact start and end time input",
+    "Timeline slider selection",
+    "Preview selection before export",
+    "Quality selection",
+    "No file upload to any server",
+    "Files up to 20GB"
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
     {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Online Video Trimmer",
-      "description": "A free, privacy-focused online video trimming tool that processes videos entirely in the browser. Users can upload videos, set precise start and end times, preview the selection, and download the trimmed clip without any data leaving their device.",
-      "url": "https://pooreyoutuber.github.io/video.html",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "Any (Web Browser)",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "Client-side video trimming",
-        "Support for large files up to 20GB",
-        "Precise start and end time control",
-        "Drag and drop upload",
-        "Real-time video preview",
-        "No server upload - complete privacy",
-        "Works offline after page load",
-        "Multiple video format support"
-      ],
-      "browserRequirements": "Requires a modern browser with MediaRecorder and HTML5 video support",
-      "creator": {
-        "@type": "Organization",
-        "name": "Pooreyoutuber",
-        "url": "https://pooreyoutuber.github.io/"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "1250"
+      "@type": "Question",
+      "name": "Is this video trimmer free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The video trimmer is completely free to use. There is no sign-up, no watermark and no hidden charge."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are my videos uploaded to a server?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The video is read and processed inside your own browser. The file never leaves your device, so your private videos stay private."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the maximum video size?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can load video files up to 20GB. Larger files are rejected with a clear message."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which video formats are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Formats that your browser can play are supported, such as MP4 (H.264), WebM and many MOV files. Formats your browser cannot decode, such as some MKV files, may not load."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does trimming take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Trimming runs in real time, so a 5 minute clip takes about 5 minutes to export. Keep the tab open and active while it runs."
       }
     }
-    </script>
-    
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #ffffff;
-            --surface: #f8fafc;
-            --border: #e2e8f0;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        /* Header */
-        .header {
-            background: #ffffff;
-            border-bottom: 1px solid var(--border);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow);
-        }
-        
-        .logo {
-            font-size: 1.35rem;
-            font-weight: 700;
-            text-decoration: none;
-            color: var(--text);
-        }
-        
-        .nav-controls nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .nav-controls a, .dropbtn {
-            text-decoration: none;
-            color: var(--text);
-            font-size: 0.95rem;
-            padding: 8px 14px;
-            border-radius: 8px;
-            transition: background 0.2s;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        
-        .nav-controls a:hover, .dropbtn:hover {
-            background: var(--surface);
-        }
-        
-        .home-btn { font-weight: 600; }
-        
-        .badge-new {
-            background: #ef4444;
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 999px;
-            margin-left: 4px;
-            vertical-align: middle;
-        }
-        
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background: white;
-            min-width: 180px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            z-index: 200;
-            overflow: hidden;
-        }
-        
-        .dropdown-content a {
-            display: block;
-            padding: 12px 16px;
-            color: var(--text);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        
-        .dropdown-content a:hover {
-            background: var(--surface);
-        }
-        
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        
-        .donate-coffee-btn {
-            background: #f59e0b !important;
-            color: white !important;
-            font-weight: 600;
-        }
-        
-        /* Main */
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 32px 20px 60px;
-        }
-        
-        h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 32px;
-            font-size: 1.1rem;
-        }
-        
-        /* Tool Card */
-        .tool-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            box-shadow: var(--shadow);
-            margin-bottom: 40px;
-        }
-        
-        /* Upload Zone */
-        .upload-zone {
-            border: 2px dashed #94a3b8;
-            border-radius: var(--radius);
-            padding: 48px 24px;
-            text-align: center;
-            background: white;
-            cursor: pointer;
-            transition: all 0.25s;
-            position: relative;
-        }
-        
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-        
-        .upload-zone.has-file {
-            border-style: solid;
-            border-color: var(--success);
-            padding: 20px;
-        }
-        
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 12px;
-        }
-        
-        .upload-text {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-        
-        .upload-hint {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-        
-        #fileInput {
-            display: none;
-        }
-        
-        /* Video Area */
-        .video-section {
-            display: none;
-            margin-top: 24px;
-        }
-        
-        .video-wrapper {
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        #previewVideo {
-            width: 100%;
-            max-height: 420px;
-            display: block;
-            background: #000;
-        }
-        
-        /* Controls */
-        .controls {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .time-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        
-        @media (max-width: 600px) {
-            .time-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text);
-        }
-        
-        .form-group input[type="text"],
-        .form-group input[type="number"] {
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: white;
-            color: var(--text);
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-        
-        .slider-group {
-            margin-top: 8px;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #cbd5e1;
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        .duration-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        
-        .selected-range {
-            text-align: center;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary);
-            padding: 12px;
-            background: #eff6ff;
-            border-radius: 8px;
-            margin: 8px 0;
-        }
-        
-        /* Buttons */
-        .btn-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            background: var(--primary-hover);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--surface);
-        }
-        
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #15803d;
-        }
-        
-        /* Progress */
-        .progress-section {
-            display: none;
-            margin-top: 20px;
-        }
-        
-        .progress-bar-bg {
-            height: 10px;
-            background: #e2e8f0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 5px;
-        }
-        
-        .progress-text {
-            text-align: center;
-            margin-top: 8px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        
-        /* Result */
-        .result-section {
-            display: none;
-            margin-top: 24px;
-            text-align: center;
-            padding: 20px;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 10px;
-        }
-        
-        .result-section h3 {
-            color: var(--success);
-            margin-bottom: 12px;
-        }
-        
-        /* Tips */
-        .tips {
-            margin-top: 20px;
-            padding: 16px;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #92400e;
-        }
-        
-        .tips strong {
-            display: block;
-            margin-bottom: 6px;
-        }
-        
-        /* Description Section */
-        .description {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 36px 28px;
-            line-height: 1.75;
-        }
-        
-        .description h2 {
-            font-size: 1.5rem;
-            margin-bottom: 16px;
-            color: var(--text);
-        }
-        
-        .description h3 {
-            font-size: 1.2rem;
-            margin: 28px 0 12px;
-            color: var(--text);
-        }
-        
-        .description p {
-            margin-bottom: 14px;
-            color: #334155;
-        }
-        
-        .description ul, .description ol {
-            margin: 12px 0 16px 24px;
-            color: #334155;
-        }
-        
-        .description li {
-            margin-bottom: 8px;
-        }
-        
-        .description strong {
-            color: var(--text);
-        }
-        
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border);
-            margin-top: 40px;
-        }
-        
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-    </style>
+  ]
+}
+</script>
+
+<style>
+[hidden]{display:none !important}
+:root{
+  --bg:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --primary:#2563eb;
+  --primary-dark:#1d4ed8;
+  --soft:#f9fafb;
+  --danger:#dc2626;
+  --success:#16a34a;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+
+/* Header (site navigation) */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:50}
+.logo{font-weight:700;color:var(--text);text-decoration:none;font-size:1.2rem}
+.nav-controls nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.nav-controls nav a{color:var(--text);text-decoration:none;font-size:.95rem}
+.badge-new{background:#ef4444;color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;vertical-align:top}
+.dropdown{position:relative}
+.dropbtn{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.95rem;color:var(--text)}
+.dropdown-content{display:none;position:absolute;right:0;top:110%;background:#fff;border:1px solid var(--border);border-radius:8px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:6px;z-index:60}
+.dropdown-content a{display:block;padding:8px 10px;border-radius:6px}
+.dropdown-content a:hover{background:var(--soft)}
+.dropdown:hover .dropdown-content,.dropdown:focus-within .dropdown-content{display:block}
+.donate-coffee-btn{background:var(--primary);color:#fff !important;padding:7px 12px;border-radius:6px}
+
+/* Layout */
+.wrap{max-width:920px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:2rem;margin:.2em 0 .3em;line-height:1.25}
+.lead{color:var(--muted);margin:0 0 24px}
+h2{font-size:1.4rem;margin:2.2em 0 .5em}
+h3{font-size:1.1rem;margin:1.6em 0 .4em}
+p{margin:.6em 0}
+ol,ul{padding-left:1.3em}
+li{margin:.3em 0}
+
+/* Tool card */
+.tool{border:1px solid var(--border);border-radius:14px;padding:22px;background:#fff;box-shadow:0 4px 18px rgba(17,24,39,.05)}
+.drop{border:2px dashed #cbd5e1;border-radius:12px;padding:40px 20px;text-align:center;background:var(--soft);transition:.2s}
+.drop.over{border-color:var(--primary);background:#eff6ff}
+.drop strong{font-size:1.1rem}
+.small{font-size:.875rem;color:var(--muted)}
+.btn{display:inline-block;border:none;border-radius:8px;padding:10px 16px;font-size:.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--primary-dark)}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid #cbd5e1}
+.btn-ghost:hover:not(:disabled){background:var(--soft)}
+.file-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.file-info .name{font-weight:600;word-break:break-all}
+.file-info .meta{color:var(--muted);font-size:.9rem}
+video{width:100%;max-height:420px;background:#000;border-radius:10px;display:block}
+
+/* Dual range timeline */
+.timeline{margin:18px 0 6px}
+.range-wrap{position:relative;height:44px}
+.track{position:absolute;top:18px;left:0;right:0;height:8px;background:#e5e7eb;border-radius:4px}
+.selected{position:absolute;top:18px;height:8px;background:var(--primary);border-radius:4px}
+.range-wrap input[type=range]{position:absolute;left:0;top:14px;width:100%;height:16px;margin:0;background:none;appearance:none;-webkit-appearance:none;pointer-events:none;outline:none}
+.range-wrap input[type=range]::-webkit-slider-runnable-track{background:transparent;height:16px}
+.range-wrap input[type=range]::-moz-range-track{background:transparent}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer;margin-top:-1px}
+.range-wrap input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer}
+#endRange{z-index:2}
+#startRange{z-index:3}
+.timeline-labels{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+
+.times{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.times label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.row{display:flex;gap:8px}
+input[type=text],select{flex:1;min-width:0;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:.95rem;font-family:ui-monospace,Menlo,Consolas,monospace;background:#fff;color:var(--text)}
+input[type=text]:focus,select:focus{outline:2px solid #bfdbfe;border-color:var(--primary)}
+.out{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--soft);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+.actions select{flex:0 0 auto;width:auto}
+.actions .spacer{flex:1}
+
+.progress{margin-top:18px;border:1px solid var(--border);border-radius:10px;padding:14px;background:var(--soft)}
+.bar{height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden}
+#progressBar{height:100%;width:0;background:var(--primary);transition:width .2s}
+#status{margin:10px 0 8px;font-size:.9rem;color:var(--muted)}
+.msg{margin:14px 0 0;font-weight:600;min-height:1.2em}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--success)}
+
+/* Description content */
+.content{margin-top:40px;border-top:1px solid var(--border);padding-top:10px}
+.content p,.content li{color:#374151;font-size:1rem}
+.faq details{border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}
+.faq summary{cursor:pointer;font-weight:600}
+.faq details p{margin:.5em 0 0;color:#374151}
+
+footer{border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.875rem;padding:22px}
+
+@media (max-width:600px){
+  h1{font-size:1.55rem}
+  .tool{padding:14px}
+  .row{flex-direction:column}
+  .actions .spacer{display:none}
+}
+</style>
 </head>
 <body>
-    <header class="header">
-        <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-        <div class="nav-controls">
-            <nav>
-                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
-                <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
-                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-                <div class="dropdown">
-                    <button class="dropbtn">🛒 Shop ▾</button>
-                    <div class="dropdown-content">
-                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
-                    </div>
-                </div>
-                <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
-            </nav>
-        </div>
-    </header>
 
-    <div class="container">
-        <h1>Online Video Trimmer</h1>
-        <p class="subtitle">Trim videos instantly in your browser • 100% Private • No Upload to Server • Supports Large Files</p>
-
-        <div class="tool-card">
-            <!-- Upload Zone -->
-            <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">🎬</div>
-                <div class="upload-text">Drag & Drop your video here</div>
-                <div class="upload-hint">or click to browse • MP4, WebM, MOV, MKV, AVI and more • Max recommended ~2GB for best performance (claimed support up to 20GB depending on device RAM)</div>
-                <input type="file" id="fileInput" accept="video/*">
-            </div>
-
-            <!-- Video + Controls -->
-            <div class="video-section" id="videoSection">
-                <div class="video-wrapper">
-                    <video id="previewVideo" controls playsinline></video>
-                </div>
-
-                <div class="controls">
-                    <div class="time-row">
-                        <div class="form-group">
-                            <label for="startTime">Start Time (HH:MM:SS or seconds)</label>
-                            <input type="text" id="startTime" placeholder="0:00" value="0:00">
-                            <div class="slider-group">
-                                <input type="range" id="startSlider" min="0" max="100" value="0" step="0.01">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="endTime">End Time (HH:MM:SS or seconds)</label>
-                            <input type="text" id="endTime" placeholder="0:00" value="0:00">
-                            <div class="slider-group">
-                                <input type="range" id="endSlider" min="0" max="100" value="100" step="0.01">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="duration-info">
-                        <span>Original Duration: <strong id="origDuration">0:00</strong></span>
-                        <span>Selected: <strong id="selectedDuration">0:00</strong></span>
-                    </div>
-
-                    <div class="selected-range" id="selectedRange">
-                        Selected clip: 0:00 → 0:00
-                    </div>
-
-                    <div class="btn-row">
-                        <button class="btn btn-primary" id="trimBtn" disabled>
-                            ✂️ Trim & Process
-                        </button>
-                        <button class="btn btn-secondary" id="previewRangeBtn">
-                            ▶️ Preview Selection
-                        </button>
-                        <button class="btn btn-secondary" id="resetBtn">
-                            🔄 Reset
-                        </button>
-                        <button class="btn btn-secondary" id="changeFileBtn">
-                            📁 Change Video
-                        </button>
-                    </div>
-
-                    <div class="progress-section" id="progressSection">
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar" id="progressBar"></div>
-                        </div>
-                        <div class="progress-text" id="progressText">Processing... 0%</div>
-                    </div>
-
-                    <div class="result-section" id="resultSection">
-                        <h3>✅ Trim Complete!</h3>
-                        <p id="resultInfo">Your trimmed video is ready.</p>
-                        <div class="btn-row" style="justify-content: center;">
-                            <a class="btn btn-success" id="downloadBtn" download="trimmed-video.webm">
-                                ⬇️ Download Trimmed Video
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tips">
-                    <strong>💡 Tips for best results</strong>
-                    • Use Chrome, Edge or Firefox for best compatibility.<br>
-                    • For very large files (several GB), ensure you have enough free RAM.<br>
-                    • The tool records the selected portion using the browser’s MediaRecorder – quality is high and processing happens fully offline.<br>
-                    • Precise frame-accurate cuts are limited by browser keyframe handling; results are excellent for most use cases.
+<header class="header">
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+    <div class="nav-controls">
+        <nav>
+            <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+            <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
                 </div>
             </div>
-        </div>
+            <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
+        </nav>
+    </div>
+</header>
 
-        <!-- Long Description -->
-        <div class="description">
-            <h2>Free Online Video Trimmer – Cut & Edit Videos Directly in Your Browser</h2>
-            
-            <p>Welcome to the most privacy-focused online video trimmer available. Unlike other “online” tools that force you to upload your personal videos to unknown servers, this tool works <strong>100% inside your browser</strong>. Your video never leaves your device. No account, no watermark, no waiting for server queues – just pure client-side power.</p>
+<main class="wrap">
+  <h1>Free Online Video Trimmer: Cut Videos in Your Browser</h1>
+  <p class="lead">Upload a video (up to 20GB), choose your start and end time, and download the trimmed clip. Everything runs on your own device. Nothing is uploaded.</p>
 
-            <p>Whether you are a YouTuber creating Shorts, a content creator preparing clips for Instagram Reels or TikTok, a teacher extracting a segment from a lecture recording, or simply someone who needs to cut the boring parts from a family video, this free video cutter is built for you.</p>
+  <section class="tool" id="tool" aria-label="Online video trimmer tool">
 
-            <h3>How to Use the Online Video Trimmer</h3>
-            <ol>
-                <li><strong>Upload your video</strong> – Click the upload area or drag and drop any common video file (MP4, WebM, MOV, MKV, AVI, etc.). The tool accepts files of substantial size; practical performance depends on your device’s available memory (many users successfully process multi-gigabyte files).</li>
-                <li><strong>Preview the full video</strong> – Once loaded, the video appears in the player so you can watch and decide exactly which part you need.</li>
-                <li><strong>Set the start and end points</strong> – Use the time input boxes (you can type seconds or HH:MM:SS format) or drag the two range sliders. The selected duration updates live so you always know how long the final clip will be.</li>
-                <li><strong>Preview your selection</strong> – Click “Preview Selection” to play only the chosen portion and confirm it looks perfect.</li>
-                <li><strong>Trim & Process</strong> – Hit the big Trim button. The browser records the selected segment using modern MediaRecorder technology. A progress bar keeps you informed.</li>
-                <li><strong>Download</strong> – When processing finishes, a green download button appears. Save the trimmed video to your device instantly.</li>
-            </ol>
-
-            <h3>Key Features That Make This Tool Stand Out</h3>
-            <ul>
-                <li><strong>Complete Privacy</strong> – Zero data is sent to any server. Everything happens locally in your browser tab.</li>
-                <li><strong>No File Size Limits Imposed by Us</strong> – The tool is designed to handle large videos (up to the practical limits of your browser and RAM, with support claimed for files approaching 20 GB on high-end machines).</li>
-                <li><strong>Precise Time Control</strong> – Enter exact times or use intuitive sliders. See the exact selected duration in real time.</li>
-                <li><strong>Works Offline</strong> – After the page loads, you can disconnect from the internet and still trim videos.</li>
-                <li><strong>Cross-Platform</strong> – Works on Windows, macOS, Linux, Chrome OS and even modern Android/iOS browsers (performance varies on mobile).</li>
-                <li><strong>Multiple Format Support</strong> – Accepts virtually any video the browser can play and outputs a widely compatible WebM or the browser’s preferred format.</li>
-                <li><strong>Clean, Modern White UI</strong> – Distraction-free interface that feels professional and fast.</li>
-                <li><strong>Free Forever</strong> – No subscriptions, no hidden fees, no forced upgrades.</li>
-            </ul>
-
-            <h3>Benefits for Content Creators & Everyday Users</h3>
-            <p>Content creators save hours every week by quickly cutting intros, outros, or mistakes without opening heavy desktop software like Adobe Premiere, Final Cut Pro or DaVinci Resolve. Students and teachers can extract exact segments from long recorded classes. Marketers can create short promotional clips from longer product demos. Parents can trim home videos into shareable moments without uploading private family footage to third-party cloud services.</p>
-
-            <p>Because processing stays on your device, you also avoid bandwidth costs and the privacy risks that come with uploading sensitive or copyrighted material to external servers. Many competing online trimmers store your files temporarily (or permanently) and may use them for AI training or analytics. This tool does none of that.</p>
-
-            <h3>Technical Notes & Performance Tips</h3>
-            <p>The tool uses the HTML5 video element combined with the MediaRecorder API and MediaStream capture. When you click Trim, the video is seeked to the start time, played at normal speed while the stream is recorded until the end time is reached. The resulting Blob is then offered for download.</p>
-
-            <p>For the best experience:</p>
-            <ul>
-                <li>Use a recent version of Google Chrome, Microsoft Edge, or Mozilla Firefox.</li>
-                <li>Close other heavy tabs if you are processing very large files.</li>
-                <li>Prefer MP4 or WebM source files for maximum compatibility.</li>
-                <li>If a file fails to load, try converting it first with another free tool or check that the codec is supported by your browser.</li>
-            </ul>
-
-            <p>Please note that true lossless stream-copy trimming (without re-encoding) is not possible with pure browser APIs in a cross-browser way without additional WebAssembly modules that require special server headers. This tool prioritizes maximum compatibility and privacy by using the reliable MediaRecorder approach that works on GitHub Pages and almost every modern hosting environment.</p>
-
-            <h3>Why Choose a Browser-Based Video Trimmer?</h3>
-            <p>Desktop video editors are powerful but overkill for simple cuts. Cloud-based online editors force uploads, create privacy concerns, and often impose file-size limits or daily quotas. A pure frontend solution gives you the convenience of the web with the privacy of a desktop app. You keep full ownership of your content at every step.</p>
-
-            <p>This Online Video Trimmer is part of the Pooreyoutuber toolkit – a collection of free, high-quality utilities designed especially for creators who want professional results without the complexity or cost of traditional software.</p>
-
-            <h3>Frequently Asked Questions</h3>
-            <p><strong>Is my video uploaded to a server?</strong><br>No. Never. All processing happens inside your browser using JavaScript and native browser APIs.</p>
-
-            <p><strong>What is the maximum file size?</strong><br>There is no hard limit coded into the tool. Practical limits depend on your device’s RAM and browser. Many users successfully trim multi-gigabyte videos. Extremely large files (10 GB+) may require a powerful computer with plenty of free memory.</p>
-
-            <p><strong>Does it work on mobile phones?</strong><br>Yes on modern Android and iOS browsers, although performance and file-size handling are better on desktop computers.</p>
-
-            <p><strong>Will the quality stay the same?</strong><br>The output is re-encoded by the browser’s MediaRecorder. Quality is generally excellent for most sharing and editing purposes. For absolute bit-perfect cuts, a desktop tool with stream copy is still recommended for professional archival work.</p>
-
-            <p><strong>Can I trim audio-only files?</strong><br>This version focuses on video. For pure audio trimming, other specialized tools are better suited.</p>
-
-            <p>Start trimming your videos right now – completely free, completely private, and completely in your control. Upload a file above and experience the fastest, most secure way to cut videos online.</p>
-        </div>
+    <!-- Step 1: upload -->
+    <div id="dropZone" class="drop">
+      <p><strong>Drag and drop your video here</strong></p>
+      <p class="small">or</p>
+      <label class="btn btn-primary" for="fileInput">Choose video file</label>
+      <input type="file" id="fileInput" accept="video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.3gp" hidden>
+      <p class="small" style="margin-top:14px">Maximum size: 20GB · Works 100% in your browser · Your file is never uploaded</p>
     </div>
 
-    <footer>
-        <p>© 2025–2026 <a href="https://pooreyoutuber.github.io/">Pooreyoutuber</a> • Free Browser Tools for Creators • All processing happens locally in your browser.</p>
-    </footer>
+    <!-- Step 2: editor -->
+    <div id="editor" hidden>
+      <div class="file-info">
+        <div>
+          <div class="name" id="fileName"></div>
+          <div class="meta" id="fileMeta"></div>
+        </div>
+        <button class="btn btn-ghost" id="changeBtn" type="button">Change file</button>
+      </div>
 
-    <script>
-        // Elements
-        const uploadZone = document.getElementById('uploadZone');
-        const fileInput = document.getElementById('fileInput');
-        const videoSection = document.getElementById('videoSection');
-        const previewVideo = document.getElementById('previewVideo');
-        const startTimeInput = document.getElementById('startTime');
-        const endTimeInput = document.getElementById('endTime');
-        const startSlider = document.getElementById('startSlider');
-        const endSlider = document.getElementById('endSlider');
-        const origDurationEl = document.getElementById('origDuration');
-        const selectedDurationEl = document.getElementById('selectedDuration');
-        const selectedRangeEl = document.getElementById('selectedRange');
-        const trimBtn = document.getElementById('trimBtn');
-        const previewRangeBtn = document.getElementById('previewRangeBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const changeFileBtn = document.getElementById('changeFileBtn');
-        const progressSection = document.getElementById('progressSection');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const resultSection = document.getElementById('resultSection');
-        const resultInfo = document.getElementById('resultInfo');
-        const downloadBtn = document.getElementById('downloadBtn');
+      <video id="player" controls playsinline preload="auto"></video>
 
-        let currentFile = null;
-        let videoDuration = 0;
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let isProcessing = false;
+      <div class="timeline">
+        <div class="range-wrap">
+          <div class="track"></div>
+          <div class="selected" id="selected"></div>
+          <input type="range" id="startRange" min="0" max="0" step="0.01" value="0" aria-label="Start time">
+          <input type="range" id="endRange" min="0" max="0" step="0.01" value="0" aria-label="End time">
+        </div>
+        <div class="timeline-labels"><span>00:00:00.000</span><span id="totalLabel">00:00:00.000</span></div>
+      </div>
 
-        // Format seconds to MM:SS or HH:MM:SS
-        function formatTime(seconds) {
-            if (isNaN(seconds) || seconds < 0) return '0:00';
-            seconds = Math.floor(seconds);
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
-            if (h > 0) {
-                return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            }
-            return `${m}:${String(s).padStart(2,'0')}`;
-        }
+      <div class="times">
+        <div>
+          <label for="startText">Start time (HH:MM:SS.ms)</label>
+          <div class="row">
+            <input type="text" id="startText" placeholder="00:00:00.000" autocomplete="off">
+            <button class="btn btn-ghost" id="setStartNow" type="button">Use current</button>
+          </div>
+        </div>
+        <div>
+          <label for="endText">End time (HH:MM:SS.ms)</label>
+          <div class="row">
+            <input type="text" id="endText" placeholder="00:00:00.000" autocomplete="off">
+            <button class="btn btn-ghost" id="setEndNow" type="button">Use current</button>
+          </div>
+        </div>
+        <div>
+          <label>Selected length</label>
+          <div class="out" id="lengthOut">00:00:00.000</div>
+        </div>
+      </div>
 
-        // Parse time string (supports seconds, MM:SS, HH:MM:SS)
-        function parseTime(str) {
-            if (!str) return 0;
-            str = str.trim();
-            if (/^\d+(\.\d+)?$/.test(str)) {
-                return parseFloat(str);
-            }
-            const parts = str.split(':').map(Number);
-            if (parts.length === 3) {
-                return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            }
-            if (parts.length === 2) {
-                return parts[0] * 60 + parts[1];
-            }
-            return 0;
-        }
+      <div class="actions">
+        <button class="btn btn-ghost" id="previewBtn" type="button">▶ Preview selection</button>
+        <select id="quality" aria-label="Output quality">
+          <option value="8000000">Quality: High</option>
+          <option value="4000000" selected>Quality: Medium</option>
+          <option value="1500000">Quality: Small file</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" id="trimBtn" type="button">✂ Trim and Download</button>
+      </div>
 
-        function updateSelectedDisplay() {
-            const start = parseTime(startTimeInput.value);
-            const end = parseTime(endTimeInput.value);
-            const sel = Math.max(0, end - start);
-            selectedDurationEl.textContent = formatTime(sel);
-            selectedRangeEl.textContent = `Selected clip: ${formatTime(start)} → ${formatTime(end)} (${formatTime(sel)})`;
-            trimBtn.disabled = !(sel > 0.1 && end > start && end <= videoDuration + 0.5);
-        }
+      <div class="progress" id="progressWrap" hidden>
+        <div class="bar"><div id="progressBar"></div></div>
+        <p id="status">Processing...</p>
+        <button class="btn btn-ghost" id="cancelBtn" type="button">Cancel</button>
+      </div>
 
-        function syncFromSliders() {
-            const start = (startSlider.value / 100) * videoDuration;
-            const end = (endSlider.value / 100) * videoDuration;
-            startTimeInput.value = formatTime(start);
-            endTimeInput.value = formatTime(end);
-            updateSelectedDisplay();
-        }
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    </div>
+  </section>
 
-        function syncFromInputs() {
-            let start = parseTime(startTimeInput.value);
-            let end = parseTime(endTimeInput.value);
-            if (start < 0) start = 0;
-            if (end > videoDuration) end = videoDuration;
-            if (start > end) start = end;
-            startSlider.value = (start / videoDuration) * 100 || 0;
-            endSlider.value = (end / videoDuration) * 100 || 100;
-            startTimeInput.value = formatTime(start);
-            endTimeInput.value = formatTime(end);
-            updateSelectedDisplay();
-        }
+  <!-- Long description -->
+  <section class="content">
+    <h2>What Is This Free Online Video Trimmer?</h2>
+    <p>This free online video trimmer lets you cut a video down to the exact part you need, directly inside your web browser. You do not have to download heavy software, create an account, or pay for a subscription. Simply open the page, load your video, select where the clip should begin and end, and download the result. Whether you want to remove a long intro, keep only the best moment of a recording, or shorten a clip for social media, this tool gives you precise control over every second.</p>
 
-        // Upload handling
-        uploadZone.addEventListener('click', () => fileInput.click());
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) handleFile(fileInput.files[0]);
-        });
+    <h2>How to Trim a Video Online: Step by Step</h2>
+    <ol>
+      <li><strong>Load your video.</strong> Drag the file into the box or click "Choose video file". You can select videos up to 20GB.</li>
+      <li><strong>Find the part you want.</strong> Play the video and pause where you want the clip to start, then press "Use current" next to the start time. Do the same for the end time.</li>
+      <li><strong>Fine-tune the selection.</strong> Move the blue handles on the timeline, or type an exact time such as 00:01:30.500 into the start or end box for frame-level accuracy.</li>
+      <li><strong>Preview.</strong> Press "Preview selection" to play only the part you chose. Adjust again if needed.</li>
+      <li><strong>Choose a quality level.</strong> High keeps the most detail and produces a larger file. Small file produces a much smaller download that is suitable for messaging apps.</li>
+      <li><strong>Trim and download.</strong> Press "Trim and Download". When the process finishes, your trimmed video is saved automatically to your device.</li>
+    </ol>
 
-        function handleFile(file) {
-            if (!file.type.startsWith('video/')) {
-                alert('Please select a valid video file.');
-                return;
-            }
-            currentFile = file;
-            const url = URL.createObjectURL(file);
-            previewVideo.src = url;
-            previewVideo.onloadedmetadata = () => {
-                videoDuration = previewVideo.duration;
-                origDurationEl.textContent = formatTime(videoDuration);
-                startSlider.max = 100;
-                endSlider.max = 100;
-                startSlider.value = 0;
-                endSlider.value = 100;
-                startTimeInput.value = '0:00';
-                endTimeInput.value = formatTime(videoDuration);
-                updateSelectedDisplay();
-                videoSection.style.display = 'block';
-                uploadZone.classList.add('has-file');
-                uploadZone.querySelector('.upload-text').textContent = file.name;
-                uploadZone.querySelector('.upload-hint').textContent = `Size: ${(file.size / (1024*1024)).toFixed(1)} MB • Duration: ${formatTime(videoDuration)}`;
-                resultSection.style.display = 'none';
-                progressSection.style.display = 'none';
-                trimBtn.disabled = false;
-            };
-            previewVideo.onerror = () => {
-                alert('Could not load this video. The format may not be supported by your browser.');
-            };
-        }
+    <h2>Key Features</h2>
+    <ul>
+      <li><strong>100% browser-based:</strong> No software installation is needed. It works on Windows, macOS, Linux, Android and iOS browsers.</li>
+      <li><strong>Private by design:</strong> Your video is never sent to a server. All processing happens on your own device.</li>
+      <li><strong>Large file support:</strong> Load video files up to 20GB, which covers long recordings, camera footage and full-length movies.</li>
+      <li><strong>Exact time control:</strong> Use the timeline slider for quick selection, or type precise start and end times in hours, minutes, seconds and milliseconds.</li>
+      <li><strong>Live preview:</strong> Check your selection before you export it, so you never waste time on a wrong cut.</li>
+      <li><strong>Quality options:</strong> Choose between High, Medium and Small file output to balance clarity and file size.</li>
+      <li><strong>Free forever:</strong> No sign-up, no watermark, and no limit on the number of clips you can make.</li>
+    </ul>
 
-        // Slider & input listeners
-        startSlider.addEventListener('input', () => {
-            if (parseFloat(startSlider.value) > parseFloat(endSlider.value)) {
-                startSlider.value = endSlider.value;
-            }
-            syncFromSliders();
-        });
-        endSlider.addEventListener('input', () => {
-            if (parseFloat(endSlider.value) < parseFloat(startSlider.value)) {
-                endSlider.value = startSlider.value;
-            }
-            syncFromSliders();
-        });
-        startTimeInput.addEventListener('change', syncFromInputs);
-        endTimeInput.addEventListener('change', syncFromInputs);
-        startTimeInput.addEventListener('blur', syncFromInputs);
-        endTimeInput.addEventListener('blur', syncFromInputs);
+    <h2>Why Trim Videos in Your Browser?</h2>
+    <p>Many video editors are large programs that take time to install, need powerful hardware, and often require paid licenses for basic tasks. A browser-based trimmer solves a simple problem quickly. If you only need to cut the beginning or the end of a clip, a full editor is unnecessary. Browser tools are also available on any computer or phone you already own, so you can trim a video at work, at home, or on the go without installing anything.</p>
+    <p>Common uses include shortening screen recordings for tutorials, removing dead air from phone videos, cutting highlights from a sports or event recording, preparing short clips for YouTube Shorts, Instagram Reels or WhatsApp status, and extracting a single scene from a longer film for personal reference. Students, teachers, content creators, small business owners and everyday users all benefit from a fast and simple way to edit video.</p>
 
-        // Preview selection
-        previewRangeBtn.addEventListener('click', () => {
-            const start = parseTime(startTimeInput.value);
-            const end = parseTime(endTimeInput.value);
-            if (end <= start) return;
-            previewVideo.currentTime = start;
-            previewVideo.play();
-            const checkEnd = () => {
-                if (previewVideo.currentTime >= end) {
-                    previewVideo.pause();
-                    previewVideo.removeEventListener('timeupdate', checkEnd);
-                }
-            };
-            previewVideo.addEventListener('timeupdate', checkEnd);
-        });
+    <h2>Privacy and Security</h2>
+    <p>Privacy is a core design principle of this tool. When you choose a file, the browser reads it from your own disk and plays it locally. The trimming process uses browser features that create the new clip on your device. Your original video and the finished result are never uploaded to any external server, which means personal, family, business or confidential footage stays under your control. Because no data leaves your computer, you also avoid the waiting time of uploading large files over the internet.</p>
 
-        // Reset
-        resetBtn.addEventListener('click', () => {
-            startSlider.value = 0;
-            endSlider.value = 100;
-            syncFromSliders();
-            previewVideo.currentTime = 0;
-            resultSection.style.display = 'none';
-            progressSection.style.display = 'none';
-        });
+    <h2>Tips for the Best Results</h2>
+    <ul>
+      <li><strong>Keep the tab open and active.</strong> Trimming runs in real time, so a 5-minute selection takes about 5 minutes to export. Do not close the tab or put your computer to sleep during this time.</li>
+      <li><strong>Use a desktop browser for very large files.</strong> Chrome, Microsoft Edge and Firefox on a computer handle big files and recording features most reliably.</li>
+      <li><strong>Close other heavy programs.</strong> Freeing up memory helps smooth playback and a clean export, especially with 4K or long videos.</li>
+      <li><strong>Use exact times for precision.</strong> Typing a time in the boxes is faster and more accurate than dragging the slider for a frame-perfect cut.</li>
+      <li><strong>Check the preview.</strong> Always play your selection before downloading. It takes seconds and prevents mistakes.</li>
+    </ul>
 
-        changeFileBtn.addEventListener('click', () => {
-            fileInput.value = '';
-            fileInput.click();
-        });
+    <h2>Important Limitations</h2>
+    <p>This tool trims videos but does not add effects, text, music, transitions or filters. The output is re-encoded in the format your browser supports, usually WebM or MP4, so the file type may differ slightly from the original. Videos in formats that your browser cannot play, such as some MKV or HEVC files on certain devices, may not load. If that happens, try converting the file to MP4 first. Exported quality depends on the chosen quality level and on the source video.</p>
 
-        // Main Trim function using MediaRecorder + captureStream
-        trimBtn.addEventListener('click', async () => {
-            if (isProcessing) return;
-            const start = parseTime(startTimeInput.value);
-            const end = parseTime(endTimeInput.value);
-            if (end - start < 0.2) {
-                alert('Selected duration is too short.');
-                return;
-            }
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq">
+      <details>
+        <summary>Is this video trimmer really free?</summary>
+        <p>Yes. The tool is completely free. There is no account, no watermark, and no hidden fee.</p>
+      </details>
+      <details>
+        <summary>Are my videos uploaded to a server?</summary>
+        <p>No. The video stays on your device. It is read and processed locally in your browser, so nothing is sent to our servers.</p>
+      </details>
+      <details>
+        <summary>What is the maximum file size?</summary>
+        <p>You can load videos up to 20GB. Files larger than that are rejected with a message.</p>
+      </details>
+      <details>
+        <summary>Which video formats work?</summary>
+        <p>MP4 (H.264), WebM, MOV and most other formats that your browser can play are supported. Some MKV and special codec files may not play in every browser.</p>
+      </details>
+      <details>
+        <summary>Why does the export take as long as the clip?</summary>
+        <p>The trimmer records the selected part as it plays, so the export runs in real time. This is what allows it to work fully in the browser without any server.</p>
+      </details>
+      <details>
+        <summary>Can I trim the same video more than once?</summary>
+        <p>Yes. You can make as many cuts as you like. Each download is a separate new file, and your original video is never changed.</p>
+      </details>
+    </div>
+  </section>
+</main>
 
-            isProcessing = true;
-            trimBtn.disabled = true;
-            progressSection.style.display = 'block';
-            resultSection.style.display = 'none';
-            progressBar.style.width = '0%';
-            progressText.textContent = 'Preparing...';
+<footer>
+  <p>&copy; Pooreyoutuber. Free online video trimmer. Your videos never leave your device.</p>
+</footer>
 
-            try {
-                // Ensure video is ready
-                await new Promise((resolve) => {
-                    if (previewVideo.readyState >= 2) resolve();
-                    else previewVideo.addEventListener('canplay', resolve, { once: true });
-                });
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const MAX_BYTES = 20 * 1024 * 1024 * 1024; // 20GB
 
-                // Seek to start
-                previewVideo.currentTime = start;
-                await new Promise((resolve) => {
-                    const onSeeked = () => {
-                        previewVideo.removeEventListener('seeked', onSeeked);
-                        resolve();
-                    };
-                    previewVideo.addEventListener('seeked', onSeeked);
-                });
+  const dropZone   = $('dropZone');
+  const fileInput  = $('fileInput');
+  const editor     = $('editor');
+  const player     = $('player');
+  const fileName   = $('fileName');
+  const fileMeta   = $('fileMeta');
+  const changeBtn  = $('changeBtn');
+  const startRange = $('startRange');
+  const endRange   = $('endRange');
+  const selected   = $('selected');
+  const startText  = $('startText');
+  const endText    = $('endText');
+  const lengthOut  = $('lengthOut');
+  const totalLabel = $('totalLabel');
+  const previewBtn = $('previewBtn');
+  const trimBtn    = $('trimBtn');
+  const quality    = $('quality');
+  const progressWrap = $('progressWrap');
+  const progressBar  = $('progressBar');
+  const statusEl   = $('status');
+  const cancelBtn  = $('cancelBtn');
+  const msg        = $('msg');
+  const setStartNow = $('setStartNow');
+  const setEndNow   = $('setEndNow');
 
-                // Capture stream
-                const stream = previewVideo.captureStream ? previewVideo.captureStream() : previewVideo.mozCaptureStream();
-                if (!stream) {
-                    throw new Error('captureStream is not supported in this browser.');
-                }
+  let currentFile = null;
+  let objectUrl = null;
+  let duration = 0;
+  let previewing = false;
+  let recorder = null;
+  let recStream = null;
+  let timer = null;
+  let cancelled = false;
 
-                // Choose supported mimeType
-                const mimeTypes = [
-                    'video/webm;codecs=vp9,opus',
-                    'video/webm;codecs=vp8,opus',
-                    'video/webm;codecs=vp9',
-                    'video/webm;codecs=vp8',
-                    'video/webm',
-                    'video/mp4'
-                ];
-                let selectedMime = '';
-                for (const mt of mimeTypes) {
-                    if (MediaRecorder.isTypeSupported(mt)) {
-                        selectedMime = mt;
-                        break;
-                    }
-                }
-                if (!selectedMime) {
-                    throw new Error('No supported MediaRecorder mime type found.');
-                }
+  /* ---------- helpers ---------- */
+  function pad(n, len = 2) { return String(n).padStart(len, '0'); }
 
-                recordedChunks = [];
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: selectedMime,
-                    videoBitsPerSecond: 8000000 // 8 Mbps for good quality
-                });
+  function fmt(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const total = Math.round(sec * 1000);
+    const ms = total % 1000;
+    const s = Math.floor(total / 1000) % 60;
+    const m = Math.floor(total / 60000) % 60;
+    const h = Math.floor(total / 3600000);
+    return pad(h) + ':' + pad(m) + ':' + pad(s) + '.' + pad(ms, 3);
+  }
 
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data && e.data.size > 0) {
-                        recordedChunks.push(e.data);
-                    }
-                };
+  // Accepts "SS", "MM:SS", "HH:MM:SS" and decimals such as "01:02:03.250"
+  function parseTime(str) {
+    str = (str || '').trim();
+    if (!str) return NaN;
+    const parts = str.split(':');
+    if (parts.length > 3) return NaN;
+    let sec = 0;
+    for (const p of parts) {
+      const v = parseFloat(p);
+      if (isNaN(v) || v < 0) return NaN;
+      sec = sec * 60 + v;
+    }
+    return sec;
+  }
 
-                const duration = end - start;
-                let startTimeStamp = null;
+  function formatBytes(bytes) {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let i = 0, v = bytes;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    return v.toFixed(i === 0 ? 0 : 2) + ' ' + units[i];
+  }
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: selectedMime });
-                    const url = URL.createObjectURL(blob);
-                    downloadBtn.href = url;
-                    const ext = selectedMime.includes('mp4') ? 'mp4' : 'webm';
-                    downloadBtn.download = `trimmed-${currentFile.name.replace(/\.[^/.]+$/, '') || 'video'}.${ext}`;
-                    resultInfo.textContent = `Trimmed video ready (${(blob.size / (1024*1024)).toFixed(2)} MB) • Format: ${ext.toUpperCase()}`;
-                    resultSection.style.display = 'block';
-                    progressSection.style.display = 'none';
-                    isProcessing = false;
-                    trimBtn.disabled = false;
-                    previewVideo.pause();
-                };
+  function showMsg(text, isError) {
+    msg.textContent = text;
+    msg.className = 'msg ' + (isError ? 'err' : 'ok');
+  }
 
-                // Start recording
-                mediaRecorder.start(100); // collect data every 100ms
-                previewVideo.play();
+  /* ---------- loading the file ---------- */
+  function looksLikeVideo(file) {
+    return (file.type && file.type.startsWith('video/')) ||
+           /\.(mp4|mov|webm|m4v|mkv|avi|3gp)$/i.test(file.name);
+  }
 
-                // Progress & stop logic
-                const updateProgress = () => {
-                    if (!isProcessing) return;
-                    const current = previewVideo.currentTime;
-                    const progress = Math.min(100, ((current - start) / duration) * 100);
-                    progressBar.style.width = progress + '%';
-                    progressText.textContent = `Processing... ${Math.round(progress)}%`;
+  function loadFile(file) {
+    if (!file) return;
+    if (!looksLikeVideo(file)) {
+      showMsg('Please choose a video file (MP4, MOV, WebM, MKV, AVI, etc.).', true);
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      showMsg('This file is ' + formatBytes(file.size) + '. The maximum allowed size is 20GB.', true);
+      return;
+    }
 
-                    if (current >= end - 0.05 || previewVideo.ended || previewVideo.paused && current > start) {
-                        // finished
-                        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                            mediaRecorder.stop();
-                        }
-                        previewVideo.pause();
-                        previewVideo.removeEventListener('timeupdate', updateProgress);
-                    }
-                };
+    resetRecording();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
 
-                previewVideo.addEventListener('timeupdate', updateProgress);
+    currentFile = file;
+    objectUrl = URL.createObjectURL(file);
+    player.src = objectUrl;
 
-                // Safety timeout
-                setTimeout(() => {
-                    if (isProcessing && mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.stop();
-                        previewVideo.pause();
-                    }
-                }, (duration + 5) * 1000);
+    fileName.textContent = file.name;
+    fileMeta.textContent = 'Size: ' + formatBytes(file.size) + ' · Loading...';
 
-            } catch (err) {
-                console.error(err);
-                alert('Error during trimming: ' + err.message + '\n\nTry a different browser (Chrome/Edge recommended) or a smaller file.');
-                progressSection.style.display = 'none';
-                isProcessing = false;
-                trimBtn.disabled = false;
-            }
-        });
-    </script>
+    dropZone.hidden = true;
+    editor.hidden = false;
+    showMsg('', false);
+  }
+
+  player.addEventListener('loadedmetadata', () => {
+    duration = player.duration;
+    if (!isFinite(duration) || duration <= 0) {
+      showMsg('Could not read the length of this video. The format may not be supported by your browser.', true);
+      return;
+    }
+    startRange.max = duration;
+    endRange.max = duration;
+    totalLabel.textContent = fmt(duration);
+    fileMeta.textContent = 'Size: ' + formatBytes(currentFile.size) + ' · Length: ' + fmt(duration);
+    setSelection(0, duration);
+  });
+
+  player.addEventListener('error', () => {
+    showMsg("Your browser can't play this video format. Try an MP4 (H.264) or WebM file.", true);
+  });
+
+  /* ---------- drag and drop + picker ---------- */
+  fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+
+  ['dragenter', 'dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
+  dropZone.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+
+  changeBtn.addEventListener('click', () => {
+    resetRecording();
+    player.pause();
+    player.removeAttribute('src');
+    player.load();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = null;
+    currentFile = null;
+    fileInput.value = '';
+    editor.hidden = true;
+    dropZone.hidden = false;
+    showMsg('', false);
+  });
+
+  /* ---------- selection handling ---------- */
+  function setSelection(s, e) {
+    if (!duration) return;
+    s = Math.max(0, Math.min(s, duration));
+    e = Math.max(0, Math.min(e, duration));
+    if (e - s < 0.1) {
+      // keep at least 0.1s of selection
+      if (s + 0.1 <= duration) e = s + 0.1;
+      else s = e - 0.1;
+    }
+    startRange.value = s.toFixed(2);
+    endRange.value = e.toFixed(2);
+    updateUI();
+  }
+
+  function currentSelection() {
+    return { s: parseFloat(startRange.value) || 0, e: parseFloat(endRange.value) || 0 };
+  }
+
+  function updateUI() {
+    const { s, e } = currentSelection();
+    if (duration) {
+      selected.style.left = (s / duration * 100) + '%';
+      selected.style.width = ((e - s) / duration * 100) + '%';
+    }
+    startText.value = fmt(s);
+    endText.value = fmt(e);
+    lengthOut.textContent = fmt(e - s);
+  }
+
+  startRange.addEventListener('input', () => {
+    const { s, e } = currentSelection();
+    if (s > e - 0.1) startRange.value = Math.max(0, e - 0.1).toFixed(2);
+    updateUI();
+    player.currentTime = parseFloat(startRange.value);
+  });
+
+  endRange.addEventListener('input', () => {
+    const { s, e } = currentSelection();
+    if (e < s + 0.1) endRange.value = Math.min(duration, s + 0.1).toFixed(2);
+    updateUI();
+    player.currentTime = parseFloat(endRange.value);
+  });
+
+  function applyTextInput(input, which) {
+    const val = parseTime(input.value);
+    if (isNaN(val) || val > duration) {
+      showMsg('Please enter a valid time between 00:00:00.000 and ' + fmt(duration) + '.', true);
+      updateUI();
+      return;
+    }
+    const { s, e } = currentSelection();
+    if (which === 'start') setSelection(val, Math.max(e, val + 0.1));
+    else setSelection(Math.min(s, val - 0.1), val);
+    showMsg('', false);
+  }
+
+  startText.addEventListener('change', () => applyTextInput(startText, 'start'));
+  endText.addEventListener('change', () => applyTextInput(endText, 'end'));
+  startText.addEventListener('keydown', e => { if (e.key === 'Enter') applyTextInput(startText, 'start'); });
+  endText.addEventListener('keydown', e => { if (e.key === 'Enter') applyTextInput(endText, 'end'); });
+
+  setStartNow.addEventListener('click', () => {
+    const { e } = currentSelection();
+    setSelection(player.currentTime, Math.max(e, player.currentTime + 0.1));
+  });
+  setEndNow.addEventListener('click', () => {
+    const { s } = currentSelection();
+    setSelection(Math.min(s, player.currentTime - 0.1), player.currentTime);
+  });
+
+  /* ---------- preview ---------- */
+  previewBtn.addEventListener('click', () => {
+    if (!duration) return;
+    if (previewing) {
+      previewing = false;
+      player.pause();
+      previewBtn.textContent = '▶ Preview selection';
+      return;
+    }
+    const { s, e } = currentSelection();
+    player.currentTime = s;
+    previewing = true;
+    previewBtn.textContent = '■ Stop preview';
+    player.play().catch(() => {});
+  });
+
+  player.addEventListener('timeupdate', () => {
+    if (previewing) {
+      const { e } = currentSelection();
+      if (player.currentTime >= e) {
+        previewing = false;
+        player.pause();
+        player.currentTime = e;
+        previewBtn.textContent = '▶ Preview selection';
+      }
+    }
+  });
+
+  player.addEventListener('pause', () => {
+    if (previewing && !player.ended) {
+      // user paused manually during preview
+    }
+  });
+
+  /* ---------- trimming (real-time recording inside the browser) ---------- */
+  function pickMimeType() {
+    const candidates = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4',
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    if (!window.MediaRecorder) return null;
+    return candidates.find(t => MediaRecorder.isTypeSupported(t)) || null;
+  }
+
+  function setBusy(busy) {
+    trimBtn.disabled = busy;
+    previewBtn.disabled = busy;
+    changeBtn.disabled = busy;
+    quality.disabled = busy;
+    progressWrap.hidden = !busy;
+    if (!busy) progressBar.style.width = '0%';
+  }
+
+  function resetRecording() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (recorder && recorder.state !== 'inactive') {
+      try { recorder.stop(); } catch (_) {}
+    }
+    recorder = null;
+    previewing = false;
+  }
+
+  function finishStream() {
+    if (recStream) {
+      recStream.getTracks().forEach(t => t.stop());
+      recStream = null;
+    }
+  }
+
+  function waitFor(target, eventName) {
+    return new Promise(resolve => target.addEventListener(eventName, resolve, { once: true }));
+  }
+
+  async function trim() {
+    if (!currentFile || !duration) return;
+
+    const { s, e } = currentSelection();
+    if (e - s < 0.1) {
+      showMsg('The selected part is too short. Please select at least 0.1 seconds.', true);
+      return;
+    }
+
+    const captureFn = player.captureStream
+      ? () => player.captureStream()
+      : (player.mozCaptureStream ? () => player.mozCaptureStream() : null);
+
+    if (!captureFn || !window.MediaRecorder) {
+      showMsg('Your browser does not support in-browser trimming. Please use the latest Chrome, Edge or Firefox on a desktop computer.', true);
+      return;
+    }
+
+    const mime = pickMimeType();
+    if (!mime) {
+      showMsg('Your browser cannot record video in a supported format. Please try Chrome, Edge or Firefox.', true);
+      return;
+    }
+
+    showMsg('', false);
+    cancelled = false;
+    setBusy(true);
+    statusEl.textContent = 'Preparing...';
+
+    const chunks = [];
+    const total = e - s;
+
+    try {
+      recStream = captureFn();
+      recorder = new MediaRecorder(recStream, {
+        mimeType: mime,
+        videoBitsPerSecond: parseInt(quality.value, 10)
+      });
+    } catch (err) {
+      setBusy(false);
+      finishStream();
+      showMsg('Could not start the recorder: ' + err.message, true);
+      return;
+    }
+
+    recorder.ondataavailable = ev => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
+
+    const stopped = new Promise(resolve => { recorder.onstop = resolve; });
+
+    player.pause();
+    player.muted = false;
+    player.currentTime = s;
+    await waitFor(player, 'seeked');
+
+    recorder.start(1000);
+
+    const stopAll = () => {
+      if (timer) { clearInterval(timer); timer = null; }
+      player.pause();
+      if (recorder && recorder.state !== 'inactive') recorder.stop();
+    };
+
+    timer = setInterval(() => {
+      if (cancelled) { stopAll(); return; }
+      const t = player.currentTime;
+      const done = Math.max(0, Math.min(100, (t - s) / total * 100));
+      progressBar.style.width = done.toFixed(1) + '%';
+      statusEl.textContent = 'Processing... ' + Math.round(done) + '% (' + fmt(Math.max(0, t - s)) + ' of ' + fmt(total) + '). Keep this tab open.';
+      if (t >= e - 0.03 || player.ended) stopAll();
+    }, 100);
+
+    try {
+      await player.play();
+    } catch (err) {
+      stopAll();
+      showMsg('Playback was blocked by your browser. Please click "Trim and Download" again.', true);
+    }
+
+    await stopped;
+    if (timer) { clearInterval(timer); timer = null; }
+    finishStream();
+
+    if (cancelled) {
+      setBusy(false);
+      showMsg('Trimming cancelled.', false);
+      return;
+    }
+
+    const type = recorder.mimeType || mime;
+    const ext = type.includes('mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(chunks, { type: type.split(';')[0] });
+
+    if (blob.size === 0) {
+      setBusy(false);
+      showMsg('Nothing was recorded. Please try again.', true);
+      return;
+    }
+
+    const base = currentFile.name.replace(/\.[^.]+$/, '');
+    const name = base + '_trimmed_' + fmt(s).replace(/[:.]/g, '-') + '_to_' + fmt(e).replace(/[:.]/g, '-') + '.' + ext;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+    setBusy(false);
+    showMsg('Done! Your trimmed video (' + formatBytes(blob.size) + ') has been downloaded.', false);
+    recorder = null;
+  }
+
+  trimBtn.addEventListener('click', trim);
+  cancelBtn.addEventListener('click', () => { cancelled = true; });
+
+  // Default quality preset on load
+  updateUI();
+})();
+</script>
 </body>
 </html>
