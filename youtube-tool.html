@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Description Studio | Free SEO Description & Tags Generator</title>
-
-    <meta name="description" content="Free YouTube Description Studio by PooreYoutuber. Generate 10 distinct, high-quality video descriptions (~500 words each), 20 relevant hashtags, and 20 SEO keywords from any video title. No login required.">
-    <meta name="keywords" content="YouTube description generator, YouTube tags generator, YouTube SEO tool, video description writer, YouTube metadata generator, free YouTube SEO, hashtag generator for YouTube, keyword suggestions for YouTube">
-    <meta name="author" content="PooreYoutuber">
-    <meta name="robots" content="index, follow">
+    <title>YouTube Description Studio: 10 Descriptions, Hashtags &amp; Keywords</title>
+    <meta name="description" content="Free YouTube description generator. Enter a video title to get 10 distinct descriptions of about 500 words each, 20 hashtags and 20 keyword ideas. Runs in your browser.">
+    <meta name="keywords" content="YouTube description generator, YouTube description template, YouTube hashtags generator, YouTube keywords, video description writer, YouTube SEO description">
     <link rel="canonical" href="https://pooreyoutuber.github.io/youtube-tool.html">
 
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "YouTube Description Studio",
-      "url": "https://pooreyoutuber.github.io/youtube-tool.html",
-      "applicationCategory": "UtilitiesApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "description": "Free client-side tool that generates multiple high-quality YouTube video descriptions, hashtags, and SEO keywords from a single video title. Built by PooreYoutuber."
-    }
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "@id": "https://pooreyoutuber.github.io/youtube-tool.html",
+  "name": "YouTube Description Studio",
+  "url": "https://pooreyoutuber.github.io/youtube-tool.html",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires a modern web browser with JavaScript enabled",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "A free browser-based tool that turns a video title into 10 distinct YouTube description drafts of about 500 words each, plus 20 hashtags and 20 keyword ideas. Output is generated from built-in writing templates on your device and should be reviewed before publishing."
+}
     </script>
 
     <!-- Google Tag (gtag.js) -->
@@ -37,7 +36,6 @@
         gtag('config', 'G-ZPMC525FGT');
     </script>
 
-    <!-- Microsoft Clarity -->
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -46,573 +44,265 @@
     })(window, document, "clarity", "script", "xz0usv8l2h");
     </script>
 
-    <!-- Google AdSense -->
+    <!-- Google AdSense (loaded once) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
 
     <style>
         :root {
-            --bg-dark: #0b1220;
-            --bg-panel: #111827;
-            --bg-card: #1a2332;
-            --bg-input: #0f172a;
-            --border: #1e293b;
-            --border-light: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --accent-blue: #3b82f6;
-            --accent-blue-hover: #2563eb;
-            --accent-purple: #8b5cf6;
-            --accent-purple-hover: #7c3aed;
-            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --success: #10b981;
-            --success-hover: #059669;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --shadow: 0 4px 24px rgba(0,0,0,0.4);
-            --radius: 12px;
-            --radius-lg: 16px;
+            --bg: #0b1024;
+            --bg-2: #0e1734;
+            --panel: #131c3b;
+            --panel-2: #18244a;
+            --line: #2a3a6a;
+            --text: #e8edf9;
+            --muted: #b3bfdc;
+            --blue: #5b8cff;
+            --purple: #8b5cf6;
+            --grad: linear-gradient(135deg, #5b8cff 0%, #8b5cf6 100%);
+            --ok: #34d399;
+            --warn: #fbbf24;
+            --err: #fca5a5;
+            --radius: 18px;
+            --shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+            --focus: 0 0 0 3px rgba(139, 92, 246, 0.55);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            background:
+                radial-gradient(1000px 500px at 10% -10%, rgba(91, 140, 255, 0.18), transparent 60%),
+                radial-gradient(900px 500px at 100% 0%, rgba(139, 92, 246, 0.16), transparent 60%),
+                var(--bg);
         }
 
-        /* ===== HEADER ===== */
+        a { color: #9dbcff; }
+        :focus-visible { outline: none; box-shadow: var(--focus); border-radius: 8px; }
+
+        /* ---------- Site header (existing navigation) ---------- */
         .header {
-            background: #0f172a;
-            border-bottom: 1px solid var(--border);
-            padding: 0 20px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+            position: sticky; top: 0; z-index: 50;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+            gap: 12px; padding: 12px 20px;
+            background: rgba(11, 16, 36, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
         }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            text-decoration: none;
-            letter-spacing: -0.02em;
-        }
-        .logo:hover { color: var(--accent-blue); }
-
-        .nav-controls nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
+        .logo { font-weight: 800; font-size: 20px; color: var(--text); text-decoration: none; }
+        .nav-controls nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
         .nav-controls a, .dropbtn {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 8px 14px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
+            color: var(--text); text-decoration: none; font: inherit; font-size: 14px; font-weight: 600;
+            padding: 8px 12px; border-radius: 10px; border: 1px solid transparent; background: transparent; cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
-
-        .nav-controls a:hover, .dropbtn:hover {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--accent-blue);
-        }
-
-        .home-btn { color: var(--accent-blue) !important; }
-
+        .nav-controls a:hover, .dropbtn:hover { background: var(--panel-2); border-color: var(--line); }
         .badge-new {
-            background: var(--accent-purple);
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 4px;
-            font-weight: 700;
-            vertical-align: middle;
+            font-size: 10px; font-weight: 800; background: var(--grad); color: #fff;
+            padding: 2px 6px; border-radius: 999px; margin-left: 4px; vertical-align: middle;
         }
-
-        .dropdown { position: relative; display: inline-block; }
-
+        .donate-coffee-btn { background: var(--grad) !important; color: #fff !important; }
+        .dropdown { position: relative; }
         .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background: var(--bg-card);
-            min-width: 180px;
-            box-shadow: var(--shadow);
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            z-index: 200;
-            overflow: hidden;
+            display: none; position: absolute; right: 0; top: calc(100% + 6px); min-width: 200px;
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px;
+            box-shadow: var(--shadow); z-index: 60;
+        }
+        .dropdown.open .dropdown-content { display: block; }
+        .dropdown-content a { display: block; white-space: nowrap; }
+
+        /* ---------- Layout ---------- */
+        .page { max-width: 1120px; margin: 0 auto; padding: 32px 20px 64px; }
+
+        .hero { text-align: center; padding: 24px 0 28px; }
+        .eyebrow {
+            display: inline-block; margin: 0 0 12px; padding: 6px 14px; border-radius: 999px;
+            font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+            color: #c9d6ff; background: rgba(91, 140, 255, 0.12); border: 1px solid rgba(91, 140, 255, 0.35);
+        }
+        h1 {
+            font-size: clamp(28px, 4.5vw, 44px); line-height: 1.15; margin: 0 0 12px; font-weight: 800;
+            background: linear-gradient(90deg, #ffffff 0%, #c9d6ff 60%, #d8c8ff 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .lead { color: var(--muted); font-size: 17px; max-width: 680px; margin: 0 auto; }
+
+        .panel {
+            background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+            border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow);
         }
 
-        .dropdown-content a {
-            display: block;
-            padding: 12px 16px;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+        /* ---------- Input ---------- */
+        label.field-label { display: block; font-weight: 700; margin-bottom: 10px; font-size: 15px; }
+        .input-row { display: flex; gap: 12px; }
+        input[type="text"] {
+            flex: 1 1 auto; min-width: 0; padding: 16px 18px; font: inherit; font-size: 16px;
+            color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-
-        .dropdown-content a:hover {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
+        input[type="text"]::placeholder { color: #7f8db3; }
+        input[type="text"]:focus { outline: none; border-color: var(--purple); box-shadow: var(--focus); }
+        .input-meta {
+            display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+            font-size: 13px; color: var(--muted); margin-top: 10px;
         }
-
-        .dropdown:hover .dropdown-content { display: block; }
-
-        /* ===== MAIN ===== */
-        .main-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 20px 60px;
-        }
-
-        .hero {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-
-        .hero h1 {
-            font-size: clamp(1.75rem, 4vw, 2.4rem);
-            font-weight: 800;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 12px;
-            letter-spacing: -0.03em;
-        }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            max-width: 620px;
-            margin: 0 auto;
-        }
-
-        /* ===== INPUT PANEL ===== */
-        .input-panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            box-shadow: var(--shadow);
-            margin-bottom: 28px;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        #videoTitle {
-            flex: 1;
-            background: var(--bg-input);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            font-size: 1rem;
-            color: var(--text-primary);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            font-family: inherit;
-        }
-
-        #videoTitle:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-        }
-
-        #videoTitle::placeholder { color: var(--text-muted); }
 
         .btn {
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font: inherit; font-weight: 700; font-size: 15px; color: var(--text); cursor: pointer;
+            padding: 12px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2);
+            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
             white-space: nowrap;
         }
-
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 16px 28px;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        .btn:hover { border-color: #3d5296; background: #1d2b58; }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.6; cursor: wait; }
+        .btn.primary {
+            background: var(--grad); border: none; color: #fff; box-shadow: 0 10px 24px -10px rgba(139, 92, 246, 0.8);
         }
+        .btn.primary:hover { background: var(--grad); filter: brightness(1.08); }
+        .btn.large { padding: 16px 30px; font-size: 17px; }
+        .btn.small { padding: 7px 12px; font-size: 13px; border-radius: 9px; }
+        .btn.ghost { background: transparent; }
+        .btn.copied { border-color: var(--ok); color: var(--ok); }
+        .btn.warn-state { border-color: var(--warn); }
 
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+        .row-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+        .loader {
+            display: flex; align-items: center; gap: 12px; margin-top: 18px; color: var(--muted); font-size: 14px;
         }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-light);
-            padding: 10px 16px;
-            font-size: 0.85rem;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            border-color: var(--accent-blue);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-            padding: 10px 16px;
-            font-size: 0.85rem;
-        }
-
-        .btn-success:hover { background: var(--success-hover); }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-light);
-            padding: 8px 14px;
-            font-size: 0.8rem;
-        }
-
-        .btn-outline:hover {
-            border-color: var(--accent-purple);
-            color: var(--accent-purple);
-        }
-
-        .action-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        /* ===== LOADING ===== */
-        .loading-state {
-            display: none;
-            text-align: center;
-            padding: 48px 20px;
-        }
-
-        .loading-state.active { display: block; }
-
         .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border);
-            border-top-color: var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
+            width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--purple);
+            animation: spin 0.9s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .loading-state p { color: var(--text-secondary); }
+        .status { min-height: 1.4em; margin: 14px 0 0; font-size: 14px; }
+        .status.error { color: var(--err); }
+        .status.success { color: var(--ok); }
 
-        /* ===== RESULTS ===== */
-        #results { display: none; }
+        /* ---------- Empty state ---------- */
+        .empty {
+            text-align: center; color: var(--muted); padding: 40px 20px; margin-top: 28px;
+            border: 1px dashed var(--line); border-radius: var(--radius);
+        }
+        .empty strong { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
 
-        #results.visible { display: block; }
+        /* ---------- Results ---------- */
+        #results { margin-top: 32px; }
+        .toolbar {
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            padding: 16px; margin-bottom: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+        }
+        .toolbar .group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .notices { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+        .notices:empty { display: none; }
 
-        .meta-section {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            margin-bottom: 28px;
+        .cards-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 900px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
+
+        .card {
+            display: flex; flex-direction: column; gap: 14px; padding: 22px;
+            background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+            border: 1px solid var(--line); border-radius: var(--radius);
+            transition: border-color 0.25s ease, transform 0.25s ease;
+            animation: rise 0.35s ease both;
+        }
+        .card:hover { border-color: #3d5296; }
+        .card.fresh { border-color: var(--purple); }
+        @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
         }
 
-        .meta-section h2 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .card-head { display: flex; align-items: center; gap: 12px; }
+        .card-num {
+            flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+            font-weight: 800; font-size: 14px; background: var(--grad); color: #fff;
+        }
+        .card-title { margin: 0; font-size: 17px; font-weight: 700; }
+        .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+        .pill {
+            font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+            background: var(--panel-2); color: var(--muted); border: 1px solid var(--line);
+        }
+        .pill.ok { color: var(--ok); border-color: rgba(52, 211, 153, 0.4); }
+        .pill.short { color: var(--warn); border-color: rgba(251, 191, 36, 0.4); }
+        .card-head .meta-wrap { flex: 1 1 auto; min-width: 0; }
+
+        .card-body {
+            white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14.5px; line-height: 1.7; color: #d9e1f5;
+            background: #0a1129; border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+            max-height: 340px; overflow-y: auto;
+        }
+        .card-note { margin: 0; font-size: 13px; color: var(--warn); }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .card-actions .btn { flex: 1 1 auto; }
+
+        /* ---------- Tags & keywords ---------- */
+        .tags-panel { margin-top: 24px; display: grid; gap: 22px; grid-template-columns: 1fr; }
+        @media (min-width: 900px) { .tags-panel { grid-template-columns: 1fr 1fr; } }
+        .tags-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .tags-head h2 { margin: 0; font-size: 18px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; color: #cfe0ff;
+            padding: 6px 12px; border-radius: 999px; background: rgba(91, 140, 255, 0.12);
+            border: 1px solid rgba(91, 140, 255, 0.35); transition: background 0.2s ease;
+        }
+        .chip:hover { background: rgba(91, 140, 255, 0.25); }
+        .chip.kw { color: #e6dcff; background: rgba(139, 92, 246, 0.12); border-color: rgba(139, 92, 246, 0.4); }
+        .chip.kw:hover { background: rgba(139, 92, 246, 0.25); }
+        .muted-note { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+
+        /* ---------- Ads ---------- */
+        .ad-slot { margin: 24px 0; min-height: 60px; }
+
+        /* ---------- Info section ---------- */
+        .info { margin-top: 40px; }
+        .info h2 { font-size: 24px; margin: 0 0 12px; }
+        .info h3 { font-size: 18px; margin: 24px 0 8px; }
+        .info p, .info li { color: var(--muted); font-size: 15px; }
+        .info ul { padding-left: 20px; }
+
+        /* ---------- Copy dialog (fallback when clipboard is blocked) ---------- */
+        dialog {
+            width: min(640px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 16px;
+            background: var(--panel); color: var(--text); padding: 22px; box-shadow: var(--shadow);
+        }
+        dialog::backdrop { background: rgba(3, 6, 18, 0.7); }
+        dialog p { color: var(--muted); font-size: 14px; margin-top: 0; }
+        dialog textarea {
+            width: 100%; min-height: 220px; font: inherit; font-size: 14px; color: var(--text);
+            background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+        }
+        .dialog-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+            clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
         }
 
-        .tags-box, .keywords-box {
-            background: var(--bg-input);
-            border: 1px dashed var(--border-light);
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 0.9rem;
-            color: var(--accent-blue);
-            line-height: 1.8;
-            word-break: break-word;
-            margin-bottom: 14px;
-        }
-
-        .keywords-box { color: var(--accent-purple); }
-
-        .meta-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .results-header h2 {
-            font-size: 1.3rem;
-            font-weight: 800;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-
-        @media (min-width: 900px) {
-            .results-grid { grid-template-columns: 1fr 1fr; }
-        }
-
-        .desc-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .desc-card:hover {
-            border-color: var(--border-light);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-            gap: 10px;
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .style-badge {
-            background: rgba(139, 92, 246, 0.15);
-            color: var(--accent-purple);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .word-count {
-            background: rgba(59, 130, 246, 0.12);
-            color: var(--accent-blue);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-
-        .desc-text {
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            max-height: 320px;
-            overflow-y: auto;
-            flex: 1;
-            margin-bottom: 16px;
-            line-height: 1.65;
-        }
-
-        .card-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            background: var(--success);
-            color: white;
-            padding: 14px 22px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 999;
-            pointer-events: none;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.error { background: var(--danger); }
-
-        /* ===== EMPTY / ERROR ===== */
-        .empty-state, .error-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state h3, .error-state h3 {
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        /* ===== ADS ===== */
-        .ad-container {
-            margin: 24px 0;
-            text-align: center;
-            min-height: 90px;
-        }
-
-        /* ===== INFO SECTION ===== */
-        .info-section {
-            margin-top: 48px;
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 36px;
-        }
-
-        .info-section h2 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-        }
-
-        .info-section p {
-            color: var(--text-secondary);
-            margin-bottom: 14px;
-            font-size: 0.95rem;
-        }
-
-        .info-section h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin: 24px 0 10px;
-            color: var(--accent-blue);
-        }
-
-        .tips-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        @media (min-width: 640px) {
-            .tips-grid { grid-template-columns: 1fr 1fr; }
-        }
-
-        .tip-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-        }
-
-        .tip-card h4 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
-        .tip-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        /* ===== FOOTER ===== */
-        footer {
-            text-align: center;
-            padding: 32px 20px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border);
-            margin-top: 40px;
-        }
-
-        footer a { color: var(--accent-blue); text-decoration: none; }
-
-        /* ===== MOBILE ===== */
-        @media (max-width: 768px) {
-            .header { height: auto; padding: 12px 16px; flex-direction: column; gap: 10px; }
-            .nav-controls nav { justify-content: center; }
+        /* ---------- Responsive ---------- */
+        @media (max-width: 640px) {
+            .page { padding: 20px 14px 48px; }
+            .panel { padding: 20px; }
             .input-row { flex-direction: column; }
-            .btn-primary { width: 100%; }
-            .main-wrapper { padding: 20px 14px 40px; }
-            .input-panel { padding: 20px; }
-            .info-section { padding: 24px; }
-            .card-actions { flex-direction: column; }
-            .card-actions .btn { width: 100%; }
+            .btn.large { width: 100%; }
+            .header { padding: 10px 14px; position: static; }
+            .dropdown-content { right: auto; left: 0; }
         }
     </style>
 </head>
 <body>
 
+<!-- Site navigation (existing header, kept as provided) -->
 <header class="header">
     <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
     <div class="nav-controls">
@@ -620,11 +310,11 @@
             <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
             <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
             <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-            <div class="dropdown">
-                <button class="dropbtn">🛒 Shop ▾</button>
-                <div class="dropdown-content">
-                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+            <div class="dropdown" id="shopDropdown">
+                <button class="dropbtn" type="button" aria-expanded="false" aria-controls="shopMenu">🛒 Shop ▾</button>
+                <div class="dropdown-content" id="shopMenu">
+                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow sponsored noopener">🇮🇳 India Deals</a>
+                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow sponsored noopener">🇺🇸 US Deals</a>
                 </div>
             </div>
             <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
@@ -632,779 +322,1597 @@
     </div>
 </header>
 
-<div class="main-wrapper">
+<main class="page">
 
-    <div class="hero">
+    <section class="hero">
+        <p class="eyebrow">Free · Runs in your browser</p>
         <h1>YouTube Description Studio</h1>
-        <p>Enter any video title and instantly generate 10 distinct, long-form descriptions, 20 relevant hashtags, and 20 SEO keywords. Free, private, and fully offline-capable.</p>
-    </div>
+        <p class="lead">Enter your video title. Get 10 distinct descriptions of about 500 words each, 20 hashtags, and 20 keyword ideas, all based on your title.</p>
+    </section>
 
-    <!-- Top Ad -->
-    <div class="ad-container">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="1886848226"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <div class="input-panel">
+    <section class="panel" aria-labelledby="titleLabel">
+        <label class="field-label" for="videoTitle" id="titleLabel">Video title</label>
         <div class="input-row">
-            <input type="text" id="videoTitle" placeholder="Enter your video title (e.g. How to Rank YouTube Videos Fast in 2026)" maxlength="200" autocomplete="off">
-            <button class="btn btn-primary" id="generateBtn" onclick="generateAll()">
-                <span id="genBtnText">Generate 10 Descriptions</span>
-            </button>
+            <input type="text" id="videoTitle" maxlength="150" autocomplete="off" spellcheck="true"
+                   placeholder="e.g. Easy Paneer Butter Masala Recipe"
+                   aria-describedby="titleHelp">
+            <button class="btn primary large" id="generateBtn" type="button">Generate</button>
         </div>
-        <div class="action-bar">
-            <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
-            <button class="btn btn-secondary" id="regenerateAllBtn" onclick="generateAll()" style="display:none;">Regenerate All</button>
-            <button class="btn btn-secondary" id="exportTxtBtn" onclick="exportTXT()" style="display:none;">Export TXT</button>
-            <button class="btn btn-secondary" id="exportMdBtn" onclick="exportMarkdown()" style="display:none;">Export Markdown</button>
+        <div class="input-meta">
+            <span id="titleHelp">Works with English, Hindi, and Hinglish titles. Output is always in English.</span>
+            <span id="counter" aria-live="off">0/150</span>
         </div>
+
+        <div class="loader" id="loader" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Reading your title and writing 10 descriptions…</span>
+        </div>
+
+        <p class="status" id="status" role="alert"></p>
+
+        <div class="row-actions">
+            <button class="btn ghost small" id="clearBtn" type="button">Clear input &amp; results</button>
+        </div>
+
+        <div class="ad-slot">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-fb+5w+4e-db+86"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="5761524374"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </section>
+
+    <section class="empty" id="emptyState">
+        <strong>Your results will appear here</strong>
+        Type a video title above and press Generate. Every description, hashtag, and keyword is built from that title.
+    </section>
+
+    <section id="results" hidden aria-label="Generated results">
+        <div class="toolbar">
+            <div class="group">
+                <button class="btn small primary" id="copyAllDesc" type="button">Copy all descriptions</button>
+                <button class="btn small" id="copyAllTags" type="button">Copy all hashtags</button>
+                <button class="btn small" id="copyAllKw" type="button">Copy all keywords</button>
+            </div>
+            <div class="group">
+                <button class="btn small" id="regenAllBtn" type="button">Regenerate all</button>
+                <button class="btn small" id="exportTxt" type="button">Export TXT</button>
+                <button class="btn small" id="exportMd" type="button">Export Markdown</button>
+            </div>
+        </div>
+        <p class="notices" id="notices"></p>
+        <div class="cards-grid" id="cards"></div>
+
+        <section class="panel tags-panel" aria-label="Hashtags and keywords">
+            <div>
+                <div class="tags-head">
+                    <h2>Hashtags <span class="pill" id="tagCount">0</span></h2>
+                    <button class="btn small" id="copyTagsBtn" type="button">Copy all hashtags</button>
+                </div>
+                <div class="chips" id="hashtagList"></div>
+                <p class="muted-note">Click any hashtag to copy it.</p>
+            </div>
+            <div>
+                <div class="tags-head">
+                    <h2>Keyword ideas <span class="pill" id="kwCount">0</span></h2>
+                    <button class="btn small" id="copyKwBtn" type="button">Copy all keywords</button>
+                </div>
+                <div class="chips" id="keywordList"></div>
+                <p class="muted-note">Suggestions based on your title. They are not search-volume data.</p>
+            </div>
+        </section>
+
+        <div class="ad-slot">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="1886848226"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </section>
+
+    <section class="panel info" aria-labelledby="infoTitle">
+        <h2 id="infoTitle">How this YouTube description tool works</h2>
+        <p>YouTube Description Studio helps you draft video descriptions faster. Enter a title, and the tool reads the topic, the likely viewer, and the purpose of the video from the words you used. It then writes ten descriptions in ten different styles, along with 20 hashtags and 20 keyword ideas that come from your title.</p>
+
+        <h3>What runs on your device</h3>
+        <p>Everything happens in your browser. The title is not sent to a server, and no account or API key is needed. The descriptions are built from writing templates that are combined with your topic, so they are a strong starting point, not a finished script. Read each one, remove anything that does not fit your video, and add your own details.</p>
+
+        <h3>Before you publish</h3>
+        <ul>
+            <li>Replace the bracketed placeholders, such as your channel link and chapter timestamps, with real information.</li>
+            <li>Add timestamps only for chapters that exist in your video.</li>
+            <li>Check that each claim is accurate for your content. The tool does not know what your video contains.</li>
+            <li>Put the most useful information in the first lines. Viewers see only the opening lines before they click "Show more."</li>
+            <li>Use hashtags that describe your video. Check how YouTube displays them in YouTube Studio.</li>
+        </ul>
+
+        <h3>What this tool does not do</h3>
+        <p>It does not guarantee rankings, views, subscribers, or recommendations. Search and recommendation results depend on many factors, including video quality, audience behavior, and competition. Treat the keyword ideas as starting points for your own research.</p>
+    </section>
+
+</main>
+
+<dialog id="copyDialog" aria-labelledby="copyDialogTitle">
+    <h2 id="copyDialogTitle" style="margin:0 0 8px;font-size:18px;">Copy this text</h2>
+    <p>Your browser blocked automatic copying. The text is selected below. Press Ctrl+C (or ⌘C on a Mac) to copy it.</p>
+    <textarea id="copyDialogText" readonly aria-label="Text to copy"></textarea>
+    <div class="dialog-actions">
+        <button class="btn primary small" id="copyDialogClose" type="button">Close</button>
     </div>
+</dialog>
 
-    <div class="loading-state" id="loadingState">
-        <div class="spinner"></div>
-        <p>Crafting 10 unique descriptions, hashtags & keywords…</p>
-    </div>
+<div class="sr-only" id="liveRegion" role="status" aria-live="polite"></div>
 
-    <div id="results">
-        <!-- Hashtags & Keywords -->
-        <div class="meta-section">
-            <h2>📌 Hashtags <span style="font-weight:500;font-size:0.85rem;color:var(--text-muted);">(20 unique)</span></h2>
-            <div class="tags-box" id="hashtagsBox"></div>
-            <div class="meta-actions">
-                <button class="btn btn-success" onclick="copyText(currentHashtags, 'Hashtags')">Copy Hashtags</button>
-            </div>
-        </div>
+<!-- ===================================================================== -->
+<!-- ENGINE: local, rule-based, topic-aware description writer.            -->
+<!-- No network calls. No AI model. Output is template-based.             -->
+<!-- ===================================================================== -->
+<script>
+/* ===== ENGINE START ===== */
+const YTEngine = (() => {
+    "use strict";
 
-        <div class="meta-section">
-            <h2>🔑 SEO Keywords <span style="font-weight:500;font-size:0.85rem;color:var(--text-muted);">(20 unique)</span></h2>
-            <div class="keywords-box" id="keywordsBox"></div>
-            <div class="meta-actions">
-                <button class="btn btn-success" onclick="copyText(currentKeywords, 'Keywords')">Copy Keywords</button>
-                <button class="btn btn-secondary" onclick="copyAllMeta()">Copy Hashtags + Keywords</button>
-            </div>
-        </div>
+    const MAX_TITLE = 150;
+    const CARD_COUNT = 10;
+    const FILL_UNTIL = 470;       // keep adding filler sentences until the body reaches this many words
+    const SIM_THRESHOLD = 0.28;   // 4-word-shingle Jaccard similarity at or above this is "too similar"
+    const MAX_ATTEMPTS = 6;       // bounded regeneration for diversity
+    const CHAPTERS_LINE = "📌 Chapters: [add your own timestamps here, e.g. 0:00 Intro]";
+    const LINKS_BLOCK = "🔔 Subscribe: [your channel link]\n📸 Follow: [your social link]";
 
-        <div class="results-header">
-            <h2>📝 10 Description Variations</h2>
-            <button class="btn btn-secondary" onclick="copyAllDescriptions()">Copy All Descriptions</button>
-        </div>
+    const STYLES = [
+        { id: "informative",    label: "Informative" },
+        { id: "conversational", label: "Conversational" },
+        { id: "seo",            label: "SEO-focused" },
+        { id: "storytelling",   label: "Storytelling" },
+        { id: "educational",    label: "Educational" },
+        { id: "professional",   label: "Professional" },
+        { id: "curiosity",      label: "Curiosity-driven" },
+        { id: "benefits",       label: "Benefits-focused" },
+        { id: "natural",        label: "Natural creator" },
+        { id: "niche",          label: "Niche-specific creative" }
+    ];
 
-        <div class="results-grid" id="resultsGrid"></div>
-    </div>
+    /* ---------- Style banks: sentence templates. {subject} = topic, {aud} = audience ---------- */
+    const STYLE_BANK = {
+        informative: {
+            open: [
+                "This video explains {subject} clearly and covers the points that matter most.",
+                "Here is a clear overview of {subject}, organized so you can follow the main ideas from start to finish.",
+                "{subject} is the focus of this video, presented as a straightforward guide to the essentials."
+            ],
+            value: [
+                "The core ideas are presented in plain language, and important terms are defined as they come up.",
+                "Each section builds on the one before it, which makes the subject easier to remember and apply.",
+                "The goal is an accurate picture of {subject} rather than a quick list of claims.",
+                "Where there are several common approaches, the differences are explained so you can choose what fits."
+            ],
+            close: [
+                "Bookmark this video as a reference you can return to when you need a refresher.",
+                "Keep notes as you watch, since the most useful points are often the ones people forget first.",
+                "If one part needs more detail, leave a comment and it may inspire a follow-up video."
+            ]
+        },
+        conversational: {
+            open: [
+                "Okay, let's talk about {subject}, because it comes up a lot and it's not always explained well.",
+                "So you're curious about {subject}? Pull up a chair, this one is a friendly walk-through.",
+                "Grab your favorite drink, because we're getting into {subject} in a relaxed, no-jargon way."
+            ],
+            value: [
+                "I'll keep things casual and skip anything that doesn't really help you.",
+                "Think of it like a chat with a friend who happens to know the subject well.",
+                "If something sounds confusing, pause, rewind, and we'll take it one piece at a time.",
+                "Nobody expects you to absorb everything on the first watch, and that's completely fine."
+            ],
+            close: [
+                "Tell me in the comments what you'd like me to explain next.",
+                "Let me know which part helped most, and I'll keep that in mind for future videos.",
+                "Thanks for hanging out, and see you in the next one."
+            ]
+        },
+        seo: {
+            open: [
+                "{subject}: this video covers what you need to know, step by step, in one place.",
+                "Searching for answers about {subject}? This video is built around that exact question.",
+                "Looking for reliable information on {subject}? The essentials are all in this video."
+            ],
+            value: [
+                "Common questions about {subject} usually cover the basics, the frequent mistakes, and the best starting point, and each is addressed here.",
+                "The description uses the terms people tend to search for, so the video is easier to find when you need it.",
+                "Clear headings and short sections make it quick to locate the exact answer you need.",
+                "Keywords are used naturally in context rather than repeated for their own sake."
+            ],
+            close: [
+                "Subscribe for more videos on {subject} and related topics.",
+                "Save this video and share it with anyone searching for the same answers.",
+                "Check the links below for any resources referenced in this video."
+            ]
+        },
+        storytelling: {
+            open: [
+                "Picture this: you've been trying to make sense of {subject}, and every answer you find feels incomplete.",
+                "Have you ever wondered how {subject} really works? That question is where this video begins.",
+                "It often starts with one simple question about {subject}, and the answer can be surprising."
+            ],
+            value: [
+                "We follow that question from first confusion to clear understanding, one step at a time.",
+                "Along the way we look at the moments where most people get stuck, because those are the moments that matter most.",
+                "The narrative is built around the questions viewers ask most, not around abstract theory.",
+                "By the end, the subject should feel less like a mystery and more like something you can explain yourself."
+            ],
+            close: [
+                "If this story resonated, share it with someone who is also wondering about {subject}.",
+                "Which part of this journey would you like to see next? Tell us below.",
+                "Stay with us until the end, because the final section ties everything together."
+            ]
+        },
+        educational: {
+            open: [
+                "Welcome to a structured lesson on {subject}, built in logical stages.",
+                "This lesson introduces {subject} from the foundations up, so no prior knowledge is required.",
+                "In this lesson you will learn the core concepts behind {subject} and how they connect."
+            ],
+            value: [
+                "Each concept is introduced before it is used, so new ideas always have a clear place to land.",
+                "Examples are chosen to show the reasoning, not just the final answer.",
+                "Review points help you check whether the ideas have actually stuck.",
+                "By the end, you should be able to explain {subject} in your own words."
+            ],
+            close: [
+                "Try summarizing the lesson in three sentences before moving on.",
+                "Share your questions in the comments so they can shape future lessons.",
+                "Revisit the key points after a day or two to strengthen what you learned."
+            ]
+        },
+        professional: {
+            open: [
+                "This presentation offers a concise, professional overview of {subject}.",
+                "The video examines {subject} with a focus on practical relevance and clear reasoning.",
+                "A structured review of {subject}, prepared for viewers who need reliable, well-organized information."
+            ],
+            value: [
+                "The analysis focuses on the factors that most affect outcomes and the trade-offs involved.",
+                "Recommendations are framed as considerations to evaluate, not guarantees of results.",
+                "Terminology is kept precise, and assumptions are stated so conclusions can be checked.",
+                "The structure moves logically from context to application."
+            ],
+            close: [
+                "Questions and feedback are welcome in the comments.",
+                "For decisions with financial, legal, or medical consequences, consider consulting a qualified professional about your own situation.",
+                "Subscribe for future briefings on related topics."
+            ]
+        },
+        curiosity: {
+            open: [
+                "What if most of what you assumed about {subject} was only half the story?",
+                "There's a question about {subject} that most people never think to ask, and it changes everything.",
+                "Why does {subject} work the way it does? The answer is less obvious than it looks."
+            ],
+            value: [
+                "We look at the detail that is easy to miss and explain why it matters.",
+                "Once you see the underlying pattern, a lot of confusing advice starts to make sense.",
+                "The unexpected part is often where the real insight hides.",
+                "Keep watching, because the most surprising point comes after the common explanations."
+            ],
+            close: [
+                "Did you already know this? Tell us in the comments.",
+                "Share your own theory below, and we'll see whether it holds up.",
+                "Subscribe so you don't miss the next question we dig into."
+            ]
+        },
+        benefits: {
+            open: [
+                "Imagine getting clear, practical results from {subject} without the usual trial and error.",
+                "This video is about the advantages of understanding {subject} well.",
+                "Here's how a better grasp of {subject} can save you time and effort."
+            ],
+            value: [
+                "Understanding the core principles helps you avoid common mistakes and choose options that fit your goals.",
+                "The approach focuses on practical steps you can use right away.",
+                "A clearer decision framework means less time second-guessing.",
+                "Results depend on your situation, but a solid foundation makes every next step easier."
+            ],
+            close: [
+                "Start with one idea from this video and apply it today.",
+                "If it helps you, share it with someone who could benefit too.",
+                "Subscribe for more practical guides."
+            ]
+        },
+        natural: {
+            open: [
+                "Hey, I wanted to make a video about {subject} because it's something I'd want explained properly.",
+                "This one's about {subject}, and I'll walk you through it the way I'd explain it to a friend.",
+                "Quick intro: this is my take on {subject}, kept as simple and practical as I can make it."
+            ],
+            value: [
+                "I'll cover the basics first, then move on to the parts people usually ask about.",
+                "Nothing here is complicated, but a few small details make a big difference, so I'll point them out.",
+                "I'll keep it honest, including the parts that are still a little tricky.",
+                "If something doesn't make sense, tell me in the comments so we can slow down together."
+            ],
+            close: [
+                "Thanks for watching, and I'll see you in the next one.",
+                "If you have a question I didn't cover, drop it below.",
+                "Hit subscribe if you want more videos like this."
+            ]
+        }
+    };
 
-    <!-- Bottom Ad -->
-    <div class="ad-container" style="margin-top:32px;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-7020422718957281"
-             data-ad-slot="1886848226"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
+    /* ---------- Intent banks: what kind of video this is ---------- */
+    const INTENT_BANK = {
+        tutorial: [
+            "The video walks through {subject} in a clear sequence of steps, so you can follow along at your own pace.",
+            "Each step explains what to do and why it matters, which makes mistakes easier to spot.",
+            "Common stumbling points are called out so you don't have to figure them out alone.",
+            "Pause at any step to match what you see on your own screen.",
+            "Setting up the basics first keeps the later steps from feeling rushed.",
+            "The order is chosen so that each step prepares you for the next one."
+        ],
+        list: [
+            "The video covers several strong options related to {subject}, with each one explained briefly.",
+            "Each item is explained so you can see how it applies to your situation.",
+            "You don't need to try everything; the list is meant to help you narrow down your choices.",
+            "Use it as a shortlist and start with the items that fit your goals best.",
+            "Some items suit beginners, while others reward more experience.",
+            "Pick one or two to test first, then decide whether the rest are worth your time."
+        ],
+        comparison: [
+            "The video compares the main options for {subject} side by side.",
+            "Differences in cost, usability, and results are discussed using the criteria that matter most.",
+            "Strengths and weaknesses are presented fairly so you can decide what suits you.",
+            "The verdict depends on your needs, so the video explains which factors to weigh.",
+            "Price, ease of use, and performance are all part of the picture.",
+            "A quick summary at the end pulls the main differences together."
+        ],
+        explainer: [
+            "The video breaks down how {subject} works, starting with the basic ideas.",
+            "Key terms are defined as they come up, so the explanation stays easy to follow.",
+            "Real-world context shows why the subject matters beyond the textbook definition.",
+            "By the end you should have a clear mental model of {subject}.",
+            "Simple analogies are used where they help, and their limits are pointed out.",
+            "The explanation moves from the simplest idea to the more detailed one."
+        ],
+        story: [
+            "The video follows the sequence of events around {subject} and shows how each part connects.",
+            "Background comes first, so the later details make sense.",
+            "The focus stays on the people, decisions, and turning points that shaped the subject.",
+            "It's told as a narrative rather than a list of facts.",
+            "Each turning point is placed in context so its importance is clear.",
+            "The pace slows down where the details matter most."
+        ],
+        news: [
+            "The video covers what is new around {subject} and what it could mean for viewers.",
+            "It separates confirmed information from speculation, so you know what to take seriously.",
+            "Background is included so the latest update is easier to understand.",
+            "Check back for updates, since the situation can change as new details emerge.",
+            "Important dates and facts are kept separate from interpretation.",
+            "The aim is to help you follow what changed and why it matters."
+        ],
+        general: [
+            "The video covers the main ideas behind {subject} in a practical, easy-to-follow way.",
+            "It explains why the subject matters and how it can be applied.",
+            "Key points are summarized so you can review them quickly.",
+            "Everything stays focused on {subject}, without unnecessary detours.",
+            "Nothing here requires special equipment or prior expertise.",
+            "Practical examples make the abstract points easier to apply."
+        ]
+    };
 
-    <div class="info-section">
-        <h2>How to Get the Most from Your YouTube Descriptions</h2>
-        <p>A strong description helps viewers and the YouTube algorithm understand what your video is about. Use the generated text as a starting point, then personalize it with your own links, timestamps, and calls to action.</p>
+    /* ---------- Niche banks ---------- */
+    const NICHE_BANK = {
+        gaming: {
+            aud: "players who want to sharpen their skills and enjoy the game more",
+            kw: ["gaming tips", "gameplay guide"],
+            tags: ["Gaming", "Gamers", "Gameplay", "GamingTips"],
+            ctx: [
+                "Gaming topics reward clear, hands-on explanations, and this one is no exception.",
+                "If you play regularly, small details about {subject} can change how a whole session goes.",
+                "This video is made for {aud}."
+            ],
+            tips: [
+                "Practice the basics in a low-pressure match before trying anything advanced.",
+                "Check your settings and controls, since small changes can affect how things feel.",
+                "Watching a few runs and noting what the player does differently is a quick way to improve."
+            ],
+            creative: [
+                "Think of {subject} as the boss fight you've been avoiding, and this video is the walkthrough.",
+                "Grab your controller, press start, and let's level up your understanding of {subject}."
+            ]
+        },
+        education: {
+            aud: "students and self-learners",
+            kw: ["study tips", "exam preparation"],
+            tags: ["Education", "Learning", "StudyTips", "Lesson"],
+            ctx: [
+                "Learning {subject} is easier when the ideas are broken into small, connected parts.",
+                "Many learners find this subject difficult because the basics are rushed, so this video slows down.",
+                "The lesson is written for {aud}."
+            ],
+            tips: [
+                "Write the main idea in your own words before checking the explanation again.",
+                "Spread your review over several days rather than cramming the night before.",
+                "Explaining the topic aloud to someone else quickly shows which parts are still unclear."
+            ],
+            creative: [
+                "Consider {subject} a puzzle, where every section adds one missing piece.",
+                "Curiosity is the best study tool, so ask why at every step."
+            ]
+        },
+        cooking: {
+            aud: "home cooks and food lovers",
+            kw: ["easy recipes", "home cooking"],
+            tags: ["Cooking", "Recipe", "HomeCooking", "FoodLovers"],
+            ctx: [
+                "A good {subject} dish depends on technique as much as on ingredients.",
+                "Small changes in heat, timing, or order can make a noticeable difference in the final result.",
+                "This video is made for {aud}."
+            ],
+            tips: [
+                "Prepare your ingredients before you start, since many recipes move quickly once the heat is on.",
+                "Taste as you go and adjust seasoning gradually.",
+                "Keep notes on what you change so you can repeat the version you like best."
+            ],
+            creative: [
+                "Let's turn the kitchen into a little studio and make {subject} something you'll want to cook again.",
+                "Good cooking starts with curiosity, so let's explore {subject} with an open mind."
+            ]
+        },
+        technology: {
+            aud: "tech-curious viewers and anyone choosing new gear",
+            kw: ["tech tips", "gadget setup"],
+            tags: ["Technology", "Tech", "TechTips", "Gadgets"],
+            ctx: [
+                "Technology topics are easier to follow when each setting or step has a clear purpose.",
+                "Understanding how {subject} fits into your daily setup helps you choose wisely.",
+                "The video is designed for {aud}."
+            ],
+            tips: [
+                "Back up important files before changing settings or installing new software.",
+                "Check official documentation when a step is unclear, since versions change over time.",
+                "Test changes one at a time so you know what caused a problem."
+            ],
+            creative: [
+                "Plug in, power up, and let's untangle {subject} one cable at a time.",
+                "Good tech decisions start with understanding the trade-offs behind each feature."
+            ]
+        },
+        ai: {
+            aud: "people exploring practical AI tools",
+            kw: ["ai tools", "ai for beginners"],
+            tags: ["AI", "ArtificialIntelligence", "AITools", "AIForBeginners"],
+            ctx: [
+                "AI tools change quickly, so this video focuses on principles that stay useful as products evolve.",
+                "Understanding how {subject} works in practice helps you use it more effectively and responsibly.",
+                "The video is for {aud}."
+            ],
+            tips: [
+                "Check important outputs against reliable sources instead of trusting them automatically.",
+                "Clear, specific instructions usually produce more useful results than vague requests.",
+                "Keep private data out of tools unless you understand how they handle it."
+            ],
+            creative: [
+                "Think of {subject} as a very fast assistant that still needs clear direction and careful review.",
+                "Let's separate the hype from the genuinely useful parts of {subject}."
+            ]
+        },
+        fitness: {
+            aud: "anyone building a steady training habit",
+            kw: ["workout routine", "fitness tips"],
+            tags: ["Fitness", "Workout", "HealthyLiving", "Training"],
+            ctx: [
+                "Training around {subject} works best when progress is steady and realistic.",
+                "Good form and gradual progression matter more than chasing intensity every session.",
+                "This video is made for {aud}."
+            ],
+            tips: [
+                "Warm up properly, and stop if you feel sharp pain.",
+                "Rest and sleep are part of the plan, not an optional extra.",
+                "If you have a medical condition or an injury, speak with a qualified professional before starting."
+            ],
+            creative: [
+                "Consistency beats intensity, and {subject} is a good place to build that habit.",
+                "Lace up, take a breath, and let's build a routine you can actually stick with."
+            ]
+        },
+        travel: {
+            aud: "travelers planning their next trip",
+            kw: ["travel tips", "trip planning"],
+            tags: ["Travel", "TravelGuide", "Wanderlust", "TravelTips"],
+            ctx: [
+                "Planning around {subject} is easier with a clear sense of priorities and timing.",
+                "Prices, opening hours, and entry rules can change, so confirm details before you go.",
+                "The video is aimed at {aud}."
+            ],
+            tips: [
+                "Keep copies of important documents in a separate place.",
+                "Leave some flexibility in your schedule so unexpected delays don't spoil the trip.",
+                "Local advice often reveals what guidebooks miss."
+            ],
+            creative: [
+                "Pack your curiosity, leave a little room in the suitcase, and let's explore {subject}.",
+                "Every destination has its own rhythm, and understanding it makes the journey richer."
+            ]
+        },
+        music: {
+            aud: "musicians and music lovers",
+            kw: ["music production tips", "learn music"],
+            tags: ["Music", "MusicProduction", "Musician", "MusicTips"],
+            ctx: [
+                "Working on {subject} gets easier when you focus on one musical idea at a time.",
+                "Listening closely to reference tracks trains your ear for the details that matter.",
+                "This video is for {aud}."
+            ],
+            tips: [
+                "Practice slowly and increase speed only when the notes feel comfortable.",
+                "Recording yourself reveals timing and tone issues you can miss while playing.",
+                "Short daily sessions usually build skill faster than occasional long ones."
+            ],
+            creative: [
+                "Turn up the volume and let's tune into {subject}, one beat at a time.",
+                "Every great track starts with a simple idea, and this video helps you find yours."
+            ]
+        },
+        business: {
+            aud: "founders, freelancers, and small business owners",
+            kw: ["small business tips", "business strategy"],
+            tags: ["Business", "Entrepreneur", "SmallBusiness", "Marketing"],
+            ctx: [
+                "Decisions about {subject} work best when they are tied to clear goals and real constraints.",
+                "Many small businesses struggle because they try to do everything at once.",
+                "The video is for {aud}."
+            ],
+            tips: [
+                "Track a small number of metrics that connect directly to your goal.",
+                "Test ideas on a small scale before committing budget or time.",
+                "Customer feedback is often more useful than assumptions."
+            ],
+            creative: [
+                "Every business starts with a question, and {subject} might be the one that shapes yours.",
+                "Let's turn strategy into steps you can actually take this week."
+            ]
+        },
+        finance: {
+            aud: "people who want to understand their money better",
+            kw: ["personal finance tips", "money management"],
+            tags: ["Finance", "PersonalFinance", "MoneyTips", "MoneyManagement"],
+            ctx: [
+                "Decisions about {subject} depend on your income, goals, risk tolerance, and time horizon.",
+                "Understanding the terms and trade-offs helps you avoid costly surprises.",
+                "This video is for {aud}."
+            ],
+            tips: [
+                "Compare fees, conditions, and total costs before choosing any product.",
+                "Build an emergency fund before taking on higher-risk investments.",
+                "This video is general education, not personalized financial advice, so consider speaking with a qualified advisor about your own situation."
+            ],
+            creative: [
+                "Money questions can feel intimidating, so let's make {subject} clear and calm.",
+                "Good money habits are built step by step, and this video starts with the first one."
+            ]
+        },
+        documentary: {
+            aud: "viewers who enjoy in-depth, well-researched stories",
+            kw: ["documentary explained", "true story"],
+            tags: ["Documentary", "Documentaries", "Storytelling", "Investigation"],
+            ctx: [
+                "The subject of {subject} has several layers, and this video takes time to explore them.",
+                "Context matters, so the story is presented in the order that helps it make sense.",
+                "This video is made for {aud}."
+            ],
+            tips: [
+                "Consider the sources behind each claim and compare them where possible.",
+                "Where details are debated, checking multiple sources is a habit worth keeping."
+            ],
+            creative: [
+                "Every story has a beginning, a turning point, and a question that refuses to go away, and {subject} has all three.",
+                "Pull up a seat, dim the lights, and let's look closely at {subject}."
+            ]
+        },
+        science: {
+            aud: "curious minds of all ages",
+            kw: ["science explained", "science facts"],
+            tags: ["Science", "ScienceExplained", "STEM", "Curiosity"],
+            ctx: [
+                "Science is at its best when we ask how we know something, and {subject} is a good example.",
+                "The video focuses on the evidence and reasoning behind the explanation.",
+                "This video is for {aud}."
+            ],
+            tips: [
+                "Be cautious with headlines, and check the original research or a reputable summary when possible.",
+                "Scientific understanding often evolves as new evidence appears, so stay open to updates."
+            ],
+            creative: [
+                "Ready to look at {subject} through a curious, evidence-first lens?",
+                "Many big ideas began as a simple question, just like the one behind {subject}."
+            ]
+        },
+        history: {
+            aud: "history lovers and curious learners",
+            kw: ["history explained", "historical facts"],
+            tags: ["History", "HistoryFacts", "HistoryLovers", "Historical"],
+            ctx: [
+                "Understanding {subject} means placing it in its time, with the people and conditions that shaped it.",
+                "Historical accounts can differ, so comparing sources helps.",
+                "This video is made for {aud}."
+            ],
+            tips: [
+                "Look for primary sources and reputable historians when you want to go deeper.",
+                "Dates and names are easier to remember when they connect to a larger story."
+            ],
+            creative: [
+                "Dust off the archives, because {subject} has more to say than a textbook suggests.",
+                "History rarely repeats exactly, but its patterns are worth studying, starting with {subject}."
+            ]
+        },
+        diy: {
+            aud: "hands-on makers and home-project fans",
+            kw: ["diy projects", "home projects"],
+            tags: ["DIY", "Crafts", "Handmade", "HomeProjects"],
+            ctx: [
+                "Projects built around {subject} go smoothly when planning happens before the first cut or stroke.",
+                "Safety comes first, so use the right protective gear and tools for the job.",
+                "This video is for {aud}."
+            ],
+            tips: [
+                "Measure twice and test on scrap material when you can.",
+                "Work in a clean, well-lit space so mistakes are easier to spot early.",
+                "Give glue, paint, or finish enough drying time before moving on."
+            ],
+            creative: [
+                "Roll up your sleeves, because {subject} is about to become something you made yourself.",
+                "Good projects start with a plan and end with a small, satisfying finish."
+            ]
+        },
+        vlog: {
+            aud: "viewers who enjoy real, unscripted daily life",
+            kw: ["daily vlog", "day in my life"],
+            tags: ["Vlog", "DailyVlog", "DayInMyLife", "Lifestyle"],
+            ctx: [
+                "Moments around {subject} are easier to share when they're shown honestly.",
+                "This video offers a relaxed look at what the day actually involves.",
+                "It's made for {aud}."
+            ],
+            tips: [
+                "Keep your routine simple so the moments that matter stand out.",
+                "Planning a few shots in advance helps the day flow without feeling scripted."
+            ],
+            creative: [
+                "Grab your bag, press record, and come along for {subject}.",
+                "Real days are rarely perfect, and that's exactly what makes them worth sharing."
+            ]
+        },
+        podcast: {
+            aud: "listeners who enjoy long, thoughtful conversations",
+            kw: ["podcast episode", "podcast conversation"],
+            tags: ["Podcast", "PodcastEpisode", "Conversations", "Interview"],
+            ctx: [
+                "This conversation explores {subject} from a few different angles.",
+                "Listeners can follow the discussion without needing prior background.",
+                "It's made for {aud}."
+            ],
+            tips: [
+                "Jot down the ideas that stand out, since they're easy to lose after the episode ends.",
+                "Share the episode with someone who would enjoy the conversation."
+            ],
+            creative: [
+                "Pull up a chair and join the conversation about {subject}.",
+                "Let's talk it through one question at a time, starting with {subject}."
+            ]
+        },
+        entertainment: {
+            aud: "viewers looking for something fun to watch",
+            kw: ["entertainment video", "fun video"],
+            tags: ["Entertainment", "Fun", "Funny", "Watch"],
+            ctx: [
+                "Entertainment content around {subject} works best when it's fun and easy to follow.",
+                "The video keeps the focus on what makes {subject} enjoyable.",
+                "It's made for {aud}."
+            ],
+            tips: [
+                "Watch with sound on for the full experience.",
+                "Share your opinion in the comments, since different takes make the conversation better."
+            ],
+            creative: [
+                "Popcorn ready? Let's get into {subject}.",
+                "Expect a few laughs, a few surprises, and plenty to talk about around {subject}."
+            ]
+        },
+        general: {
+            aud: "viewers searching for this topic",
+            kw: ["video tips", "explained simply"],
+            tags: ["Explained", "Guide", "Learn", "Tips"],
+            ctx: [
+                "This video focuses on {subject} and aims to make the subject clear for {aud}.",
+                "The explanation stays close to the topic in the title, without tangents.",
+                "The key ideas are presented in a logical order."
+            ],
+            tips: [
+                "Take notes on the points most relevant to your own situation.",
+                "Revisit the video after a day to see what you remember.",
+                "Share your questions in the comments so future videos can address them."
+            ],
+            creative: [
+                "Let's explore {subject} together, starting from the basics.",
+                "Curiosity is the only prerequisite for this one."
+            ]
+        }
+    };
 
-        <h3>Best practices</h3>
-        <p>Put the most important keywords near the beginning of the description. Add clear chapter timestamps if your video has sections. Include links to related videos, playlists, or resources. End with a friendly invitation to subscribe or comment. Avoid keyword stuffing — natural language performs better.</p>
+    /* ---------- Shared filler sentences (used to reach the target length) ---------- */
+    const DEPTH = [
+        "Starting with the basics makes the rest of the subject far easier to absorb.",
+        "Repetition with small variations helps ideas stick, so some points are revisited from different angles.",
+        "The order of the sections is designed so each one prepares you for the next.",
+        "Mistakes are normal when learning something new, and they usually point toward what to study next.",
+        "Realistic expectations make it easier to measure progress and stay motivated.",
+        "Small, consistent steps tend to produce better long-term results than one large push.",
+        "Use the ideas here as a starting framework, then adapt them to your own situation.",
+        "Comparing your current approach with the one described here can reveal simple improvements.",
+        "Good questions often lead to better answers, so think about what you want to know before you start.",
+        "The details that look minor at first often end up shaping the outcome.",
+        "Context changes the best answer, so consider your own constraints before acting.",
+        "Clear definitions and examples are included so the advice is easy to test for yourself.",
+        "Trying one small idea at a time makes it easier to see what actually works.",
+        "Writing down your goal before you begin keeps the rest of the process focused.",
+        "Many common problems come from skipping a step that looked unimportant.",
+        "A short review at the end helps lock in what you have learned.",
+        "Asking which parts are essential and which are optional can save a great deal of effort.",
+        "Progress often feels slow at first, then becomes noticeable once the basics feel automatic.",
+        "Keeping a simple record of what you tried can prevent repeating the same mistake.",
+        "Different situations call for different choices, so the right answer is not always the most popular one.",
+        "Looking at the problem from another angle sometimes reveals a simpler solution.",
+        "Give yourself enough time to practice, because understanding grows through use.",
+        "Quality usually matters more than quantity, especially when you are just starting.",
+        "Clear priorities make it easier to decide what to skip when time is limited.",
+        "Thinking about {subject} in stages makes the whole process feel more manageable."
+    ];
+    const EXTENSION = [
+        "Focusing on one part at a time keeps {subject} from feeling overwhelming.",
+        "It helps to know not only what to do, but also why each step is recommended.",
+        "If you are short on time, start with the summary and return to the details later.",
+        "A simple checklist can help you confirm that nothing important was skipped.",
+        "Think about how you will measure success before you begin, so you know when you have reached it.",
+        "Returning to the material after a short break often reveals connections you missed the first time.",
+        "Sharing what you learn with others is one of the most reliable ways to remember it.",
+        "Keep this video handy as a reference whenever you revisit {subject}.",
+        "Bookmark the sections you find most useful so you can return to them quickly.",
+        "Consider how this applies to your own goals before deciding what to try first.",
+        "If a step feels confusing, come back to it after you have seen the full picture.",
+        "Writing a short summary in your own words is a simple way to test your understanding.",
+        "Practical examples are the fastest way to turn these ideas into habits.",
+        "Each small improvement adds up, even when the results are not immediately visible.",
+        "A few minutes of focused practice often beats a long session full of distractions.",
+        "Use this video as one of several sources, and compare what you learn with other trusted references."
+    ];
 
-        <div class="tips-grid">
-            <div class="tip-card">
-                <h4>Length matters</h4>
-                <p>Descriptions around 200–500 words give the algorithm more context while remaining readable. The first 2–3 lines appear above the “Show more” fold.</p>
-            </div>
-            <div class="tip-card">
-                <h4>Hashtags & tags</h4>
-                <p>YouTube allows up to 15 hashtags in the description (3 appear above the title). Use the 20 generated hashtags and pick the most relevant ones.</p>
-            </div>
-            <div class="tip-card">
-                <h4>Keywords in tags</h4>
-                <p>Paste the SEO keywords into the YouTube Tags field (comma-separated). Focus on phrases people actually search for.</p>
-            </div>
-            <div class="tip-card">
-                <h4>Edit before publishing</h4>
-                <p>Always review and customize the output. Add your real social links, affiliate disclaimers, and any specific claims that match the actual video content.</p>
-            </div>
-        </div>
-    </div>
-</div>
+    const INTENT_TAGS = {
+        tutorial:    ["HowTo", "Tutorial", "StepByStep"],
+        list:        ["Ideas", "Tips", "Picks"],
+        comparison:  ["Comparison", "Review", "Compared"],
+        explainer:   ["Explained", "Explainer", "Learn"],
+        story:       ["Story", "Storytelling", "Journey"],
+        news:        ["News", "Update", "Latest"],
+        general:     ["Guide", "Learn", "Explained"]
+    };
+    const GENERIC_TAGS = ["YouTube", "Video", "Explained", "Tips", "Guide", "Learn", "Beginners", "Tutorial", "Watch", "Basics", "Overview", "Lesson", "Essentials", "Insights", "Walkthrough", "Examples", "Facts", "Advice", "Review", "Help"];
 
-<footer>
-    Built by <a href="https://pooreyoutuber.github.io/">PooreYoutuber</a> · Free YouTube tools for creators · No login required
-</footer>
+    /* ---------- Language helpers ---------- */
+    const DEVA_MAP = {
+        "यूट्यूब": "YouTube", "यूटयूब": "YouTube", "वीडियो": "Video", "कैसे": "how", "तरीके": "ways",
+        "तरीका": "ways", "तरीकों": "ways", "सीखें": "learn", "सीखे": "learn", "सीखना": "learn",
+        "बनाएं": "make", "बनाएँ": "make", "बनाने": "make", "बनायें": "make", "बनाना": "make",
+        "पैसे": "money", "पैसा": "money", "पैसों": "money", "बचत": "savings", "बचाएं": "save",
+        "बचाने": "saving", "कमाएं": "earn", "कमाई": "earnings", "घर": "home", "खाना": "food",
+        "खाने": "food", "रेसिपी": "Recipe", "गेम": "Game", "गेमिंग": "Gaming", "पढ़ाई": "study",
+        "स्वास्थ्य": "Health", "कसरत": "Workout", "यात्रा": "Travel", "संगीत": "Music",
+        "तकनीक": "Technology", "सस्ता": "budget", "सस्ते": "budget", "सबसे": "best",
+        "अच्छा": "good", "अच्छे": "good", "निवेश": "Investing", "बिज़नेस": "Business",
+        "व्यापार": "Business", "एआई": "AI", "शेयर": "Stock", "हिंदी": "", "हिन्दी": ""
+    };
+    const DEVA_DROP = new Set(["के", "का", "की", "में", "से", "और", "है", "हैं", "को", "लिए", "पर", "भी", "क्या", "तो", "ही", "यह", "ये", "वो", "एक", "नहीं", "करें", "करने", "करना", "बारे", "सही"]);
+    const HINGLISH_MAP = {
+        kaise: "how", tarika: "ways", tarike: "ways", tareeka: "ways", sikhe: "learn", seekhe: "learn",
+        sikhein: "learn", seekhein: "learn", sikhiye: "learn", banaye: "make", banaen: "make", banayein: "make",
+        banaiye: "make", banao: "make", bana: "make", banane: "make", paise: "money", paisa: "money",
+        paison: "money", bachaye: "save", bachane: "saving", bachana: "saving", bachat: "savings",
+        kamaye: "earn", kamane: "earning", kamai: "earnings", ghar: "", khana: "food", khane: "food",
+        sasta: "budget", sasti: "budget", achha: "good", accha: "good", achhe: "good", sabse: "best",
+        sahi: "right", dekhe: "watch", dekhein: "watch", padhai: "study", padhna: "study", sehat: "health",
+        vyayam: "exercise", kasrat: "workout", yatra: "travel", safar: "travel", gaane: "songs",
+        gana: "song", naya: "new", naukri: "job", shaadi: "wedding", chai: "tea", sabzi: "vegetable", mithai: "sweets",
+        shuru: "start", shuruaat: "start", hindi: "", hinglish: ""
+    };
+    const HINGLISH_DROP = new Set(["ka", "ki", "ke", "ko", "se", "mein", "par", "aur", "hai", "hain", "kya", "bhi", "wala", "wali", "wale", "sab", "nahi", "nahin", "kare", "karne", "karen", "karein", "kar", "karo", "karna", "ek", "liye", "hi", "ho", "hona", "ye", "yeh", "woh", "ya", "tak", "apne", "apni", "apna"]);
+    const HINGLISH_KEYS = new Set(["ka", "ki", "ke", "ko", "se", "mein", "kaise", "kare", "karne", "karen", "karein", "hai", "aur", "bhi", "kya", "tarika", "tarike", "sabse", "paise", "bachat", "sikhe", "seekhe", "bana", "banaye", "banao", "wala"]);
 
-<div class="toast" id="toast"></div>
+    /* ---------- Topic extraction helpers ---------- */
+    const STOP_EN = new Set(["a", "an", "the", "to", "of", "in", "on", "at", "for", "and", "or", "with", "by", "from", "into", "about", "is", "are", "was", "be", "how", "what", "why", "when", "where", "who", "which", "you", "your", "we", "our", "my", "i", "me", "this", "that", "these", "it", "its", "do", "does", "did", "can", "will", "should", "versus", "best", "top", "new", "latest", "easy", "simple", "fast", "quick", "ultimate", "complete", "full", "guide", "tutorial", "tips", "tricks", "ways", "way", "part", "episode", "video", "videos", "just", "really", "every", "all", "no", "not", "so", "if", "than", "then", "like", "ever", "still", "now", "today", "day", "days", "year", "years", "s", "hindi", "hinglish", "explained", "explain", "talking", "talk", "good", "better", "2024", "2025", "2026", "2027"]);
+    const BOUNDARY = new Set(["for", "with", "from", "in", "on", "at", "by", "of"]);
+    const VERB_SET = new Set(["make", "learn", "save", "earn", "start", "grow", "build", "rank", "fix", "get", "use", "edit", "plan", "train", "bake", "write", "improve", "increase", "boost", "choose", "create", "master", "invest", "cook", "stop", "avoid", "find", "try", "apply", "draw", "install", "understand", "buy", "sell"]);
+    const LEAD_STRIP = new Set(["how", "to", "do", "does", "i", "can", "what", "is", "are", "why", "who"]);
+
+    const NICHE_ORDER = ["ai", "gaming", "education", "cooking", "fitness", "travel", "music", "finance", "business", "science", "history", "documentary", "diy", "technology", "podcast", "vlog", "entertainment"];
+    const NICHE_KEYWORDS = {
+        ai: ["ai", "chatgpt", "gpt", "llm", "llms", "claude", "gemini", "midjourney", "prompt", "prompts", "prompting", "copilot", "openai", "generative", "machine learning", "ai tools"],
+        gaming: ["game", "games", "gaming", "gamer", "gamers", "gameplay", "minecraft", "fortnite", "valorant", "pubg", "bgmi", "gta", "esports", "speedrun", "playthrough", "console", "ps5", "xbox", "nintendo", "steam", "walkthrough", "multiplayer"],
+        education: ["study", "studying", "exam", "exams", "students", "student", "learn", "learning", "lesson", "lessons", "class", "course", "school", "university", "syllabus", "revision", "neet", "jee", "upsc", "physics", "chemistry", "maths", "math", "grammar", "teacher", "homework"],
+        cooking: ["recipe", "recipes", "cook", "cooking", "kitchen", "food", "meal", "dinner", "lunch", "breakfast", "baking", "bake", "cake", "dessert", "curry", "masala", "paneer", "pasta", "snack", "snacks", "chai", "vegan", "sabzi"],
+        fitness: ["workout", "workouts", "gym", "fitness", "exercise", "exercises", "yoga", "diet", "protein", "muscle", "muscles", "running", "cardio", "abs", "training", "weight", "kasrat", "vyayam", "health", "stretching"],
+        travel: ["travel", "trip", "trips", "itinerary", "hotel", "hotels", "flight", "flights", "visa", "backpacking", "destination", "destinations", "tour", "tourism", "goa", "paris", "japan", "tokyo", "yatra", "safar", "packing"],
+        music: ["music", "song", "songs", "guitar", "piano", "singing", "vocals", "beat", "beats", "production", "chords", "cover", "covers", "drums", "album", "band", "rap", "gaana", "gaane"],
+        finance: ["money", "invest", "investing", "investment", "stocks", "stock", "savings", "saving", "budget", "budgeting", "debt", "credit", "tax", "taxes", "mutual", "crypto", "bitcoin", "salary", "loan", "loans", "retirement", "emi", "paise", "bachat", "income"],
+        business: ["business", "startup", "startups", "marketing", "sales", "entrepreneur", "entrepreneurs", "brand", "ecommerce", "freelance", "freelancing", "hustle", "company", "revenue", "clients", "shop", "agency"],
+        science: ["science", "scientific", "space", "planet", "planets", "universe", "biology", "experiment", "experiments", "climate", "quantum", "dinosaurs", "nature", "animals", "evolution", "astronomy", "galaxy", "black hole"],
+        history: ["history", "historical", "ancient", "war", "wars", "empire", "empires", "medieval", "century", "dynasty", "revolution", "civilization", "civilisation", "kingdom", "colonial"],
+        documentary: ["documentary", "documentaries", "investigation", "untold", "mystery", "mysteries", "scandal", "exposed"],
+        diy: ["diy", "craft", "crafts", "handmade", "woodworking", "repair", "fix", "homemade", "upcycle", "paint", "painting", "furniture", "decor", "project", "projects"],
+        technology: ["tech", "phone", "phones", "laptop", "laptops", "iphone", "android", "smartphone", "software", "app", "apps", "pc", "router", "wifi", "gadget", "gadgets", "windows", "linux", "python", "javascript", "coding", "programming", "setup", "keyboard", "camera"],
+        podcast: ["podcast", "podcasts", "episode", "interview", "conversation", "guest", "talks", "discussion"],
+        vlog: ["vlog", "vlogs", "day in my life", "routine", "daily", "weekend", "morning routine", "life"],
+        entertainment: ["reaction", "reacts", "reacting", "comedy", "funny", "prank", "pranks", "challenge", "challenges", "movie", "movies", "trailer", "memes", "drama", "roast", "shorts"]
+    };
+
+    const NICHE_LABEL = {
+        ai: "AI", gaming: "gaming", education: "education", cooking: "cooking", fitness: "fitness",
+        travel: "travel", music: "music", finance: "personal finance", business: "business",
+        science: "science", history: "history", documentary: "documentary", diy: "DIY", technology: "technology",
+        podcast: "podcast", vlog: "vlog", entertainment: "entertainment", general: "general"
+    };
+
+    /* ---------- Utilities ---------- */
+    function mulberry32(seed) {
+        return function () {
+            seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+            let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+    function hashStr(s) {
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+    }
+    function shuffle(arr, rnd) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+    function pickN(arr, n, rnd) { return shuffle(arr, rnd).slice(0, n); }
+    function fill(tpl, v) { return tpl.replace(/\{subject\}/g, v.subject).replace(/\{aud\}/g, v.aud); }
+    function wordCount(text) {
+        return text.split(/\s+/).filter(w => /[\p{L}\p{N}]/u.test(w)).length;
+    }
+    function cap(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+    function prettyWord(w) {
+        if (/[A-Z]/.test(w.slice(1)) || w === w.toUpperCase()) return w;   // keep SEO, AI, YouTube, iPhone
+        return cap(w);
+    }
+    function shingles(text, n = 4) {
+        const w = text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean);
+        const set = new Set();
+        for (let i = 0; i + n <= w.length; i++) set.add(w.slice(i, i + n).join(" "));
+        return set;
+    }
+    function jaccard(a, b) {
+        const A = shingles(a), B = shingles(b);
+        if (!A.size || !B.size) return 0;
+        let inter = 0;
+        for (const x of A) if (B.has(x)) inter++;
+        return inter / (A.size + B.size - inter);
+    }
+
+    /* ---------- Title analysis ---------- */
+    function detectNiche(cleanLower) {
+        const padded = " " + cleanLower + " ";
+        const tokens = new Set(cleanLower.split(" "));
+        let best = "general", bestScore = 0;
+        for (const niche of NICHE_ORDER) {
+            let score = 0;
+            for (const kw of NICHE_KEYWORDS[niche]) {
+                if (kw.includes(" ")) { if (padded.includes(" " + kw + " ")) score++; }
+                else if (tokens.has(kw)) score++;
+            }
+            if (score > bestScore) { best = niche; bestScore = score; }
+        }
+        return best;
+    }
+
+    function detectIntent(clean) {
+        if (/\bhow does\b|\bhow it works\b|^what\b|^why\b|\bwhat is\b|\bwhat are\b|\bexplained\b|\bhistory of\b|\bmeaning\b/.test(clean)) return "explainer";
+        if (/\b(news|latest|update|updates|announced|announcement|released|breaking|leak|leaked)\b/.test(clean)) return "news";
+        if (/\bvs\b|\bversus\b|\bcompar\w*|\bworth it\b|\bbetter than\b|\breviews?\b/.test(clean)) return "comparison";
+        if (/\b(top|best)\b|\b\d+ (ways|tips|things|tools|apps|ideas|mistakes|reasons|places|games|recipes|books|exercises|habits|hacks|steps)\b|\bideas\b/.test(clean)) return "list";
+        if (/\bhow\b|\bguide\b|\btutorial\b|\bsteps?\b|\bstep by step\b|\bsetup\b|\bset up\b|\binstall\b|\blearn\b|\bmake\b|\bbuild\b|\bstart\b|\bfix\b|\bbeginners?\b/.test(clean)) return "tutorial";
+        if (/\bmy\b|\bday in\b|\bjourney\b|\bstory\b|\bi tried\b|\bour\b|\bvlog\b|\blife\b/.test(clean)) return "story";
+        return "general";
+    }
+
+    function uniqueClean(list, n, prefix, maxLen) {
+        const seen = new Set(), out = [];
+        for (const raw of list) {
+            const p = String(raw).replace(/[^\p{L}\p{N}]/gu, "");
+            if (!p || (maxLen && p.length > maxLen)) continue;
+            const key = p.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            out.push(prefix + p);
+            if (out.length === n) break;
+        }
+        return out;
+    }
+
+    function buildHashtags(subject, niche, intent) {
+        const info = NICHE_BANK[niche];
+        const words = subject.split(/\s+/)
+            .map(w => w.replace(/[^\p{L}\p{N}]/gu, ""))
+            .filter(w => w.length >= 2 && !STOP_EN.has(w.toLowerCase()) && w.toLowerCase() !== "vs");
+        const cands = [];
+        if (words.length) cands.push(words.slice(0, 4).map(cap).join(""));
+        words.slice(0, 5).forEach(w => cands.push(cap(w)));
+        cands.push(...info.tags);
+        cands.push(...(INTENT_TAGS[intent] || INTENT_TAGS.general));
+        for (const w of words.slice(0, 3)) {
+            for (const suf of ["Tips", "Guide", "Explained", "Beginners", "Tutorial", "Ideas"]) cands.push(cap(w) + suf);
+        }
+        cands.push(...GENERIC_TAGS);
+        return uniqueClean(cands, 20, "#", 30);
+    }
+
+    function buildKeywords(subject, niche, intent) {
+        const t = subject.toLowerCase();
+        const info = NICHE_BANK[niche];
+        const howTo = "how to " + t;
+        const cands = [t];
+        if (intent === "list" || intent === "comparison") cands.push("best " + t);
+        cands.push(
+            t + " tutorial", t + " guide", t + " for beginners", t + " tips", t + " explained",
+            t + " step by step", t + " ideas", t + " examples", t + " basics", t + " mistakes to avoid",
+            t + " checklist", t + " best practices", howTo, "learn " + t, t + " walkthrough",
+            "best " + t, t + " vs alternatives", t + " for beginners guide", t + " common questions"
+        );
+        cands.push(...info.kw);
+        const seen = new Set(), out = [];
+        for (const k of cands) {
+            const text = k.replace(/\s+/g, " ").trim();
+            const key = text.toLowerCase();
+            if (!text || seen.has(key)) continue;
+            seen.add(key);
+            out.push(text);
+            if (out.length === 20) break;
+        }
+        return out;
+    }
+
+    function analyze(raw) {
+        const notices = [];
+        let s = String(raw == null ? "" : raw)
+            .normalize("NFC")
+            .replace(/[\u0000-\u001F\u007F]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        if (!s) return { ok: false, error: "Please enter a video title first." };
+        if (!/[\p{L}\p{N}]/u.test(s)) return { ok: false, error: "Please enter a title that contains letters or numbers." };
+        if (s.length > MAX_TITLE) {
+            s = s.slice(0, MAX_TITLE).replace(/\s+\S*$/, "");
+            notices.push("Your title was shortened to " + MAX_TITLE + " characters.");
+        }
+
+        // Tokenize and translate Hindi (Devanagari) and Hinglish tokens into English.
+        // Tokens containing markup or code characters are ignored so they never become topic words.
+        const rawTokens = s.split(" ")
+            .filter(t => !/[<>=\/\\{}\[\]()|;:`"]/.test(t))
+            .map(t => t.replace(/^[^\p{L}\p{M}\p{N}]+|[^\p{L}\p{M}\p{N}]+$/gu, ""))
+            .filter(Boolean);
+        let devaCount = 0, hinglishCount = 0;
+        const untranslated = [];
+        const en = [];
+        for (const tok of rawTokens) {
+            const lower = tok.toLowerCase();
+            const isDeva = /[\u0900-\u097F]/.test(tok);
+            if (isDeva) devaCount++;
+            if (Object.prototype.hasOwnProperty.call(DEVA_MAP, tok)) { if (DEVA_MAP[tok]) en.push(DEVA_MAP[tok]); continue; }
+            if (DEVA_DROP.has(tok)) continue;
+            if (Object.prototype.hasOwnProperty.call(HINGLISH_MAP, lower)) {
+                hinglishCount++;
+                if (HINGLISH_MAP[lower]) en.push(HINGLISH_MAP[lower]);
+                continue;
+            }
+            if (HINGLISH_DROP.has(lower)) { hinglishCount++; continue; }
+            if (isDeva) { untranslated.push(tok); continue; }
+            if (HINGLISH_KEYS.has(lower)) hinglishCount++;
+            en.push(tok);
+        }
+
+        let language = "English";
+        if (devaCount > 0) language = "Hindi (Devanagari)";
+        else if (hinglishCount > 0) language = "Hinglish";
+        if (language !== "English") notices.push("Detected a " + language + " title. The descriptions are written in English.");
+        if (untranslated.length) notices.push("Some words could not be translated, so they were left out of the English text.");
+
+        const englishPhrase = en.join(" ");
+        const clean = englishPhrase.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+
+        const intent = detectIntent(clean);
+        const niche = detectNiche(clean);
+
+        // Build the topic phrase: remove leading question words, stop words, digits, and verbs.
+        const words = [...en];
+        while (words.length > 1 && LEAD_STRIP.has(words[0].toLowerCase())) words.shift();
+        const isTopicWord = w => {
+            const l = w.toLowerCase();
+            return l && !STOP_EN.has(l) && !VERB_SET.has(l) && !/^\d+$/.test(l);
+        };
+        // Cut at the first preposition ("... for Class 10 Students") when the part before it has topic words.
+        let head = words;
+        const cut = words.findIndex((w, idx) => idx > 0 && BOUNDARY.has(w.toLowerCase()));
+        if (cut > 0 && words.slice(0, cut).some(isTopicWord)) head = words.slice(0, cut);
+        const kept = head.filter(isTopicWord);
+        // Keep the topic short enough to read naturally in sentences.
+        const topicWords = [];
+        let len = 0;
+        for (const w of kept) {
+            if (topicWords.length >= 7 || len + w.length + 1 > 60) break;
+            topicWords.push(w.toLowerCase() === "vs" ? "vs" : prettyWord(w));
+            len += w.length + 1;
+        }
+        if (!topicWords.length && kept.length) topicWords.push(kept[0].slice(0, 60));
+        let subject = topicWords.join(" ");
+        if (!subject) {
+            notices.push("We could not read a clear topic from that title, so the descriptions are more general. Add a few plain English words for better results.");
+            subject = "this topic";
+        }
+
+        const niches = NICHE_BANK[niche] ? niche : "general";
+        return {
+            ok: true,
+            cleaned: s,
+            language,
+            niche: niches,
+            nicheLabel: NICHE_LABEL[niches],
+            intent,
+            subject,
+            aud: NICHE_BANK[niches].aud,
+            hashtags: buildHashtags(subject, niches, intent),
+            keywords: buildKeywords(subject, niches, intent),
+            notices
+        };
+    }
+
+    /* ---------- Description builder ---------- */
+    function usageOf(cards) {
+        const m = new Map();
+        for (const c of cards) for (const t of (c.used || [])) m.set(t, (m.get(t) || 0) + 1);
+        return m;
+    }
+
+    function buildCard(a, styleIndex, rnd, usage) {
+        const style = STYLES[styleIndex];
+        const niche = NICHE_BANK[a.niche];
+        const spec = style.id === "niche"
+            ? { open: niche.creative, value: [], close: STYLE_BANK.natural.close }
+            : STYLE_BANK[style.id];
+        const intentPool = INTENT_BANK[a.intent] || INTENT_BANK.general;
+        const v = { subject: a.subject, aud: a.aud };
+
+        const sentences = [];
+        const used = [];
+        const picked = new Set();
+        // Prefer templates that other cards have used least, so the set of descriptions spreads across the library.
+        const take = (pool, n) => {
+            const avail = pool.filter(x => !picked.has(x));
+            const ranked = shuffle(avail, rnd).sort((p, q) => (usage.get(p) || 0) - (usage.get(q) || 0));
+            const chosen = ranked.slice(0, n);
+            for (const x of chosen) { picked.add(x); used.push(x); sentences.push(fill(x, v)); }
+            return chosen.length;
+        };
+
+        take(spec.open, 1);
+        take(intentPool, 3);
+        take(niche.ctx, 2);
+        if (spec.value.length) take(spec.value, 3);
+        take(niche.tips, 2);
+
+        const filler = [...DEPTH, ...EXTENSION];
+        let guard = 0;
+        while (wordCount(sentences.join(" ")) < FILL_UNTIL && guard++ < 40) {
+            if (take(filler, 1) === 0) break;
+        }
+        take(spec.close, 1);
+
+        // Group sentences into paragraphs of 3 or 4 sentences.
+        const paragraphs = [];
+        let i = 0;
+        while (i < sentences.length) {
+            const n = 3 + Math.floor(rnd() * 2);
+            paragraphs.push(sentences.slice(i, i + n).join(" "));
+            i += n;
+        }
+        const body = paragraphs.join("\n\n");
+        const text = [body, CHAPTERS_LINE, LINKS_BLOCK].join("\n\n");
+        return {
+            styleId: style.id,
+            label: style.label,
+            body,
+            text,
+            words: wordCount(text),
+            used
+        };
+    }
+
+    function pickCard(a, i, nonce, others) {
+        const usage = usageOf(others);
+        const othersBodies = others.map(o => o.body);
+        let best = null;
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+            const rnd = mulberry32(hashStr(a.cleaned + "|" + nonce + "|" + i + "|" + attempt));
+            const cand = buildCard(a, i, rnd, usage);
+            const sim = othersBodies.length
+                ? Math.max(...othersBodies.map(o => jaccard(cand.body, o)))
+                : 0;
+            if (!best || sim < best.sim) best = { ...cand, sim, attempts: attempt + 1 };
+            if (sim < SIM_THRESHOLD) break;
+        }
+        return { ...best, index: i, flagged: best.sim >= SIM_THRESHOLD };
+    }
+
+    function generate(rawTitle, nonce) {
+        const a = analyze(rawTitle);
+        if (!a.ok) return a;
+        const n = String(nonce == null ? "0" : nonce);
+        const cards = [];
+        for (let i = 0; i < CARD_COUNT; i++) {
+            cards.push(pickCard(a, i, n, cards));
+        }
+        return {
+            ok: true,
+            analysis: a,
+            cards,
+            hashtags: a.hashtags,
+            keywords: a.keywords,
+            notices: a.notices,
+            flaggedCount: cards.filter(c => c.flagged).length
+        };
+    }
+
+    function regenerateOne(analysis, index, nonce, allCards) {
+        const others = allCards.filter((_, j) => j !== index);
+        return pickCard(analysis, index, String(nonce), others);
+    }
+
+    return {
+        analyze,
+        generate,
+        regenerateOne,
+        constants: { CARD_COUNT, SIM_THRESHOLD, MAX_ATTEMPTS, MAX_TITLE },
+        styles: STYLES
+    };
+})();
+/* ===== ENGINE END ===== */
+</script>
 
 <script>
-/* ============================================================
-   YouTube Description Studio – Modular Offline Generation Engine
-   Honest client-side system. No external AI API required.
-   Descriptions are constructed from topic-aware modules, not
-   random generic templates. No invented timestamps, stats, or
-   personal experiences.
-   ============================================================ */
+/* ===== UI ===== */
+(function () {
+    "use strict";
 
-const STYLE_LABELS = [
-    "Informative",
-    "Conversational",
-    "SEO-Focused",
-    "Storytelling",
-    "Educational",
-    "Professional",
-    "Curiosity-Driven",
-    "Benefits-Focused",
-    "Natural Creator",
-    "Niche Creative"
-];
-
-const NICHE_KEYWORDS = {
-    gaming: ["game", "gaming", "gameplay", "walkthrough", "playthrough", "fortnite", "minecraft", "valorant", "gta", "roblox", "esports", "streamer", "xbox", "playstation", "nintendo", "pc gaming", "mobile game"],
-    education: ["learn", "tutorial", "how to", "explained", "course", "lesson", "study", "exam", "school", "college", "math", "science", "history", "geography", "english", "grammar", "coding class"],
-    technology: ["tech", "technology", "software", "app", "gadget", "phone", "laptop", "ai", "artificial intelligence", "coding", "programming", "python", "javascript", "web development", "cybersecurity", "blockchain"],
-    cooking: ["recipe", "cook", "cooking", "bake", "baking", "food", "kitchen", "ingredient", "dish", "meal", "cuisine", "chef", "dessert", "breakfast", "lunch", "dinner"],
-    fitness: ["workout", "fitness", "exercise", "gym", "yoga", "cardio", "strength", "muscle", "weight loss", "diet", "nutrition", "bodybuilding", "pilates", "running"],
-    travel: ["travel", "trip", "tour", "destination", "vacation", "hotel", "flight", "backpack", "vlog", "explore", "adventure", "city guide", "itinerary"],
-    music: ["music", "song", "cover", "instrument", "guitar", "piano", "beats", "producer", "singer", "lyrics", "album", "concert", "dj"],
-    business: ["business", "startup", "entrepreneur", "marketing", "sales", "finance", "money", "invest", "stock", "side hustle", "passive income", "brand"],
-    finance: ["finance", "money", "investing", "stock", "crypto", "bitcoin", "budget", "saving", "loan", "credit", "tax", "retirement", "wealth"],
-    diy: ["diy", "craft", "handmade", "build", "woodworking", "home improvement", "repair", "make", "project", "tutorial craft"],
-    entertainment: ["funny", "comedy", "reaction", "prank", "challenge", "vlog", "storytime", "drama", "movie", "review", "trailer"],
-    science: ["science", "physics", "chemistry", "biology", "space", "astronomy", "experiment", "research", "discovery"],
-    history: ["history", "historical", "ancient", "war", "civilization", "documentary", "timeline", "empire"],
-    podcast: ["podcast", "interview", "talk", "discussion", "episode", "guest", "conversation"]
-};
-
-const NICHE_PHRASES = {
-    gaming: {
-        audience: "gamers and content creators",
-        value: "improve your gameplay, discover new strategies, and stay competitive",
-        tips: [
-            "Focus on clear communication of mechanics rather than just showing the final result.",
-            "Break complex strategies into smaller, repeatable steps that viewers can practice.",
-            "Mention common mistakes that cost players matches so the audience can avoid them.",
-            "Encourage viewers to test the tips in their own games and share results in the comments."
-        ]
-    },
-    education: {
-        audience: "students, lifelong learners, and educators",
-        value: "understand the topic more clearly and apply the knowledge with confidence",
-        tips: [
-            "Start with the big picture before diving into details so the structure is easy to follow.",
-            "Use simple language and real-world analogies whenever possible.",
-            "Highlight the most common points of confusion and address them directly.",
-            "Suggest practice exercises or follow-up resources so learning continues after the video."
-        ]
-    },
-    technology: {
-        audience: "tech enthusiasts, developers, and early adopters",
-        value: "stay up to date with practical insights and avoid common technical pitfalls",
-        tips: [
-            "Explain both the 'what' and the 'why' behind each recommendation.",
-            "Keep terminology accessible while still being accurate for experienced users.",
-            "Point out trade-offs so viewers can make informed decisions for their own use cases.",
-            "Encourage testing and verification rather than blind adoption of any single approach."
-        ]
-    },
-    cooking: {
-        audience: "home cooks and food lovers",
-        value: "prepare the dish successfully and enjoy the process",
-        tips: [
-            "List ingredients and approximate quantities clearly near the top of the description.",
-            "Mention substitutions for common dietary needs or missing items.",
-            "Share timing cues and visual cues that indicate the dish is ready.",
-            "Invite viewers to adapt the recipe and share their variations in the comments."
-        ]
-    },
-    fitness: {
-        audience: "people working on their health and fitness goals",
-        value: "train more effectively and stay consistent",
-        tips: [
-            "Emphasize proper form and safety before intensity.",
-            "Offer modifications for different fitness levels.",
-            "Remind viewers that progress takes time and consistency matters more than perfection.",
-            "Suggest tracking simple metrics so improvement becomes visible."
-        ]
-    },
-    travel: {
-        audience: "travelers and adventure seekers",
-        value: "plan better trips and experience destinations more meaningfully",
-        tips: [
-            "Highlight practical details such as timing, accessibility, and local context.",
-            "Balance inspiration with realistic expectations.",
-            "Mention cultural or safety considerations when relevant.",
-            "Encourage responsible travel and respect for local communities."
-        ]
-    },
-    music: {
-        audience: "musicians, producers, and music fans",
-        value: "improve skills, discover techniques, and deepen appreciation for the craft",
-        tips: [
-            "Describe the technique or concept without claiming exclusive secrets.",
-            "Suggest practice methods that build muscle memory and musical ear.",
-            "Keep the focus on creativity and expression rather than pure technical perfection.",
-            "Invite listeners to experiment and share their own interpretations."
-        ]
-    },
-    business: {
-        audience: "entrepreneurs, marketers, and professionals",
-        value: "make clearer decisions and apply practical frameworks",
-        tips: [
-            "Separate principles from tactics so the advice stays useful over time.",
-            "Acknowledge that results vary based on context, effort, and market conditions.",
-            "Encourage testing small changes before large commitments.",
-            "Point readers toward further learning rather than promising overnight success."
-        ]
-    },
-    finance: {
-        audience: "people interested in personal finance and investing",
-        value: "understand financial concepts and make more informed decisions",
-        tips: [
-            "Stress that this is educational content, not personalized financial advice.",
-            "Explain risks alongside potential benefits.",
-            "Use clear language and avoid unnecessary jargon.",
-            "Recommend consulting qualified professionals for individual situations."
-        ]
-    },
-    diy: {
-        audience: "makers, hobbyists, and home improvers",
-        value: "complete projects safely and with better results",
-        tips: [
-            "List required tools and materials early in the description.",
-            "Highlight safety precautions where relevant.",
-            "Break the process into logical stages that are easy to follow.",
-            "Encourage viewers to share their finished projects and adaptations."
-        ]
-    },
-    entertainment: {
-        audience: "viewers looking for enjoyable and engaging content",
-        value: "have a good time and feel connected to the creator",
-        tips: [
-            "Keep the tone light and inviting while still being clear about the video topic.",
-            "Invite comments and reactions to build community.",
-            "Mention related videos or playlists for continued watching.",
-            "Thank viewers for their time and support."
-        ]
-    },
-    science: {
-        audience: "curious minds and science enthusiasts",
-        value: "understand scientific ideas more clearly and appreciate how they apply to the real world",
-        tips: [
-            "Prioritize accuracy and clarity over hype.",
-            "Define key terms so newcomers can follow along.",
-            "Connect abstract concepts to everyday examples when possible.",
-            "Encourage critical thinking and further reading."
-        ]
-    },
-    history: {
-        audience: "history enthusiasts and lifelong learners",
-        value: "gain a clearer picture of past events and their lasting impact",
-        tips: [
-            "Present context before diving into specific events.",
-            "Acknowledge that historical interpretation can evolve with new evidence.",
-            "Keep the narrative engaging without sacrificing accuracy.",
-            "Suggest related topics or further resources for deeper exploration."
-        ]
-    },
-    podcast: {
-        audience: "listeners who enjoy thoughtful conversations",
-        value: "gain new perspectives and useful insights from the discussion",
-        tips: [
-            "Summarize the main themes of the episode without spoiling every detail.",
-            "Highlight guest expertise or unique angles when relevant.",
-            "Invite listeners to share their own thoughts in the comments.",
-            "Link to previous episodes or related conversations when available."
-        ]
-    },
-    general: {
-        audience: "viewers interested in this topic",
-        value: "understand the subject more clearly and take useful next steps",
-        tips: [
-            "Open with a clear statement of what the video covers.",
-            "Organize information so it is easy to scan and return to later.",
-            "Avoid over-promising results that depend on individual effort and context.",
-            "End with a simple invitation to engage — comment, subscribe, or watch related content."
-        ]
-    }
-};
-
-// Global state
-let currentTitle = "";
-let currentDescriptions = [];
-let currentHashtags = "";
-let currentKeywords = "";
-let currentNiche = "general";
-
-function detectNiche(title) {
-    const lower = title.toLowerCase();
-    let best = "general";
-    let maxHits = 0;
-    for (const [niche, words] of Object.entries(NICHE_KEYWORDS)) {
-        let hits = 0;
-        for (const w of words) {
-            if (lower.includes(w)) hits++;
-        }
-        if (hits > maxHits) {
-            maxHits = hits;
-            best = niche;
-        }
-    }
-    return best;
-}
-
-function extractKeywords(title) {
-    const stop = new Set(["the","a","an","and","or","but","in","on","at","to","for","of","with","by","from","is","are","was","were","be","been","being","have","has","had","do","does","did","will","would","could","should","may","might","must","shall","can","need","how","what","when","where","why","which","who","whom","this","that","these","those","i","you","he","she","it","we","they","my","your","his","her","its","our","their","me","him","us","them","not","no","yes","up","out","so","if","about","into","over","after","before","between","under","again","further","then","once","here","there","all","each","few","more","most","other","some","such","only","own","same","than","too","very","just","also"]);
-    return title
-        .toLowerCase()
-        .replace(/[^\w\s\u0900-\u097F]/g, " ")
-        .split(/\s+/)
-        .filter(w => w.length > 2 && !stop.has(w));
-}
-
-function wordCount(text) {
-    return text.trim().split(/\s+/).filter(Boolean).length;
-}
-
-function expandToTarget(base, targetWords, nicheData, title) {
-    // Build additional modular paragraphs until we reach ~targetWords
-    const extras = [
-        `This video is designed for ${nicheData.audience} who want practical, actionable information rather than vague advice. The goal is to give you a clear overview of the topic so you can decide what to focus on next.`,
-        `As you watch, pay attention to the overall structure. Understanding the flow of ideas often helps more than memorizing isolated tips. Pause when something is unclear and rewatch key sections if needed.`,
-        `Everyone starts from a different place. Some viewers will already know parts of this material, while others are completely new. Use the parts that match your current level and skip or revisit sections as required.`,
-        `Applying what you learn matters more than consuming more content. After finishing the video, try one small action related to the topic. Even a short experiment builds real understanding.`,
-        `If you found this helpful, consider sharing it with someone else who might benefit. Community recommendations help good educational content reach the people who need it.`,
-        `Questions and thoughtful comments are always welcome. They help improve future videos and often spark useful discussions among viewers.`,
-        `Remember that results depend on consistent effort, context, and individual circumstances. Treat the information here as a starting point for your own exploration rather than a guaranteed formula.`,
-        `Related topics and deeper dives may appear in future videos. Subscribing and turning on notifications is the easiest way to stay updated when new content is published.`,
-        `Take notes if that helps you retain information. Writing down key points in your own words is one of the most effective ways to move knowledge from short-term to long-term memory.`,
-        `Finally, enjoy the process. Learning and creating are more sustainable when they feel interesting rather than forced. Find the aspects of this topic that genuinely engage you and build from there.`
-    ];
-
-    let text = base;
-    let i = 0;
-    while (wordCount(text) < targetWords && i < extras.length * 2) {
-        text += "\n\n" + extras[i % extras.length];
-        i++;
-    }
-    // Final trim if massively over (rare)
-    const words = text.trim().split(/\s+/);
-    if (words.length > targetWords + 80) {
-        text = words.slice(0, targetWords + 40).join(" ") + "…";
-    }
-    return text;
-}
-
-function buildDescription(title, styleIndex, niche) {
-    const nicheData = NICHE_PHRASES[niche] || NICHE_PHRASES.general;
-    const tips = nicheData.tips;
-    const t = title.trim();
-
-    const openings = [
-        // 0 Informative
-        `This video provides a clear and structured overview of "${t}". The goal is to help ${nicheData.audience} understand the core ideas and ${nicheData.value}.`,
-        // 1 Conversational
-        `Hey everyone — today we're talking about "${t}". If you've been looking for a straightforward explanation that actually helps you move forward, you're in the right place.`,
-        // 2 SEO-Focused
-        `Looking for reliable information on "${t}"? This video covers the essential points that ${nicheData.audience} search for when they want to ${nicheData.value}.`,
-        // 3 Storytelling
-        `Every useful skill or insight starts with curiosity. In this video we explore "${t}" and the practical path that helps people ${nicheData.value}.`,
-        // 4 Educational
-        `Welcome to this educational breakdown of "${t}". The material is organized so both beginners and more experienced viewers can follow along and extract value.`,
-        // 5 Professional
-        `This presentation examines "${t}" with a focus on clarity, accuracy, and practical application for ${nicheData.audience}.`,
-        // 6 Curiosity-Driven
-        `What does it really take to understand "${t}" at a useful level? This video unpacks the key elements so you can ${nicheData.value}.`,
-        // 7 Benefits-Focused
-        `If your goal is to ${nicheData.value}, this video on "${t}" is built to give you a clear roadmap and concrete next steps.`,
-        // 8 Natural Creator
-        `Thanks for clicking on this video about "${t}". I put this together to share useful information in a way that feels natural and easy to follow.`,
-        // 9 Niche Creative
-        `Let's dive into "${t}" from a practical angle. Whether you're just getting started or refining your approach, the ideas here are meant to help you ${nicheData.value}.`
-    ];
-
-    const bodies = [
-        // Informative
-        `The content is arranged to move from foundational concepts to more detailed considerations. You will see explanations of the main ideas, common approaches, and points that often cause confusion.\n\n${tips[0]}\n\n${tips[1]}\n\nAdditional context is provided so you can connect the ideas to your own situation. The emphasis stays on understanding rather than memorizing isolated facts.`,
-        // Conversational
-        `I'll walk you through the important parts without unnecessary complexity. Think of this as a conversation where we look at what actually matters for "${t}".\n\n${tips[0]}\n\n${tips[2]}\n\nFeel free to pause, rewatch, or skip ahead depending on what you already know. The description below also summarizes the main themes so you can return later.`,
-        // SEO
-        `Search interest around this topic continues to grow because people want practical guidance. This video addresses the questions that commonly appear when someone starts researching "${t}".\n\nKey themes include clarity of explanation, realistic expectations, and actionable takeaways.\n\n${tips[1]}\n\n${tips[3]}`,
-        // Storytelling
-        `The journey of learning anything new usually begins with a simple question. This video follows that path for "${t}" — starting with the basics and building toward a more complete picture.\n\nAlong the way you'll encounter practical observations that many people discover only after trial and error.\n\n${tips[0]}\n\n${tips[2]}`,
-        // Educational
-        `Learning works best when information is presented in a logical sequence. This video follows that principle for the topic of "${t}".\n\nYou will first see the broader context, then more specific considerations, and finally suggestions for applying the ideas.\n\n${tips[1]}\n\n${tips[3]}`,
-        // Professional
-        `The material is prepared with attention to accuracy and usefulness. Viewers who work with or study topics related to "${t}" should find a balanced overview that supports further independent research.\n\n${tips[0]}\n\n${tips[1]}\n\nNo exaggerated claims are made; the focus remains on clear explanation and realistic application.`,
-        // Curiosity
-        `Curiosity is the starting point for deeper understanding. If you've wondered about the details behind "${t}", this video aims to satisfy that curiosity with solid information.\n\n${tips[2]}\n\n${tips[3]}\n\nYou are encouraged to keep questioning and exploring beyond what is covered here.`,
-        // Benefits
-        `The main benefit of watching is a clearer mental model of "${t}". With that model you can ${nicheData.value} more effectively.\n\nSecondary benefits include knowing which resources or next steps are worth your time and which common approaches tend to create extra work.\n\n${tips[0]}\n\n${tips[1]}`,
-        // Natural Creator
-        `I wanted to create something that feels helpful rather than overwhelming. This video on "${t}" is the result of that intention.\n\nYou'll find explanations, a few practical suggestions, and space to form your own conclusions.\n\n${tips[2]}\n\n${tips[3]}`,
-        // Niche Creative
-        `Different people approach "${t}" from different angles. This video offers one practical perspective that many ${nicheData.audience} find useful.\n\nThe structure is flexible — use the parts that resonate and adapt the rest to your own style or goals.\n\n${tips[0]}\n\n${tips[2]}`
-    ];
-
-    const closings = [
-        `If this overview helped clarify the topic for you, consider leaving a comment with your own experience or questions. Your input helps shape future content.\n\nThank you for watching, and best of luck as you apply what you've learned.`,
-        `That's the core of what I wanted to share about "${t}". If you found value here, a like or subscribe helps the channel continue creating free resources.\n\nSee you in the next video!`,
-        `Use the information as a foundation and continue refining your approach over time. Consistent small improvements usually outperform occasional large efforts.\n\nThanks for your time and attention.`,
-        `Whether you are just starting or already experienced, revisiting fundamentals can reveal new insights. Keep exploring and stay curious.\n\nTake care and talk soon.`,
-        `Remember that understanding deepens with practice. Try one idea from this video in the coming days and notice what works for your situation.\n\nAppreciate you watching.`
-    ];
-
-    let desc = openings[styleIndex] + "\n\n" + bodies[styleIndex] + "\n\n" + closings[styleIndex % closings.length];
-
-    // Expand to approximately 500 words
-    desc = expandToTarget(desc, 480, nicheData, t);
-
-    // Light personalization note (no invented claims)
-    desc += `\n\n---\n📌 Video title: ${t}\n🔔 Subscribe for more content on related topics\n💬 Comment with your questions or experiences\n\n#${extractKeywords(t).slice(0,3).join(" #") || "YouTube"}`;
-
-    return desc;
-}
-
-function generateHashtags(title, niche) {
-    const words = extractKeywords(title);
-    const set = new Set();
-
-    // From title
-    words.forEach(w => {
-        if (set.size < 8) set.add("#" + w.replace(/\s+/g, ""));
-    });
-
-    // Combined phrases
-    if (words.length >= 2) {
-        set.add("#" + words[0] + words[1]);
-    }
-    if (words.length >= 3) {
-        set.add("#" + words[0] + words[1] + words[2]);
-    }
-
-    // Niche-related
-    const nicheTags = {
-        gaming: ["#Gaming", "#Gameplay", "#Gamer", "#GameTips", "#Esports"],
-        education: ["#Learning", "#Education", "#Tutorial", "#StudyTips", "#HowTo"],
-        technology: ["#Tech", "#Technology", "#AI", "#Coding", "#Software"],
-        cooking: ["#Cooking", "#Recipe", "#Food", "#HomeCooking", "#KitchenTips"],
-        fitness: ["#Fitness", "#Workout", "#Health", "#Exercise", "#GymLife"],
-        travel: ["#Travel", "#TravelTips", "#Adventure", "#Wanderlust", "#Explore"],
-        music: ["#Music", "#Musician", "#Song", "#Producer", "#MusicTips"],
-        business: ["#Business", "#Entrepreneur", "#Marketing", "#Startup", "#Success"],
-        finance: ["#Finance", "#Investing", "#MoneyTips", "#PersonalFinance", "#Wealth"],
-        diy: ["#DIY", "#Crafts", "#Handmade", "#Maker", "#HomeProjects"],
-        entertainment: ["#Entertainment", "#Fun", "#Comedy", "#Viral", "#Content"],
-        science: ["#Science", "#STEM", "#Research", "#Discovery", "#Curious"],
-        history: ["#History", "#Historical", "#Documentary", "#LearnHistory", "#Past"],
-        podcast: ["#Podcast", "#Interview", "#TalkShow", "#Discussion", "#Episode"],
-        general: ["#YouTube", "#ContentCreator", "#Video", "#Tips", "#Guide"]
+    const $ = id => document.getElementById(id);
+    const els = {
+        title: $("videoTitle"),
+        counter: $("counter"),
+        generate: $("generateBtn"),
+        clear: $("clearBtn"),
+        loader: $("loader"),
+        status: $("status"),
+        empty: $("emptyState"),
+        results: $("results"),
+        notices: $("notices"),
+        cards: $("cards"),
+        hashtags: $("hashtagList"),
+        keywords: $("keywordList"),
+        tagCount: $("tagCount"),
+        kwCount: $("kwCount"),
+        copyAllDesc: $("copyAllDesc"),
+        copyAllTags: $("copyAllTags"),
+        copyAllKw: $("copyAllKw"),
+        copyTagsBtn: $("copyTagsBtn"),
+        copyKwBtn: $("copyKwBtn"),
+        regenAll: $("regenAllBtn"),
+        exportTxt: $("exportTxt"),
+        exportMd: $("exportMd"),
+        dialog: $("copyDialog"),
+        dialogText: $("copyDialogText"),
+        dialogClose: $("copyDialogClose"),
+        live: $("liveRegion"),
+        shop: $("shopDropdown"),
+        shopBtn: document.querySelector("#shopDropdown .dropbtn")
     };
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    (nicheTags[niche] || nicheTags.general).forEach(t => set.add(t));
+    let state = null;
+    let nonceCounter = 0;
 
-    // Generic useful
-    ["#YouTubeTips", "#ContentCreator", "#VideoMarketing", "#CreatorEconomy", "#OnlineLearning", "#2026"].forEach(t => {
-        if (set.size < 20) set.add(t);
-    });
-
-    // Pad if needed with title-based variations
-    let i = 0;
-    while (set.size < 20 && i < words.length) {
-        set.add("#" + words[i] + "Tips");
-        set.add("#" + words[i] + "Guide");
-        i++;
+    /* ---------- helpers ---------- */
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text != null) node.textContent = text;
+        return node;
     }
-    while (set.size < 20) {
-        set.add("#Topic" + set.size);
+    function announce(msg) { els.live.textContent = msg; }
+    function setStatus(msg, kind) {
+        els.status.textContent = msg || "";
+        els.status.className = "status" + (kind ? " " + kind : "");
     }
-
-    return Array.from(set).slice(0, 20).join(" ");
-}
-
-function generateKeywords(title, niche) {
-    const words = extractKeywords(title);
-    const set = new Set();
-
-    // Full title and variations
-    set.add(title.toLowerCase().trim());
-    if (words.length) set.add(words.join(" "));
-    words.forEach(w => set.add(w));
-
-    // Combinations
-    if (words.length >= 2) {
-        set.add(words[0] + " " + words[1]);
-        set.add(words[0] + " tutorial");
-        set.add(words[0] + " guide");
-        set.add(words[0] + " tips");
-        set.add("how to " + words.slice(0, 3).join(" "));
+    function setLoading(on) {
+        els.generate.disabled = on;
+        els.loader.hidden = !on;
+    }
+    function updateCounter() {
+        els.counter.textContent = els.title.value.length + "/150";
+    }
+    function slugify(s) {
+        return (s || "descriptions").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50) || "descriptions";
     }
 
-    const nicheKw = {
-        gaming: ["gameplay tips", "gaming guide", "best strategies", "beginner gaming", "pro tips"],
-        education: ["online learning", "study guide", "explained simply", "beginner tutorial", "step by step"],
-        technology: ["tech review", "how to use", "software tutorial", "beginner tech", "latest technology"],
-        cooking: ["easy recipe", "home cooking", "step by step recipe", "cooking tips", "beginner cooking"],
-        fitness: ["home workout", "fitness tips", "exercise guide", "beginner fitness", "training routine"],
-        travel: ["travel guide", "travel tips", "best places", "travel vlog", "destination guide"],
-        music: ["music tutorial", "how to play", "music production", "beginner music", "song cover"],
-        business: ["business tips", "entrepreneur guide", "marketing strategy", "startup advice", "online business"],
-        finance: ["personal finance", "investing for beginners", "money management", "financial tips", "budgeting"],
-        diy: ["diy project", "how to make", "craft tutorial", "home diy", "beginner diy"],
-        entertainment: ["funny video", "entertainment", "reaction", "comedy sketch", "viral content"],
-        science: ["science explained", "scientific method", "fun science", "science facts", "beginner science"],
-        history: ["history documentary", "historical events", "history explained", "learn history", "ancient history"],
-        podcast: ["podcast episode", "interview", "discussion", "talk show", "podcast tips"],
-        general: ["youtube tips", "content creation", "video guide", "how to", "beginner guide"]
-    };
-
-    (nicheKw[niche] || nicheKw.general).forEach(k => set.add(k));
-
-    // Year and common modifiers
-    set.add(words[0] + " 2026");
-    set.add("best " + (words[0] || "guide"));
-    set.add((words[0] || "topic") + " for beginners");
-
-    const arr = Array.from(set).filter(k => k.length > 2).slice(0, 20);
-    while (arr.length < 20) arr.push("related topic " + (arr.length + 1));
-    return arr.join(", ");
-}
-
-function showToast(msg, isError = false) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.className = "toast show" + (isError ? " error" : "");
-    setTimeout(() => t.classList.remove("show"), 2500);
-}
-
-async function copyText(text, label = "Text") {
-    if (!text) {
-        showToast("Nothing to copy", true);
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(text);
-        showToast(`${label} copied!`);
-    } catch (e) {
-        // Fallback
+    /* ---------- clipboard ---------- */
+    function legacyCopy(text) {
         const ta = document.createElement("textarea");
         ta.value = text;
+        ta.setAttribute("readonly", "");
         ta.style.position = "fixed";
-        ta.style.left = "-9999px";
+        ta.style.top = "-1000px";
+        ta.style.opacity = "0";
         document.body.appendChild(ta);
-        ta.select();
+        let ok = false;
         try {
-            document.execCommand("copy");
-            showToast(`${label} copied!`);
-        } catch (err) {
-            showToast("Copy failed — select and copy manually", true);
+            ta.select();
+            ta.setSelectionRange(0, text.length);
+            ok = !!document.execCommand && document.execCommand("copy");
+        } catch (_) {
+            ok = false;
+        } finally {
+            ta.remove();
         }
-        document.body.removeChild(ta);
+        return ok;
     }
-}
-
-function copyDescription(index) {
-    const desc = currentDescriptions[index];
-    if (desc) copyText(desc, `Description ${index + 1}`);
-}
-
-function copyDescriptionWithTags(index) {
-    const desc = currentDescriptions[index];
-    if (!desc) return;
-    const combined = desc + "\n\nHashtags:\n" + currentHashtags + "\n\nKeywords:\n" + currentKeywords;
-    copyText(combined, `Description ${index + 1} + Tags`);
-}
-
-function copyAllDescriptions() {
-    if (!currentDescriptions.length) return;
-    const all = currentDescriptions.map((d, i) => `=== Option ${i + 1} (${STYLE_LABELS[i]}) ===\n\n${d}`).join("\n\n\n");
-    copyText(all, "All descriptions");
-}
-
-function copyAllMeta() {
-    copyText("Hashtags:\n" + currentHashtags + "\n\nKeywords:\n" + currentKeywords, "Hashtags + Keywords");
-}
-
-function regenerateOne(index) {
-    if (!currentTitle) return;
-    const niche = currentNiche;
-    const newDesc = buildDescription(currentTitle, index, niche);
-    currentDescriptions[index] = newDesc;
-
-    // Update only that card
-    const card = document.querySelector(`.desc-card[data-index="${index}"]`);
-    if (card) {
-        const pre = card.querySelector(".desc-text");
-        const wc = card.querySelector(".word-count");
-        pre.textContent = newDesc;
-        wc.textContent = wordCount(newDesc) + " words";
+    function openCopyDialog(text) {
+        els.dialogText.value = text;
+        if (typeof els.dialog.showModal === "function") {
+            if (!els.dialog.open) els.dialog.showModal();
+        } else {
+            els.dialog.setAttribute("open", "");
+        }
+        setTimeout(() => { els.dialogText.focus(); els.dialogText.select(); }, 30);
     }
-    showToast(`Option ${index + 1} regenerated`);
-}
-
-function renderResults() {
-    const grid = document.getElementById("resultsGrid");
-    grid.innerHTML = "";
-
-    currentDescriptions.forEach((desc, i) => {
-        const card = document.createElement("div");
-        card.className = "desc-card";
-        card.dataset.index = i;
-
-        const header = document.createElement("div");
-        header.className = "card-header";
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "card-title";
-        titleEl.innerHTML = `Option ${i + 1} <span class="style-badge">${STYLE_LABELS[i]}</span> <span class="word-count">${wordCount(desc)} words</span>`;
-
-        header.appendChild(titleEl);
-        card.appendChild(header);
-
-        const pre = document.createElement("div");
-        pre.className = "desc-text";
-        pre.textContent = desc; // Safe: textContent, not innerHTML
-        card.appendChild(pre);
-
-        const actions = document.createElement("div");
-        actions.className = "card-actions";
-
-        const btnCopy = document.createElement("button");
-        btnCopy.className = "btn btn-success";
-        btnCopy.textContent = "Copy Description";
-        btnCopy.onclick = () => copyDescription(i);
-
-        const btnCopyAll = document.createElement("button");
-        btnCopyAll.className = "btn btn-secondary";
-        btnCopyAll.textContent = "Copy + Hashtags";
-        btnCopyAll.onclick = () => copyDescriptionWithTags(i);
-
-        const btnRegen = document.createElement("button");
-        btnRegen.className = "btn btn-outline";
-        btnRegen.textContent = "Regenerate";
-        btnRegen.onclick = () => regenerateOne(i);
-
-        actions.append(btnCopy, btnCopyAll, btnRegen);
-        card.appendChild(actions);
-
-        grid.appendChild(card);
-    });
-
-    document.getElementById("hashtagsBox").textContent = currentHashtags;
-    document.getElementById("keywordsBox").textContent = currentKeywords;
-
-    document.getElementById("results").classList.add("visible");
-    document.getElementById("regenerateAllBtn").style.display = "inline-flex";
-    document.getElementById("exportTxtBtn").style.display = "inline-flex";
-    document.getElementById("exportMdBtn").style.display = "inline-flex";
-}
-
-function generateAll() {
-    const input = document.getElementById("videoTitle");
-    const title = input.value.trim();
-
-    if (!title) {
-        showToast("Please enter a video title", true);
-        input.focus();
-        return;
+    function flash(btn) {
+        if (!btn) return;
+        if (!btn.dataset.orig) btn.dataset.orig = btn.textContent;
+        btn.textContent = "✓ Copied";
+        btn.classList.add("copied");
+        clearTimeout(btn._t);
+        btn._t = setTimeout(() => {
+            btn.textContent = btn.dataset.orig;
+            btn.classList.remove("copied");
+        }, 1800);
+    }
+    async function copyText(text, btn) {
+        let ok = false;
+        if (navigator.clipboard && window.isSecureContext) {
+            try { await navigator.clipboard.writeText(text); ok = true; } catch (_) { ok = false; }
+        }
+        if (!ok) ok = legacyCopy(text);
+        if (ok) {
+            flash(btn);
+            announce("Copied to clipboard.");
+        } else {
+            openCopyDialog(text);
+            announce("Automatic copy was blocked. The text is shown in a dialog so you can copy it manually.");
+        }
     }
 
-    if (title.length > 200) {
-        showToast("Title is too long (max 200 characters)", true);
-        return;
+    /* ---------- text builders ---------- */
+    function allDescriptionsText() {
+        return state.cards.map((c, i) =>
+            "Description " + (i + 1) + " (" + c.label + ", " + c.words + " words)\n" + c.text
+        ).join("\n\n----------------------------------------\n\n");
+    }
+    function plainExport() {
+        const parts = [
+            "YouTube Description Studio export",
+            "Video title: " + state.title,
+            "",
+            allDescriptionsText(),
+            "",
+            "========================================",
+            "HASHTAGS (" + state.hashtags.length + ")",
+            state.hashtags.join(" "),
+            "",
+            "KEYWORD IDEAS (" + state.keywords.length + ")",
+            state.keywords.join("\n")
+        ];
+        return parts.join("\n");
+    }
+    function markdownExport() {
+        const lines = [
+            "# YouTube Descriptions",
+            "",
+            "**Video title:** " + state.title,
+            "",
+            "## Descriptions",
+            ""
+        ];
+        state.cards.forEach((c, i) => {
+            lines.push("### " + (i + 1) + ". " + c.label + " (" + c.words + " words)", "", c.text, "");
+        });
+        lines.push("## Hashtags", "", state.hashtags.join(" "), "", "## Keyword ideas", "");
+        state.keywords.forEach(k => lines.push("- " + k));
+        lines.push("");
+        return lines.join("\n");
+    }
+    function downloadFile(content, filename, mime) {
+        const blob = new Blob([content], { type: mime + ";charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    currentTitle = title;
-    currentNiche = detectNiche(title);
+    /* ---------- rendering ---------- */
+    function makeCard(card) {
+        const art = el("article", "card");
+        art.dataset.index = String(card.index);
 
-    // Show loading
-    document.getElementById("loadingState").classList.add("active");
-    document.getElementById("results").classList.remove("visible");
-    document.getElementById("generateBtn").disabled = true;
-    document.getElementById("genBtnText").textContent = "Generating…";
+        const head = el("div", "card-head");
+        head.appendChild(el("span", "card-num", String(card.index + 1).padStart(2, "0")));
+        const metaWrap = el("div", "meta-wrap");
+        metaWrap.appendChild(el("h3", "card-title", card.label));
+        const meta = el("div", "card-meta");
+        const inRange = card.words >= 450 && card.words <= 560;
+        meta.appendChild(el("span", "pill " + (inRange ? "ok" : "short"), card.words + " words"));
+        meta.appendChild(el("span", "pill", "Style " + (card.index + 1) + " of 10"));
+        metaWrap.appendChild(meta);
+        head.appendChild(metaWrap);
+        art.appendChild(head);
 
-    // Simulate short processing for UX (actual generation is fast)
-    setTimeout(() => {
-        try {
-            currentDescriptions = [];
-            for (let i = 0; i < 10; i++) {
-                currentDescriptions.push(buildDescription(title, i, currentNiche));
+        const body = el("div", "card-body");
+        body.tabIndex = 0;
+        body.setAttribute("role", "region");
+        body.setAttribute("aria-label", "Description " + (card.index + 1) + ", " + card.label);
+        body.textContent = card.text;
+        art.appendChild(body);
+
+        if (card.flagged) {
+            art.appendChild(el("p", "card-note", "This version is still fairly similar to another option. Use Regenerate to get a more distinct one."));
+        }
+
+        const actions = el("div", "card-actions");
+        const bCopy = el("button", "btn small primary", "Copy description");
+        bCopy.type = "button";
+        bCopy.dataset.action = "copy";
+        bCopy.setAttribute("aria-label", "Copy description " + (card.index + 1));
+        const bTags = el("button", "btn small", "Copy + hashtags");
+        bTags.type = "button";
+        bTags.dataset.action = "copy-tags";
+        bTags.setAttribute("aria-label", "Copy description " + (card.index + 1) + " with hashtags");
+        const bRegen = el("button", "btn small ghost", "Regenerate");
+        bRegen.type = "button";
+        bRegen.dataset.action = "regen";
+        bRegen.setAttribute("aria-label", "Regenerate description " + (card.index + 1));
+        actions.append(bCopy, bTags, bRegen);
+        art.appendChild(actions);
+        return art;
+    }
+
+    function renderTags() {
+        els.hashtags.textContent = "";
+        els.keywords.textContent = "";
+        els.tagCount.textContent = String(state.hashtags.length);
+        els.kwCount.textContent = String(state.keywords.length);
+        state.hashtags.forEach(h => {
+            const chip = el("button", "chip", h);
+            chip.type = "button";
+            chip.setAttribute("aria-label", "Copy hashtag " + h);
+            chip.addEventListener("click", () => copyText(h, null));
+            els.hashtags.appendChild(chip);
+        });
+        state.keywords.forEach(k => {
+            const chip = el("button", "chip kw", k);
+            chip.type = "button";
+            chip.setAttribute("aria-label", "Copy keyword " + k);
+            chip.addEventListener("click", () => copyText(k, null));
+            els.keywords.appendChild(chip);
+        });
+    }
+
+    function renderAll() {
+        els.cards.textContent = "";
+        state.cards.forEach(c => els.cards.appendChild(makeCard(c)));
+        renderTags();
+        els.notices.textContent = (state.notices || []).join(" ");
+        els.empty.hidden = true;
+        els.results.hidden = false;
+    }
+
+    function showEmpty() {
+        els.results.hidden = true;
+        els.empty.hidden = false;
+        els.cards.textContent = "";
+        els.notices.textContent = "";
+    }
+
+    /* ---------- actions ---------- */
+    function runGenerate(nonce, isRegenAll) {
+        const raw = els.title.value;
+        const check = YTEngine.analyze(raw);
+        if (!check.ok) {
+            setStatus(check.error, "error");
+            els.title.focus();
+            return;
+        }
+        setStatus("");
+        setLoading(true);
+        const titleAtRun = raw;
+        setTimeout(() => {
+            try {
+                const result = YTEngine.generate(titleAtRun, nonce);
+                if (!result.ok) throw new Error(result.error);
+                state = {
+                    title: titleAtRun,
+                    analysis: result.analysis,
+                    cards: result.cards,
+                    hashtags: result.hashtags,
+                    keywords: result.keywords,
+                    notices: result.notices
+                };
+                renderAll();
+                const extra = result.flaggedCount
+                    ? " " + result.flaggedCount + " description(s) are still fairly similar to others. Regenerate them if you want more variety."
+                    : " All descriptions are distinct from one another.";
+                const msg = "Created 10 descriptions, 20 hashtags, and 20 keyword ideas." + extra;
+                setStatus(msg, "success");
+                announce(msg);
+                if (!reduceMotion) els.results.scrollIntoView({ behavior: "smooth", block: "start" });
+                else els.results.scrollIntoView({ block: "start" });
+            } catch (err) {
+                console.error(err);
+                if (!isRegenAll) showEmpty();
+                setStatus("Something went wrong while generating. Please try again.", "error");
+            } finally {
+                setLoading(false);
             }
-            currentHashtags = generateHashtags(title, currentNiche);
-            currentKeywords = generateKeywords(title, currentNiche);
+        }, 150);
+    }
 
-            renderResults();
-            showToast("10 descriptions ready!");
+    function regenerateOne(index) {
+        if (!state) return;
+        const nonce = "r" + (++nonceCounter) + Math.random().toString(36).slice(2, 7);
+        try {
+            const replacement = YTEngine.regenerateOne(
+                state.analysis, index, nonce, state.cards
+            );
+            state.cards[index] = replacement;
+            const old = els.cards.querySelector('.card[data-index="' + index + '"]');
+            const fresh = makeCard(replacement);
+            fresh.classList.add("fresh");
+            if (old) old.replaceWith(fresh);
+            const btn = fresh.querySelector('button[data-action="copy"]');
+            if (btn) btn.focus({ preventScroll: true });
+            setStatus("Description " + (index + 1) + " was regenerated. The other nine are unchanged.", "success");
+            announce("Description " + (index + 1) + " regenerated.");
         } catch (err) {
             console.error(err);
-            showToast("Generation failed. Please try again.", true);
-        } finally {
-            document.getElementById("loadingState").classList.remove("active");
-            document.getElementById("generateBtn").disabled = false;
-            document.getElementById("genBtnText").textContent = "Generate 10 Descriptions";
+            setStatus("Could not regenerate that description. Please try again.", "error");
         }
-    }, 600);
-}
+    }
 
-function clearAll() {
-    document.getElementById("videoTitle").value = "";
-    document.getElementById("results").classList.remove("visible");
-    document.getElementById("loadingState").classList.remove("active");
-    document.getElementById("regenerateAllBtn").style.display = "none";
-    document.getElementById("exportTxtBtn").style.display = "none";
-    document.getElementById("exportMdBtn").style.display = "none";
-    currentTitle = "";
-    currentDescriptions = [];
-    currentHashtags = "";
-    currentKeywords = "";
-    document.getElementById("videoTitle").focus();
-}
+    function regenerateAll() {
+        if (!state) return;
+        const nonce = "a" + (++nonceCounter) + Math.random().toString(36).slice(2, 7);
+        setLoading(true);
+        setTimeout(() => {
+            try {
+                const result = YTEngine.generate(state.title, nonce);
+                state.cards = result.cards;
+                state.notices = result.notices;
+                renderAll();
+                setStatus("All 10 descriptions were regenerated. Hashtags and keywords were kept.", "success");
+                announce("All descriptions regenerated.");
+            } catch (err) {
+                console.error(err);
+                setStatus("Could not regenerate. Please try again.", "error");
+            } finally {
+                setLoading(false);
+            }
+        }, 150);
+    }
 
-function exportTXT() {
-    if (!currentDescriptions.length) return;
-    let content = `YouTube Description Studio Export\nTitle: ${currentTitle}\nGenerated: ${new Date().toISOString()}\n\n`;
-    content += `HASHTAGS (20):\n${currentHashtags}\n\n`;
-    content += `KEYWORDS (20):\n${currentKeywords}\n\n`;
-    content += "=".repeat(60) + "\n\n";
-    currentDescriptions.forEach((d, i) => {
-        content += `OPTION ${i + 1} — ${STYLE_LABELS[i]} (${wordCount(d)} words)\n${"-".repeat(40)}\n${d}\n\n\n`;
+    function clearAll() {
+        state = null;
+        els.title.value = "";
+        updateCounter();
+        setStatus("");
+        showEmpty();
+        els.title.focus();
+        announce("Input and results cleared.");
+    }
+
+    /* ---------- events ---------- */
+    els.generate.addEventListener("click", () => runGenerate("g" + (++nonceCounter), false));
+    els.title.addEventListener("keydown", e => {
+        if (e.key === "Enter") { e.preventDefault(); runGenerate("g" + (++nonceCounter), false); }
     });
-    downloadFile(content, `youtube-descriptions-${Date.now()}.txt`, "text/plain");
-}
+    els.title.addEventListener("input", () => { updateCounter(); if (els.status.classList.contains("error")) setStatus(""); });
+    els.clear.addEventListener("click", clearAll);
 
-function exportMarkdown() {
-    if (!currentDescriptions.length) return;
-    let md = `# YouTube Descriptions for: ${currentTitle}\n\n`;
-    md += `**Generated:** ${new Date().toLocaleString()}\n\n`;
-    md += `## Hashtags\n\n${currentHashtags}\n\n`;
-    md += `## SEO Keywords\n\n${currentKeywords}\n\n`;
-    md += `---\n\n`;
-    currentDescriptions.forEach((d, i) => {
-        md += `## Option ${i + 1}: ${STYLE_LABELS[i]} (${wordCount(d)} words)\n\n${d}\n\n---\n\n`;
+    els.cards.addEventListener("click", e => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn || !state) return;
+        const index = Number(btn.closest(".card").dataset.index);
+        const card = state.cards[index];
+        if (!card) return;
+        if (btn.dataset.action === "copy") copyText(card.text, btn);
+        else if (btn.dataset.action === "copy-tags") copyText(card.text + "\n\n" + state.hashtags.join(" "), btn);
+        else if (btn.dataset.action === "regen") regenerateOne(index);
     });
-    downloadFile(md, `youtube-descriptions-${Date.now()}.md`, "text/markdown");
-}
 
-function downloadFile(content, filename, type) {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("File downloaded");
-}
+    els.copyAllDesc.addEventListener("click", () => state && copyText(allDescriptionsText(), els.copyAllDesc));
+    els.copyAllTags.addEventListener("click", () => state && copyText(state.hashtags.join(" "), els.copyAllTags));
+    els.copyAllKw.addEventListener("click", () => state && copyText(state.keywords.join(", "), els.copyAllKw));
+    els.copyTagsBtn.addEventListener("click", () => state && copyText(state.hashtags.join(" "), els.copyTagsBtn));
+    els.copyKwBtn.addEventListener("click", () => state && copyText(state.keywords.join(", "), els.copyKwBtn));
+    els.regenAll.addEventListener("click", regenerateAll);
+    els.exportTxt.addEventListener("click", () => {
+        if (!state) return;
+        downloadFile(plainExport(), "youtube-descriptions-" + slugify(state.title) + ".txt", "text/plain");
+        announce("TXT file downloaded.");
+    });
+    els.exportMd.addEventListener("click", () => {
+        if (!state) return;
+        downloadFile(markdownExport(), "youtube-descriptions-" + slugify(state.title) + ".md", "text/markdown");
+        announce("Markdown file downloaded.");
+    });
+    els.dialogClose.addEventListener("click", () => {
+        if (typeof els.dialog.close === "function") els.dialog.close(); else els.dialog.removeAttribute("open");
+    });
 
-// Enter key support
-document.getElementById("videoTitle").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") generateAll();
-});
+    /* Shop dropdown: keyboard and touch friendly */
+    if (els.shopBtn) {
+        els.shopBtn.addEventListener("click", e => {
+            e.stopPropagation();
+            const open = els.shop.classList.toggle("open");
+            els.shopBtn.setAttribute("aria-expanded", String(open));
+        });
+        document.addEventListener("click", e => {
+            if (!els.shop.contains(e.target)) {
+                els.shop.classList.remove("open");
+                els.shopBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                els.shop.classList.remove("open");
+                els.shopBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
+    updateCounter();
+})();
 </script>
 </body>
 </html>
