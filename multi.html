@@ -1,794 +1,1435 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Online Video Trimmer - Cut Videos in Your Browser (Up to 20GB)</title>
-<meta name="description" content="Free online video trimmer. Cut and trim your videos directly in your browser with exact start and end times. Files never leave your device. Supports files up to 20GB.">
-<meta name="keywords" content="online video trimmer, trim video online, cut video, video cutter, free video trimmer, browser video editor, trim mp4 online, cut video without upload">
-<meta property="og:title" content="Free Online Video Trimmer - Cut Videos in Your Browser">
-<meta property="og:description" content="Trim any video in your browser. Set exact start and end times, preview, and download. No upload, no sign-up, up to 20GB.">
-<meta property="og:type" content="website">
-<meta name="robots" content="index, follow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Tools Collection - PooreYoutuber</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --border: #334155;
+            --success: #22c55e;
+        }
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Free Online Video Trimmer",
-  "applicationCategory": "MultimediaApplication",
-  "operatingSystem": "Any modern web browser (Chrome, Edge, Firefox, Safari)",
-  "description": "A free browser-based video trimmer that lets you cut videos by setting exact start and end times. Processing happens locally on your device and files up to 20GB are supported.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "featureList": [
-    "Trim video in the browser",
-    "Exact start and end time input",
-    "Timeline slider selection",
-    "Preview selection before export",
-    "Quality selection",
-    "No file upload to any server",
-    "Files up to 20GB"
-  ]
-}
-</script>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Is this video trimmer free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. The video trimmer is completely free to use. There is no sign-up, no watermark and no hidden charge."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Are my videos uploaded to a server?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. The video is read and processed inside your own browser. The file never leaves your device, so your private videos stay private."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the maximum video size?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "You can load video files up to 20GB. Larger files are rejected with a clear message."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which video formats are supported?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Formats that your browser can play are supported, such as MP4 (H.264), WebM and many MOV files. Formats your browser cannot decode, such as some MKV files, may not load."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How long does trimming take?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Trimming runs in real time, so a 5 minute clip takes about 5 minutes to export. Keep the tab open and active while it runs."
-      }
-    }
-  ]
-}
-</script>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-<style>
-[hidden]{display:none !important}
-:root{
-  --bg:#ffffff;
-  --text:#111827;
-  --muted:#6b7280;
-  --border:#e5e7eb;
-  --primary:#2563eb;
-  --primary-dark:#1d4ed8;
-  --soft:#f9fafb;
-  --danger:#dc2626;
-  --success:#16a34a;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+        /* Header Styles */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
 
-/* Header (site navigation) */
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:50}
-.logo{font-weight:700;color:var(--text);text-decoration:none;font-size:1.2rem}
-.nav-controls nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.nav-controls nav a{color:var(--text);text-decoration:none;font-size:.95rem}
-.badge-new{background:#ef4444;color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;vertical-align:top}
-.dropdown{position:relative}
-.dropbtn{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.95rem;color:var(--text)}
-.dropdown-content{display:none;position:absolute;right:0;top:110%;background:#fff;border:1px solid var(--border);border-radius:8px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:6px;z-index:60}
-.dropdown-content a{display:block;padding:8px 10px;border-radius:6px}
-.dropdown-content a:hover{background:var(--soft)}
-.dropdown:hover .dropdown-content,.dropdown:focus-within .dropdown-content{display:block}
-.donate-coffee-btn{background:var(--primary);color:#fff !important;padding:7px 12px;border-radius:6px}
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5px;
+        }
 
-/* Layout */
-.wrap{max-width:920px;margin:0 auto;padding:28px 20px 60px}
-h1{font-size:2rem;margin:.2em 0 .3em;line-height:1.25}
-.lead{color:var(--muted);margin:0 0 24px}
-h2{font-size:1.4rem;margin:2.2em 0 .5em}
-h3{font-size:1.1rem;margin:1.6em 0 .4em}
-p{margin:.6em 0}
-ol,ul{padding-left:1.3em}
-li{margin:.3em 0}
+        .nav-controls nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-/* Tool card */
-.tool{border:1px solid var(--border);border-radius:14px;padding:22px;background:#fff;box-shadow:0 4px 18px rgba(17,24,39,.05)}
-.drop{border:2px dashed #cbd5e1;border-radius:12px;padding:40px 20px;text-align:center;background:var(--soft);transition:.2s}
-.drop.over{border-color:var(--primary);background:#eff6ff}
-.drop strong{font-size:1.1rem}
-.small{font-size:.875rem;color:var(--muted)}
-.btn{display:inline-block;border:none;border-radius:8px;padding:10px 16px;font-size:.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover:not(:disabled){background:var(--primary-dark)}
-.btn-ghost{background:#fff;color:var(--text);border:1px solid #cbd5e1}
-.btn-ghost:hover:not(:disabled){background:var(--soft)}
-.file-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.file-info .name{font-weight:600;word-break:break-all}
-.file-info .meta{color:var(--muted);font-size:.9rem}
-video{width:100%;max-height:420px;background:#000;border-radius:10px;display:block}
+        .nav-controls a, .dropbtn {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
 
-/* Dual range timeline */
-.timeline{margin:18px 0 6px}
-.range-wrap{position:relative;height:44px}
-.track{position:absolute;top:18px;left:0;right:0;height:8px;background:#e5e7eb;border-radius:4px}
-.selected{position:absolute;top:18px;height:8px;background:var(--primary);border-radius:4px}
-.range-wrap input[type=range]{position:absolute;left:0;top:14px;width:100%;height:16px;margin:0;background:none;appearance:none;-webkit-appearance:none;pointer-events:none;outline:none}
-.range-wrap input[type=range]::-webkit-slider-runnable-track{background:transparent;height:16px}
-.range-wrap input[type=range]::-moz-range-track{background:transparent}
-.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer;margin-top:-1px}
-.range-wrap input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer}
-#endRange{z-index:2}
-#startRange{z-index:3}
-.timeline-labels{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+        .nav-controls a:hover, .dropbtn:hover, .nav-controls a.home-btn {
+            color: #fff;
+            background: var(--card-bg);
+        }
 
-.times{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
-.times label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--text)}
-.row{display:flex;gap:8px}
-input[type=text],select{flex:1;min-width:0;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:.95rem;font-family:ui-monospace,Menlo,Consolas,monospace;background:#fff;color:var(--text)}
-input[type=text]:focus,select:focus{outline:2px solid #bfdbfe;border-color:var(--primary)}
-.out{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--soft);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem}
-.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
-.actions select{flex:0 0 auto;width:auto}
-.actions .spacer{flex:1}
+        .badge-new {
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.2rem;
+            vertical-align: super;
+            margin-left: 2px;
+        }
 
-.progress{margin-top:18px;border:1px solid var(--border);border-radius:10px;padding:14px;background:var(--soft)}
-.bar{height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden}
-#progressBar{height:100%;width:0;background:var(--primary);transition:width .2s}
-#status{margin:10px 0 8px;font-size:.9rem;color:var(--muted)}
-.msg{margin:14px 0 0;font-weight:600;min-height:1.2em}
-.msg.err{color:var(--danger)}
-.msg.ok{color:var(--success)}
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
-/* Description content */
-.content{margin-top:40px;border-top:1px solid var(--border);padding-top:10px}
-.content p,.content li{color:#374151;font-size:1rem}
-.faq details{border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:10px 0;background:#fff}
-.faq summary{cursor:pointer;font-weight:600}
-.faq details p{margin:.5em 0 0;color:#374151}
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+            z-index: 1;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
 
-footer{border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.875rem;padding:22px}
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
 
-@media (max-width:600px){
-  h1{font-size:1.55rem}
-  .tool{padding:14px}
-  .row{flex-direction:column}
-  .actions .spacer{display:none}
-}
-</style>
+        .dropdown-content a:hover {
+            background-color: var(--card-hover);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .donate-coffee-btn {
+            background: var(--accent) !important;
+            color: white !important;
+        }
+        .donate-coffee-btn:hover {
+            background: var(--accent-hover) !important;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Search & Filter bar */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Grid of Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .tool-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .tool-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .tool-card-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--card-hover);
+            color: var(--text-muted);
+            padding: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            color: white;
+            background: var(--border);
+        }
+
+        .btn-secondary.favorited {
+            color: #ef4444;
+        }
+
+        /* Tool Workspace / Modal View */
+        .workspace {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .workspace.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .workspace-header h2 {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media(max-width: 900px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .control-group input, .control-group select, .control-group textarea {
+            width: 100%;
+            padding: 0.65rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .control-group input[type="color"] {
+            height: 40px;
+            padding: 0 5px;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"] {
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .preview-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-output {
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .copy-code-btn {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .copy-code-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tool-info-box {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem;
+            border-radius: 0 0.375rem 0.375rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        /* SEO Article Section */
+        .seo-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            line-height: 1.7;
+        }
+
+        .seo-section h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .seo-section h3 {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .seo-section p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .seo-section ul {
+            margin-left: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .seo-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
 
-<header class="header">
-    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-    <div class="nav-controls">
-        <nav>
-            <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
-            <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
-            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-            <div class="dropdown">
-                <button class="dropbtn">🛒 Shop ▾</button>
-                <div class="dropdown-content">
-                    <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                    <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+    <!-- Header Section -->
+    <header class="header">
+        <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+        <div class="nav-controls">
+            <nav>
+                <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+                <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
+                <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>  
+                <div class="dropdown">  
+                    <button class="dropbtn">🛒 Shop ▾</button>  
+                    <div class="dropdown-content">  
+                        <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>  
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>  
+                    </div>  
+                </div>  
+                <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>  
+            </nav>  
+        </div>  
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- Hero Title -->
+        <div class="hero">
+            <h1>CSS Tools Collection</h1>
+            <p>Generate, customize, and copy production-ready CSS snippets instantly without writing code from scratch.</p>
+        </div>
+
+        <!-- Toolbar & Search -->
+        <div class="toolbar">
+            <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="searchInput" placeholder="Search CSS generators (e.g., Loader, Shadow, Gradient)..." onkeyup="filterTools()">
+            </div>
+        </div>
+
+        <!-- Tools Grid View -->
+        <div class="tools-grid" id="toolsGrid">
+            <!-- 1. Loader -->
+            <div class="tool-card" data-name="css loader generator spinner">
+                <div>
+                    <h3>CSS Loader Generator</h3>
+                    <p>Generate fancy CSS loaders by specifying the type, color and size of the loading indicator.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('loader')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'loader')">❤️</button>
                 </div>
             </div>
-            <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
-        </nav>
+
+            <!-- 2. Checkbox -->
+            <div class="tool-card" data-name="css checkbox generator">
+                <div>
+                    <h3>CSS Checkbox Generator</h3>
+                    <p>Generate CSS checkboxes with different styles by customizing color and size.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('checkbox')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'checkbox')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 3. Switch -->
+            <div class="tool-card" data-name="css switch generator toggle">
+                <div>
+                    <h3>CSS Switch Generator</h3>
+                    <p>Generate beautiful CSS switches and toggles without Javascript.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('switch')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'switch')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 4. Clip Path -->
+            <div class="tool-card" data-name="css clip path generator">
+                <div>
+                    <h3>CSS Clip Path Generator</h3>
+                    <p>Generate CSS clip path with different patterns and use clip-path property in your projects.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('clippath')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'clippath')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 5. Background Pattern -->
+            <div class="tool-card" data-name="css background pattern generator">
+                <div>
+                    <h3>CSS Background Pattern Generator</h3>
+                    <p>Generate beautiful CSS-only background patterns and use it in your projects right away.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('pattern')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'pattern')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 6. Cubic Bezier -->
+            <div class="tool-card" data-name="css cubic bezier generator easing">
+                <div>
+                    <h3>CSS Cubic Bezier Generator</h3>
+                    <p>Generate CSS cubic Bezier easing functions by previewing animation and time-progress graph.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('bezier')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'bezier')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 7. Glassmorphism -->
+            <div class="tool-card" data-name="css glassmorphism generator blur">
+                <div>
+                    <h3>CSS Glassmorphism Generator</h3>
+                    <p>Generate CSS for applying frosted-glass effect on your HTML elements by using background blur.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('glass')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'glass')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 8. Text Glitch -->
+            <div class="tool-card" data-name="css text glitch effect generator">
+                <div>
+                    <h3>CSS Text Glitch Effect Generator</h3>
+                    <p>Generate CSS text glitch effect and create fancy text animations by using pure CSS.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('glitch')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'glitch')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 9. Gradient -->
+            <div class="tool-card" data-name="css gradient generator">
+                <div>
+                    <h3>CSS Gradient Generator</h3>
+                    <p>Generate beautiful CSS gradients either by using presets or customizing on your own.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('gradient')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'gradient')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 10. Triangle -->
+            <div class="tool-card" data-name="css triangle generator">
+                <div>
+                    <h3>CSS Triangle Generator</h3>
+                    <p>Generate CSS code for triangular shapes with desired width, height, angle and color.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('triangle')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'triangle')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 11. Box Shadow -->
+            <div class="tool-card" data-name="css box shadow generator">
+                <div>
+                    <h3>CSS Box Shadow Generator</h3>
+                    <p>Generate CSS code for box shadows while previewing it for box, circle or header design.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('shadow')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'shadow')">❤️</button>
+                </div>
+            </div>
+
+            <!-- 12. Border Radius -->
+            <div class="tool-card" data-name="css border radius generator">
+                <div>
+                    <h3>CSS Border Radius Generator</h3>
+                    <p>Generate advanced CSS border radius to shape your HTML elements corners individually.</p>
+                </div>
+                <div class="tool-card-actions">
+                    <button class="btn btn-primary" onclick="openTool('radius')">Open</button>
+                    <button class="btn btn-secondary" onclick="toggleFav(this, 'radius')">❤️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= WORKSPACES FOR EACH TOOL ================= -->
+
+        <!-- 1. Loader Workspace -->
+        <div id="ws-loader" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Loader Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Customize loading spinners and progress animations instantly. Copy the CSS and keyframes directly into your stylesheet.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Loader Type</label>
+                        <select id="loaderType" onchange="updateLoader()">
+                            <option value="spinner">Circular Spinner</option>
+                            <option value="pulse">Pulsing Dot</option>
+                            <option value="bars">Bouncing Bars</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Indicator Color</label>
+                        <input type="color" id="loaderColor" value="#6366f1" oninput="updateLoader()">
+                    </div>
+                    <div class="control-group">
+                        <label>Size (px)</label>
+                        <input type="range" id="loaderSize" min="30" max="100" value="50" oninput="updateLoader()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" id="loaderPreviewBox">
+                        <!-- Preview container -->
+                    </div>
+                    <div class="code-output" id="loaderCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('loaderCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Checkbox Workspace -->
+        <div id="ws-checkbox" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Checkbox Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Design custom styled checkboxes without bloated Javascript libraries.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Active Accent Color</label>
+                        <input type="color" id="chkColor" value="#6366f1" oninput="updateCheckbox()">
+                    </div>
+                    <div class="control-group">
+                        <label>Checkbox Size (px)</label>
+                        <input type="range" id="chkSize" min="16" max="36" value="24" oninput="updateCheckbox()">
+                    </div>
+                    <div class="control-group">
+                        <label>Border Radius (px)</label>
+                        <input type="range" id="chkRadius" min="0" max="12" value="4" oninput="updateCheckbox()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" id="chkPreviewBox">
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:1.1rem;">
+                            <input type="checkbox" id="sampleChk" checked style="display:none;">
+                            <span id="chkCustom" style="display:inline-block;"></span>
+                            Click me to test checkbox
+                        </label>
+                    </div>
+                    <div class="code-output" id="chkCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('chkCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Switch Workspace -->
+        <div id="ws-switch" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Switch Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Create clean, modern toggle switches for settings and dark mode toggles.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Active Track Color</label>
+                        <input type="color" id="switchColor" value="#22c55e" oninput="updateSwitch()">
+                    </div>
+                    <div class="control-group">
+                        <label>Switch Width (px)</label>
+                        <input type="range" id="switchWidth" min="40" max="80" value="60" oninput="updateSwitch()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" id="switchPreviewBox">
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:12px;">
+                            <input type="checkbox" id="sampleSwitch" checked style="display:none;">
+                            <div id="switchTrack" style="position:relative; border-radius:30px; transition:0.3s; cursor:pointer;">
+                                <div id="switchThumb" style="position:absolute; background:#fff; border-radius:50%; transition:0.3s;"></div>
+                            </div>
+                            Toggle Switch
+                        </label>
+                    </div>
+                    <div class="code-output" id="switchCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('switchCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Clip Path Workspace -->
+        <div id="ws-clippath" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Clip Path Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Crop images and HTML boxes into polygons and geometric shapes.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Preset Shape</label>
+                        <select id="clipPreset" onchange="updateClipPath()">
+                            <option value="polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)">Diamond</option>
+                            <option value="polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)">Parallelogram</option>
+                            <option value="polygon(50% 0%, 0% 100%, 100% 100%)">Triangle</option>
+                            <option value="polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)">Trapezoid</option>
+                            <option value="polygon(0% 0%, 100% 0%, 100% 75%, 0% 100%)">Message Bubble</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Fill Color</label>
+                        <input type="color" id="clipColor" value="#818cf8" oninput="updateClipPath()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box">
+                        <div id="clipPreviewElement" style="width: 150px; height: 150px; transition: 0.3s;"></div>
+                    </div>
+                    <div class="code-output" id="clipCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('clipCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Background Pattern Workspace -->
+        <div id="ws-pattern" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Background Pattern Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Lightweight, pure CSS patterns to replace heavy background images.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Pattern Style</label>
+                        <select id="patternType" onchange="updatePattern()">
+                            <option value="dots">Polka Dots</option>
+                            <option value="grid">Grid Lines</option>
+                            <option value="stripes">Diagonal Stripes</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Primary Color</label>
+                        <input type="color" id="patternColor" value="#334155" oninput="updatePattern()">
+                    </div>
+                    <div class="control-group">
+                        <label>Background Base Color</label>
+                        <input type="color" id="patternBg" value="#0f172a" oninput="updatePattern()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" id="patternPreviewBox" style="height: 200px;">
+                        <span style="background: rgba(15,23,42,0.8); padding: 10px 20px; border-radius: 6px;">Sample Container</span>
+                    </div>
+                    <div class="code-output" id="patternCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('patternCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Cubic Bezier Workspace -->
+        <div id="ws-bezier" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Cubic Bezier Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Craft custom timing curves for smooth animations and transitions.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Preset Curves</label>
+                        <select id="bezierPreset" onchange="updateBezierPreset(this)">
+                            <option value="0.25, 0.1, 0.25, 1">Ease</option>
+                            <option value="0.42, 0, 1, 1">Ease In</option>
+                            <option value="0, 0, 0.58, 1">Ease Out</option>
+                            <option value="0.68, -0.55, 0.265, 1.55">Bounce / Back</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>X1, Y1, X2, Y2 Custom String</label>
+                        <input type="text" id="bezierValue" value="0.25, 0.1, 0.25, 1" oninput="updateBezierCustom()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 20px;">
+                        <div id="bezierBall" style="width: 40px; height: 40px; background: #6366f1; border-radius: 50%; position: relative; left: 0; transition: left 1.5s;"></div>
+                        <button class="btn btn-primary" onclick="triggerBezierAnimation()">Replay Animation</button>
+                    </div>
+                    <div class="code-output" id="bezierCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('bezierCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Glassmorphism Workspace -->
+        <div id="ws-glass" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Glassmorphism Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Generate modern frosted glass UI cards with adjustable backdrop blur and opacity.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Blur Intensity (px)</label>
+                        <input type="range" id="glassBlur" min="1" max="30" value="10" oninput="updateGlass()">
+                    </div>
+                    <div class="control-group">
+                        <label>Background Opacity (%)</label>
+                        <input type="range" id="glassOpacity" min="5" max="90" value="25" oninput="updateGlass()">
+                    </div>
+                    <div class="control-group">
+                        <label>Tint Color</label>
+                        <input type="color" id="glassColor" value="#ffffff" oninput="updateGlass()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);">
+                        <div id="glassCard" style="padding: 2rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2); width: 80%; text-align: center;">
+                            <h3>Glass Card</h3>
+                            <p style="font-size:0.85rem; color:#fff;">Frosted glass effect preview</p>
+                        </div>
+                    </div>
+                    <div class="code-output" id="glassCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('glassCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Text Glitch Workspace -->
+        <div id="ws-glitch" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Text Glitch Effect Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Eye-catching cyber-punk style glitch animations using pure CSS.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Glitch Text</label>
+                        <input type="text" id="glitchText" value="POOREYOUTUBER" oninput="updateGlitch()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box">
+                        <div id="glitchPreview" style="font-size: 2rem; font-weight: 800; letter-spacing: 2px; color: #fff; position: relative;">POOREYOUTUBER</div>
+                    </div>
+                    <div class="code-output" id="glitchCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('glitchCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Gradient Workspace -->
+        <div id="ws-gradient" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Gradient Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Blend stunning color gradients for backgrounds and buttons.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Color 1</label>
+                        <input type="color" id="gradColor1" value="#6366f1" oninput="updateGradient()">
+                    </div>
+                    <div class="control-group">
+                        <label>Color 2</label>
+                        <input type="color" id="gradColor2" value="#ec4899" oninput="updateGradient()">
+                    </div>
+                    <div class="control-group">
+                        <label>Gradient Direction</label>
+                        <select id="gradDir" onchange="updateGradient()">
+                            <option value="to right">To Right</option>
+                            <option value="to bottom">To Bottom</option>
+                            <option value="to bottom right">To Bottom Right</option>
+                            <option value="45deg">45 Degrees</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box" id="gradPreviewBox" style="height: 200px;"></div>
+                    <div class="code-output" id="gradCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('gradCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Triangle Workspace -->
+        <div id="ws-triangle" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Triangle Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Generate geometric triangles using CSS border properties.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Pointing Direction</label>
+                        <select id="triDir" onchange="updateTriangle()">
+                            <option value="up">Up</option>
+                            <option value="down">Down</option>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Color</label>
+                        <input type="color" id="triColor" value="#38bdf8" oninput="updateTriangle()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box">
+                        <div id="triPreviewElement"></div>
+                    </div>
+                    <div class="code-output" id="triCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('triCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. Box Shadow Workspace -->
+        <div id="ws-shadow" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Box Shadow Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Add depth and elevation to UI elements with precise box-shadow controls.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Horizontal Offset (px)</label>
+                        <input type="range" id="shadowX" min="-50" max="50" value="0" oninput="updateShadow()">
+                    </div>
+                    <div class="control-group">
+                        <label>Vertical Offset (px)</label>
+                        <input type="range" id="shadowY" min="-50" max="50" value="10" oninput="updateShadow()">
+                    </div>
+                    <div class="control-group">
+                        <label>Blur Radius (px)</label>
+                        <input type="range" id="shadowBlur" min="0" max="100" value="25" oninput="updateShadow()">
+                    </div>
+                    <div class="control-group">
+                        <label>Spread Radius (px)</label>
+                        <input type="range" id="shadowSpread" min="-20" max="50" value="-5" oninput="updateShadow()">
+                    </div>
+                    <div class="control-group">
+                        <label>Shadow Color</label>
+                        <input type="color" id="shadowColorInput" value="#000000" oninput="updateShadow()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box">
+                        <div id="shadowBoxElement" style="width: 120px; height: 120px; background: var(--card-hover); border-radius: 12px; transition: 0.2s;"></div>
+                    </div>
+                    <div class="code-output" id="shadowCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('shadowCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. Border Radius Workspace -->
+        <div id="ws-radius" class="workspace">
+            <div class="workspace-header">
+                <h2>CSS Border Radius Generator</h2>
+                <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
+            </div>
+            <div class="tool-info-box">Shape element corners individually to create organic shapes and blobs.</div>
+            <div class="workspace-grid">
+                <div>
+                    <div class="control-group">
+                        <label>Top-Left (px)</label>
+                        <input type="range" id="radTL" min="0" max="100" value="30" oninput="updateRadius()">
+                    </div>
+                    <div class="control-group">
+                        <label>Top-Right (px)</label>
+                        <input type="range" id="radTR" min="0" max="100" value="30" oninput="updateRadius()">
+                    </div>
+                    <div class="control-group">
+                        <label>Bottom-Right (px)</label>
+                        <input type="range" id="radBR" min="0" max="100" value="30" oninput="updateRadius()">
+                    </div>
+                    <div class="control-group">
+                        <label>Bottom-Left (px)</label>
+                        <input type="range" id="radBL" min="0" max="100" value="30" oninput="updateRadius()">
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-box">
+                        <div id="radiusBoxElement" style="width: 140px; height: 140px; background: var(--accent); transition: 0.2s;"></div>
+                    </div>
+                    <div class="code-output" id="radiusCode"></div>
+                    <button class="copy-code-btn" onclick="copyCode('radiusCode')">Copy CSS Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Article Section (600+ Words) -->
+        <div class="seo-section">
+            <h2>Mastering Web Design with Professional CSS Generators: A Comprehensive Guide</h2>
+            <p>Cascading Style Sheets (CSS) form the artistic and structural foundation of the modern web. From subtle hover transitions and frosted glass cards to complex geometric layouts and loading spinners, CSS empowers developers to deliver breathtaking user experiences without relying on heavy JavaScript frameworks. However, manually calculating cubic-bezier curves, multi-layered box shadows, or intricate clip-path polygons can be tedious and time-consuming. That is why having access to a comprehensive suite of interactive CSS generators is an absolute game-changer for web developers, UI/UX designers, and digital creators.</p>
+
+            <h3>Why Use Pure CSS Generators?</h3>
+            <p>Performance and speed are paramount in modern web development. Utilizing pure CSS solutions instead of JavaScript animation libraries or image assets provides several distinct advantages:</p>
+            <ul>
+                <li><strong>Lightning-Fast Page Speeds:</strong> Pure CSS code renders instantly in the browser without requiring external script execution, drastically reducing Largest Contentful Paint (LCP) metrics.</li>
+                <li><strong>Zero Dependencies:</strong> You don't need to install complex node modules or jQuery plugins just to create a checkbox or a loading spinner.</li>
+                <li><strong>Completely Responsive:</strong> CSS properties like percentages, variables, and flex/grid units scale effortlessly across smartphones, tablets, and widescreen desktop monitors.</li>
+                <li><strong>Easy Maintenance:</strong> Clean snippets can be copied and pasted directly into your existing stylesheets or Tailwind utility configs with zero overhead.</li>
+            </ul>
+
+            <h3>Deep Dive into Our 12 Essential CSS Tools</h3>
+            <p>Our curated toolset covers every fundamental aspect of modern frontend styling:</p>
+            <ul>
+                <li><strong>CSS Loader Generator:</strong> Keep users engaged during data fetching or page transitions with customizable loading spinners and pulsing dots.</li>
+                <li><strong>Checkboxes & Switches:</strong> Upgrade standard HTML form elements into sleek, accessible toggles with zero JS event listeners.</li>
+                <li><strong>Clip Path & Triangles:</strong> Break away from traditional rectangular layouts by cropping containers into diamonds, polygons, and speech bubbles.</li>
+                <li><strong>Glassmorphism & Gradients:</strong> Replicate modern iOS and Windows UI trends using backdrop filters, translucent rgba colors, and fluid gradients.</li>
+                <li><strong>Box Shadow & Border Radius:</strong> Add realistic depth and organic corner curvatures to cards, buttons, and profile avatars.</li>
+            </ul>
+
+            <h3>Best Practices for Implementing Generated CSS</h3>
+            <p>Once you copy your customized code snippets from our tools, follow these industry standards to maintain clean codebases:</p>
+            <ul>
+                <li>Organize your CSS variables (custom properties) in your root selector for global color consistency.</li>
+                <li>Test your animations across multiple browsers (Chrome, Safari, Firefox) to ensure hardware acceleration is active.</li>
+                <li>Combine multiple generators—such as pairing a Glassmorphism card with a subtle Box Shadow—to create rich, hierarchical UI components.</li>
+            </ul>
+            <p>Start exploring the generators above today to supercharge your web development workflow, save countless hours of trial and error, and craft stunning user interfaces that stand out!</p>
+        </div>
+
     </div>
-</header>
-
-<main class="wrap">
-  <h1>Free Online Video Trimmer: Cut Videos in Your Browser</h1>
-  <p class="lead">Upload a video (up to 20GB), choose your start and end time, and download the trimmed clip. Everything runs on your own device. Nothing is uploaded.</p>
-
-  <section class="tool" id="tool" aria-label="Online video trimmer tool">
-
-    <!-- Step 1: upload -->
-    <div id="dropZone" class="drop">
-      <p><strong>Drag and drop your video here</strong></p>
-      <p class="small">or</p>
-      <label class="btn btn-primary" for="fileInput">Choose video file</label>
-      <input type="file" id="fileInput" accept="video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.3gp" hidden>
-      <p class="small" style="margin-top:14px">Maximum size: 20GB · Works 100% in your browser · Your file is never uploaded</p>
-    </div>
-
-    <!-- Step 2: editor -->
-    <div id="editor" hidden>
-      <div class="file-info">
-        <div>
-          <div class="name" id="fileName"></div>
-          <div class="meta" id="fileMeta"></div>
-        </div>
-        <button class="btn btn-ghost" id="changeBtn" type="button">Change file</button>
-      </div>
-
-      <video id="player" controls playsinline preload="auto"></video>
-
-      <div class="timeline">
-        <div class="range-wrap">
-          <div class="track"></div>
-          <div class="selected" id="selected"></div>
-          <input type="range" id="startRange" min="0" max="0" step="0.01" value="0" aria-label="Start time">
-          <input type="range" id="endRange" min="0" max="0" step="0.01" value="0" aria-label="End time">
-        </div>
-        <div class="timeline-labels"><span>00:00:00.000</span><span id="totalLabel">00:00:00.000</span></div>
-      </div>
-
-      <div class="times">
-        <div>
-          <label for="startText">Start time (HH:MM:SS.ms)</label>
-          <div class="row">
-            <input type="text" id="startText" placeholder="00:00:00.000" autocomplete="off">
-            <button class="btn btn-ghost" id="setStartNow" type="button">Use current</button>
-          </div>
-        </div>
-        <div>
-          <label for="endText">End time (HH:MM:SS.ms)</label>
-          <div class="row">
-            <input type="text" id="endText" placeholder="00:00:00.000" autocomplete="off">
-            <button class="btn btn-ghost" id="setEndNow" type="button">Use current</button>
-          </div>
-        </div>
-        <div>
-          <label>Selected length</label>
-          <div class="out" id="lengthOut">00:00:00.000</div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-ghost" id="previewBtn" type="button">▶ Preview selection</button>
-        <select id="quality" aria-label="Output quality">
-          <option value="8000000">Quality: High</option>
-          <option value="4000000" selected>Quality: Medium</option>
-          <option value="1500000">Quality: Small file</option>
-        </select>
-        <span class="spacer"></span>
-        <button class="btn btn-primary" id="trimBtn" type="button">✂ Trim and Download</button>
-      </div>
-
-      <div class="progress" id="progressWrap" hidden>
-        <div class="bar"><div id="progressBar"></div></div>
-        <p id="status">Processing...</p>
-        <button class="btn btn-ghost" id="cancelBtn" type="button">Cancel</button>
-      </div>
-
-      <p class="msg" id="msg" role="status" aria-live="polite"></p>
-    </div>
-  </section>
-
-  <!-- Long description -->
-  <section class="content">
-    <h2>What Is This Free Online Video Trimmer?</h2>
-    <p>This free online video trimmer lets you cut a video down to the exact part you need, directly inside your web browser. You do not have to download heavy software, create an account, or pay for a subscription. Simply open the page, load your video, select where the clip should begin and end, and download the result. Whether you want to remove a long intro, keep only the best moment of a recording, or shorten a clip for social media, this tool gives you precise control over every second.</p>
-
-    <h2>How to Trim a Video Online: Step by Step</h2>
-    <ol>
-      <li><strong>Load your video.</strong> Drag the file into the box or click "Choose video file". You can select videos up to 20GB.</li>
-      <li><strong>Find the part you want.</strong> Play the video and pause where you want the clip to start, then press "Use current" next to the start time. Do the same for the end time.</li>
-      <li><strong>Fine-tune the selection.</strong> Move the blue handles on the timeline, or type an exact time such as 00:01:30.500 into the start or end box for frame-level accuracy.</li>
-      <li><strong>Preview.</strong> Press "Preview selection" to play only the part you chose. Adjust again if needed.</li>
-      <li><strong>Choose a quality level.</strong> High keeps the most detail and produces a larger file. Small file produces a much smaller download that is suitable for messaging apps.</li>
-      <li><strong>Trim and download.</strong> Press "Trim and Download". When the process finishes, your trimmed video is saved automatically to your device.</li>
-    </ol>
-
-    <h2>Key Features</h2>
-    <ul>
-      <li><strong>100% browser-based:</strong> No software installation is needed. It works on Windows, macOS, Linux, Android and iOS browsers.</li>
-      <li><strong>Private by design:</strong> Your video is never sent to a server. All processing happens on your own device.</li>
-      <li><strong>Large file support:</strong> Load video files up to 20GB, which covers long recordings, camera footage and full-length movies.</li>
-      <li><strong>Exact time control:</strong> Use the timeline slider for quick selection, or type precise start and end times in hours, minutes, seconds and milliseconds.</li>
-      <li><strong>Live preview:</strong> Check your selection before you export it, so you never waste time on a wrong cut.</li>
-      <li><strong>Quality options:</strong> Choose between High, Medium and Small file output to balance clarity and file size.</li>
-      <li><strong>Free forever:</strong> No sign-up, no watermark, and no limit on the number of clips you can make.</li>
-    </ul>
-
-    <h2>Why Trim Videos in Your Browser?</h2>
-    <p>Many video editors are large programs that take time to install, need powerful hardware, and often require paid licenses for basic tasks. A browser-based trimmer solves a simple problem quickly. If you only need to cut the beginning or the end of a clip, a full editor is unnecessary. Browser tools are also available on any computer or phone you already own, so you can trim a video at work, at home, or on the go without installing anything.</p>
-    <p>Common uses include shortening screen recordings for tutorials, removing dead air from phone videos, cutting highlights from a sports or event recording, preparing short clips for YouTube Shorts, Instagram Reels or WhatsApp status, and extracting a single scene from a longer film for personal reference. Students, teachers, content creators, small business owners and everyday users all benefit from a fast and simple way to edit video.</p>
-
-    <h2>Privacy and Security</h2>
-    <p>Privacy is a core design principle of this tool. When you choose a file, the browser reads it from your own disk and plays it locally. The trimming process uses browser features that create the new clip on your device. Your original video and the finished result are never uploaded to any external server, which means personal, family, business or confidential footage stays under your control. Because no data leaves your computer, you also avoid the waiting time of uploading large files over the internet.</p>
-
-    <h2>Tips for the Best Results</h2>
-    <ul>
-      <li><strong>Keep the tab open and active.</strong> Trimming runs in real time, so a 5-minute selection takes about 5 minutes to export. Do not close the tab or put your computer to sleep during this time.</li>
-      <li><strong>Use a desktop browser for very large files.</strong> Chrome, Microsoft Edge and Firefox on a computer handle big files and recording features most reliably.</li>
-      <li><strong>Close other heavy programs.</strong> Freeing up memory helps smooth playback and a clean export, especially with 4K or long videos.</li>
-      <li><strong>Use exact times for precision.</strong> Typing a time in the boxes is faster and more accurate than dragging the slider for a frame-perfect cut.</li>
-      <li><strong>Check the preview.</strong> Always play your selection before downloading. It takes seconds and prevents mistakes.</li>
-    </ul>
-
-    <h2>Important Limitations</h2>
-    <p>This tool trims videos but does not add effects, text, music, transitions or filters. The output is re-encoded in the format your browser supports, usually WebM or MP4, so the file type may differ slightly from the original. Videos in formats that your browser cannot play, such as some MKV or HEVC files on certain devices, may not load. If that happens, try converting the file to MP4 first. Exported quality depends on the chosen quality level and on the source video.</p>
-
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq">
-      <details>
-        <summary>Is this video trimmer really free?</summary>
-        <p>Yes. The tool is completely free. There is no account, no watermark, and no hidden fee.</p>
-      </details>
-      <details>
-        <summary>Are my videos uploaded to a server?</summary>
-        <p>No. The video stays on your device. It is read and processed locally in your browser, so nothing is sent to our servers.</p>
-      </details>
-      <details>
-        <summary>What is the maximum file size?</summary>
-        <p>You can load videos up to 20GB. Files larger than that are rejected with a message.</p>
-      </details>
-      <details>
-        <summary>Which video formats work?</summary>
-        <p>MP4 (H.264), WebM, MOV and most other formats that your browser can play are supported. Some MKV and special codec files may not play in every browser.</p>
-      </details>
-      <details>
-        <summary>Why does the export take as long as the clip?</summary>
-        <p>The trimmer records the selected part as it plays, so the export runs in real time. This is what allows it to work fully in the browser without any server.</p>
-      </details>
-      <details>
-        <summary>Can I trim the same video more than once?</summary>
-        <p>Yes. You can make as many cuts as you like. Each download is a separate new file, and your original video is never changed.</p>
-      </details>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <p>&copy; Pooreyoutuber. Free online video trimmer. Your videos never leave your device.</p>
-</footer>
-
-<script>
-(function () {
-  const $ = id => document.getElementById(id);
-  const MAX_BYTES = 20 * 1024 * 1024 * 1024; // 20GB
-
-  const dropZone   = $('dropZone');
-  const fileInput  = $('fileInput');
-  const editor     = $('editor');
-  const player     = $('player');
-  const fileName   = $('fileName');
-  const fileMeta   = $('fileMeta');
-  const changeBtn  = $('changeBtn');
-  const startRange = $('startRange');
-  const endRange   = $('endRange');
-  const selected   = $('selected');
-  const startText  = $('startText');
-  const endText    = $('endText');
-  const lengthOut  = $('lengthOut');
-  const totalLabel = $('totalLabel');
-  const previewBtn = $('previewBtn');
-  const trimBtn    = $('trimBtn');
-  const quality    = $('quality');
-  const progressWrap = $('progressWrap');
-  const progressBar  = $('progressBar');
-  const statusEl   = $('status');
-  const cancelBtn  = $('cancelBtn');
-  const msg        = $('msg');
-  const setStartNow = $('setStartNow');
-  const setEndNow   = $('setEndNow');
-
-  let currentFile = null;
-  let objectUrl = null;
-  let duration = 0;
-  let previewing = false;
-  let recorder = null;
-  let recStream = null;
-  let timer = null;
-  let cancelled = false;
-
-  /* ---------- helpers ---------- */
-  function pad(n, len = 2) { return String(n).padStart(len, '0'); }
-
-  function fmt(sec) {
-    if (!isFinite(sec) || sec < 0) sec = 0;
-    const total = Math.round(sec * 1000);
-    const ms = total % 1000;
-    const s = Math.floor(total / 1000) % 60;
-    const m = Math.floor(total / 60000) % 60;
-    const h = Math.floor(total / 3600000);
-    return pad(h) + ':' + pad(m) + ':' + pad(s) + '.' + pad(ms, 3);
-  }
-
-  // Accepts "SS", "MM:SS", "HH:MM:SS" and decimals such as "01:02:03.250"
-  function parseTime(str) {
-    str = (str || '').trim();
-    if (!str) return NaN;
-    const parts = str.split(':');
-    if (parts.length > 3) return NaN;
-    let sec = 0;
-    for (const p of parts) {
-      const v = parseFloat(p);
-      if (isNaN(v) || v < 0) return NaN;
-      sec = sec * 60 + v;
-    }
-    return sec;
-  }
-
-  function formatBytes(bytes) {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let i = 0, v = bytes;
-    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-    return v.toFixed(i === 0 ? 0 : 2) + ' ' + units[i];
-  }
-
-  function showMsg(text, isError) {
-    msg.textContent = text;
-    msg.className = 'msg ' + (isError ? 'err' : 'ok');
-  }
-
-  /* ---------- loading the file ---------- */
-  function looksLikeVideo(file) {
-    return (file.type && file.type.startsWith('video/')) ||
-           /\.(mp4|mov|webm|m4v|mkv|avi|3gp)$/i.test(file.name);
-  }
-
-  function loadFile(file) {
-    if (!file) return;
-    if (!looksLikeVideo(file)) {
-      showMsg('Please choose a video file (MP4, MOV, WebM, MKV, AVI, etc.).', true);
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      showMsg('This file is ' + formatBytes(file.size) + '. The maximum allowed size is 20GB.', true);
-      return;
-    }
-
-    resetRecording();
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-
-    currentFile = file;
-    objectUrl = URL.createObjectURL(file);
-    player.src = objectUrl;
-
-    fileName.textContent = file.name;
-    fileMeta.textContent = 'Size: ' + formatBytes(file.size) + ' · Loading...';
-
-    dropZone.hidden = true;
-    editor.hidden = false;
-    showMsg('', false);
-  }
-
-  player.addEventListener('loadedmetadata', () => {
-    duration = player.duration;
-    if (!isFinite(duration) || duration <= 0) {
-      showMsg('Could not read the length of this video. The format may not be supported by your browser.', true);
-      return;
-    }
-    startRange.max = duration;
-    endRange.max = duration;
-    totalLabel.textContent = fmt(duration);
-    fileMeta.textContent = 'Size: ' + formatBytes(currentFile.size) + ' · Length: ' + fmt(duration);
-    setSelection(0, duration);
-  });
-
-  player.addEventListener('error', () => {
-    showMsg("Your browser can't play this video format. Try an MP4 (H.264) or WebM file.", true);
-  });
-
-  /* ---------- drag and drop + picker ---------- */
-  fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
-
-  ['dragenter', 'dragover'].forEach(ev =>
-    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); }));
-  ['dragleave', 'drop'].forEach(ev =>
-    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); }));
-  dropZone.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
-
-  changeBtn.addEventListener('click', () => {
-    resetRecording();
-    player.pause();
-    player.removeAttribute('src');
-    player.load();
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    objectUrl = null;
-    currentFile = null;
-    fileInput.value = '';
-    editor.hidden = true;
-    dropZone.hidden = false;
-    showMsg('', false);
-  });
-
-  /* ---------- selection handling ---------- */
-  function setSelection(s, e) {
-    if (!duration) return;
-    s = Math.max(0, Math.min(s, duration));
-    e = Math.max(0, Math.min(e, duration));
-    if (e - s < 0.1) {
-      // keep at least 0.1s of selection
-      if (s + 0.1 <= duration) e = s + 0.1;
-      else s = e - 0.1;
-    }
-    startRange.value = s.toFixed(2);
-    endRange.value = e.toFixed(2);
-    updateUI();
-  }
-
-  function currentSelection() {
-    return { s: parseFloat(startRange.value) || 0, e: parseFloat(endRange.value) || 0 };
-  }
-
-  function updateUI() {
-    const { s, e } = currentSelection();
-    if (duration) {
-      selected.style.left = (s / duration * 100) + '%';
-      selected.style.width = ((e - s) / duration * 100) + '%';
-    }
-    startText.value = fmt(s);
-    endText.value = fmt(e);
-    lengthOut.textContent = fmt(e - s);
-  }
-
-  startRange.addEventListener('input', () => {
-    const { s, e } = currentSelection();
-    if (s > e - 0.1) startRange.value = Math.max(0, e - 0.1).toFixed(2);
-    updateUI();
-    player.currentTime = parseFloat(startRange.value);
-  });
-
-  endRange.addEventListener('input', () => {
-    const { s, e } = currentSelection();
-    if (e < s + 0.1) endRange.value = Math.min(duration, s + 0.1).toFixed(2);
-    updateUI();
-    player.currentTime = parseFloat(endRange.value);
-  });
-
-  function applyTextInput(input, which) {
-    const val = parseTime(input.value);
-    if (isNaN(val) || val > duration) {
-      showMsg('Please enter a valid time between 00:00:00.000 and ' + fmt(duration) + '.', true);
-      updateUI();
-      return;
-    }
-    const { s, e } = currentSelection();
-    if (which === 'start') setSelection(val, Math.max(e, val + 0.1));
-    else setSelection(Math.min(s, val - 0.1), val);
-    showMsg('', false);
-  }
-
-  startText.addEventListener('change', () => applyTextInput(startText, 'start'));
-  endText.addEventListener('change', () => applyTextInput(endText, 'end'));
-  startText.addEventListener('keydown', e => { if (e.key === 'Enter') applyTextInput(startText, 'start'); });
-  endText.addEventListener('keydown', e => { if (e.key === 'Enter') applyTextInput(endText, 'end'); });
-
-  setStartNow.addEventListener('click', () => {
-    const { e } = currentSelection();
-    setSelection(player.currentTime, Math.max(e, player.currentTime + 0.1));
-  });
-  setEndNow.addEventListener('click', () => {
-    const { s } = currentSelection();
-    setSelection(Math.min(s, player.currentTime - 0.1), player.currentTime);
-  });
-
-  /* ---------- preview ---------- */
-  previewBtn.addEventListener('click', () => {
-    if (!duration) return;
-    if (previewing) {
-      previewing = false;
-      player.pause();
-      previewBtn.textContent = '▶ Preview selection';
-      return;
-    }
-    const { s, e } = currentSelection();
-    player.currentTime = s;
-    previewing = true;
-    previewBtn.textContent = '■ Stop preview';
-    player.play().catch(() => {});
-  });
-
-  player.addEventListener('timeupdate', () => {
-    if (previewing) {
-      const { e } = currentSelection();
-      if (player.currentTime >= e) {
-        previewing = false;
-        player.pause();
-        player.currentTime = e;
-        previewBtn.textContent = '▶ Preview selection';
-      }
-    }
-  });
-
-  player.addEventListener('pause', () => {
-    if (previewing && !player.ended) {
-      // user paused manually during preview
-    }
-  });
-
-  /* ---------- trimming (real-time recording inside the browser) ---------- */
-  function pickMimeType() {
-    const candidates = [
-      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-      'video/mp4',
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm'
-    ];
-    if (!window.MediaRecorder) return null;
-    return candidates.find(t => MediaRecorder.isTypeSupported(t)) || null;
-  }
-
-  function setBusy(busy) {
-    trimBtn.disabled = busy;
-    previewBtn.disabled = busy;
-    changeBtn.disabled = busy;
-    quality.disabled = busy;
-    progressWrap.hidden = !busy;
-    if (!busy) progressBar.style.width = '0%';
-  }
-
-  function resetRecording() {
-    if (timer) { clearInterval(timer); timer = null; }
-    if (recorder && recorder.state !== 'inactive') {
-      try { recorder.stop(); } catch (_) {}
-    }
-    recorder = null;
-    previewing = false;
-  }
-
-  function finishStream() {
-    if (recStream) {
-      recStream.getTracks().forEach(t => t.stop());
-      recStream = null;
-    }
-  }
-
-  function waitFor(target, eventName) {
-    return new Promise(resolve => target.addEventListener(eventName, resolve, { once: true }));
-  }
-
-  async function trim() {
-    if (!currentFile || !duration) return;
-
-    const { s, e } = currentSelection();
-    if (e - s < 0.1) {
-      showMsg('The selected part is too short. Please select at least 0.1 seconds.', true);
-      return;
-    }
-
-    const captureFn = player.captureStream
-      ? () => player.captureStream()
-      : (player.mozCaptureStream ? () => player.mozCaptureStream() : null);
-
-    if (!captureFn || !window.MediaRecorder) {
-      showMsg('Your browser does not support in-browser trimming. Please use the latest Chrome, Edge or Firefox on a desktop computer.', true);
-      return;
-    }
-
-    const mime = pickMimeType();
-    if (!mime) {
-      showMsg('Your browser cannot record video in a supported format. Please try Chrome, Edge or Firefox.', true);
-      return;
-    }
-
-    showMsg('', false);
-    cancelled = false;
-    setBusy(true);
-    statusEl.textContent = 'Preparing...';
-
-    const chunks = [];
-    const total = e - s;
-
-    try {
-      recStream = captureFn();
-      recorder = new MediaRecorder(recStream, {
-        mimeType: mime,
-        videoBitsPerSecond: parseInt(quality.value, 10)
-      });
-    } catch (err) {
-      setBusy(false);
-      finishStream();
-      showMsg('Could not start the recorder: ' + err.message, true);
-      return;
-    }
-
-    recorder.ondataavailable = ev => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
-
-    const stopped = new Promise(resolve => { recorder.onstop = resolve; });
-
-    player.pause();
-    player.muted = false;
-    player.currentTime = s;
-    await waitFor(player, 'seeked');
-
-    recorder.start(1000);
-
-    const stopAll = () => {
-      if (timer) { clearInterval(timer); timer = null; }
-      player.pause();
-      if (recorder && recorder.state !== 'inactive') recorder.stop();
-    };
-
-    timer = setInterval(() => {
-      if (cancelled) { stopAll(); return; }
-      const t = player.currentTime;
-      const done = Math.max(0, Math.min(100, (t - s) / total * 100));
-      progressBar.style.width = done.toFixed(1) + '%';
-      statusEl.textContent = 'Processing... ' + Math.round(done) + '% (' + fmt(Math.max(0, t - s)) + ' of ' + fmt(total) + '). Keep this tab open.';
-      if (t >= e - 0.03 || player.ended) stopAll();
-    }, 100);
-
-    try {
-      await player.play();
-    } catch (err) {
-      stopAll();
-      showMsg('Playback was blocked by your browser. Please click "Trim and Download" again.', true);
-    }
-
-    await stopped;
-    if (timer) { clearInterval(timer); timer = null; }
-    finishStream();
-
-    if (cancelled) {
-      setBusy(false);
-      showMsg('Trimming cancelled.', false);
-      return;
-    }
-
-    const type = recorder.mimeType || mime;
-    const ext = type.includes('mp4') ? 'mp4' : 'webm';
-    const blob = new Blob(chunks, { type: type.split(';')[0] });
-
-    if (blob.size === 0) {
-      setBusy(false);
-      showMsg('Nothing was recorded. Please try again.', true);
-      return;
-    }
-
-    const base = currentFile.name.replace(/\.[^.]+$/, '');
-    const name = base + '_trimmed_' + fmt(s).replace(/[:.]/g, '-') + '_to_' + fmt(e).replace(/[:.]/g, '-') + '.' + ext;
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-
-    setBusy(false);
-    showMsg('Done! Your trimmed video (' + formatBytes(blob.size) + ') has been downloaded.', false);
-    recorder = null;
-  }
-
-  trimBtn.addEventListener('click', trim);
-  cancelBtn.addEventListener('click', () => { cancelled = true; });
-
-  // Default quality preset on load
-  updateUI();
-})();
-</script>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 PooreYoutuber. All rights reserved. Built with passion for creators and developers.</p>
+    </footer>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        // Search Filter
+        function filterTools() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.getElementsByClassName('tool-card');
+            for (let card of cards) {
+                let name = card.getAttribute('data-name');
+                if (name.includes(input)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            }
+        }
+
+        // Workspace Management
+        function openTool(toolName) {
+            closeWorkspaces();
+            let ws = document.getElementById('ws-' + toolName);
+            if (ws) {
+                ws.classList.add('active');
+                ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Trigger initial render
+                if(toolName === 'loader') updateLoader();
+                if(toolName === 'checkbox') updateCheckbox();
+                if(toolName === 'switch') updateSwitch();
+                if(toolName === 'clippath') updateClipPath();
+                if(toolName === 'pattern') updatePattern();
+                if(toolName === 'bezier') updateBezierCustom();
+                if(toolName === 'glass') updateGlass();
+                if(toolName === 'glitch') updateGlitch();
+                if(toolName === 'gradient') updateGradient();
+                if(toolName === 'triangle') updateTriangle();
+                if(toolName === 'shadow') updateShadow();
+                if(toolName === 'radius') updateRadius();
+            }
+        }
+
+        function closeWorkspaces() {
+            let workspaces = document.getElementsByClassName('workspace');
+            for (let ws of workspaces) {
+                ws.classList.remove('active');
+            }
+        }
+
+        // Copy Code Helper
+        function copyCode(elementId) {
+            let codeText = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('CSS Code Copied to Clipboard!');
+            });
+        }
+
+        // Favorites toggle with localStorage
+        function toggleFav(btn, toolKey) {
+            btn.classList.toggle('favorited');
+            let favs = JSON.parse(localStorage.getItem('py_favs') || '[]');
+            if(btn.classList.contains('favorited')) {
+                if(!favs.includes(toolKey)) favs.push(toolKey);
+            } else {
+                favs = favs.filter(k => k !== toolKey);
+            }
+            localStorage.setItem('py_favs', JSON.stringify(favs));
+        }
+
+        // Load saved favorites on start
+        window.addEventListener('DOMContentLoaded', () => {
+            let favs = JSON.parse(localStorage.getItem('py_favs') || '[]');
+            // (Optional styling sync for favs can be added here)
+        });
+
+        // 1. Loader Logic
+        function updateLoader() {
+            let type = document.getElementById('loaderType').value;
+            let color = document.getElementById('loaderColor').value;
+            let size = document.getElementById('loaderSize').value + 'px';
+            let box = document.getElementById('loaderPreviewBox');
+            let codeEl = document.getElementById('loaderCode');
+
+            box.innerHTML = `<div id="activeLoader"></div>`;
+            let el = document.getElementById('activeLoader');
+            el.style.width = size;
+            el.style.height = size;
+
+            let css = "";
+            if(type === 'spinner') {
+                el.style.border = `4px solid ${color}33`;
+                el.style.borderTop = `4px solid ${color}`;
+                el.style.borderRadius = '50%';
+                el.style.animation = 'spin 1s linear infinite';
+                css = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n\n.loader {\n  width: ${size};\n  height: ${size};\n  border: 4px solid ${color}33;\n  border-top: 4px solid ${color};\n  border-radius: 50%;\n  animation: spin 1s linear infinite;\n}`;
+            } else if(type === 'pulse') {
+                el.style.background = color;
+                el.style.borderRadius = '50%';
+                el.style.animation = 'pulse 1.2s infinite ease-in-out';
+                css = `@keyframes pulse { 0%, 100% { transform: scale(0); opacity: 0.5; } 50% { transform: scale(1); opacity: 1; } }\n\n.loader {\n  width: ${size};\n  height: ${size};\n  background: ${color};\n  border-radius: 50%;\n  animation: pulse 1.2s infinite ease-in-out;\n}`;
+            } else {
+                el.style.background = color;
+                el.style.animation = 'bounce 0.8s infinite alternate';
+                css = `@keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }\n\n.loader {\n  width: calc(${size} / 3);\n  height: ${size};\n  background: ${color};\n  animation: bounce 0.8s infinite alternate;\n}`;
+            }
+            codeEl.innerText = css;
+        }
+
+        // 2. Checkbox Logic
+        function updateCheckbox() {
+            let color = document.getElementById('chkColor').value;
+            let size = document.getElementById('chkSize').value + 'px';
+            let radius = document.getElementById('chkRadius').value + 'px';
+            let customSpan = document.getElementById('chkCustom');
+
+            customSpan.style.width = size;
+            customSpan.style.height = size;
+            customSpan.style.borderRadius = radius;
+            customSpan.style.border = `2px solid ${color}`;
+            customSpan.style.backgroundColor = document.getElementById('sampleChk').checked ? color : 'transparent';
+            
+            let css = `.custom-checkbox {\n  width: ${size};\n  height: ${size};\n  border-radius: ${radius};\n  border: 2px solid ${color};\n  display: inline-block;\n  cursor: pointer;\n}`;
+            document.getElementById('chkCode').innerText = css;
+        }
+
+        // 3. Switch Logic
+        function updateSwitch() {
+            let color = document.getElementById('switchColor').value;
+            let width = parseInt(document.getElementById('switchWidth').value);
+            let height = width / 2;
+            let thumbSize = height - 8;
+
+            let track = document.getElementById('switchTrack');
+            let thumb = document.getElementById('switchThumb');
+
+            track.style.width = width + 'px';
+            track.style.height = height + 'px';
+            track.style.background = color;
+
+            thumb.style.width = thumbSize + 'px';
+            thumb.style.height = thumbSize + 'px';
+            thumb.style.top = '4px';
+            thumb.style.left = (width - thumbSize - 4) + 'px';
+
+            let css = `.switch-track {\n  width: ${width}px;\n  height: ${height}px;\n  background: ${color};\n  border-radius: 30px;\n  position: relative;\n}\n.switch-thumb {\n  width: ${thumbSize}px;\n  height: ${thumbSize}px;\n  background: #fff;\n  border-radius: 50%;\n  position: absolute;\n  top: 4px;\n  left: ${width - thumbSize - 4}px;\n}`;
+            document.getElementById('switchCode').innerText = css;
+        }
+
+        // 4. Clip Path Logic
+        function updateClipPath() {
+            let val = document.getElementById('clipPreset').value;
+            let color = document.getElementById('clipColor').value;
+            let el = document.getElementById('clipPreviewElement');
+
+            el.style.backgroundColor = color;
+            el.style.clipPath = val;
+
+            document.getElementById('clipCode').innerText = `.clipped-element {\n  width: 150px;\n  height: 150px;\n  background: ${color};\n  clip-path: ${val};\n}`;
+        }
+
+        // 5. Background Pattern Logic
+        function updatePattern() {
+            let type = document.getElementById('patternType').value;
+            let color = document.getElementById('patternColor').value;
+            let bg = document.getElementById('patternBg').value;
+            let box = document.getElementById('patternPreviewBox');
+
+            let css = "";
+            if(type === 'dots') {
+                box.style.backgroundColor = bg;
+                box.style.backgroundImage = `radial-gradient(${color} 15%, transparent 16%)`;
+                box.style.backgroundSize = '20px 20px';
+                css = `background-color: ${bg};\nbackground-image: radial-gradient(${color} 15%, transparent 16%);\nbackground-size: 20px 20px;`;
+            } else if(type === 'grid') {
+                box.style.backgroundColor = bg;
+                box.style.backgroundImage = `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`;
+                box.style.backgroundSize = '20px 20px';
+                css = `background-color: ${bg};\nbackground-image: linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px);\nbackground-size: 20px 20px;`;
+            } else {
+                box.style.backgroundColor = bg;
+                box.style.backgroundImage = `linear-gradient(45deg, ${color} 25%, transparent 25%, transparent 50%, ${color} 50%, ${color} 75%, transparent 75%, transparent)`;
+                box.style.backgroundSize = '30px 30px';
+                css = `background-color: ${bg};\nbackground-image: linear-gradient(45deg, ${color} 25%, transparent 25%, transparent 50%, ${color} 50%, ${color} 75%, transparent 75%, transparent);\nbackground-size: 30px 30px;`;
+            }
+            document.getElementById('patternCode').innerText = css;
+        }
+
+        // 6. Cubic Bezier Logic
+        function updateBezierPreset(sel) {
+            document.getElementById('bezierValue').value = sel.value;
+            updateBezierCustom();
+        }
+
+        function updateBezierCustom() {
+            let val = document.getElementById('bezierValue').value;
+            let ball = document.getElementById('bezierBall');
+            ball.style.transitionTimingFunction = `cubic-bezier(${val})`;
+            document.getElementById('bezierCode').innerText = `transition: left 1.5s cubic-bezier(${val});`;
+        }
+
+        function triggerBezierAnimation() {
+            let ball = document.getElementById('bezierBall');
+            ball.style.left = '0px';
+            setTimeout(() => {
+                ball.style.left = '250px';
+            }, 50);
+        }
+
+        // 7. Glassmorphism Logic
+        function updateGlass() {
+            let blur = document.getElementById('glassBlur').value + 'px';
+            let opacity = document.getElementById('glassOpacity').value / 100;
+            let color = document.getElementById('glassColor').value;
+            let card = document.getElementById('glassCard');
+
+            // Convert hex to rgba
+            let r = parseInt(color.slice(1,3), 16);
+            let g = parseInt(color.slice(3,5), 16);
+            let b = parseInt(color.slice(5,7), 16);
+
+            let bgRgba = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            card.style.background = bgRgba;
+            card.style.backdropFilter = `blur(${blur})`;
+            card.style.webkitBackdropFilter = `blur(${blur})`;
+
+            document.getElementById('glassCode').innerText = `background: ${bgRgba};\nbackdrop-filter: blur(${blur});\n-webkit-backdrop-filter: blur(${blur});\nborder: 1px solid rgba(255, 255, 255, 0.2);`;
+        }
+
+        // 8. Text Glitch Logic
+        function updateGlitch() {
+            let text = document.getElementById('glitchText').value;
+            let prev = document.getElementById('glitchPreview');
+            prev.innerText = text;
+
+            let css = `.glitch-text {\n  position: relative;\n  color: #fff;\n  font-weight: 800;\n}`;
+            document.getElementById('glitchCode').innerText = css;
+        }
+
+        // 9. Gradient Logic
+        function updateGradient() {
+            let c1 = document.getElementById('gradColor1').value;
+            let c2 = document.getElementById('gradColor2').value;
+            let dir = document.getElementById('gradDir').value;
+            let box = document.getElementById('gradPreviewBox');
+
+            let gradStr = `linear-gradient(${dir}, ${c1}, ${c2})`;
+            box.style.background = gradStr;
+            document.getElementById('gradCode').innerText = `background: ${c1};\nbackground: ${gradStr};`;
+        }
+
+        // 10. Triangle Logic
+        function updateTriangle() {
+            let dir = document.getElementById('triDir').value;
+            let color = document.getElementById('triColor').value;
+            let el = document.getElementById('triPreviewElement');
+
+            el.style = "";
+            el.style.width = "0";
+            el.style.height = "0";
+
+            let css = "";
+            if(dir === 'up') {
+                el.style.borderLeft = "40px solid transparent";
+                el.style.borderRight = "40px solid transparent";
+                el.style.borderBottom = `70px solid ${color}`;
+                css = `width: 0;\nheight: 0;\nborder-left: 40px solid transparent;\nborder-right: 40px solid transparent;\nborder-bottom: 70px solid ${color};`;
+            } else if(dir === 'down') {
+                el.style.borderLeft = "40px solid transparent";
+                el.style.borderRight = "40px solid transparent";
+                el.style.borderTop = `70px solid ${color}`;
+                css = `width: 0;\nheight: 0;\nborder-left: 40px solid transparent;\nborder-right: 40px solid transparent;\nborder-top: 70px solid ${color};`;
+            } else if(dir === 'left') {
+                el.style.borderTop = "40px solid transparent";
+                el.style.borderBottom = "40px solid transparent";
+                el.style.borderRight = `70px solid ${color}`;
+                css = `width: 0;\nheight: 0;\nborder-top: 40px solid transparent;\nborder-bottom: 40px solid transparent;\nborder-right: 70px solid ${color};`;
+            } else {
+                el.style.borderTop = "40px solid transparent";
+                el.style.borderBottom = "40px solid transparent";
+                el.style.borderLeft = `70px solid ${color}`;
+                css = `width: 0;\nheight: 0;\nborder-top: 40px solid transparent;\nborder-bottom: 40px solid transparent;\nborder-left: 70px solid ${color};`;
+            }
+            document.getElementById('triCode').innerText = css;
+        }
+
+        // 11. Box Shadow Logic
+        function updateShadow() {
+            let x = document.getElementById('shadowX').value + 'px';
+            let y = document.getElementById('shadowY').value + 'px';
+            let blur = document.getElementById('shadowBlur').value + 'px';
+            let spread = document.getElementById('shadowSpread').value + 'px';
+            let col = document.getElementById('shadowColorInput').value;
+
+            // rgba alpha conversion for softness
+            let shadowStr = `${x} ${y} ${blur} ${spread} ${col}4d`;
+            let box = document.getElementById('shadowBoxElement');
+            box.style.boxShadow = shadowStr;
+
+            document.getElementById('shadowCode').innerText = `box-shadow: ${shadowStr};`;
+        }
+
+        // 12. Border Radius Logic
+        function updateRadius() {
+            let tl = document.getElementById('radTL').value + '%';
+            let tr = document.getElementById('radTR').value + '%';
+            let br = document.getElementById('radBR').value + '%';
+            let bl = document.getElementById('radBL').value + '%';
+
+            let radStr = `${tl} ${tr} ${br} ${bl}`;
+            let box = document.getElementById('radiusBoxElement');
+            box.style.borderRadius = radStr;
+
+            document.getElementById('radiusCode').innerText = `border-radius: ${radStr};`;
+        }
+    </script>
 </body>
 </html>
