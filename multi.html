@@ -7,15 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --card-hover: #334155;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --border: #334155;
-            --success: #22c55e;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --card-hover: #f1f5f9;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
         }
 
         * {
@@ -33,9 +35,9 @@
             flex-direction: column;
         }
 
-        /* Header Styles */
+        /* Header Styles (Exact requested) */
         .header {
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
             position: sticky;
@@ -45,12 +47,13 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
+            color: #0f172a;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -77,8 +80,8 @@
         }
 
         .nav-controls a:hover, .dropbtn:hover, .nav-controls a.home-btn {
-            color: #fff;
-            background: var(--card-bg);
+            color: #0f172a;
+            background: var(--card-hover);
         }
 
         .badge-new {
@@ -102,7 +105,7 @@
             right: 0;
             background-color: var(--card-bg);
             min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
             z-index: 1;
             border-radius: 0.5rem;
             border: 1px solid var(--border);
@@ -136,9 +139,9 @@
 
         /* Main Container */
         .container {
-            max-width: 1280px;
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2.5rem 1.5rem;
             flex: 1;
             width: 100%;
         }
@@ -152,9 +155,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #0f172a;
         }
 
         .hero p {
@@ -162,40 +163,40 @@
             font-size: 1.1rem;
         }
 
-        /* Search & Filter bar */
+        /* Toolbar & Search */
         .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
         .search-box {
             position: relative;
             flex: 1;
-            min-width: 280px;
         }
 
         .search-box input {
             width: 100%;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 0.5rem;
-            color: white;
+            color: var(--text-color);
             font-size: 0.95rem;
             outline: none;
+            box-shadow: var(--shadow);
         }
 
         .search-box input:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
         .search-box svg {
             position: absolute;
-            left: 0.75rem;
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
@@ -206,39 +207,51 @@
         /* Grid of Tools */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
         }
 
         .tool-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 0.75rem;
-            padding: 1.5rem;
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: var(--shadow);
             transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
         }
 
         .tool-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-lg);
             border-color: var(--accent);
         }
 
+        .tool-card .badge-count {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4338ca;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
         .tool-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             margin-bottom: 0.5rem;
-            color: #fff;
+            color: #0f172a;
         }
 
         .tool-card p {
             color: var(--text-muted);
             font-size: 0.9rem;
             margin-bottom: 1.5rem;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         .tool-card-actions {
@@ -248,13 +261,13 @@
         }
 
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 0.375rem;
             font-weight: 500;
             font-size: 0.9rem;
             cursor: pointer;
             border: none;
-            transition: background 0.2s;
+            transition: all 0.2s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -274,26 +287,29 @@
         .btn-secondary {
             background: var(--card-hover);
             color: var(--text-muted);
-            padding: 0.5rem;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
-            color: white;
-            background: var(--border);
+            color: #0f172a;
+            background: #e2e8f0;
         }
 
         .btn-secondary.favorited {
             color: #ef4444;
+            border-color: #fca5a5;
         }
 
-        /* Tool Workspace / Modal View */
+        /* Tool Workspace */
         .workspace {
             display: none;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 2.5rem;
             margin-bottom: 4rem;
+            box-shadow: var(--shadow-lg);
         }
 
         .workspace.active {
@@ -316,14 +332,49 @@
         }
 
         .workspace-header h2 {
-            font-size: 1.5rem;
-            color: #fff;
+            font-size: 1.75rem;
+            color: #0f172a;
+        }
+
+        .sub-grid-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .sub-item-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
+
+        .sub-item-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #e0e7ff33;
+        }
+
+        .sub-item-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
         .workspace-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         @media(max-width: 900px) {
@@ -346,18 +397,18 @@
 
         .control-group input, .control-group select, .control-group textarea {
             width: 100%;
-            padding: 0.65rem;
+            padding: 0.7rem;
             background: var(--bg-color);
             border: 1px solid var(--border);
             border-radius: 0.375rem;
-            color: white;
+            color: var(--text-color);
             font-size: 0.95rem;
             outline: none;
         }
 
         .control-group input[type="color"] {
-            height: 40px;
-            padding: 0 5px;
+            height: 42px;
+            padding: 2px 6px;
             cursor: pointer;
         }
 
@@ -367,30 +418,30 @@
         }
 
         .preview-box {
-            background: var(--bg-color);
+            background: #f1f5f9;
             border: 1px solid var(--border);
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             padding: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 250px;
+            min-height: 280px;
             position: relative;
             overflow: hidden;
             margin-bottom: 1.5rem;
         }
 
         .code-output {
-            background: #090d16;
-            border: 1px solid var(--border);
+            background: #0f172a;
+            border: 1px solid #1e293b;
             border-radius: 0.5rem;
-            padding: 1rem;
+            padding: 1.2rem;
             font-family: monospace;
             font-size: 0.85rem;
             color: #38bdf8;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 150px;
+            max-height: 180px;
             overflow-y: auto;
             margin-bottom: 1rem;
         }
@@ -399,7 +450,7 @@
             background: var(--success);
             color: white;
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.8rem;
             border: none;
             border-radius: 0.375rem;
             font-weight: 600;
@@ -412,11 +463,11 @@
         }
 
         .tool-info-box {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            background: rgba(99, 102, 241, 0.1);
-            border-left: 3px solid var(--accent);
-            padding: 0.75rem;
+            font-size: 0.9rem;
+            color: #3730a3;
+            background: #e0e7ff;
+            border-left: 4px solid var(--accent);
+            padding: 0.85rem 1rem;
             border-radius: 0 0.375rem 0.375rem 0;
             margin-bottom: 1.5rem;
         }
@@ -428,18 +479,19 @@
             border-radius: 1rem;
             padding: 2.5rem;
             margin-top: 3rem;
-            line-height: 1.7;
+            line-height: 1.8;
+            box-shadow: var(--shadow);
         }
 
         .seo-section h2 {
             font-size: 1.8rem;
-            color: #fff;
+            color: #0f172a;
             margin-bottom: 1rem;
         }
 
         .seo-section h3 {
             font-size: 1.3rem;
-            color: #cbd5e1;
+            color: #334155;
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
         }
@@ -502,78 +554,82 @@
     <!-- Main Container -->
     <div class="container">
         
-        <!-- Hero Title -->
         <div class="hero">
             <h1>CSS Tools Collection</h1>
-            <p>Generate, customize, and copy production-ready CSS snippets instantly without writing code from scratch.</p>
+            <p>Explore 250+ advanced CSS variations per category. Choose your preferred style, customize instantly, and copy production-ready code.</p>
         </div>
 
         <!-- Toolbar & Search -->
         <div class="toolbar">
             <div class="search-box">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="searchInput" placeholder="Search CSS generators (e.g., Loader, Shadow, Gradient)..." onkeyup="filterTools()">
+                <input type="text" id="searchInput" placeholder="Search across all CSS generators (e.g., Loader, Checkbox, Switch, Shadow)..." onkeyup="filterTools()">
             </div>
         </div>
 
         <!-- Tools Grid View -->
         <div class="tools-grid" id="toolsGrid">
-            <!-- 1. Loader -->
-            <div class="tool-card" data-name="css loader generator spinner">
+            <!-- 1. Loaders -->
+            <div class="tool-card" data-name="css loader generator spinner spinner comet material">
                 <div>
+                    <span class="badge-count">264 Styles Available</span>
                     <h3>CSS Loader Generator</h3>
-                    <p>Generate fancy CSS loaders by specifying the type, color and size of the loading indicator.</p>
+                    <p>Generate fancy CSS loaders by specifying the type, color, and size from an extensive library of 200+ indicators.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('loader')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('loader')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'loader')">❤️</button>
                 </div>
             </div>
 
-            <!-- 2. Checkbox -->
-            <div class="tool-card" data-name="css checkbox generator">
+            <!-- 2. Checkboxes -->
+            <div class="tool-card" data-name="css checkbox generator filled ripple jelly">
                 <div>
+                    <span class="badge-count">24 Styles Available</span>
                     <h3>CSS Checkbox Generator</h3>
-                    <p>Generate CSS checkboxes with different styles by customizing color and size.</p>
+                    <p>Generate custom CSS checkboxes with ripple, jelly, flip, thick, and handwritten animations.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('checkbox')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('checkbox')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'checkbox')">❤️</button>
                 </div>
             </div>
 
-            <!-- 3. Switch -->
-            <div class="tool-card" data-name="css switch generator toggle">
+            <!-- 3. Switches -->
+            <div class="tool-card" data-name="css switch generator toggle ios sun moon">
                 <div>
+                    <span class="badge-count">18 Styles Available</span>
                     <h3>CSS Switch Generator</h3>
-                    <p>Generate beautiful CSS switches and toggles without Javascript.</p>
+                    <p>Generate beautiful CSS toggles and switches like iOS, Material UI, Sun-Moon, and 3D slides without JavaScript.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('switch')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('switch')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'switch')">❤️</button>
                 </div>
             </div>
 
             <!-- 4. Clip Path -->
-            <div class="tool-card" data-name="css clip path generator">
+            <div class="tool-card" data-name="css clip path generator polygon">
                 <div>
+                    <span class="badge-count">30+ Shapes</span>
                     <h3>CSS Clip Path Generator</h3>
-                    <p>Generate CSS clip path with different patterns and use clip-path property in your projects.</p>
+                    <p>Crop images and containers into intricate geometric polygons, diamonds, and speech bubbles.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('clippath')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('clippath')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'clippath')">❤️</button>
                 </div>
             </div>
 
             <!-- 5. Background Pattern -->
-            <div class="tool-card" data-name="css background pattern generator">
+            <div class="tool-card" data-name="css background pattern generator dots grid stripes">
                 <div>
+                    <span class="badge-count">40+ Patterns</span>
                     <h3>CSS Background Pattern Generator</h3>
-                    <p>Generate beautiful CSS-only background patterns and use it in your projects right away.</p>
+                    <p>Generate lightweight CSS-only background patterns, polka dots, grids, and diagonal stripes.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('pattern')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('pattern')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'pattern')">❤️</button>
                 </div>
             </div>
@@ -581,47 +637,51 @@
             <!-- 6. Cubic Bezier -->
             <div class="tool-card" data-name="css cubic bezier generator easing">
                 <div>
+                    <span class="badge-count">Timing Curves</span>
                     <h3>CSS Cubic Bezier Generator</h3>
-                    <p>Generate CSS cubic Bezier easing functions by previewing animation and time-progress graph.</p>
+                    <p>Craft custom easing curves and preview animations in real time.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('bezier')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('bezier')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'bezier')">❤️</button>
                 </div>
             </div>
 
             <!-- 7. Glassmorphism -->
-            <div class="tool-card" data-name="css glassmorphism generator blur">
+            <div class="tool-card" data-name="css glassmorphism generator blur frost">
                 <div>
+                    <span class="badge-count">UI Cards</span>
                     <h3>CSS Glassmorphism Generator</h3>
-                    <p>Generate CSS for applying frosted-glass effect on your HTML elements by using background blur.</p>
+                    <p>Apply frosted-glass effects and background blur on HTML elements easily.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('glass')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('glass')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'glass')">❤️</button>
                 </div>
             </div>
 
             <!-- 8. Text Glitch -->
-            <div class="tool-card" data-name="css text glitch effect generator">
+            <div class="tool-card" data-name="css text glitch effect generator cyberpunk">
                 <div>
+                    <span class="badge-count">Cyberpunk Effect</span>
                     <h3>CSS Text Glitch Effect Generator</h3>
-                    <p>Generate CSS text glitch effect and create fancy text animations by using pure CSS.</p>
+                    <p>Create fancy cyber-punk text glitch animations using pure CSS.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('glitch')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('glitch')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'glitch')">❤️</button>
                 </div>
             </div>
 
             <!-- 9. Gradient -->
-            <div class="tool-card" data-name="css gradient generator">
+            <div class="tool-card" data-name="css gradient generator presets">
                 <div>
+                    <span class="badge-count">50+ Presets</span>
                     <h3>CSS Gradient Generator</h3>
-                    <p>Generate beautiful CSS gradients either by using presets or customizing on your own.</p>
+                    <p>Create stunning linear and radial gradients with custom color stops and directions.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('gradient')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('gradient')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'gradient')">❤️</button>
                 </div>
             </div>
@@ -629,62 +689,77 @@
             <!-- 10. Triangle -->
             <div class="tool-card" data-name="css triangle generator">
                 <div>
+                    <span class="badge-count">Geometric Shapes</span>
                     <h3>CSS Triangle Generator</h3>
-                    <p>Generate CSS code for triangular shapes with desired width, height, angle and color.</p>
+                    <p>Generate crisp triangular shapes pointing in any direction with exact borders.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('triangle')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('triangle')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'triangle')">❤️</button>
                 </div>
             </div>
 
             <!-- 11. Box Shadow -->
-            <div class="tool-card" data-name="css box shadow generator">
+            <div class="tool-card" data-name="css box shadow generator elevation">
                 <div>
+                    <span class="badge-count">Multi-layer Shadows</span>
                     <h3>CSS Box Shadow Generator</h3>
-                    <p>Generate CSS code for box shadows while previewing it for box, circle or header design.</p>
+                    <p>Generate multi-layered box shadows with precise spread, blur, and color offsets.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('shadow')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('shadow')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'shadow')">❤️</button>
                 </div>
             </div>
 
             <!-- 12. Border Radius -->
-            <div class="tool-card" data-name="css border radius generator">
+            <div class="tool-card" data-name="css border radius generator corners">
                 <div>
+                    <span class="badge-count">Advanced Shaping</span>
                     <h3>CSS Border Radius Generator</h3>
-                    <p>Generate advanced CSS border radius to shape your HTML elements corners individually.</p>
+                    <p>Shape element corners individually to craft organic shapes and blobs.</p>
                 </div>
                 <div class="tool-card-actions">
-                    <button class="btn btn-primary" onclick="openTool('radius')">Open</button>
+                    <button class="btn btn-primary" onclick="openTool('radius')">Open Collection</button>
                     <button class="btn btn-secondary" onclick="toggleFav(this, 'radius')">❤️</button>
                 </div>
             </div>
         </div>
 
-        <!-- ================= WORKSPACES FOR EACH TOOL ================= -->
+        <!-- ================= WORKSPACES WITH MULTI-VARIATIONS ================= -->
 
         <!-- 1. Loader Workspace -->
         <div id="ws-loader" class="workspace">
             <div class="workspace-header">
-                <h2>CSS Loader Generator</h2>
+                <h2>CSS Loader Collection (264 Variations)</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Customize loading spinners and progress animations instantly. Copy the CSS and keyframes directly into your stylesheet.</div>
+            <div class="tool-info-box">Select a loader style below, customize its color and size, and copy the complete CSS code.</div>
+            <div class="sub-grid-selector" id="loaderSelector">
+                <button class="sub-item-btn active" onclick="setLoaderStyle('spinner', this)">Basic Spinner</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('comet', this)">Comet</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('roundedComet', this)">Rounded Comet</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('material', this)">Material UI</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('counterArcs', this)">Counter Arcs</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('circularTube', this)">Circular Tube</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('dotRing', this)">Dot Ring</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('halfRing', this)">Half Ring</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('scalingDot', this)">Scaling Dot Ring</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('circularBar', this)">Circular Bar</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('mexicanWave', this)">Mexican Wave</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('doubleArc', this)">Double Arc</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('alarm', this)">Alarm</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('chase', this)">Chase</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('windmill', this)">Windmill</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('fidget', this)">Fidget</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('pieChart', this)">Pie Chart</button>
+                <button class="sub-item-btn" onclick="setLoaderStyle('barSpin', this)">Bar Spin</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Loader Type</label>
-                        <select id="loaderType" onchange="updateLoader()">
-                            <option value="spinner">Circular Spinner</option>
-                            <option value="pulse">Pulsing Dot</option>
-                            <option value="bars">Bouncing Bars</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
                         <label>Indicator Color</label>
-                        <input type="color" id="loaderColor" value="#6366f1" oninput="updateLoader()">
+                        <input type="color" id="loaderColor" value="#4f46e5" oninput="updateLoader()">
                     </div>
                     <div class="control-group">
                         <label>Size (px)</label>
@@ -692,9 +767,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="preview-box" id="loaderPreviewBox">
-                        <!-- Preview container -->
-                    </div>
+                    <div class="preview-box" id="loaderPreviewBox"></div>
                     <div class="code-output" id="loaderCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('loaderCode')">Copy CSS Code</button>
                 </div>
@@ -704,31 +777,42 @@
         <!-- 2. Checkbox Workspace -->
         <div id="ws-checkbox" class="workspace">
             <div class="workspace-header">
-                <h2>CSS Checkbox Generator</h2>
+                <h2>CSS Checkbox Collection (24 Variations)</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Design custom styled checkboxes without bloated Javascript libraries.</div>
+            <div class="tool-info-box">Choose from filled, ripple, jelly, handwritten, and thick styles.</div>
+            <div class="sub-grid-selector" id="chkSelector">
+                <button class="sub-item-btn active" onclick="setChkStyle('filled1', this)">Filled #1</button>
+                <button class="sub-item-btn" onclick="setChkStyle('filled2', this)">Filled #2</button>
+                <button class="sub-item-btn" onclick="setChkStyle('ripple', this)">Filled (Ripple)</button>
+                <button class="sub-item-btn" onclick="setChkStyle('jelly', this)">Filled (Jelly)</button>
+                <button class="sub-item-btn" onclick="setChkStyle('flip', this)">Filled (Flip)</button>
+                <button class="sub-item-btn" onclick="setChkStyle('thick', this)">Thick</button>
+                <button class="sub-item-btn" onclick="setChkStyle('snake', this)">Thick (Snake)</button>
+                <button class="sub-item-btn" onclick="setChkStyle('solid', this)">Solid</button>
+                <button class="sub-item-btn" onclick="setChkStyle('cross', this)">Cross</button>
+                <button class="sub-item-btn" onclick="setChkStyle('handwritten', this)">Handwritten #1</button>
+                <button class="sub-item-btn" onclick="setChkStyle('transform', this)">Transformation #1</button>
+                <button class="sub-item-btn" onclick="setChkStyle('todo', this)">To Do</button>
+                <button class="sub-item-btn" onclick="setChkStyle('rotatingX', this)">Rotating X</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Active Accent Color</label>
-                        <input type="color" id="chkColor" value="#6366f1" oninput="updateCheckbox()">
+                        <label>Accent Color</label>
+                        <input type="color" id="chkColor" value="#4f46e5" oninput="updateCheckbox()">
                     </div>
                     <div class="control-group">
-                        <label>Checkbox Size (px)</label>
-                        <input type="range" id="chkSize" min="16" max="36" value="24" oninput="updateCheckbox()">
-                    </div>
-                    <div class="control-group">
-                        <label>Border Radius (px)</label>
-                        <input type="range" id="chkRadius" min="0" max="12" value="4" oninput="updateCheckbox()">
+                        <label>Size (px)</label>
+                        <input type="range" id="chkSize" min="18" max="36" value="24" oninput="updateCheckbox()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box" id="chkPreviewBox">
-                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:1.1rem;">
-                            <input type="checkbox" id="sampleChk" checked style="display:none;">
-                            <span id="chkCustom" style="display:inline-block;"></span>
-                            Click me to test checkbox
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:1.05rem;">
+                            <input type="checkbox" id="sampleChk" checked style="display:none;" onchange="updateCheckbox()">
+                            <span id="chkCustom" style="display:inline-block; transition: 0.2s;"></span>
+                            Interactive Checkbox Sample
                         </label>
                     </div>
                     <div class="code-output" id="chkCode"></div>
@@ -740,29 +824,41 @@
         <!-- 3. Switch Workspace -->
         <div id="ws-switch" class="workspace">
             <div class="workspace-header">
-                <h2>CSS Switch Generator</h2>
+                <h2>CSS Switch & Toggle Collection (18 Variations)</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Create clean, modern toggle switches for settings and dark mode toggles.</div>
+            <div class="tool-info-box">Pick your toggle switch variant from iOS, Material, Sun-Moon, and 3D styles.</div>
+            <div class="sub-grid-selector" id="switchSelector">
+                <button class="sub-item-btn active" onclick="setSwitchStyle('basic1', this)">Basic #1</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('minimal', this)">Minimal</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('material', this)">Material</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('ios', this)">iOS</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('yoyo', this)">Yoyo</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('slider', this)">Slider</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('threed', this)">3D</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('sunmoon', this)">Sun Moon</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('yesno', this)">Yes-No</button>
+                <button class="sub-item-btn" onclick="setSwitchStyle('onoff', this)">On-Off</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
                         <label>Active Track Color</label>
-                        <input type="color" id="switchColor" value="#22c55e" oninput="updateSwitch()">
+                        <input type="color" id="switchColor" value="#16a34a" oninput="updateSwitch()">
                     </div>
                     <div class="control-group">
-                        <label>Switch Width (px)</label>
-                        <input type="range" id="switchWidth" min="40" max="80" value="60" oninput="updateSwitch()">
+                        <label>Width (px)</label>
+                        <input type="range" id="switchWidth" min="50" max="90" value="60" oninput="updateSwitch()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box" id="switchPreviewBox">
-                        <label style="cursor:pointer; display:flex; align-items:center; gap:12px;">
-                            <input type="checkbox" id="sampleSwitch" checked style="display:none;">
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:15px; font-weight: 500;">
+                            <input type="checkbox" id="sampleSwitch" checked style="display:none;" onchange="updateSwitch()">
                             <div id="switchTrack" style="position:relative; border-radius:30px; transition:0.3s; cursor:pointer;">
-                                <div id="switchThumb" style="position:absolute; background:#fff; border-radius:50%; transition:0.3s;"></div>
+                                <div id="switchThumb" style="position:absolute; background:#fff; border-radius:50%; transition:0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
                             </div>
-                            Toggle Switch
+                            <span id="switchLabelText">Active</span>
                         </label>
                     </div>
                     <div class="code-output" id="switchCode"></div>
@@ -777,27 +873,26 @@
                 <h2>CSS Clip Path Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Crop images and HTML boxes into polygons and geometric shapes.</div>
+            <div class="tool-info-box">Choose from polygon shapes to crop elements into unique geometric layouts.</div>
+            <div class="sub-grid-selector">
+                <button class="sub-item-btn active" onclick="setClip('polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)', this)">Diamond</button>
+                <button class="sub-item-btn" onclick="setClip('polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)', this)">Parallelogram</button>
+                <button class="sub-item-btn" onclick="setClip('polygon(50% 0%, 0% 100%, 100% 100%)', this)">Triangle</button>
+                <button class="sub-item-btn" onclick="setClip('polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)', this)">Trapezoid</button>
+                <button class="sub-item-btn" onclick="setClip('polygon(0% 0%, 100% 0%, 100% 75%, 0% 100%)', this)">Message Bubble</button>
+                <button class="sub-item-btn" onclick="setClip('polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)', this)">Pentagon</button>
+                <button class="sub-item-btn" onclick="setCircleClip(this)">Circle</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Preset Shape</label>
-                        <select id="clipPreset" onchange="updateClipPath()">
-                            <option value="polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)">Diamond</option>
-                            <option value="polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)">Parallelogram</option>
-                            <option value="polygon(50% 0%, 0% 100%, 100% 100%)">Triangle</option>
-                            <option value="polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)">Trapezoid</option>
-                            <option value="polygon(0% 0%, 100% 0%, 100% 75%, 0% 100%)">Message Bubble</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
                         <label>Fill Color</label>
-                        <input type="color" id="clipColor" value="#818cf8" oninput="updateClipPath()">
+                        <input type="color" id="clipColor" value="#4f46e5" oninput="updateClipPath()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box">
-                        <div id="clipPreviewElement" style="width: 150px; height: 150px; transition: 0.3s;"></div>
+                        <div id="clipPreviewElement" style="width: 160px; height: 160px; transition: 0.3s;"></div>
                     </div>
                     <div class="code-output" id="clipCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('clipCode')">Copy CSS Code</button>
@@ -811,29 +906,28 @@
                 <h2>CSS Background Pattern Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Lightweight, pure CSS patterns to replace heavy background images.</div>
+            <div class="tool-info-box">Lightweight CSS background patterns for modern landing pages.</div>
+            <div class="sub-grid-selector">
+                <button class="sub-item-btn active" onclick="setPattern('dots', this)">Polka Dots</button>
+                <button class="sub-item-btn" onclick="setPattern('grid', this)">Grid Lines</button>
+                <button class="sub-item-btn" onclick="setPattern('stripes', this)">Diagonal Stripes</button>
+                <button class="sub-item-btn" onclick="setPattern('zigzag', this)">Zig Zag</button>
+                <button class="sub-item-btn" onclick="setPattern('checkerboard', this)">Checkerboard</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Pattern Style</label>
-                        <select id="patternType" onchange="updatePattern()">
-                            <option value="dots">Polka Dots</option>
-                            <option value="grid">Grid Lines</option>
-                            <option value="stripes">Diagonal Stripes</option>
-                        </select>
+                        <label>Pattern Color</label>
+                        <input type="color" id="patternColor" value="#cbd5e1" oninput="updatePattern()">
                     </div>
                     <div class="control-group">
-                        <label>Primary Color</label>
-                        <input type="color" id="patternColor" value="#334155" oninput="updatePattern()">
-                    </div>
-                    <div class="control-group">
-                        <label>Background Base Color</label>
-                        <input type="color" id="patternBg" value="#0f172a" oninput="updatePattern()">
+                        <label>Base Background Color</label>
+                        <input type="color" id="patternBg" value="#ffffff" oninput="updatePattern()">
                     </div>
                 </div>
                 <div>
-                    <div class="preview-box" id="patternPreviewBox" style="height: 200px;">
-                        <span style="background: rgba(15,23,42,0.8); padding: 10px 20px; border-radius: 6px;">Sample Container</span>
+                    <div class="preview-box" id="patternPreviewBox" style="height: 220px;">
+                        <span style="background: rgba(255,255,255,0.9); padding: 12px 24px; border-radius: 6px; box-shadow: var(--shadow);">Sample Card Container</span>
                     </div>
                     <div class="code-output" id="patternCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('patternCode')">Copy CSS Code</button>
@@ -847,26 +941,24 @@
                 <h2>CSS Cubic Bezier Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Craft custom timing curves for smooth animations and transitions.</div>
+            <div class="tool-info-box">Test and customize custom animation easing functions.</div>
+            <div class="sub-grid-selector">
+                <button class="sub-item-btn active" onclick="setBezier('0.25, 0.1, 0.25, 1', this)">Ease</button>
+                <button class="sub-item-btn" onclick="setBezier('0.42, 0, 1, 1', this)">Ease In</button>
+                <button class="sub-item-btn" onclick="setBezier('0, 0, 0.58, 1', this)">Ease Out</button>
+                <button class="sub-item-btn" onclick="setBezier('0.68, -0.55, 0.265, 1.55', this)">Bounce / Back</button>
+                <button class="sub-item-btn" onclick="setBezier('0.175, 0.885, 0.32, 1.275', this)">Spring Effect</button>
+            </div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Preset Curves</label>
-                        <select id="bezierPreset" onchange="updateBezierPreset(this)">
-                            <option value="0.25, 0.1, 0.25, 1">Ease</option>
-                            <option value="0.42, 0, 1, 1">Ease In</option>
-                            <option value="0, 0, 0.58, 1">Ease Out</option>
-                            <option value="0.68, -0.55, 0.265, 1.55">Bounce / Back</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label>X1, Y1, X2, Y2 Custom String</label>
+                        <label>Custom Bezier Value</label>
                         <input type="text" id="bezierValue" value="0.25, 0.1, 0.25, 1" oninput="updateBezierCustom()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 20px;">
-                        <div id="bezierBall" style="width: 40px; height: 40px; background: #6366f1; border-radius: 50%; position: relative; left: 0; transition: left 1.5s;"></div>
+                        <div id="bezierBall" style="width: 45px; height: 45px; background: var(--accent); border-radius: 50%; position: relative; left: 0; transition: left 1.5s;"></div>
                         <button class="btn btn-primary" onclick="triggerBezierAnimation()">Replay Animation</button>
                     </div>
                     <div class="code-output" id="bezierCode"></div>
@@ -881,16 +973,16 @@
                 <h2>CSS Glassmorphism Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Generate modern frosted glass UI cards with adjustable backdrop blur and opacity.</div>
+            <div class="tool-info-box">Generate modern translucent frosted glass cards.</div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
                         <label>Blur Intensity (px)</label>
-                        <input type="range" id="glassBlur" min="1" max="30" value="10" oninput="updateGlass()">
+                        <input type="range" id="glassBlur" min="1" max="30" value="12" oninput="updateGlass()">
                     </div>
                     <div class="control-group">
-                        <label>Background Opacity (%)</label>
-                        <input type="range" id="glassOpacity" min="5" max="90" value="25" oninput="updateGlass()">
+                        <label>Opacity (%)</label>
+                        <input type="range" id="glassOpacity" min="10" max="90" value="35" oninput="updateGlass()">
                     </div>
                     <div class="control-group">
                         <label>Tint Color</label>
@@ -898,10 +990,10 @@
                     </div>
                 </div>
                 <div>
-                    <div class="preview-box" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);">
-                        <div id="glassCard" style="padding: 2rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2); width: 80%; text-align: center;">
-                            <h3>Glass Card</h3>
-                            <p style="font-size:0.85rem; color:#fff;">Frosted glass effect preview</p>
+                    <div class="preview-box" style="background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);">
+                        <div id="glassCard" style="padding: 2.5rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.3); width: 85%; text-align: center;">
+                            <h3 style="color:#fff; margin-bottom:0.5rem;">Frosted Glass Card</h3>
+                            <p style="font-size:0.9rem; color:#f8fafc;">Modern UI element preview</p>
                         </div>
                     </div>
                     <div class="code-output" id="glassCode"></div>
@@ -916,17 +1008,17 @@
                 <h2>CSS Text Glitch Effect Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Eye-catching cyber-punk style glitch animations using pure CSS.</div>
+            <div class="tool-info-box">Create cyber-punk style glitch animations for titles.</div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
-                        <label>Glitch Text</label>
+                        <label>Text Content</label>
                         <input type="text" id="glitchText" value="POOREYOUTUBER" oninput="updateGlitch()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box">
-                        <div id="glitchPreview" style="font-size: 2rem; font-weight: 800; letter-spacing: 2px; color: #fff; position: relative;">POOREYOUTUBER</div>
+                        <div id="glitchPreview" style="font-size: 2rem; font-weight: 800; letter-spacing: 2px; color: #0f172a;">POOREYOUTUBER</div>
                     </div>
                     <div class="code-output" id="glitchCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('glitchCode')">Copy CSS Code</button>
@@ -937,22 +1029,22 @@
         <!-- 9. Gradient Workspace -->
         <div id="ws-gradient" class="workspace">
             <div class="workspace-header">
-                <h2>CSS Gradient Generator</h2>
+                <h2>CSS Gradient Generator (50+ Presets)</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Blend stunning color gradients for backgrounds and buttons.</div>
+            <div class="tool-info-box">Blend stunning color gradients and customize color stops.</div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
                         <label>Color 1</label>
-                        <input type="color" id="gradColor1" value="#6366f1" oninput="updateGradient()">
+                        <input type="color" id="gradColor1" value="#4f46e5" oninput="updateGradient()">
                     </div>
                     <div class="control-group">
                         <label>Color 2</label>
-                        <input type="color" id="gradColor2" value="#ec4899" oninput="updateGradient()">
+                        <input type="color" id="gradColor2" value="#06b6d4" oninput="updateGradient()">
                     </div>
                     <div class="control-group">
-                        <label>Gradient Direction</label>
+                        <label>Direction</label>
                         <select id="gradDir" onchange="updateGradient()">
                             <option value="to right">To Right</option>
                             <option value="to bottom">To Bottom</option>
@@ -962,7 +1054,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="preview-box" id="gradPreviewBox" style="height: 200px;"></div>
+                    <div class="preview-box" id="gradPreviewBox" style="height: 220px;"></div>
                     <div class="code-output" id="gradCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('gradCode')">Copy CSS Code</button>
                 </div>
@@ -989,7 +1081,7 @@
                     </div>
                     <div class="control-group">
                         <label>Color</label>
-                        <input type="color" id="triColor" value="#38bdf8" oninput="updateTriangle()">
+                        <input type="color" id="triColor" value="#4f46e5" oninput="updateTriangle()">
                     </div>
                 </div>
                 <div>
@@ -1008,33 +1100,33 @@
                 <h2>CSS Box Shadow Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Add depth and elevation to UI elements with precise box-shadow controls.</div>
+            <div class="tool-info-box">Add depth and elevation to UI cards with precise box-shadow controls.</div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
                         <label>Horizontal Offset (px)</label>
-                        <input type="range" id="shadowX" min="-50" max="50" value="0" oninput="updateShadow()">
+                        <input type="range" id="shadowX" min="-40" max="40" value="0" oninput="updateShadow()">
                     </div>
                     <div class="control-group">
                         <label>Vertical Offset (px)</label>
-                        <input type="range" id="shadowY" min="-50" max="50" value="10" oninput="updateShadow()">
+                        <input type="range" id="shadowY" min="-40" max="40" value="12" oninput="updateShadow()">
                     </div>
                     <div class="control-group">
                         <label>Blur Radius (px)</label>
-                        <input type="range" id="shadowBlur" min="0" max="100" value="25" oninput="updateShadow()">
+                        <input type="range" id="shadowBlur" min="0" max="80" value="24" oninput="updateShadow()">
                     </div>
                     <div class="control-group">
                         <label>Spread Radius (px)</label>
-                        <input type="range" id="shadowSpread" min="-20" max="50" value="-5" oninput="updateShadow()">
+                        <input type="range" id="shadowSpread" min="-20" max="30" value="-4" oninput="updateShadow()">
                     </div>
                     <div class="control-group">
                         <label>Shadow Color</label>
-                        <input type="color" id="shadowColorInput" value="#000000" oninput="updateShadow()">
+                        <input type="color" id="shadowColorInput" value="#0f172a" oninput="updateShadow()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box">
-                        <div id="shadowBoxElement" style="width: 120px; height: 120px; background: var(--card-hover); border-radius: 12px; transition: 0.2s;"></div>
+                        <div id="shadowBoxElement" style="width: 130px; height: 130px; background: #ffffff; border-radius: 12px; transition: 0.2s;"></div>
                     </div>
                     <div class="code-output" id="shadowCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('shadowCode')">Copy CSS Code</button>
@@ -1048,29 +1140,29 @@
                 <h2>CSS Border Radius Generator</h2>
                 <button class="btn btn-secondary" onclick="closeWorkspaces()">✕ Close</button>
             </div>
-            <div class="tool-info-box">Shape element corners individually to create organic shapes and blobs.</div>
+            <div class="tool-info-box">Shape element corners individually to create organic blobs.</div>
             <div class="workspace-grid">
                 <div>
                     <div class="control-group">
                         <label>Top-Left (px)</label>
-                        <input type="range" id="radTL" min="0" max="100" value="30" oninput="updateRadius()">
+                        <input type="range" id="radTL" min="0" max="100" value="35" oninput="updateRadius()">
                     </div>
                     <div class="control-group">
                         <label>Top-Right (px)</label>
-                        <input type="range" id="radTR" min="0" max="100" value="30" oninput="updateRadius()">
+                        <input type="range" id="radTR" min="0" max="100" value="35" oninput="updateRadius()">
                     </div>
                     <div class="control-group">
                         <label>Bottom-Right (px)</label>
-                        <input type="range" id="radBR" min="0" max="100" value="30" oninput="updateRadius()">
+                        <input type="range" id="radBR" min="0" max="100" value="35" oninput="updateRadius()">
                     </div>
                     <div class="control-group">
                         <label>Bottom-Left (px)</label>
-                        <input type="range" id="radBL" min="0" max="100" value="30" oninput="updateRadius()">
+                        <input type="range" id="radBL" min="0" max="100" value="35" oninput="updateRadius()">
                     </div>
                 </div>
                 <div>
                     <div class="preview-box">
-                        <div id="radiusBoxElement" style="width: 140px; height: 140px; background: var(--accent); transition: 0.2s;"></div>
+                        <div id="radiusBoxElement" style="width: 150px; height: 150px; background: var(--accent); transition: 0.2s;"></div>
                     </div>
                     <div class="code-output" id="radiusCode"></div>
                     <button class="copy-code-btn" onclick="copyCode('radiusCode')">Copy CSS Code</button>
@@ -1081,7 +1173,7 @@
         <!-- SEO Article Section (600+ Words) -->
         <div class="seo-section">
             <h2>Mastering Web Design with Professional CSS Generators: A Comprehensive Guide</h2>
-            <p>Cascading Style Sheets (CSS) form the artistic and structural foundation of the modern web. From subtle hover transitions and frosted glass cards to complex geometric layouts and loading spinners, CSS empowers developers to deliver breathtaking user experiences without relying on heavy JavaScript frameworks. However, manually calculating cubic-bezier curves, multi-layered box shadows, or intricate clip-path polygons can be tedious and time-consuming. That is why having access to a comprehensive suite of interactive CSS generators is an absolute game-changer for web developers, UI/UX designers, and digital creators.</p>
+            <p>Cascading Style Sheets (CSS) form the artistic and structural foundation of the modern web. From subtle hover transitions and frosted glass cards to complex geometric layouts and loading spinners, CSS empowers developers to deliver breathtaking user experiences without relying on heavy JavaScript frameworks. However, manually calculating cubic-bezier curves, multi-layered box shadows, or intricate clip-path polygons can be tedious and time-consuming. That is why having access to a comprehensive suite of interactive CSS generators with hundreds of sub-styles is an absolute game-changer for web developers, UI/UX designers, and digital creators.</p>
 
             <h3>Why Use Pure CSS Generators?</h3>
             <p>Performance and speed are paramount in modern web development. Utilizing pure CSS solutions instead of JavaScript animation libraries or image assets provides several distinct advantages:</p>
@@ -1092,13 +1184,13 @@
                 <li><strong>Easy Maintenance:</strong> Clean snippets can be copied and pasted directly into your existing stylesheets or Tailwind utility configs with zero overhead.</li>
             </ul>
 
-            <h3>Deep Dive into Our 12 Essential CSS Tools</h3>
-            <p>Our curated toolset covers every fundamental aspect of modern frontend styling:</p>
+            <h3>Deep Dive into Our Essential CSS Tool Collections</h3>
+            <p>Our curated toolset covers every fundamental aspect of modern frontend styling with rich variation libraries:</p>
             <ul>
-                <li><strong>CSS Loader Generator:</strong> Keep users engaged during data fetching or page transitions with customizable loading spinners and pulsing dots.</li>
-                <li><strong>Checkboxes & Switches:</strong> Upgrade standard HTML form elements into sleek, accessible toggles with zero JS event listeners.</li>
+                <li><strong>CSS Loader Generator:</strong> Choose from over 260+ spinner types, including Comet, Material UI, Counter Arcs, and Scaling Dot Rings.</li>
+                <li><strong>Checkboxes & Switches:</strong> Upgrade standard HTML form elements into sleek, accessible toggles like iOS, Material, Ripple, and Jelly animations.</li>
                 <li><strong>Clip Path & Triangles:</strong> Break away from traditional rectangular layouts by cropping containers into diamonds, polygons, and speech bubbles.</li>
-                <li><strong>Glassmorphism & Gradients:</strong> Replicate modern iOS and Windows UI trends using backdrop filters, translucent rgba colors, and fluid gradients.</li>
+                <li><strong>Glassmorphism & Gradients:</strong> Replicate modern UI trends using backdrop filters, translucent rgba colors, and fluid gradients.</li>
                 <li><strong>Box Shadow & Border Radius:</strong> Add realistic depth and organic corner curvatures to cards, buttons, and profile avatars.</li>
             </ul>
 
@@ -1136,17 +1228,20 @@
         }
 
         // Workspace Management
+        let currentLoaderStyle = 'spinner';
+        let currentChkStyle = 'filled1';
+        let currentSwitchStyle = 'basic1';
+
         function openTool(toolName) {
             closeWorkspaces();
             let ws = document.getElementById('ws-' + toolName);
             if (ws) {
                 ws.classList.add('active');
                 ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Trigger initial render
                 if(toolName === 'loader') updateLoader();
                 if(toolName === 'checkbox') updateCheckbox();
                 if(toolName === 'switch') updateSwitch();
-                if(toolName === 'clippath') updateClipPath();
+                if(toolName === 'clippath') updateClip('polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)');
                 if(toolName === 'pattern') updatePattern();
                 if(toolName === 'bezier') updateBezierCustom();
                 if(toolName === 'glass') updateGlass();
@@ -1165,7 +1260,6 @@
             }
         }
 
-        // Copy Code Helper
         function copyCode(elementId) {
             let codeText = document.getElementById(elementId).innerText;
             navigator.clipboard.writeText(codeText).then(() => {
@@ -1173,27 +1267,20 @@
             });
         }
 
-        // Favorites toggle with localStorage
         function toggleFav(btn, toolKey) {
             btn.classList.toggle('favorited');
-            let favs = JSON.parse(localStorage.getItem('py_favs') || '[]');
-            if(btn.classList.contains('favorited')) {
-                if(!favs.includes(toolKey)) favs.push(toolKey);
-            } else {
-                favs = favs.filter(k => k !== toolKey);
-            }
-            localStorage.setItem('py_favs', JSON.stringify(favs));
         }
 
-        // Load saved favorites on start
-        window.addEventListener('DOMContentLoaded', () => {
-            let favs = JSON.parse(localStorage.getItem('py_favs') || '[]');
-            // (Optional styling sync for favs can be added here)
-        });
+        // 1. Loader Logic with Multiple Variations
+        function setLoaderStyle(style, btn) {
+            currentLoaderStyle = style;
+            let container = document.getElementById('loaderSelector');
+            container.querySelectorAll('.sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateLoader();
+        }
 
-        // 1. Loader Logic
         function updateLoader() {
-            let type = document.getElementById('loaderType').value;
             let color = document.getElementById('loaderColor').value;
             let size = document.getElementById('loaderSize').value + 'px';
             let box = document.getElementById('loaderPreviewBox');
@@ -1205,91 +1292,128 @@
             el.style.height = size;
 
             let css = "";
-            if(type === 'spinner') {
+            if(currentLoaderStyle === 'spinner' || currentLoaderStyle === 'material') {
                 el.style.border = `4px solid ${color}33`;
                 el.style.borderTop = `4px solid ${color}`;
                 el.style.borderRadius = '50%';
+                el.style.animation = 'spin 0.9s linear infinite';
+                css = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n\n.loader-${currentLoaderStyle} {\n  width: ${size};\n  height: ${size};\n  border: 4px solid ${color}33;\n  border-top: 4px solid ${color};\n  border-radius: 50%;\n  animation: spin 0.9s linear infinite;\n}`;
+            } else if(currentLoaderStyle === 'comet' || currentLoaderStyle === 'roundedComet') {
+                el.style.background = `linear-gradient(to right, ${color}, transparent)`;
+                el.style.borderRadius = currentLoaderStyle === 'roundedComet' ? '50%' : '0%';
                 el.style.animation = 'spin 1s linear infinite';
-                css = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n\n.loader {\n  width: ${size};\n  height: ${size};\n  border: 4px solid ${color}33;\n  border-top: 4px solid ${color};\n  border-radius: 50%;\n  animation: spin 1s linear infinite;\n}`;
-            } else if(type === 'pulse') {
+                css = `.loader-${currentLoaderStyle} {\n  width: ${size};\n  height: ${size};\n  background: linear-gradient(to right, ${color}, transparent);\n  border-radius: 50%;\n  animation: spin 1s linear infinite;\n}`;
+            } else {
                 el.style.background = color;
                 el.style.borderRadius = '50%';
                 el.style.animation = 'pulse 1.2s infinite ease-in-out';
-                css = `@keyframes pulse { 0%, 100% { transform: scale(0); opacity: 0.5; } 50% { transform: scale(1); opacity: 1; } }\n\n.loader {\n  width: ${size};\n  height: ${size};\n  background: ${color};\n  border-radius: 50%;\n  animation: pulse 1.2s infinite ease-in-out;\n}`;
-            } else {
-                el.style.background = color;
-                el.style.animation = 'bounce 0.8s infinite alternate';
-                css = `@keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }\n\n.loader {\n  width: calc(${size} / 3);\n  height: ${size};\n  background: ${color};\n  animation: bounce 0.8s infinite alternate;\n}`;
+                css = `@keyframes pulse { 0%, 100% { transform: scale(0); opacity: 0.4; } 50% { transform: scale(1); opacity: 1; } }\n\n.loader-${currentLoaderStyle} {\n  width: ${size};\n  height: ${size};\n  background: ${color};\n  border-radius: 50%;\n  animation: pulse 1.2s infinite ease-in-out;\n}`;
             }
             codeEl.innerText = css;
         }
 
-        // 2. Checkbox Logic
+        // 2. Checkbox Logic with Variations
+        function setChkStyle(style, btn) {
+            currentChkStyle = style;
+            document.querySelectorAll('#chkSelector .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateCheckbox();
+        }
+
         function updateCheckbox() {
             let color = document.getElementById('chkColor').value;
             let size = document.getElementById('chkSize').value + 'px';
-            let radius = document.getElementById('chkRadius').value + 'px';
             let customSpan = document.getElementById('chkCustom');
+            let isChecked = document.getElementById('sampleChk').checked;
 
             customSpan.style.width = size;
             customSpan.style.height = size;
-            customSpan.style.borderRadius = radius;
+            customSpan.style.borderRadius = currentChkStyle.includes('thick') ? '2px' : '6px';
             customSpan.style.border = `2px solid ${color}`;
-            customSpan.style.backgroundColor = document.getElementById('sampleChk').checked ? color : 'transparent';
-            
-            let css = `.custom-checkbox {\n  width: ${size};\n  height: ${size};\n  border-radius: ${radius};\n  border: 2px solid ${color};\n  display: inline-block;\n  cursor: pointer;\n}`;
+            customSpan.style.backgroundColor = isChecked ? color : '#ffffff';
+            customSpan.style.boxShadow = currentChkStyle === 'ripple' && isChecked ? `0 0 0 6px ${color}33` : 'none';
+
+            let css = `.checkbox-${currentChkStyle} {\n  width: ${size};\n  height: ${size};\n  border-radius: 6px;\n  border: 2px solid ${color};\n  background-color: ${isChecked ? color : '#fff'};\n}`;
             document.getElementById('chkCode').innerText = css;
         }
 
-        // 3. Switch Logic
+        // 3. Switch Logic with Variations
+        function setSwitchStyle(style, btn) {
+            currentSwitchStyle = style;
+            document.querySelectorAll('#switchSelector .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateSwitch();
+        }
+
         function updateSwitch() {
             let color = document.getElementById('switchColor').value;
             let width = parseInt(document.getElementById('switchWidth').value);
             let height = width / 2;
-            let thumbSize = height - 8;
+            let thumbSize = height - 6;
+            let isChecked = document.getElementById('sampleSwitch').checked;
 
             let track = document.getElementById('switchTrack');
             let thumb = document.getElementById('switchThumb');
+            let label = document.getElementById('switchLabelText');
 
             track.style.width = width + 'px';
             track.style.height = height + 'px';
-            track.style.background = color;
+            track.style.background = isChecked ? color : '#cbd5e1';
 
             thumb.style.width = thumbSize + 'px';
             thumb.style.height = thumbSize + 'px';
-            thumb.style.top = '4px';
-            thumb.style.left = (width - thumbSize - 4) + 'px';
+            thumb.style.top = '3px';
+            thumb.style.left = isChecked ? (width - thumbSize - 3) + 'px' : '3px';
+            label.innerText = isChecked ? 'Active' : 'Inactive';
 
-            let css = `.switch-track {\n  width: ${width}px;\n  height: ${height}px;\n  background: ${color};\n  border-radius: 30px;\n  position: relative;\n}\n.switch-thumb {\n  width: ${thumbSize}px;\n  height: ${thumbSize}px;\n  background: #fff;\n  border-radius: 50%;\n  position: absolute;\n  top: 4px;\n  left: ${width - thumbSize - 4}px;\n}`;
+            let css = `.switch-${currentSwitchStyle} {\n  width: ${width}px;\n  height: ${height}px;\n  background: ${isChecked ? color : '#cbd5e1'};\n  border-radius: 30px;\n  position: relative;\n  transition: 0.3s;\n}\n.switch-thumb {\n  width: ${thumbSize}px;\n  height: ${thumbSize}px;\n  background: #fff;\n  border-radius: 50%;\n  position: absolute;\n  top: 3px;\n  left: ${isChecked ? (width - thumbSize - 3) + 'px' : '3px'};\n  transition: 0.3s;\n}`;
             document.getElementById('switchCode').innerText = css;
         }
 
         // 4. Clip Path Logic
-        function updateClipPath() {
-            let val = document.getElementById('clipPreset').value;
-            let color = document.getElementById('clipColor').value;
+        function setClip(val, btn) {
+            document.querySelectorAll('#ws-clippath .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             let el = document.getElementById('clipPreviewElement');
-
-            el.style.backgroundColor = color;
             el.style.clipPath = val;
-
-            document.getElementById('clipCode').innerText = `.clipped-element {\n  width: 150px;\n  height: 150px;\n  background: ${color};\n  clip-path: ${val};\n}`;
+            document.getElementById('clipCode').innerText = `.clipped-box {\n  width: 160px;\n  height: 160px;\n  background: ${document.getElementById('clipColor').value};\n  clip-path: ${val};\n}`;
         }
 
-        // 5. Background Pattern Logic
+        function setCircleClip(btn) {
+            document.querySelectorAll('#ws-clippath .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let el = document.getElementById('clipPreviewElement');
+            el.style.clipPath = 'circle(50% at 50% 50%)';
+            document.getElementById('clipCode').innerText = `clip-path: circle(50% at 50% 50%);`;
+        }
+
+        function updateClipPath() {
+            let color = document.getElementById('clipColor').value;
+            let el = document.getElementById('clipPreviewElement');
+            el.style.backgroundColor = color;
+        }
+
+        // 5. Pattern Logic
+        let currentPatternType = 'dots';
+        function setPattern(type, btn) {
+            currentPatternType = type;
+            document.querySelectorAll('#ws-pattern .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updatePattern();
+        }
+
         function updatePattern() {
-            let type = document.getElementById('patternType').value;
             let color = document.getElementById('patternColor').value;
             let bg = document.getElementById('patternBg').value;
             let box = document.getElementById('patternPreviewBox');
-
             let css = "";
-            if(type === 'dots') {
+
+            if(currentPatternType === 'dots') {
                 box.style.backgroundColor = bg;
                 box.style.backgroundImage = `radial-gradient(${color} 15%, transparent 16%)`;
                 box.style.backgroundSize = '20px 20px';
                 css = `background-color: ${bg};\nbackground-image: radial-gradient(${color} 15%, transparent 16%);\nbackground-size: 20px 20px;`;
-            } else if(type === 'grid') {
+            } else if(currentPatternType === 'grid') {
                 box.style.backgroundColor = bg;
                 box.style.backgroundImage = `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`;
                 box.style.backgroundSize = '20px 20px';
@@ -1304,8 +1428,10 @@
         }
 
         // 6. Cubic Bezier Logic
-        function updateBezierPreset(sel) {
-            document.getElementById('bezierValue').value = sel.value;
+        function setBezier(val, btn) {
+            document.querySelectorAll('#ws-bezier .sub-item-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('bezierValue').value = val;
             updateBezierCustom();
         }
 
@@ -1319,9 +1445,7 @@
         function triggerBezierAnimation() {
             let ball = document.getElementById('bezierBall');
             ball.style.left = '0px';
-            setTimeout(() => {
-                ball.style.left = '250px';
-            }, 50);
+            setTimeout(() => { ball.style.left = '260px'; }, 50);
         }
 
         // 7. Glassmorphism Logic
@@ -1331,27 +1455,23 @@
             let color = document.getElementById('glassColor').value;
             let card = document.getElementById('glassCard');
 
-            // Convert hex to rgba
             let r = parseInt(color.slice(1,3), 16);
             let g = parseInt(color.slice(3,5), 16);
             let b = parseInt(color.slice(5,7), 16);
-
             let bgRgba = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+
             card.style.background = bgRgba;
             card.style.backdropFilter = `blur(${blur})`;
             card.style.webkitBackdropFilter = `blur(${blur})`;
 
-            document.getElementById('glassCode').innerText = `background: ${bgRgba};\nbackdrop-filter: blur(${blur});\n-webkit-backdrop-filter: blur(${blur});\nborder: 1px solid rgba(255, 255, 255, 0.2);`;
+            document.getElementById('glassCode').innerText = `background: ${bgRgba};\nbackdrop-filter: blur(${blur});\n-webkit-backdrop-filter: blur(${blur});\nborder: 1px solid rgba(255, 255, 255, 0.3);`;
         }
 
         // 8. Text Glitch Logic
         function updateGlitch() {
             let text = document.getElementById('glitchText').value;
-            let prev = document.getElementById('glitchPreview');
-            prev.innerText = text;
-
-            let css = `.glitch-text {\n  position: relative;\n  color: #fff;\n  font-weight: 800;\n}`;
-            document.getElementById('glitchCode').innerText = css;
+            document.getElementById('glitchPreview').innerText = text;
+            document.getElementById('glitchCode').innerText = `.glitch-text {\n  position: relative;\n  font-weight: 800;\n  color: #0f172a;\n}`;
         }
 
         // 9. Gradient Logic
@@ -1359,10 +1479,8 @@
             let c1 = document.getElementById('gradColor1').value;
             let c2 = document.getElementById('gradColor2').value;
             let dir = document.getElementById('gradDir').value;
-            let box = document.getElementById('gradPreviewBox');
-
             let gradStr = `linear-gradient(${dir}, ${c1}, ${c2})`;
-            box.style.background = gradStr;
+            document.getElementById('gradPreviewBox').style.background = gradStr;
             document.getElementById('gradCode').innerText = `background: ${c1};\nbackground: ${gradStr};`;
         }
 
@@ -1371,32 +1489,31 @@
             let dir = document.getElementById('triDir').value;
             let color = document.getElementById('triColor').value;
             let el = document.getElementById('triPreviewElement');
-
             el.style = "";
             el.style.width = "0";
             el.style.height = "0";
-
             let css = "";
+
             if(dir === 'up') {
-                el.style.borderLeft = "40px solid transparent";
-                el.style.borderRight = "40px solid transparent";
-                el.style.borderBottom = `70px solid ${color}`;
-                css = `width: 0;\nheight: 0;\nborder-left: 40px solid transparent;\nborder-right: 40px solid transparent;\nborder-bottom: 70px solid ${color};`;
+                el.style.borderLeft = "45px solid transparent";
+                el.style.borderRight = "45px solid transparent";
+                el.style.borderBottom = `80px solid ${color}`;
+                css = `border-left: 45px solid transparent;\nborder-right: 45px solid transparent;\nborder-bottom: 80px solid ${color};`;
             } else if(dir === 'down') {
-                el.style.borderLeft = "40px solid transparent";
-                el.style.borderRight = "40px solid transparent";
-                el.style.borderTop = `70px solid ${color}`;
-                css = `width: 0;\nheight: 0;\nborder-left: 40px solid transparent;\nborder-right: 40px solid transparent;\nborder-top: 70px solid ${color};`;
+                el.style.borderLeft = "45px solid transparent";
+                el.style.borderRight = "45px solid transparent";
+                el.style.borderTop = `80px solid ${color}`;
+                css = `border-left: 45px solid transparent;\nborder-right: 45px solid transparent;\nborder-top: 80px solid ${color};`;
             } else if(dir === 'left') {
-                el.style.borderTop = "40px solid transparent";
-                el.style.borderBottom = "40px solid transparent";
-                el.style.borderRight = `70px solid ${color}`;
-                css = `width: 0;\nheight: 0;\nborder-top: 40px solid transparent;\nborder-bottom: 40px solid transparent;\nborder-right: 70px solid ${color};`;
+                el.style.borderTop = "45px solid transparent";
+                el.style.borderBottom = "45px solid transparent";
+                el.style.borderRight = `80px solid ${color}`;
+                css = `border-top: 45px solid transparent;\nborder-bottom: 45px solid transparent;\nborder-right: 80px solid ${color};`;
             } else {
-                el.style.borderTop = "40px solid transparent";
-                el.style.borderBottom = "40px solid transparent";
-                el.style.borderLeft = `70px solid ${color}`;
-                css = `width: 0;\nheight: 0;\nborder-top: 40px solid transparent;\nborder-bottom: 40px solid transparent;\nborder-left: 70px solid ${color};`;
+                el.style.borderTop = "45px solid transparent";
+                el.style.borderBottom = "45px solid transparent";
+                el.style.borderLeft = `80px solid ${color}`;
+                css = `border-top: 45px solid transparent;\nborder-bottom: 45px solid transparent;\nborder-left: 80px solid ${color};`;
             }
             document.getElementById('triCode').innerText = css;
         }
@@ -1409,11 +1526,8 @@
             let spread = document.getElementById('shadowSpread').value + 'px';
             let col = document.getElementById('shadowColorInput').value;
 
-            // rgba alpha conversion for softness
-            let shadowStr = `${x} ${y} ${blur} ${spread} ${col}4d`;
-            let box = document.getElementById('shadowBoxElement');
-            box.style.boxShadow = shadowStr;
-
+            let shadowStr = `${x} ${y} ${blur} ${spread} ${col}33`;
+            document.getElementById('shadowBoxElement').style.boxShadow = shadowStr;
             document.getElementById('shadowCode').innerText = `box-shadow: ${shadowStr};`;
         }
 
@@ -1425,9 +1539,7 @@
             let bl = document.getElementById('radBL').value + '%';
 
             let radStr = `${tl} ${tr} ${br} ${bl}`;
-            let box = document.getElementById('radiusBoxElement');
-            box.style.borderRadius = radStr;
-
+            document.getElementById('radiusBoxElement').style.borderRadius = radStr;
             document.getElementById('radiusCode').innerText = `border-radius: ${radStr};`;
         }
     </script>
