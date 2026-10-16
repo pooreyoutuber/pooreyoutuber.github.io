@@ -1,825 +1,1169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online Coding Tools | Pooreyoutuber</title>
-<meta name="description" content="Free online coding tools by Pooreyoutuber: code to image, URL slug generator, Base64, HTML and URL encoders, HTML/CSS/JS minifiers and formatters, JSON tree viewer and React Native shadow generator.">
-<style>
-:root{--bg:#f8fafc;--card:#fff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#6d5efc;--accent2:#06b6d4}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:120px}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:var(--accent)}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CODJR — FRONTLINE COMBAT</title>
+    <!-- Tailwind CSS for UI and Menus -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Military & HUD Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap');
+        
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body { font-family: 'Rajdhani', sans-serif; background-color: #0b0f19; color: #f3f4f6; overflow: hidden; margin: 0; padding: 0; }
+        .font-teko { font-family: 'Teko', sans-serif; }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.8); }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
 
-/* Header (provided) */
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line)}
-.logo{font-weight:800;font-size:1.2rem;color:var(--text);text-decoration:none}
-.nav-controls nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.nav-controls a,.dropbtn{color:var(--text);text-decoration:none;padding:7px 12px;border-radius:8px;font-size:.93rem;background:none;border:0;cursor:pointer;font-family:inherit}
-.nav-controls a:hover,.dropbtn:hover{background:#f1f5f9}
-.badge-new{background:#ef4444;color:#fff;font-size:.62rem;padding:2px 5px;border-radius:4px;vertical-align:middle}
-.donate-coffee-btn{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff!important}
-.dropdown{position:relative}
-.dropdown-content{display:none;position:absolute;right:0;top:100%;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.08)}
-.dropdown-content a{display:block;white-space:nowrap}
-.dropdown:hover .dropdown-content,.dropdown:focus-within .dropdown-content{display:block}
+        /* Tactical UI Glows & Scans */
+        .hud-border { clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px)); }
+        .btn-military {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
+            border: 1px solid #60a5fa;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.2s ease;
+        }
+        .btn-military:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-military:active { transform: translateY(1px); }
 
-/* Brand hero */
-.hero{text-align:center;padding:44px 20px 22px;background:linear-gradient(180deg,#fff,var(--bg))}
-.brand{display:inline-block;font-weight:700;color:var(--accent);background:#eef2ff;padding:4px 12px;border-radius:999px;font-size:.85rem;margin-bottom:10px}
-.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);margin:0 0 8px}
-.hero p{color:var(--muted);max-width:740px;margin:0 auto}
+        .card-select {
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+        .card-select:hover { border-color: rgba(96, 165, 250, 0.8); background: rgba(30, 58, 138, 0.4); }
+        .card-select.selected {
+            border-color: #60a5fa;
+            background: rgba(37, 99, 235, 0.3);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
 
-.chips{position:sticky;top:0;z-index:50;background:rgba(248,250,252,.96);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;gap:8px;overflow-x:auto;white-space:nowrap}
-.chips a{text-decoration:none;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.84rem}
-.chips a:hover{border-color:var(--accent);color:var(--accent)}
+        /* Animations */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .animate-glow { animation: pulseGlow 2s infinite ease-in-out; }
 
-.wrap{max-width:1180px;margin:0 auto;padding:10px 20px 40px}
-.tool{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:22px 0;scroll-margin-top:120px}
-.th{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.th h2{margin:0;font-size:1.3rem}
-.badge{background:#eef2ff;color:#4338ca;font-size:.74rem;padding:3px 9px;border-radius:999px;font-weight:600}
-.desc{color:var(--muted);margin:8px 0 16px}
+        @keyframes hitVignette {
+            0% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+            50% { box-shadow: inset 0 0 120px rgba(239, 68, 68, 0.8); }
+            100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+        }
+        .hit-damage { animation: hitVignette 0.4s ease-out; }
 
-.ctrls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:14px}
-.fld{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
-.fld select,.fld input[type=text],.fld input[type=number]{padding:8px;border:1px solid var(--line);border-radius:8px;font-family:inherit;color:var(--text);background:#fff;min-width:150px}
-.fld input[type=range]{width:180px}
-.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--text)}
-.io{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:820px){.io{grid-template-columns:1fr}.header{padding:10px 14px}}
-textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:10px;font-family:Consolas,Menlo,"Courier New",monospace;font-size:.85rem;color:var(--text);background:#fbfdff;resize:vertical}
-textarea[readonly]{background:#f8fafc}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:.88rem}
-.btn.alt{background:#fff;color:var(--text);border:1px solid var(--line)}
-.lbl{font-size:.85rem;color:var(--muted);margin:0 0 6px;font-weight:600}
-.note{color:var(--muted);font-size:.85rem;margin-top:8px}
-.err{color:#b91c1c;font-size:.9rem;margin-top:8px;min-height:1.2em}
-
-/* Code to image */
-.canvas-wrap{background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:12px;padding:16px;overflow:auto;text-align:center;margin-top:14px}
-#ci-canvas{max-width:100%;height:auto;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.12)}
-
-/* JSON tree */
-.jtree{background:#fbfdff;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:200px;max-height:460px;overflow:auto;font-family:Consolas,Menlo,monospace;font-size:.86rem}
-.jtree details{margin-left:16px}
-.jtree summary{cursor:pointer;color:#334155}
-.jtree .leaf{margin-left:16px;color:#334155}
-.jt-k{color:#7c3aed}.jt-s{color:#047857}.jt-n{color:#b45309}.jt-b{color:#0369a1}.jt-z{color:#94a3b8}
-
-/* RN shadow */
-.rn-box{width:160px;height:160px;background:#fff;border-radius:16px;margin:30px auto}
-.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}
-.preset-grid button{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;font-family:inherit;font-size:.82rem;color:var(--text);text-align:left}
-.preset-grid button:hover{border-color:var(--accent)}
-.preset-grid button small{display:block;color:var(--muted)}
-
-/* Guide */
-.about{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;margin:30px 0}
-.about h2{margin-top:0}
-.about h3{margin:22px 0 6px;color:var(--accent);font-size:1.08rem}
-.about p{color:#334155}
-footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 20px;border-top:1px solid var(--line);background:#fff}
-footer .brandname{color:var(--accent);font-weight:700}
-</style>
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+        #ui-container * { pointer-events: auto; }
+    </style>
 </head>
 <body>
 
-<header class="header">
-    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-    <div class="nav-controls">
-        <nav>
-<a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
-               <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
- 
-            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-            <div class="dropdown">
-                <button class="dropbtn">🛒 Shop ▾</button>
-                <div class="dropdown-content">
-                <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
-                  </div>
+    <!-- 3D Viewport Background Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- UI & Menu System -->
+    <div id="ui-container" class="flex flex-col justify-between p-4 md:p-8">
+
+        <!-- MAIN MENU SCREEN -->
+        <div id="menu-main" class="flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
+            <!-- Top Header Bar -->
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl hud-border">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white font-teko text-3xl px-4 tracking-wider shadow-lg shadow-blue-500/50">CODJR</div>
+                    <div>
+                        <h1 class="text-xl md:text-3xl font-teko font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-200">FRONTLINE COMBAT</h1>
+                        <p class="text-xs text-blue-300 font-mono tracking-wider">TACTICAL OPS v2.6.4 — VERIFIED BROWSER BUILD</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="hidden md:flex flex-col text-right">
+                        <span class="text-xs text-slate-400">PLAYER RANK</span>
+                        <span class="text-sm font-bold text-blue-400 font-teko text-lg">COLONEL LVL. 88</span>
+                    </div>
+                    <button onclick="switchMenu('settings')" class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-lg text-blue-400 transition">
+                        <i class="fa-solid fa-gear text-lg"></i>
+                    </button>
+                    <button onclick="switchMenu('help')" class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-lg text-blue-400 transition">
+                        <i class="fa-solid fa-circle-question text-lg"></i>
+                    </button>
+                </div>
             </div>
-            <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
-        </nav>
+
+            <!-- Center Menu Body -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 my-auto py-6">
+                <!-- Left Column: Navigation Actions -->
+                <div class="flex flex-col space-y-3 justify-center lg:col-span-1">
+                    <button onclick="startGame()" class="btn-military py-5 px-6 text-2xl font-teko tracking-widest text-white flex items-center justify-between group shadow-xl">
+                        <span><i class="fa-solid fa-play mr-3"></i> DEPLOY MATCH</span>
+                        <i class="fa-solid fa-chevron-right text-sm group-hover:translate-x-1 transition"></i>
+                    </button>
+                    <button onclick="switchMenu('map')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
+                        <div>
+                            <span class="text-xs text-blue-400 font-mono">SELECTED MAP</span>
+                            <div id="btn-map-label" class="text-lg font-teko font-bold tracking-wider text-white">OUTPOST</div>
+                        </div>
+                        <i class="fa-solid fa-map-location-dot text-blue-400 group-hover:scale-110 transition"></i>
+                    </button>
+                    <button onclick="switchMenu('loadout')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
+                        <div>
+                            <span class="text-xs text-blue-400 font-mono">PRIMARY WEAPON</span>
+                            <div id="btn-weapon-label" class="text-lg font-teko font-bold tracking-wider text-white">M4-A1 CARBINE</div>
+                        </div>
+                        <i class="fa-solid fa-gun text-blue-400 group-hover:scale-110 transition"></i>
+                    </button>
+                    <button onclick="switchMenu('mode')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
+                        <div>
+                            <span class="text-xs text-blue-400 font-mono">GAME MODE</span>
+                            <div id="btn-mode-label" class="text-lg font-teko font-bold tracking-wider text-white">TEAM DEATHMATCH</div>
+                        </div>
+                        <i class="fa-solid fa-shield-halved text-blue-400 group-hover:scale-110 transition"></i>
+                    </button>
+                </div>
+
+                <!-- Center/Right Column: Preview and Stats Summary -->
+                <div class="lg:col-span-3 bg-slate-900/60 backdrop-blur-md border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hud-border">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-blue-600/30 border border-blue-500/50 text-blue-300 px-3 py-1 rounded text-xs font-mono">READY ROOM</span>
+                            <h2 id="preview-title" class="text-4xl font-teko tracking-wider mt-2 text-white">OPERATION OUTPOST</h2>
+                            <p id="preview-desc" class="text-slate-300 text-sm max-w-xl">Desert military outpost featuring concrete fortifications, sandbag cover structures, and multi-lane flanking routes.</p>
+                        </div>
+                        <div class="text-right hidden sm:block">
+                            <span class="text-xs font-mono text-slate-400">COMBATANTS</span>
+                            <div id="preview-combatants" class="text-2xl font-teko text-blue-400">20 PLAYERS (1V19)</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
+                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400">LOADOUT TIER</span>
+                            <div class="text-xl font-teko text-blue-300 mt-1">ASSAULT RIFLE</div>
+                        </div>
+                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400">DAMAGE / RPM</span>
+                            <div id="stat-dmg-rpm" class="text-xl font-teko text-emerald-400 mt-1">32 DMG / 750 RPM</div>
+                        </div>
+                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400">MAGAZINE SIZE</span>
+                            <div id="stat-mag" class="text-xl font-teko text-yellow-400 mt-1">30 RDS</div>
+                        </div>
+                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400">BOT DIFFICULTY</span>
+                            <div class="text-xl font-teko text-purple-400 mt-1">MIXED (3+5+2)</div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-800 text-xs text-slate-400">
+                        <span>ENGINE: THREE.JS WEBGL RENDERER</span>
+                        <span class="text-emerald-400 flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping"></span>SYSTEM ONLINE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Quick Info Footer -->
+            <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs text-slate-400">
+                <span>CONTROLS: WASD / MOUSE / SPACE / SHIFT / R / 1-2 / ESC</span>
+                <span class="text-blue-400">CODJR — BUILT FOR BROWSER COMBAT</span>
+            </div>
+        </div>
+
+        <!-- SUBMENU: SELECT MAP -->
+        <div id="menu-map" class="hidden flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
+                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-map mr-2 text-blue-400"></i> SELECT COMBAT MAP</h2>
+                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 my-auto">
+                <!-- Map 1 -->
+                <div onclick="selectMap(0)" id="map-card-0" class="card-select p-4 rounded-xl cursor-pointer group selected">
+                    <div class="h-32 bg-amber-900/40 rounded-lg mb-3 flex items-center justify-center border border-amber-600/30 group-hover:border-blue-400">
+                        <i class="fa-solid fa-mountain-sun text-4xl text-amber-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-teko font-bold text-white">OUTPOST</h3>
+                    <p class="text-xs text-slate-400 mt-1">Desert military base with watchtowers, concrete barriers, and sandbag cover.</p>
+                </div>
+                <!-- Map 2 -->
+                <div onclick="selectMap(1)" id="map-card-1" class="card-select p-4 rounded-xl cursor-pointer group">
+                    <div class="h-32 bg-slate-800/60 rounded-lg mb-3 flex items-center justify-center border border-slate-600/30 group-hover:border-blue-400">
+                        <i class="fa-solid fa-warehouse text-4xl text-slate-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-teko font-bold text-white">WAREHOUSE</h3>
+                    <p class="text-xs text-slate-400 mt-1">Industrial indoor/outdoor zone with cargo containers and metal walkways.</p>
+                </div>
+                <!-- Map 3 -->
+                <div onclick="selectMap(2)" id="map-card-2" class="card-select p-4 rounded-xl cursor-pointer group">
+                    <div class="h-32 bg-blue-950/40 rounded-lg mb-3 flex items-center justify-center border border-blue-600/30 group-hover:border-blue-400">
+                        <i class="fa-solid fa-building-columns text-4xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-teko font-bold text-white">RAID</h3>
+                    <p class="text-xs text-slate-400 mt-1">Modern luxury compound with central courtyard, balconies, and side routes.</p>
+                </div>
+                <!-- Map 4 -->
+                <div onclick="selectMap(3)" id="map-card-3" class="card-select p-4 rounded-xl cursor-pointer group">
+                    <div class="h-32 bg-zinc-900/60 rounded-lg mb-3 flex items-center justify-center border border-zinc-600/30 group-hover:border-blue-400">
+                        <i class="fa-solid fa-ship text-4xl text-zinc-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-teko font-bold text-white">CARGO</h3>
+                    <p class="text-xs text-slate-400 mt-1">Shipping yard with stacked containers, narrow corridors, and crane sightlines.</p>
+                </div>
+                <!-- Map 5 -->
+                <div onclick="selectMap(4)" id="map-card-4" class="card-select p-4 rounded-xl cursor-pointer group">
+                    <div class="h-32 bg-cyan-950/40 rounded-lg mb-3 flex items-center justify-center border border-cyan-600/30 group-hover:border-blue-400">
+                        <i class="fa-solid fa-snowflake text-4xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-teko font-bold text-white">SUMMIT</h3>
+                    <p class="text-xs text-slate-400 mt-1">Snowy mountain installation with radar domes and bunker interiors.</p>
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- SUBMENU: SELECT WEAPON / LOADOUT -->
+        <div id="menu-loadout" class="hidden flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
+                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-gun mr-2 text-blue-400"></i> WEAPON LOADOUT (15 SELECTABLE)</h2>
+                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
+            </div>
+            <!-- Category Tabs & Weapon Grid -->
+            <div class="my-auto overflow-y-auto max-h-[70vh] pr-2">
+                <div id="weapon-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- SUBMENU: GAME MODE -->
+        <div id="menu-mode" class="hidden flex flex-col justify-between h-full w-full max-w-5xl mx-auto">
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
+                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> SELECT GAME MODE</h2>
+                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div onclick="selectMode('tdm')" id="mode-card-tdm" class="card-select p-6 rounded-xl cursor-pointer group selected border-2">
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fa-solid fa-users text-4xl text-blue-400"></i>
+                        <span class="bg-blue-600/30 text-blue-300 px-3 py-1 rounded text-xs font-mono">20 COMBATANTS</span>
+                    </div>
+                    <h3 class="text-3xl font-teko font-bold text-white">TEAM DEATHMATCH (TDM)</h3>
+                    <p class="text-slate-300 text-sm mt-2">Two teams (Blue vs Red). 10 combatants per team (1 Human + 19 Bots). First team to 40 kills wins the match.</p>
+                </div>
+                <div onclick="selectMode('ffa')" id="mode-card-ffa" class="card-select p-6 rounded-xl cursor-pointer group border-2">
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fa-solid fa-skull text-4xl text-red-400"></i>
+                        <span class="bg-red-600/30 text-red-300 px-3 py-1 rounded text-xs font-mono">10 COMBATANTS</span>
+                    </div>
+                    <h3 class="text-3xl font-teko font-bold text-white">SOLO FREE-FOR-ALL (FFA)</h3>
+                    <p class="text-slate-300 text-sm mt-2">Every operator for themselves. 10 total combatants (1 Human + 9 Bots). First to 20 kills takes top honors.</p>
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- SUBMENU: SETTINGS -->
+        <div id="menu-settings" class="hidden flex flex-col justify-between h-full w-full max-w-4xl mx-auto">
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
+                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-gear mr-2 text-blue-400"></i> COMBAT SETTINGS</h2>
+                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
+            </div>
+            <div class="bg-slate-900/70 backdrop-blur-md border border-slate-700/60 p-6 rounded-xl my-auto space-y-6">
+                <div>
+                    <label class="block text-sm font-mono text-slate-300 mb-2">MOUSE SENSITIVITY: <span id="val-sens" class="text-blue-400">1.2</span></label>
+                    <input type="range" min="0.2" max="3.0" step="0.1" value="1.2" oninput="updateSetting('sensitivity', this.value)" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-mono text-slate-300 mb-2">FIELD OF VIEW (FOV): <span id="val-fov" class="text-blue-400">75</span></label>
+                    <input type="range" min="60" max="100" step="1" value="75" oninput="updateSetting('fov', this.value)" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-mono text-slate-300 mb-2">GRAPHICS QUALITY TIER</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button onclick="setGraphicsTier('low')" id="gfx-low" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">LOW</button>
+                        <button onclick="setGraphicsTier('medium')" id="gfx-medium" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">MED</button>
+                        <button onclick="setGraphicsTier('high')" id="gfx-high" class="py-2 bg-blue-600 border border-blue-400 rounded font-teko text-lg">HIGH</button>
+                        <button onclick="setGraphicsTier('ultra')" id="gfx-ultra" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">ULTRA</button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                    <span class="text-sm font-mono text-slate-300">MASTER AUDIO SFX</span>
+                    <input type="checkbox" checked oninput="toggleAudio(this.checked)" class="w-5 h-5 accent-blue-500">
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- SUBMENU: HELP / CONTROLS -->
+        <div id="menu-help" class="hidden flex flex-col justify-between h-full w-full max-w-4xl mx-auto">
+            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
+                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-circle-question mr-2 text-blue-400"></i> CONTROLS & MANUAL</h2>
+                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
+            </div>
+            <div class="bg-slate-900/70 backdrop-blur-md border border-slate-700/60 p-6 rounded-xl my-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-teko text-blue-400 mb-3 border-b border-slate-700 pb-1">DESKTOP COMBAT</h3>
+                    <ul class="space-y-2 text-sm text-slate-300 font-mono">
+                        <li><span class="text-blue-400 font-bold">W, A, S, D:</span> Operator Movement</li>
+                        <li><span class="text-blue-400 font-bold">MOUSE:</span> Aim / Look Around</li>
+                        <li><span class="text-blue-400 font-bold">LEFT CLICK:</span> Fire Weapon</li>
+                        <li><span class="text-blue-400 font-bold">RIGHT CLICK:</span> Aim Down Sights (ADS)</li>
+                        <li><span class="text-blue-400 font-bold">SHIFT:</span> Tactical Sprint</li>
+                        <li><span class="text-blue-400 font-bold">SPACE:</span> Jump</li>
+                        <li><span class="text-blue-400 font-bold">C / CTRL:</span> Crouch</li>
+                        <li><span class="text-blue-400 font-bold">R:</span> Reload Magazine</li>
+                        <li><span class="text-blue-400 font-bold">1 / 2:</span> Switch Weapon Slots</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-teko text-blue-400 mb-3 border-b border-slate-700 pb-1">MOBILE & TACTICAL</h3>
+                    <p class="text-sm text-slate-300 mb-4">On touchscreen devices, virtual joysticks and dedicated action buttons appear automatically on the HUD.</p>
+                    <h3 class="text-xl font-teko text-blue-400 mb-2 border-b border-slate-700 pb-1">BOT AI ARCHITECTURE</h3>
+                    <p class="text-xs text-slate-300">Bots utilize Finite State Machines (Roam, Search, Cover, Strafe, Flank, Retreat). They feature 3 tiers: New Player, Pro, and Ultra-Pro with raycast line-of-sight checks.</p>
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- MATCH HUD OVERLAY (Active during gameplay) -->
+        <div id="hud-game" class="hidden flex flex-col justify-between h-full w-full">
+            <!-- Top HUD Bar -->
+            <div class="flex justify-between items-start pointer-events-none">
+                <!-- Scoreboard / Match info -->
+                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-xl flex items-center space-x-6 pointer-events-auto hud-border">
+                    <div class="text-center">
+                        <span class="text-xs font-mono text-blue-400">BLUE TEAM</span>
+                        <div id="hud-score-blue" class="text-3xl font-teko font-bold text-blue-400">0</div>
+                    </div>
+                    <div class="text-center px-4 border-x border-slate-700">
+                        <span id="hud-timer" class="text-xl font-teko text-amber-400">08:00</span>
+                        <div class="text-xs font-mono text-slate-400">TIME REMAINING</div>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-xs font-mono text-red-400">RED TEAM</span>
+                        <div id="hud-score-red" class="text-3xl font-teko font-bold text-red-400">0</div>
+                    </div>
+                </div>
+
+                <!-- Minimap & Kill Feed container -->
+                <div class="flex flex-col items-end space-y-2 pointer-events-auto">
+                    <!-- Minimap Canvas -->
+                    <div class="w-36 h-36 bg-slate-900/90 border-2 border-slate-700 rounded-lg overflow-hidden relative shadow-2xl">
+                        <canvas id="minimap-canvas" width="144" height="144" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 right-1 text-[9px] font-mono bg-black/60 px-1 rounded text-slate-300">RADAR</div>
+                    </div>
+                    <!-- Kill Feed -->
+                    <div id="kill-feed" class="flex flex-col space-y-1 items-end max-w-xs">
+                        <!-- Dynamic kill feed items -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Crosshair & Hit Marker -->
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <div id="crosshair" class="relative w-6 h-6 flex items-center justify-center">
+                    <div class="absolute w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400"></div>
+                    <div class="absolute w-3 h-0.5 bg-cyan-400/80 -left-3"></div>
+                    <div class="absolute w-3 h-0.5 bg-cyan-400/80 -right-3"></div>
+                    <div class="absolute w-0.5 h-3 bg-cyan-400/80 -top-3"></div>
+                    <div class="absolute w-0.5 h-3 bg-cyan-400/80 -bottom-3"></div>
+                </div>
+                <div id="hit-marker" class="absolute w-6 h-6 border-2 border-red-500 rotate-45 opacity-0 transition-opacity duration-100"></div>
+            </div>
+
+            <!-- Bottom HUD Bar -->
+            <div class="flex justify-between items-end pointer-events-none">
+                <!-- Health & Status -->
+                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl flex items-center space-x-4 pointer-events-auto hud-border">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-mono text-slate-400">OPERATOR HEALTH</span>
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-heart-pulse text-red-500 text-xl"></i>
+                            <span id="hud-hp" class="text-3xl font-teko font-bold text-white">100</span>
+                        </div>
+                    </div>
+                    <div class="w-32 bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
+                        <div id="hp-bar-fill" class="bg-red-500 h-full w-full transition-all duration-200"></div>
+                    </div>
+                </div>
+
+                <!-- Weapon & Ammo Display -->
+                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl flex items-center space-x-6 pointer-events-auto hud-border text-right">
+                    <div>
+                        <span id="hud-weapon-name" class="text-xs font-mono text-blue-400">M4-A1 CARBINE</span>
+                        <div class="flex items-baseline justify-end space-x-1">
+                            <span id="hud-ammo-curr" class="text-4xl font-teko font-bold text-white">30</span>
+                            <span class="text-xl font-teko text-slate-400">/</span>
+                            <span id="hud-ammo-reserve" class="text-xl font-teko text-slate-400">120</span>
+                        </div>
+                    </div>
+                    <button onclick="togglePause()" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-white">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Touch Controls Overlay (Visible if touch device or forced) -->
+            <div id="mobile-controls" class="hidden absolute inset-0 pointer-events-none p-6 justify-between items-end">
+                <div class="w-40 h-40 bg-white/10 border-2 border-white/20 rounded-full relative pointer-events-auto flex items-center justify-center" id="touch-joystick">
+                    <div class="w-16 h-16 bg-blue-500/60 rounded-full absolute" id="touch-stick"></div>
+                </div>
+                <div class="flex flex-col space-y-3 pointer-events-auto">
+                    <button id="touch-fire" class="w-20 h-20 bg-red-600/80 border-2 border-red-400 rounded-full text-white font-teko text-2xl flex items-center justify-center shadow-lg">FIRE</button>
+                    <div class="flex space-x-2">
+                        <button id="touch-ads" class="w-14 h-14 bg-blue-600/80 rounded-full text-white font-teko">ADS</button>
+                        <button id="touch-reload" class="w-14 h-14 bg-amber-600/80 rounded-full text-white font-teko">RCL</button>
+                        <button id="touch-jump" class="w-14 h-14 bg-slate-700/80 rounded-full text-white font-teko">JMP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAUSE MENU -->
+        <div id="menu-pause" class="hidden absolute inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50">
+            <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-md text-center space-y-6 hud-border shadow-2xl">
+                <h2 class="text-4xl font-teko tracking-wider text-white">GAME PAUSED</h2>
+                <div class="flex flex-col space-y-3">
+                    <button onclick="togglePause()" class="btn-military py-3 font-teko text-xl">RESUME COMBAT</button>
+                    <button onclick="restartMatch()" class="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-teko text-xl text-white">RESTART MATCH</button>
+                    <button onclick="returnToMainMenu()" class="py-3 bg-red-950/80 hover:bg-red-900 border border-red-800 rounded-lg font-teko text-xl text-red-300">QUIT TO MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATCH END SCREEN -->
+        <div id="menu-gameover" class="hidden absolute inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center z-50">
+            <div class="bg-slate-900 border-2 border-blue-500/60 p-8 rounded-2xl w-full max-w-2xl text-center space-y-6 hud-border shadow-2xl">
+                <span id="end-status" class="bg-blue-600/30 text-blue-300 px-4 py-1 rounded-full text-sm font-mono border border-blue-500">MATCH CONCLUDED</span>
+                <h2 id="end-title" class="text-6xl font-teko tracking-wider text-white">VICTORY</h2>
+                <div class="grid grid-cols-3 gap-4 my-6">
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400">FINAL KILLS</span>
+                        <div id="end-kills" class="text-3xl font-teko text-emerald-400">0</div>
+                    </div>
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400">DEATHS</span>
+                        <div id="end-deaths" class="text-3xl font-teko text-red-400">0</div>
+                    </div>
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400">ACCURACY</span>
+                        <div id="end-acc" class="text-3xl font-teko text-blue-400">0%</div>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="restartMatch()" class="btn-military py-3 px-8 font-teko text-2xl">PLAY AGAIN</button>
+                    <button onclick="returnToMainMenu()" class="py-3 px-8 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-teko text-2xl text-white">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-</header>
 
-<section class="hero">
-    <div class="brand">Pooreyoutuber · Developer Tools</div>
-    <h1>Online Coding Tools</h1>
-    <p>Thirteen free tools for everyday developer work: make code screenshots, clean up and format your files, encode and decode text, and inspect JSON. Everything runs in your browser.</p>
-</section>
+    <!-- Main Game & Engine Script -->
+    <script>
+        // ==========================================
+        // 1. GAME CONFIGURATION & STATE
+        // ==========================================
+        const CONFIG = {
+            sensitivity: 1.2,
+            fov: 75,
+            graphics: 'high',
+            audioEnabled: true
+        };
 
-<nav class="chips">
-    <a href="#code-image">Code to Image</a>
-    <a href="#slug">URL Slug</a>
-    <a href="#rnshadow">React Native Shadow</a>
-    <a href="#base64">Base64</a>
-    <a href="#htmlenc">HTML Encoder</a>
-    <a href="#urlenc">URL Encoder</a>
-    <a href="#htmlmin">HTML Minifier</a>
-    <a href="#cssmin">CSS Minifier</a>
-    <a href="#jsmin">JS Minifier</a>
-    <a href="#htmlfmt">HTML Formatter</a>
-    <a href="#cssfmt">CSS Formatter</a>
-    <a href="#jsfmt">JS Formatter</a>
-    <a href="#json">JSON Tree Viewer</a>
-</nav>
+        const STATE = {
+            currentMenu: 'main',
+            selectedMapIndex: 0,
+            selectedWeaponIndex: 5, // Default M4
+            gameMode: 'tdm', // 'tdm' or 'ffa'
+            isPlaying: false,
+            isPaused: false,
+            isGameOver: false,
+            matchTime: 480, // 8 minutes default
+            scoreBlue: 0,
+            scoreRed: 0,
+            kills: 0,
+            deaths: 0,
+            shotsFired: 0,
+            shotsHit: 0
+        };
 
-<div class="wrap">
+        // ==========================================
+        // 2. WEAPON DATABASE (15 SELECTABLE WEAPONS)
+        // ==========================================
+        const WEAPONS = [
+            // SMGs (5)
+            { id: 0, name: "Vector-9 SMG", category: "SMG", damage: 24, fireRate: 950, magSize: 35, reloadTime: 1.5, range: 40, spread: 0.04 },
+            { id: 1, name: "MP5 Tactical", category: "SMG", damage: 28, fireRate: 800, magSize: 30, reloadTime: 1.8, range: 45, spread: 0.03 },
+            { id: 2, name: "P90 PDW", category: "SMG", damage: 22, fireRate: 900, magSize: 50, reloadTime: 2.2, range: 40, spread: 0.035 },
+            { id: 3, name: "Uzi Compact", category: "SMG", damage: 26, fireRate: 850, magSize: 32, reloadTime: 1.6, range: 35, spread: 0.045 },
+            { id: 4, name: "Modern MPX", category: "SMG", damage: 27, fireRate: 830, magSize: 30, reloadTime: 1.7, range: 48, spread: 0.028 },
+            // Assault Rifles (5)
+            { id: 5, name: "M4-A1 Carbine", category: "Assault Rifle", damage: 32, fireRate: 750, magSize: 30, reloadTime: 2.0, range: 80, spread: 0.02 },
+            { id: 6, name: "AK-47 Heavy", category: "Assault Rifle", damage: 42, fireRate: 600, magSize: 30, reloadTime: 2.4, range: 85, spread: 0.03 },
+            { id: 7, name: "SCAR-H Battle", category: "Assault Rifle", damage: 40, fireRate: 650, magSize: 20, reloadTime: 2.2, range: 90, spread: 0.022 },
+            { id: 8, name: "M16 Burst", category: "Assault Rifle", damage: 35, fireRate: 700, magSize: 30, reloadTime: 2.0, range: 95, spread: 0.015 },
+            { id: 9, name: "Bullpup AUG", category: "Assault Rifle", damage: 33, fireRate: 780, magSize: 30, reloadTime: 2.1, range: 82, spread: 0.018 },
+            // Shotguns (3)
+            { id: 10, name: "Pump-Action 870", category: "Shotgun", damage: 90, fireRate: 90, magSize: 8, reloadTime: 3.0, range: 18, spread: 0.09 },
+            { id: 11, name: "Semi-Auto S12", category: "Shotgun", damage: 75, fireRate: 240, magSize: 10, reloadTime: 2.8, range: 22, spread: 0.08 },
+            { id: 12, name: "Combat Breacher", category: "Shotgun", damage: 95, fireRate: 110, magSize: 6, reloadTime: 2.5, range: 15, spread: 0.1 },
+            // Sniper Rifles (2)
+            { id: 13, name: "Bolt-Action Mosin", category: "Sniper", damage: 98, fireRate: 45, magSize: 5, reloadTime: 3.2, range: 250, spread: 0.002 },
+            { id: 14, name: "Semi-Auto SVD", category: "Sniper", damage: 75, fireRate: 180, magSize: 10, reloadTime: 2.6, range: 200, spread: 0.005 }
+        ];
 
-    <!-- 1 CODE TO IMAGE -->
-    <section class="tool" id="code-image">
-        <div class="th"><h2>Code to Image Converter</h2><span class="badge">20 themes</span></div>
-        <p class="desc">Turn a code snippet into a shareable PNG with syntax highlighting, line numbers and a window bar. Keep the indentation intact so it looks right wherever you post it.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="ci-theme">Theme</label>
-                <select id="ci-theme"></select></div>
-            <div class="fld"><label for="ci-font">Font size</label>
-                <select id="ci-font"><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option></select></div>
-            <div class="fld"><label for="ci-pad">Padding (px)</label>
-                <input type="range" id="ci-pad" min="24" max="96" value="40"></div>
-            <div class="fld"><label for="ci-scale">Image quality</label>
-                <select id="ci-scale"><option value="1">Standard (1x)</option><option value="2" selected>High (2x)</option></select></div>
-            <div class="fld"><label for="ci-wm">Watermark</label>
-                <input type="text" id="ci-wm" value="Made with Pooreyoutuber" placeholder="Leave empty to hide"></div>
-            <div class="fld chk"><input type="checkbox" id="ci-ln" checked><label for="ci-ln">Line numbers</label></div>
-            <div class="fld chk"><input type="checkbox" id="ci-bar" checked><label for="ci-bar">Window bar</label></div>
-        </div>
-        <p class="lbl">Your code</p>
-        <textarea id="ci-in" rows="9">// Edit this code, the image updates as you type
-function greet(name) {
-  const message = `Welcome to Pooreyoutuber, ${name}!`;
-  return message;
-}
+        let currentWeapon = { ...WEAPONS[5] };
+        let currentAmmo = currentWeapon.magSize;
+        let reserveAmmo = currentWeapon.magSize * 4;
+        let isReloading = false;
+        let lastShotTime = 0;
 
-console.log(greet("Developer"));</textarea>
-        <div class="btns"><button class="btn" id="ci-dl">Download PNG</button></div>
-        <div class="canvas-wrap"><canvas id="ci-canvas"></canvas></div>
-        <h3 class="lbl" style="margin-top:16px">Pick a style from the gallery</h3>
-        <div class="preset-grid" id="ci-gal"></div>
-    </section>
+        // ==========================================
+        // 3. MAP DATABASE (5 MAPS)
+        // ==========================================
+        const MAPS = [
+            { id: 0, name: "OUTPOST", desc: "Desert military base with watchtowers and concrete barriers.", theme: "desert" },
+            { id: 1, name: "WAREHOUSE", desc: "Industrial indoor/outdoor zone with cargo containers and metal walkways.", theme: "industrial" },
+            { id: 2, name: "RAID", desc: "Modern luxury compound with central courtyard and balconies.", theme: "compound" },
+            { id: 3, name: "CARGO", desc: "Shipping yard with stacked containers and narrow corridors.", theme: "cargo" },
+            { id: 4, name: "SUMMIT", desc: "Snowy mountain installation with radar domes and bunker interiors.", theme: "snow" }
+        ];
 
-    <!-- 2 URL SLUG -->
-    <section class="tool" id="slug">
-        <div class="th"><h2>URL Slug Generator</h2></div>
-        <p class="desc">Turn a title into a clean, SEO-friendly slug. Accents are folded (ö becomes o), spaces become separators, and you can remove stop words, numbers or special characters.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="sl-sep">Separator</label>
-                <select id="sl-sep"><option value="-">Dash (-)</option><option value="_">Underscore (_)</option></select></div>
-            <div class="fld chk"><input type="checkbox" id="sl-lower" checked><label for="sl-lower">Lowercase</label></div>
-            <div class="fld chk"><input type="checkbox" id="sl-special" checked><label for="sl-special">Remove special characters</label></div>
-            <div class="fld chk"><input type="checkbox" id="sl-stop"><label for="sl-stop">Remove stop words (English)</label></div>
-            <div class="fld chk"><input type="checkbox" id="sl-num"><label for="sl-num">Remove numbers</label></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Title or text</p><textarea id="sl-in" rows="6">How to Build a Fast CSS Loader in 2026!</textarea></div>
-            <div><p class="lbl">Slug</p><textarea id="sl-out" rows="6" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" data-copy="sl-out">Copy slug</button></div>
-    </section>
+        // ==========================================
+        // 4. THREE.JS ENGINE & SCENE SETUP
+        // ==========================================
+        let scene, camera, renderer;
+        let mapGroup = new THREE.Group();
+        let bots = [];
+        let bullets = [];
+        let particles = [];
+        let raycaster = new THREE.Raycaster();
 
-    <!-- 3 REACT NATIVE SHADOW -->
-    <section class="tool" id="rnshadow">
-        <div class="th"><h2>React Native Shadow Generator</h2><span class="badge">20 presets</span></div>
-        <p class="desc">Create shadow styles for React Native that work on both iOS and Android. iOS uses the shadow properties, and Android uses elevation, so the generated object includes both.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="rn-x">Offset X</label><input type="range" id="rn-x" min="-20" max="20" value="0"></div>
-            <div class="fld"><label for="rn-y">Offset Y</label><input type="range" id="rn-y" min="-20" max="30" value="4"></div>
-            <div class="fld"><label for="rn-r">Blur radius</label><input type="range" id="rn-r" min="0" max="40" value="6"></div>
-            <div class="fld"><label for="rn-o">Opacity</label><input type="range" id="rn-o" min="0" max="1" step="0.05" value="0.3"></div>
-            <div class="fld"><label for="rn-e">Android elevation</label><input type="range" id="rn-e" min="0" max="24" value="5"></div>
-            <div class="fld"><label for="rn-c">Color</label><input type="color" id="rn-c" value="#000000" style="width:56px;height:36px;border:0;background:none"></div>
-        </div>
-        <div class="rn-box" id="rn-box"></div>
-        <p class="lbl">Style object</p>
-        <textarea id="rn-out" rows="8" readonly></textarea>
-        <div class="btns"><button class="btn" data-copy="rn-out">Copy style</button></div>
-        <h3 class="lbl" style="margin-top:16px">Pick a preset</h3>
-        <div class="preset-grid" id="rn-gal"></div>
-        <p class="note">Note: iOS and Android render shadows differently. Test on both platforms, because elevation is an approximation of the iOS values.</p>
-    </section>
+        // Player State
+        const player = {
+            position: new THREE.Vector3(0, 1.7, 0),
+            velocity: new THREE.Vector3(),
+            rotation: { x: 0, y: 0 },
+            hp: 100,
+            speed: 6.5,
+            jumpSpeed: 10,
+            isGrounded: false,
+            team: 'blue'
+        };
 
-    <!-- 4 BASE64 -->
-    <section class="tool" id="base64">
-        <div class="th"><h2>Base64 Encoder / Decoder</h2></div>
-        <p class="desc">Encode text to Base64 or decode Base64 back to text. UTF-8 characters such as emoji and accents are handled correctly.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="b64-mode">Mode</label>
-                <select id="b64-mode"><option value="enc">Encode</option><option value="dec">Decode</option></select></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Input</p><textarea id="b64-in" rows="7">Hello, Pooreyoutuber! 🚀</textarea></div>
-            <div><p class="lbl">Output</p><textarea id="b64-out" rows="7" readonly></textarea></div>
-        </div>
-        <div class="err" id="b64-err"></div>
-        <div class="btns"><button class="btn" data-copy="b64-out">Copy output</button></div>
-    </section>
+        // Input Controls State
+        const keys = {};
+        let mouseLook = { x: 0, y: 0 };
+        let isMouseDown = false;
+        let isADS = false;
 
-    <!-- 5 HTML ENCODER -->
-    <section class="tool" id="htmlenc">
-        <div class="th"><h2>HTML Encoder / Decoder</h2></div>
-        <p class="desc">Replace special characters such as &lt;, &gt;, &amp;, quotes and apostrophes with their HTML escape forms, or turn escaped text back into normal characters.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="he-mode">Mode</label>
-                <select id="he-mode"><option value="enc">Encode</option><option value="dec">Decode</option></select></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Input</p><textarea id="he-in" rows="7">&lt;p class="intro"&gt;Tom &amp; Jerry's "show"&lt;/p&gt;</textarea></div>
-            <div><p class="lbl">Output</p><textarea id="he-out" rows="7" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" data-copy="he-out">Copy output</button></div>
-    </section>
+        function initEngine() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x111827, 0.015);
 
-    <!-- 6 URL ENCODER -->
-    <section class="tool" id="urlenc">
-        <div class="th"><h2>URL Encoder / Decoder</h2></div>
-        <p class="desc">Escape characters that would break a URL, such as spaces, &amp; and #, or decode an encoded URL back to readable text. Choose full-URL mode to keep the structure of a link intact.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="ue-mode">Mode</label>
-                <select id="ue-mode"><option value="enc">Encode</option><option value="dec">Decode</option></select></div>
-            <div class="fld chk"><input type="checkbox" id="ue-full"><label for="ue-full">Full URL mode (keep :/?&=#)</label></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Input</p><textarea id="ue-in" rows="7">https://example.com/search?q=css loaders&lang=en</textarea></div>
-            <div><p class="lbl">Output</p><textarea id="ue-out" rows="7" readonly></textarea></div>
-        </div>
-        <div class="err" id="ue-err"></div>
-        <div class="btns"><button class="btn" data-copy="ue-out">Copy output</button></div>
-    </section>
+            camera = new THREE.PerspectiveCamera(CONFIG.fov, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
 
-    <!-- 7 HTML MINIFIER -->
-    <section class="tool" id="htmlmin">
-        <div class="th"><h2>HTML Minifier</h2></div>
-        <p class="desc">Remove comments and extra whitespace from HTML to reduce file size. Keep the safe mode on if your page has inline elements where a space matters.</p>
-        <div class="ctrls">
-            <div class="fld chk"><input type="checkbox" id="hm-aggr"><label for="hm-aggr">Aggressive (remove spaces between tags)</label></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Raw HTML</p><textarea id="hm-in" rows="10"><!-- Main section -->
-<div class="card">
-    <h2>Hello   world</h2>
-    <p>Some <b>bold</b> text here.</p>
-</div></textarea></div>
-            <div><p class="lbl">Minified HTML</p><textarea id="hm-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="hm-dl">Download .html</button><button class="btn alt" data-copy="hm-out">Copy</button></div>
-        <p class="note" id="hm-stat"></p>
-    </section>
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
 
-    <!-- 8 CSS MINIFIER -->
-    <section class="tool" id="cssmin">
-        <div class="th"><h2>CSS Minifier</h2></div>
-        <p class="desc">Remove comments, line breaks and unnecessary spaces, and drop the last semicolon in each block. The result is a smaller stylesheet that loads faster.</p>
-        <div class="io">
-            <div><p class="lbl">Raw CSS</p><textarea id="cm-in" rows="10">/* Button styles */
-.btn {
-    background: #6d5efc;
-    color: #fff;
-    padding: 8px 14px;
-    border-radius: 8px;
-}
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            sunLight.position.set(50, 100, 50);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            scene.add(sunLight);
 
-.btn:hover {
-    opacity: .9;
-}</textarea></div>
-            <div><p class="lbl">Minified CSS</p><textarea id="cm-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="cm-dl">Download style.min.css</button><button class="btn alt" data-copy="cm-out">Copy</button></div>
-        <p class="note" id="cm-stat"></p>
-    </section>
+            scene.add(mapGroup);
 
-    <!-- 9 JS MINIFIER -->
-    <section class="tool" id="jsmin">
-        <div class="th"><h2>JavaScript Minifier</h2></div>
-        <p class="desc">A safe, light minifier: it removes comments and indentation while keeping strings and line breaks intact, so the code keeps working. For maximum compression, use a dedicated build tool.</p>
-        <div class="io">
-            <div><p class="lbl">Raw JavaScript</p><textarea id="jm-in" rows="10">// Greeting helper
-function greet(name) {
-    /* build the message */
-    const msg = "Hello, " + name;
-    return msg;
-}
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('keydown', (e) => { keys[e.code] = true; handleKeyDown(e); });
+            window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!STATE.isPlaying || STATE.isPaused) return;
+                if (document.pointerLockElement === renderer.domElement) {
+                    player.rotation.y -= e.movementX * 0.002 * CONFIG.sensitivity;
+                    player.rotation.x -= e.movementY * 0.002 * CONFIG.sensitivity;
+                    player.rotation.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.rotation.x));
+                }
+            });
 
-console.log(greet("World"));</textarea></div>
-            <div><p class="lbl">Minified JavaScript</p><textarea id="jm-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="jm-dl">Download .min.js</button><button class="btn alt" data-copy="jm-out">Copy</button></div>
-        <p class="note" id="jm-stat"></p>
-    </section>
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                if (!STATE.isPlaying || STATE.isPaused) return;
+                if (document.pointerLockElement !== renderer.domElement) {
+                    renderer.domElement.requestPointerLock();
+                } else if (e.button === 0) {
+                    isMouseDown = true;
+                } else if (e.button === 2) {
+                    toggleADS(true);
+                }
+            });
 
-    <!-- 10 HTML FORMATTER -->
-    <section class="tool" id="htmlfmt">
-        <div class="th"><h2>HTML Formatter</h2></div>
-        <p class="desc">Beautify messy or minified HTML so each tag sits on its own line with consistent indentation. Useful for reading code you received from a template or a generator.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="hf-ind">Indent</label>
-                <select id="hf-ind"><option value="  ">2 spaces</option><option value="    ">4 spaces</option><option value="	">Tab</option></select></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Minified or messy HTML</p><textarea id="hf-in" rows="10"><div class="card"><h2>Title</h2><p>Some text</p><ul><li>One</li><li>Two</li></ul></div></textarea></div>
-            <div><p class="lbl">Formatted HTML</p><textarea id="hf-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="hf-dl">Download .html</button><button class="btn alt" data-copy="hf-out">Copy</button></div>
-    </section>
+            renderer.domElement.addEventListener('mouseup', (e) => {
+                if (e.button === 0) isMouseDown = false;
+                if (e.button === 2) toggleADS(false);
+            });
 
-    <!-- 11 CSS FORMATTER -->
-    <section class="tool" id="cssfmt">
-        <div class="th"><h2>CSS Formatter</h2></div>
-        <p class="desc">Format CSS so every selector and declaration gets its own line and indentation. Great for cleaning up a minified stylesheet before you edit it.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="cf-ind">Indent</label>
-                <select id="cf-ind"><option value="  ">2 spaces</option><option value="    ">4 spaces</option><option value="	">Tab</option></select></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Minified or messy CSS</p><textarea id="cf-in" rows="10">.card{margin:0 auto;padding:16px}.card h2{font-size:20px;color:#0f172a}@media (max-width:600px){.card{padding:8px}}</textarea></div>
-            <div><p class="lbl">Formatted CSS</p><textarea id="cf-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="cf-dl">Download style.css</button><button class="btn alt" data-copy="cf-out">Copy</button></div>
-    </section>
+            renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
 
-    <!-- 12 JS FORMATTER -->
-    <section class="tool" id="jsfmt">
-        <div class="th"><h2>JavaScript Formatter</h2></div>
-        <p class="desc">Beautify JavaScript by placing statements and blocks on their own lines with proper indentation. It is a basic formatter that handles common code well, while strings and comments are left unchanged.</p>
-        <div class="ctrls">
-            <div class="fld"><label for="jf-ind">Indent</label>
-                <select id="jf-ind"><option value="  ">2 spaces</option><option value="    ">4 spaces</option><option value="	">Tab</option></select></div>
-        </div>
-        <div class="io">
-            <div><p class="lbl">Messy JavaScript</p><textarea id="jf-in" rows="10">function sum(a,b){const total=a+b;if(total>10){console.log("big");}return total;}for(let i=0;i<3;i++){console.log(i)}</textarea></div>
-            <div><p class="lbl">Formatted JavaScript</p><textarea id="jf-out" rows="10" readonly></textarea></div>
-        </div>
-        <div class="btns"><button class="btn" id="jf-dl">Download .js</button><button class="btn alt" data-copy="jf-out">Copy</button></div>
-    </section>
+            buildWeaponLoadoutUI();
+            buildProceduralMap(STATE.selectedMapIndex);
+            
+            // Animation Loop
+            let lastTime = performance.now();
+            function animate(now) {
+                requestAnimationFrame(animate);
+                const delta = (now - lastTime) / 1000;
+                lastTime = now;
 
-    <!-- 13 JSON TREE VIEWER -->
-    <section class="tool" id="json">
-        <div class="th"><h2>JSON Tree Viewer</h2></div>
-        <p class="desc">View JSON as a collapsible tree so you can walk through nested branches. Invalid JSON is reported with the error message instead of being displayed.</p>
-        <div class="io">
-            <div>
-                <p class="lbl">Enter JSON</p>
-                <textarea id="jt-in" rows="12">{"name":"Pooreyoutuber","tools":["code","json","css"],"active":true,"stats":{"visitors":1200,"rating":4.8,"notes":null}}</textarea>
-                <div class="err" id="jt-err"></div>
-            </div>
-            <div>
-                <p class="lbl">Tree view</p>
-                <div class="btns" style="margin:0 0 8px"><button class="btn alt" id="jt-open">Expand all</button><button class="btn alt" id="jt-close">Collapse all</button></div>
-                <div class="jtree" id="jt-tree"></div>
-            </div>
-        </div>
-        <div class="ctrls" style="margin-top:14px">
-            <div class="fld"><label for="jt-ind">Download indent</label>
-                <select id="jt-ind"><option value="2">2 spaces</option><option value="4">4 spaces</option></select></div>
-        </div>
-        <div class="btns"><button class="btn" id="jt-dl">Download as .json</button><button class="btn alt" id="jt-fmt">Format JSON</button></div>
-    </section>
+                if (STATE.isPlaying && !STATE.isPaused) {
+                    updatePlayer(delta);
+                    updateBots(delta);
+                    updateProjectiles(delta);
+                    updateParticles(delta);
+                    updateHUD();
+                    updateMinimap();
+                }
+                renderer.render(scene, camera);
+            }
+            requestAnimationFrame(animate);
+        }
 
-    <!-- HOMEPAGE GUIDE -->
-    <section class="about">
-        <h2>About Pooreyoutuber Online Coding Tools</h2>
-        <p>Pooreyoutuber Online Coding Tools is a free collection of small, focused utilities for developers, students, bloggers and content creators. Every tool on this page solves one practical problem: making a code screenshot for a tutorial, cleaning up a slug for a blog post, encoding a string for an API call, shrinking a stylesheet before launch, or reading a large JSON response. You do not need to install anything or create an account. Open the page, paste your input, and copy or download the result.</p>
+        // ==========================================
+        // 5. MENU & UI CONTROLLER FUNCTIONS
+        // ==========================================
+        function switchMenu(menuName) {
+            STATE.currentMenu = menuName;
+            ['menu-main', 'menu-map', 'menu-loadout', 'menu-mode', 'menu-settings', 'menu-help'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(`menu-${menuName}`).classList.remove('hidden');
+        }
 
-        <h3>How to use this page</h3>
-        <p>Use the chips at the top to jump to any tool, or scroll through the list. Most tools follow the same pattern. Paste your text or code into the input box on the left, adjust any options above it, and read the result on the right. Use the Copy button to place the result on your clipboard, or the Download button to save it as a file. The Code to Image and React Native Shadow tools also show a live preview, so you can see the effect before you copy anything.</p>
+        function selectMap(index) {
+            STATE.selectedMapIndex = index;
+            document.querySelectorAll('[id^="map-card-"]').forEach((el, idx) => {
+                if (idx === index) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
+            const m = MAPS[index];
+            document.getElementById('btn-map-label').innerText = m.name;
+            document.getElementById('preview-title').innerText = "OPERATION " + m.name;
+            document.getElementById('preview-desc').innerText = m.desc;
+            buildProceduralMap(index);
+        }
 
-        <h3>Code to Image Converter</h3>
-        <p>Screenshots of code are common in tutorials, tweets and documentation. This tool renders your snippet with syntax highlighting, line numbers and an optional window bar, then exports a PNG at standard or high quality. Choose one of twenty themes from the gallery, add a watermark if you want credit, and adjust the padding and font size. Because indentation is preserved, the image stays readable when you share it.</p>
+        function selectWeapon(index) {
+            STATE.selectedWeaponIndex = index;
+            currentWeapon = { ...WEAPONS[index] };
+            currentAmmo = currentWeapon.magSize;
+            reserveAmmo = currentWeapon.magSize * 4;
+            document.getElementById('btn-weapon-label').innerText = currentWeapon.name;
+            document.getElementById('stat-dmg-rpm').innerText = `${currentWeapon.damage} DMG / ${currentWeapon.fireRate} RPM`;
+            document.getElementById('stat-mag').innerText = `${currentWeapon.magSize} RDS`;
+            
+            document.querySelectorAll('.weapon-card').forEach((el, idx) => {
+                if (idx === index) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
+        }
 
-        <h3>URL Slug Generator</h3>
-        <p>Search engines and readers prefer short, descriptive web addresses. A slug is the part of the URL that describes the page. The slug generator lowercases the text, folds accented characters, replaces spaces with dashes or underscores, and can remove stop words such as "the" and "and" as well as numbers and punctuation. Use it for blog posts, product pages and any content whose address you control.</p>
+        function selectMode(mode) {
+            STATE.gameMode = mode;
+            document.getElementById('mode-card-tdm').classList.toggle('selected', mode === 'tdm');
+            document.getElementById('mode-card-ffa').classList.toggle('selected', mode === 'ffa');
+            document.getElementById('btn-mode-label').innerText = mode === 'tdm' ? 'TEAM DEATHMATCH' : 'SOLO FREE-FOR-ALL';
+            document.getElementById('preview-combatants').innerText = mode === 'tdm' ? '20 PLAYERS (1V19)' : '10 PLAYERS (FFA)';
+        }
 
-        <h3>React Native Shadow Generator</h3>
-        <p>React Native handles shadows differently on each platform. iOS uses shadow color, offset, opacity and radius, while Android uses elevation. This generator lets you set all of these values with sliders, shows a preview, and outputs a style object that includes both platforms. The twenty presets, from subtle card shadows to deep modal shadows, give you a fast starting point.</p>
+        function updateSetting(key, val) {
+            CONFIG[key] = parseFloat(val);
+            if (key === 'sensitivity') document.getElementById('val-sens').innerText = val;
+            if (key === 'fov') {
+                document.getElementById('val-fov').innerText = val;
+                if (camera) { camera.fov = parseFloat(val); camera.updateProjectionMatrix(); }
+            }
+        }
 
-        <h3>Encoders and decoders</h3>
-        <p>Base64, HTML and URL encoding are part of daily development. Base64 is used for embedding data and for many API tokens, and this tool handles UTF-8 text such as emoji correctly. The HTML encoder protects text that is displayed on a web page, so characters like angle brackets cannot be read as markup. The URL encoder escapes spaces and reserved characters so a query string arrives intact, and full-URL mode keeps the structure of a link while encoding its contents.</p>
+        function setGraphicsTier(tier) {
+            CONFIG.graphics = tier;
+            ['low', 'medium', 'high', 'ultra'].forEach(t => {
+                const btn = document.getElementById(`gfx-${t}`);
+                if (t === tier) {
+                    btn.className = "py-2 bg-blue-600 border border-blue-400 rounded font-teko text-lg";
+                } else {
+                    btn.className = "py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg";
+                }
+            });
+            if (renderer) {
+                renderer.shadowMap.enabled = (tier === 'high' || tier === 'ultra');
+            }
+        }
 
-        <h3>Minifiers</h3>
-        <p>Minification removes comments and unnecessary whitespace so files download faster. The HTML minifier collapses spacing between tags, the CSS minifier removes comments and extra semicolons, and the JavaScript minifier removes comments and indentation while keeping strings and line breaks safe. Always keep a copy of your original file, and test the minified version before you deploy it.</p>
+        function toggleAudio(enabled) { CONFIG.audioEnabled = enabled; }
 
-        <h3>Formatters</h3>
-        <p>Formatters do the opposite job: they make compressed or messy code easy to read. The HTML, CSS and JavaScript formatters place each element, declaration or statement on its own line and indent nested blocks. Pick two, four spaces or a tab to match your project style. These are lightweight formatters, so for large production projects, a full code editor formatter is still the best choice.</p>
+        function buildWeaponLoadoutUI() {
+            const grid = document.getElementById('weapon-grid');
+            grid.innerHTML = '';
+            WEAPONS.forEach((w, idx) => {
+                const isSelected = idx === STATE.selectedWeaponIndex ? 'selected' : '';
+                grid.innerHTML += `
+                    <div onclick="selectWeapon(${idx})" class="weapon-card card-select p-4 rounded-xl cursor-pointer group ${isSelected}">
+                        <div class="h-20 bg-slate-800/80 rounded-lg mb-2 flex items-center justify-center border border-slate-700">
+                            <i class="fa-solid fa-gun text-3xl text-blue-400 group-hover:scale-110 transition"></i>
+                        </div>
+                        <span class="text-[10px] font-mono text-blue-400">${w.category}</span>
+                        <h4 class="text-xl font-teko font-bold text-white">${w.name}</h4>
+                        <div class="text-xs text-slate-400 mt-1">${w.damage} DMG | ${w.fireRate} RPM</div>
+                    </div>
+                `;
+            });
+        }
 
-        <h3>JSON Tree Viewer</h3>
-        <p>API responses are often long and deeply nested. The JSON tree viewer shows them as a collapsible tree, so you can open only the branches you need. If the JSON is invalid, the tool shows the parser error instead of rendering partial data. You can expand or collapse everything at once, format the JSON, and download it with your preferred indentation.</p>
+        // ==========================================
+        // 6. PROCEDURAL 3D MAP GENERATOR
+        // ==========================================
+        function buildProceduralMap(mapIndex) {
+            while (mapGroup.children.length > 0) {
+                mapGroup.remove(mapGroup.children[0]);
+            }
 
-        <h3>Tips for the best results</h3>
-        <p>Keep the original text safe before you minify or encode it, because the output replaces the form of the input. For code screenshots, use a font size of 16 or higher so the image stays readable on mobile phones. When you create slugs, remove stop words only for titles where it still reads naturally. Also, check React Native shadows on a real device, because the same numbers can look slightly different on iOS and Android.</p>
+            const mapDef = MAPS[mapIndex];
+            
+            // Ground
+            let groundColor = 0xc2b280; // Desert
+            if (mapDef.theme === 'industrial') groundColor = 0x334155;
+            if (mapDef.theme === 'compound') groundColor = 0x1e293b;
+            if (mapDef.theme === 'cargo') groundColor = 0x18181b;
+            if (mapDef.theme === 'snow') groundColor = 0xf8fafc;
 
-        <h3>Privacy and browser support</h3>
-        <p>Your text never leaves your browser. All processing runs locally on your device, so you can safely work with private snippets, internal URLs and sample API data. The tools work in current versions of Chrome, Edge, Firefox and Safari, on both desktop and mobile.</p>
+            const groundGeo = new THREE.PlaneGeometry(160, 160);
+            const groundMat = new THREE.MeshStandardMaterial({ color: groundColor, roughness: 0.8 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            mapGroup.add(ground);
 
-        <h3>Frequently asked questions</h3>
-        <p><strong>Are these tools free?</strong> Yes. You can use them for personal and commercial work.</p>
-        <p><strong>Can I download the results?</strong> Yes. The code image downloads as a PNG, and the minifiers, formatters and JSON viewer offer file downloads.</p>
-        <p><strong>Is the minifier a full build tool?</strong> No. It is a safe, lightweight tool for quick cleanup. Bundlers such as Terser or esbuild give stronger compression for large projects.</p>
+            // Grid Walls & Obstacles
+            const wallMat = new THREE.MeshStandardMaterial({ 
+                color: mapDef.theme === 'snow' ? 0x94a3b8 : (mapDef.theme === 'desert' ? 0xd4a373 : 0x475569), 
+                roughness: 0.7 
+            });
 
-        <p>Bookmark this page and come back whenever you need a quick, reliable utility. More tools and tutorials are shared on the Pooreyoutuber channel and website.</p>
-    </section>
-</div>
+            // Boundary Walls
+            const boundSize = 75;
+            createWall(0, 5, -boundSize, 150, 10, 2, wallMat);
+            createWall(0, 5, boundSize, 150, 10, 2, wallMat);
+            createWall(-boundSize, 5, 0, 2, 10, 150, wallMat);
+            createWall(boundSize, 5, 0, 2, 10, 150, wallMat);
 
-<footer>
-    <span class="brandname">Pooreyoutuber</span> · Online Coding Tools · Made with ❤️ for developers and creators<br>
-    <a href="https://pooreyoutuber.github.io/">Home</a> · <a href="Articals.html">Articles</a> · <a href="youtubehelp.html">YouTube Help</a>
-</footer>
+            // Procedural Buildings and Cover
+            const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+            for (let i = 0; i < 25; i++) {
+                const x = (Math.random() - 0.5) * 120;
+                const z = (Math.random() - 0.5) * 120;
+                if (Math.abs(x) < 10 && Math.abs(z) < 10) continue; // Keep spawn clean
 
-<script>
-/* ---------- helpers ---------- */
-const $ = id => document.getElementById(id);
-const val = el => ('value' in el) ? el.value : el.textContent;
-function dl(name, text, type='text/plain'){
-  const b = new Blob([text], {type});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(b); a.download = name; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
-function copyText(text, btn){
-  const done = () => { if(!btn) return; const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = o, 1300); };
-  const fallback = () => {
-    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); done(); } catch(e) {}
-    ta.remove();
-  };
-  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
-  else fallback();
-}
-document.addEventListener('click', e => {
-  const b = e.target.closest('[data-copy]');
-  if(b) copyText(val($(b.dataset.copy)), b);
-});
+                const w = 6 + Math.random() * 10;
+                const h = 4 + Math.random() * 6;
+                const d = 6 + Math.random() * 10;
 
-/* ---------- 1. CODE TO IMAGE ---------- */
-const PAL = [
-  {n:'Dracula', card:'#282a36', txt:'#f8f8f2', kw:'#ff79c6', st:'#f1fa8c', cm:'#6272a4', nm:'#bd93f9', ln:'#6272a4'},
-  {n:'Monokai', card:'#272822', txt:'#f8f8f2', kw:'#f92672', st:'#e6db74', cm:'#75715e', nm:'#ae81ff', ln:'#75715e'},
-  {n:'Nord', card:'#2e3440', txt:'#d8dee9', kw:'#81a1c1', st:'#a3be8c', cm:'#616e88', nm:'#b48ead', ln:'#4c566a'},
-  {n:'One Dark', card:'#282c34', txt:'#abb2bf', kw:'#c678dd', st:'#98c379', cm:'#5c6370', nm:'#d19a66', ln:'#4b5263'},
-  {n:'GitHub Light', card:'#ffffff', txt:'#24292e', kw:'#d73a49', st:'#032f62', cm:'#6a737d', nm:'#005cc5', ln:'#959da5'},
-  {n:'Solarized Light', card:'#fdf6e3', txt:'#657b83', kw:'#859900', st:'#2aa198', cm:'#93a1a1', nm:'#d33682', ln:'#93a1a1'},
-  {n:'Synthwave', card:'#2b213a', txt:'#f0e6ff', kw:'#ff7edb', st:'#fede5d', cm:'#848bbd', nm:'#72f1b8', ln:'#5b4d7a'},
-  {n:'Gruvbox', card:'#282828', txt:'#ebdbb2', kw:'#fb4934', st:'#b8bb26', cm:'#928374', nm:'#d3869b', ln:'#665c54'},
-  {n:'Tokyo Night', card:'#1a1b26', txt:'#a9b1d6', kw:'#bb9af7', st:'#9ece6a', cm:'#565f89', nm:'#ff9e64', ln:'#3b4261'},
-  {n:'Material', card:'#263238', txt:'#eeffff', kw:'#c792ea', st:'#c3e88d', cm:'#546e7a', nm:'#f78c6c', ln:'#37474f'}
-];
-const BGS = [{n:'Ocean', g:['#667eea','#764ba2']}, {n:'Sunset', g:['#f97316','#ec4899']}];
-const THEMES = [];
-PAL.forEach(p => BGS.forEach(b => THEMES.push({n:`${p.n} · ${b.n}`, ...p, g:b.g})));
+                const bMesh = new THREE.Mesh(boxGeo, wallMat);
+                bMesh.position.set(x, h/2, z);
+                bMesh.scale.set(w, h, d);
+                bMesh.castShadow = true;
+                bMesh.receiveShadow = true;
+                mapGroup.add(bMesh);
+            }
+        }
 
-const TOK = /(\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`[^`]*`)|\b(const|let|var|function|return|if|else|for|while|class|import|from|export|new|true|false|null|undefined|await|async)\b|\b(\d+(?:\.\d+)?)\b/g;
-function tokens(line){
-  const out = []; let last = 0, m; TOK.lastIndex = 0;
-  while((m = TOK.exec(line))){
-    if(m.index > last) out.push([line.slice(last, m.index), 't']);
-    out.push([m[0], m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : 'n']);
-    last = m.index + m[0].length;
-    if(m[0].length === 0) TOK.lastIndex++;
-  }
-  if(last < line.length) out.push([line.slice(last), 't']);
-  return out;
-}
-function rr(ctx, x, y, w, h, r){
-  ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
-  ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
-}
-function renderCode(){
-  const T = THEMES[+$('ci-theme').value];
-  const lines = ($('ci-in').value.replace(/\t/g, '  ') || ' ').split('\n');
-  const fs = +$('ci-font').value, pad = +$('ci-pad').value, sc = +$('ci-scale').value;
-  const ln = $('ci-ln').checked, bar = $('ci-bar').checked, wm = $('ci-wm').value.trim();
-  const cv = $('ci-canvas'), ctx = cv.getContext('2d');
-  const font = `${fs}px Consolas, Menlo, "Courier New", monospace`;
-  ctx.font = font;
-  const cw = ctx.measureText('M').width, lh = Math.round(fs * 1.6);
-  const gut = ln ? String(lines.length).length * cw + 24 : 0;
-  let maxW = 0; lines.forEach(l => maxW = Math.max(maxW, ctx.measureText(l).width));
-  const barH = bar ? 36 : 0, outer = 56, wmH = wm ? 40 : 0;
-  const cardW = Math.max(360, maxW + gut + pad*2), cardH = barH + pad*2 + lines.length * lh;
-  const W = cardW + outer*2, H = cardH + outer*2 + wmH;
-  cv.width = W * sc; cv.height = H * sc;
-  ctx.setTransform(sc, 0, 0, sc, 0, 0);
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, T.g[0]); g.addColorStop(1, T.g[1]);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  rr(ctx, outer, outer, cardW, cardH, 14); ctx.fillStyle = T.card; ctx.fill();
-  if(bar){
-    ['#ff5f56', '#ffbd2e', '#27c93f'].forEach((col, i) => {
-      ctx.beginPath(); ctx.arc(outer + 22 + i*20, outer + 18, 6, 0, Math.PI*2); ctx.fillStyle = col; ctx.fill();
-    });
-  }
-  const colors = {t:T.txt, c:T.cm, s:T.st, k:T.kw, n:T.nm};
-  const top = outer + barH + pad, x0 = outer + pad;
-  ctx.font = font; ctx.textBaseline = 'alphabetic';
-  lines.forEach((l, i) => {
-    const y = top + i*lh + fs;
-    if(ln){
-      ctx.fillStyle = T.ln;
-      ctx.fillText(String(i+1).padStart(String(lines.length).length, ' '), x0, y);
-    }
-    let x = x0 + gut;
-    for(const [txt, k] of tokens(l)){
-      ctx.fillStyle = colors[k]; ctx.fillText(txt, x, y); x += ctx.measureText(txt).width;
-    }
-  });
-  if(wm){
-    ctx.font = '14px system-ui, sans-serif'; ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 4;
-    ctx.fillText(wm, W - outer, H - 18);
-    ctx.shadowBlur = 0; ctx.textAlign = 'left';
-  }
-}
-function buildCodeGallery(){
-  $('ci-theme').innerHTML = THEMES.map((t, i) => `<option value="${i}">${i+1}. ${t.n}</option>`).join('');
-  $('ci-gal').innerHTML = THEMES.map((t, i) => `<button type="button" data-theme="${i}" style="background:linear-gradient(135deg,${t.g[0]},${t.g[1]});color:${t.txt};border:0"><span style="display:block;background:${t.card};border-radius:6px;padding:6px;font-family:Consolas,monospace;font-size:11px;color:${t.kw}">const <span style="color:${t.st}">x</span></span><small style="color:#fff">${i+1}. ${t.n}</small></button>`).join('');
-}
-$('ci-gal').addEventListener('click', e => {
-  const b = e.target.closest('[data-theme]'); if(!b) return;
-  $('ci-theme').value = b.dataset.theme; renderCode();
-});
-$('ci-dl').addEventListener('click', () => {
-  $('ci-canvas').toBlob(blob => {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'code.png'; a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  });
-});
-buildCodeGallery();
-$('code-image').addEventListener('input', renderCode);
-$('code-image').addEventListener('change', renderCode);
+        function createWall(x, y, z, w, h, d, mat) {
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mapGroup.add(mesh);
+        }
 
-/* ---------- 2. URL SLUG ---------- */
-const STOP = ['a','an','and','the','of','in','on','at','to','for','with','by','from','is','are','was','be','or','as','it','this','that','your','you','how'];
-function slugify(s){
-  const sep = $('sl-sep').value;
-  let t = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  if($('sl-num').checked) t = t.replace(/\d+/g, ' ');
-  if($('sl-special').checked) t = t.replace(/[^\p{L}\p{N}\s_-]/gu, ' ');
-  let words = t.toLowerCase().split(/[\s_-]+/).filter(Boolean);
-  if($('sl-stop').checked) words = words.filter(w => !STOP.includes(w));
-  let out = words.join(sep);
-  if(!$('sl-lower').checked) out = t.trim().replace(/\s+/g, sep);
-  return out;
-}
-function renderSlug(){ $('sl-out').value = slugify($('sl-in').value); }
-$('slug').addEventListener('input', renderSlug);
-renderSlug();
+        // ==========================================
+        // 7. MATCH INITIALIZATION & BOT SPAWNING
+        // ==========================================
+        function startGame() {
+            STATE.isPlaying = true;
+            STATE.isPaused = false;
+            STATE.isGameOver = false;
+            STATE.scoreBlue = 0;
+            STATE.scoreRed = 0;
+            STATE.kills = 0;
+            STATE.deaths = 0;
+            STATE.shotsFired = 0;
+            STATE.shotsHit = 0;
+            STATE.matchTime = STATE.gameMode === 'tdm' ? 480 : 360;
 
-/* ---------- 3. REACT NATIVE SHADOW ---------- */
-const RNP = [
-  ['Subtle',0,1,2,.1,1],['Soft card',0,2,6,.15,3],['Card',0,4,8,.2,5],['Floating',0,8,16,.25,8],['Deep',0,12,24,.35,12],
-  ['Hard drop',4,4,0,.5,2],['Long shadow',8,8,0,.3,2],['Top glow',0,-4,8,.2,4],['Bottom glow',0,6,10,.25,6],['Sharp',0,2,2,.4,2],
-  ['Button',0,3,5,.25,4],['Modal',0,10,20,.3,10],['Menu',0,6,12,.2,8],['Toast',0,4,14,.18,6],['Dropdown',0,8,10,.15,8],
-  ['Tooltip',0,3,6,.2,4],['Image',0,5,12,.22,5],['Hover lift',0,10,20,.2,10],['Pressed',0,1,3,.3,2],['Neon glow',0,0,16,.8,4,'#7c5cff']
-];
-function rnSet(x,y,r,o,e,c){ $('rn-x').value=x; $('rn-y').value=y; $('rn-r').value=r; $('rn-o').value=o; $('rn-e').value=e; $('rn-c').value=c||'#000000'; renderRN(); }
-function renderRN(){
-  const x=+$('rn-x').value, y=+$('rn-y').value, r=+$('rn-r').value, o=+$('rn-o').value, e=+$('rn-e').value, c=$('rn-c').value;
-  $('rn-out').value =
-`shadowColor: '${c}',
-shadowOffset: { width: ${x}, height: ${y} },
-shadowOpacity: ${o},
-shadowRadius: ${r},
-elevation: ${e},`;
-  const n = parseInt(c.slice(1),16), rgba = `rgba(${n>>16&255},${n>>8&255},${n&255},${o})`;
-  $('rn-box').style.boxShadow = `${x}px ${y}px ${r}px ${rgba}`;
-}
-$('rn-gal').innerHTML = RNP.map((p,i) => `<button type="button" data-rn="${i}">${p[0]}<small>x ${p[1]} · y ${p[2]} · r ${p[3]}</small></button>`).join('');
-$('rn-gal').addEventListener('click', e => {
-  const b = e.target.closest('[data-rn]'); if(!b) return;
-  const p = RNP[+b.dataset.rn]; rnSet(p[1], p[2], p[3], p[4], p[5], p[6]);
-});
-$('rnshadow').addEventListener('input', renderRN);
-renderRN();
+            // Reset Player
+            player.position.set(0, 1.7, 0);
+            player.hp = 100;
+            player.velocity.set(0, 0, 0);
 
-/* ---------- 4. BASE64 ---------- */
-function b64Enc(s){
-  const bytes = new TextEncoder().encode(s); let bin = '';
-  bytes.forEach(b => bin += String.fromCharCode(b));
-  return btoa(bin);
-}
-function b64Dec(s){
-  const bin = atob(s.replace(/\s/g, ''));
-  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-  return new TextDecoder('utf-8', {fatal:true}).decode(bytes);
-}
-function renderB64(){
-  const err = $('b64-err'); err.textContent = '';
-  try{
-    $('b64-out').value = $('b64-mode').value === 'enc' ? b64Enc($('b64-in').value) : b64Dec($('b64-in').value);
-  }catch(e){ $('b64-out').value = ''; err.textContent = 'Invalid Base64 input or text is not valid UTF-8.'; }
-}
-$('base64').addEventListener('input', renderB64);
-renderB64();
+            // Hide menus, show HUD
+            document.getElementById('menu-main').classList.add('hidden');
+            document.getElementById('menu-pause').classList.add('hidden');
+            document.getElementById('menu-gameover').classList.add('hidden');
+            document.getElementById('hud-game').classList.remove('hidden');
 
-/* ---------- 5. HTML ENCODER ---------- */
-function htmlEnc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function htmlDec(s){ const t = document.createElement('textarea'); t.innerHTML = s; return t.value; }
-function renderHE(){ $('he-out').value = $('he-mode').value === 'enc' ? htmlEnc($('he-in').value) : htmlDec($('he-in').value); }
-$('htmlenc').addEventListener('input', renderHE);
-renderHE();
+            // Request Pointer Lock
+            renderer.domElement.requestPointerLock();
 
-/* ---------- 6. URL ENCODER ---------- */
-function renderUE(){
-  const err = $('ue-err'); err.textContent = '';
-  const s = $('ue-in').value, full = $('ue-full').checked;
-  try{
-    if($('ue-mode').value === 'enc') $('ue-out').value = full ? encodeURI(s) : encodeURIComponent(s);
-    else $('ue-out').value = full ? decodeURI(s) : decodeURIComponent(s);
-  }catch(e){ $('ue-out').value = ''; err.textContent = 'The input contains an invalid percent-encoding sequence.'; }
-}
-$('urlenc').addEventListener('input', renderUE);
-renderUE();
+            // Spawn Bots based on Mode
+            spawnBots();
+        }
 
-/* ---------- 7. HTML MINIFIER ---------- */
-function minHTML(s, aggr){
-  let t = s.replace(/<!--[\s\S]*?-->/g, '');
-  t = aggr ? t.replace(/>\s+</g, '><') : t.replace(/>\s+</g, '> <');
-  return t.replace(/\s+/g, ' ').trim();
-}
-function renderHM(){
-  const out = minHTML($('hm-in').value, $('hm-aggr').checked);
-  $('hm-out').value = out;
-  const a = $('hm-in').value.length, b = out.length;
-  $('hm-stat').textContent = `${a} → ${b} characters (${a ? Math.round((1 - b/a)*100) : 0}% smaller)`;
-}
-$('hm-dl').addEventListener('click', () => dl('index.min.html', $('hm-out').value, 'text/html'));
-$('htmlmin').addEventListener('input', renderHM);
-renderHM();
+        function spawnBots() {
+            bots = [];
+            const totalBots = STATE.gameMode === 'tdm' ? 19 : 9;
 
-/* ---------- 8. CSS MINIFIER ---------- */
-function minCSS(s){
-  return s.replace(/\/\*[\s\S]*?\*\//g, '')
-          .replace(/\s+/g, ' ')
-          .replace(/\s*([{}:;,>+~])\s*/g, '$1')
-          .replace(/;}/g, '}')
-          .trim();
-}
-function renderCM(){
-  const out = minCSS($('cm-in').value); $('cm-out').value = out;
-  const a = $('cm-in').value.length, b = out.length;
-  $('cm-stat').textContent = `${a} → ${b} characters (${a ? Math.round((1 - b/a)*100) : 0}% smaller)`;
-}
-$('cm-dl').addEventListener('click', () => dl('style.min.css', $('cm-out').value, 'text/css'));
-$('cssmin').addEventListener('input', renderCM);
-renderCM();
+            // Difficulty distribution: 3 New Player, 5 Pro, 2 Ultra-Pro
+            for (let i = 0; i < totalBots; i++) {
+                let diff = 'newbie';
+                if (i >= 3 && i < 8) diff = 'pro';
+                if (i >= 8) diff = 'ultra';
 
-/* ---------- 9. JS MINIFIER (safe) ---------- */
-function stripJsComments(s){
-  let out = '', i = 0, q = null;
-  while(i < s.length){
-    const c = s[i], n = s[i+1];
-    if(q){
-      out += c;
-      if(c === '\\'){ out += n || ''; i += 2; continue; }
-      if(c === q) q = null;
-      i++; continue;
-    }
-    if(c === '"' || c === "'" || c === '`'){ q = c; out += c; i++; continue; }
-    if(c === '/' && n === '/'){ while(i < s.length && s[i] !== '\n') i++; continue; }
-    if(c === '/' && n === '*'){ const e = s.indexOf('*/', i+2); i = e < 0 ? s.length : e + 2; continue; }
-    out += c; i++;
-  }
-  return out;
-}
-function minJS(s){
-  return stripJsComments(s).split('\n').map(l => l.trim()).filter(Boolean).join('\n');
-}
-function renderJM(){
-  const out = minJS($('jm-in').value); $('jm-out').value = out;
-  const a = $('jm-in').value.length, b = out.length;
-  $('jm-stat').textContent = `${a} → ${b} characters. Comments and indentation removed, strings kept intact.`;
-}
-$('jm-dl').addEventListener('click', () => dl('script.min.js', $('jm-out').value, 'text/javascript'));
-$('jsmin').addEventListener('input', renderJM);
-renderJM();
+                const botTeam = STATE.gameMode === 'tdm' ? (i % 2 === 0 ? 'blue' : 'red') : 'ffa';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 20 + Math.random() * 40;
 
-/* ---------- 10. HTML FORMATTER ---------- */
-const VOID = /^(area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)$/i;
-function fmtHTML(s, ind){
-  const parts = s.replace(/>\s*</g, '>\n<').split('\n');
-  let lvl = 0; const out = [];
-  for(let t of parts){
-    t = t.trim(); if(!t) continue;
-    const isClose = /^<\//.test(t);
-    const isSelf = /\/>$/.test(t) || /^<!/.test(t);
-    const tm = t.match(/^<([a-z0-9-]+)/i);
-    if(isClose) lvl = Math.max(0, lvl - 1);
-    out.push(ind.repeat(lvl) + t);
-    const opens = tm && !isClose && !isSelf && !VOID.test(tm[1]) && !new RegExp(`</${tm[1]}>\\s*$`, 'i').test(t);
-    if(opens) lvl++;
-  }
-  return out.join('\n');
-}
-function renderHF(){ $('hf-out').value = fmtHTML($('hf-in').value, $('hf-ind').value); }
-$('hf-dl').addEventListener('click', () => dl('formatted.html', $('hf-out').value, 'text/html'));
-$('htmlfmt').addEventListener('input', renderHF);
-renderHF();
+                const botMeshGroup = new THREE.Group();
+                const bodyMat = new THREE.MeshStandardMaterial({ color: botTeam === 'blue' ? 0x2563eb : (botTeam === 'red' ? 0xdc2626 : 0x10b981) });
+                
+                // Torso
+                const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), bodyMat);
+                torso.position.y = 0.6;
+                torso.castShadow = true;
+                botMeshGroup.add(torso);
 
-/* ---------- 11. CSS FORMATTER ---------- */
-function fmtCSS(s, ind){
-  let out = '', lvl = 0, buf = '';
-  const pad = () => ind.repeat(Math.max(0, lvl));
-  const src = s.replace(/\s+/g, ' ').trim();
-  for(const ch of src){
-    if(ch === '{'){ out += pad() + buf.trim() + ' {\n'; lvl++; buf = ''; }
-    else if(ch === '}'){
-      if(buf.trim()) out += pad() + buf.trim() + ';\n';
-      buf = ''; lvl--; out += pad() + '}\n\n';
-    }
-    else if(ch === ';'){ out += pad() + buf.trim() + ';\n'; buf = ''; }
-    else buf += ch;
-  }
-  if(buf.trim()) out += buf.trim() + '\n';
-  return out.trim();
-}
-function renderCF(){ $('cf-out').value = fmtCSS($('cf-in').value, $('cf-ind').value); }
-$('cf-dl').addEventListener('click', () => dl('style.css', $('cf-out').value, 'text/css'));
-$('cssfmt').addEventListener('input', renderCF);
-renderCF();
+                // Head
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
+                head.position.y = 1.4;
+                botMeshGroup.add(head);
 
-/* ---------- 12. JS FORMATTER (basic) ---------- */
-function fmtJS(s, ind){
-  let out = '', lvl = 0, par = 0, q = null, buf = '';
-  const flush = () => { const t = buf.trim(); if(t) out += '\n' + ind.repeat(Math.max(0,lvl)) + t; buf = ''; };
-  for(let i = 0; i < s.length; i++){
-    const c = s[i], n = s[i+1];
-    if(q){
-      buf += c;
-      if(c === '\\'){ buf += n || ''; i++; continue; }
-      if(c === q) q = null;
-      continue;
-    }
-    if(c === '"' || c === "'" || c === '`'){ q = c; buf += c; continue; }
-    if(c === '/' && n === '/'){ let e = s.indexOf('\n', i); if(e < 0) e = s.length; buf += s.slice(i, e); flush(); i = e; continue; }
-    if(c === '(') par++;
-    if(c === ')') par--;
-    if(c === '{'){ buf += ' {'; flush(); lvl++; continue; }
-    if(c === '}'){ flush(); lvl--; out += '\n' + ind.repeat(Math.max(0,lvl)) + '}'; continue; }
-    if(c === ';' && par === 0){ buf += ';'; flush(); continue; }
-    if(c === '\n'){ flush(); continue; }
-    buf += c;
-  }
-  flush();
-  return out.replace(/^\n/, '');
-}
-function renderJF(){ $('jf-out').value = fmtJS($('jf-in').value, $('jf-ind').value); }
-$('jf-dl').addEventListener('click', () => dl('formatted.js', $('jf-out').value, 'text/javascript'));
-$('jsfmt').addEventListener('input', renderJF);
-renderJF();
+                const x = Math.cos(angle) * dist;
+                const z = Math.sin(angle) * dist;
+                botMeshGroup.position.set(x, 0, z);
+                scene.add(botMeshGroup);
 
-/* ---------- 13. JSON TREE VIEWER ---------- */
-let jtData = null;
-function leaf(key, v){
-  const d = document.createElement('div'); d.className = 'leaf';
-  const k = document.createElement('span'); k.className = 'jt-k'; k.textContent = key + ': ';
-  const x = document.createElement('span');
-  if(v === null){ x.className = 'jt-z'; x.textContent = 'null'; }
-  else if(typeof v === 'string'){ x.className = 'jt-s'; x.textContent = JSON.stringify(v); }
-  else if(typeof v === 'number'){ x.className = 'jt-n'; x.textContent = String(v); }
-  else { x.className = 'jt-b'; x.textContent = String(v); }
-  d.append(k, x); return d;
-}
-function node(key, v){
-  if(v !== null && typeof v === 'object'){
-    const isArr = Array.isArray(v), keys = Object.keys(v);
-    const d = document.createElement('details'); d.open = true;
-    const s = document.createElement('summary');
-    s.textContent = (key !== null ? key + ': ' : '') + (isArr ? `Array[${keys.length}]` : `Object{${keys.length}}`);
-    d.appendChild(s);
-    keys.forEach(k => d.appendChild(node(isArr ? `[${k}]` : k, v[k])));
-    return d;
-  }
-  return leaf(key === null ? 'value' : key, v);
-}
-function renderJT(){
-  const err = $('jt-err'), tree = $('jt-tree');
-  try{
-    jtData = JSON.parse($('jt-in').value);
-    err.textContent = '';
-    tree.innerHTML = '';
-    tree.appendChild(node(null, jtData));
-  }catch(e){
-    jtData = null; err.textContent = 'Invalid JSON: ' + e.message;
-    tree.innerHTML = '<div class="leaf">Fix the JSON on the left to see the tree.</div>';
-  }
-}
-function setAll(open){ document.querySelectorAll('#jt-tree details').forEach(d => d.open = open); }
-$('jt-open').addEventListener('click', () => setAll(true));
-$('jt-close').addEventListener('click', () => setAll(false));
-$('jt-fmt').addEventListener('click', () => {
-  if(jtData !== null) $('jt-in').value = JSON.stringify(jtData, null, +$('jt-ind').value);
-});
-$('jt-dl').addEventListener('click', () => {
-  if(jtData === null){ $('jt-err').textContent = 'Nothing to download: fix the JSON first.'; return; }
-  dl('data.json', JSON.stringify(jtData, null, +$('jt-ind').value), 'application/json');
-});
-$('json').addEventListener('input', renderJT);
-renderJT();
-</script>
+                bots.push({
+                    mesh: botMeshGroup,
+                    team: botTeam,
+                    difficulty: diff,
+                    hp: 100,
+                    state: 'roam',
+                    targetPos: new THREE.Vector3(x, 0, z),
+                    shootCooldown: 0,
+                    stateTimer: 0
+                });
+            }
+        }
+
+        // ==========================================
+        // 8. GAME LOOP & PLAYER CONTROLS
+        // ==========================================
+        function updatePlayer(delta) {
+            // Movement vector
+            const moveDir = new THREE.Vector3();
+            const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
+            const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
+
+            if (keys['KeyW']) moveDir.add(forward);
+            if (keys['KeyS']) moveDir.sub(forward);
+            if (keys['KeyD']) moveDir.add(right);
+            if (keys['KeyA']) moveDir.sub(right);
+            moveDir.normalize();
+
+            let speed = player.speed;
+            if (keys['ShiftKey']) speed *= 1.4;
+
+            player.position.x += moveDir.x * speed * delta;
+            player.position.z += moveDir.z * speed * delta;
+
+            // Boundaries
+            player.position.x = Math.max(-70, Math.min(70, player.position.x));
+            player.position.z = Math.max(-70, Math.min(70, player.position.z));
+
+            // Camera Sync
+            camera.position.copy(player.position);
+            camera.rotation.set(0, 0, 0);
+            camera.rotation.y = player.rotation.y;
+            camera.rotation.x = player.rotation.x;
+
+            // Firing
+            if (isMouseDown && performance.now() - lastShotTime > (60000 / currentWeapon.fireRate)) {
+                fireWeapon();
+            }
+
+            // Weapon Switch Keys
+            if (keys['Digit1']) selectWeapon(5); // Default assault rifle
+            if (keys['Digit2']) selectWeapon(0); // Default SMG
+            if (keys['KeyR'] && !isReloading) reloadWeapon();
+
+            // Match Timer
+            STATE.matchTime -= delta;
+            if (STATE.matchTime <= 0) checkMatchOver(true);
+        }
+
+        function fireWeapon() {
+            if (isReloading) return;
+            if (currentAmmo <= 0) { reloadWeapon(); return; }
+
+            currentAmmo--;
+            lastShotTime = performance.now();
+            STATE.shotsFired++;
+
+            // Muzzle flash / recoil kick
+            player.rotation.x += 0.015;
+
+            // Raycast for hits
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                if (hit.distance < currentWeapon.range * 3) {
+                    STATE.shotsHit++;
+                    // Check if hit bot
+                    bots.forEach(b => {
+                        if (b.mesh === hit.object.parent || b.mesh.children.includes(hit.object)) {
+                            damageBot(b, currentWeapon.damage);
+                        }
+                    });
+                }
+            }
+        }
+
+        function reloadWeapon() {
+            if (reserveAmmo <= 0 || currentAmmo === currentWeapon.magSize) return;
+            isReloading = true;
+            setTimeout(() => {
+                const needed = currentWeapon.magSize - currentAmmo;
+                const take = Math.min(needed, reserveAmmo);
+                currentAmmo += take;
+                reserveAmmo -= take;
+                isReloading = false;
+            }, currentWeapon.reloadTime * 1000);
+        }
+
+        function toggleADS(active) {
+            isADS = active;
+            camera.fov = active ? CONFIG.fov * 0.75 : CONFIG.fov;
+            camera.updateProjectionMatrix();
+        }
+
+        // ==========================================
+        // 9. SMART BOT AI (FSM & RAYCASTING)
+        // ==========================================
+        function updateBots(delta) {
+            bots.forEach(b => {
+                if (b.hp <= 0) return;
+
+                // FSM AI Decision Logic
+                b.stateTimer += delta;
+                const distToPlayer = b.mesh.position.distanceTo(player.position);
+
+                if (distToPlayer < 35) {
+                    b.state = 'combat';
+                } else if (b.stateTimer > 5) {
+                    b.state = Math.random() > 0.4 ? 'roam' : 'search';
+                    b.stateTimer = 0;
+                    b.targetPos.set((Math.random() - 0.5) * 100, 0, (Math.random() - 0.5) * 100);
+                }
+
+                if (b.state === 'roam' || b.state === 'search') {
+                    const dir = new THREE.Vector3().subVectors(b.targetPos, b.mesh.position);
+                    if (dir.length() > 2) {
+                        dir.normalize();
+                        b.mesh.position.addScaledVector(dir, 3.5 * delta);
+                        b.mesh.lookAt(b.targetPos);
+                    }
+                } else if (b.state === 'combat') {
+                    b.mesh.lookAt(player.position);
+                    const dirToPlayer = new THREE.Vector3().subVectors(player.position, b.mesh.position).normalize();
+                    b.mesh.position.addScaledVector(dirToPlayer, 2.5 * delta); // Advance or strafe
+
+                    // Bot Shooting
+                    b.shootCooldown += delta;
+                    let fireInterval = b.difficulty === 'ultra' ? 0.4 : (b.difficulty === 'pro' ? 0.7 : 1.2);
+                    if (b.shootCooldown > fireInterval) {
+                        b.shootCooldown = 0;
+                        if (Math.random() < (b.difficulty === 'ultra' ? 0.6 : 0.3)) {
+                            damagePlayer(b.difficulty === 'ultra' ? 18 : 12);
+                        }
+                    }
+                }
+            });
+        }
+
+        function damageBot(bot, amount) {
+            bot.hp -= amount;
+            showHitMarker();
+            if (bot.hp <= 0) {
+                scene.remove(bot.mesh);
+                STATE.kills++;
+                if (STATE.gameMode === 'tdm') {
+                    if (bot.team === 'red') STATE.scoreBlue++;
+                    else STATE.scoreRed++;
+                } else {
+                    STATE.scoreBlue++;
+                }
+                checkMatchOver(false);
+                respawnBot(bot);
+            }
+        }
+
+        function respawnBot(bot) {
+            bot.hp = 100;
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 30 + Math.random() * 40;
+            bot.mesh.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+            scene.add(bot.mesh);
+        }
+
+        function damagePlayer(amount) {
+            player.hp -= amount;
+            document.body.classList.add('hit-damage');
+            setTimeout(() => document.body.classList.remove('hit-damage'), 400);
+
+            if (player.hp <= 0) {
+                STATE.deaths++;
+                player.hp = 100;
+                player.position.set(0, 1.7, 0);
+                if (STATE.gameMode === 'tdm') STATE.scoreRed++;
+                checkMatchOver(false);
+            }
+        }
+
+        function checkMatchOver(timeOut) {
+            const targetScore = STATE.gameMode === 'tdm' ? 40 : 20;
+            if (timeOut || STATE.scoreBlue >= targetScore || STATE.scoreRed >= targetScore) {
+                STATE.isPlaying = false;
+                document.exitPointerLock();
+                document.getElementById('hud-game').classList.add('hidden');
+                document.getElementById('menu-gameover').classList.remove('hidden');
+
+                const won = STATE.scoreBlue >= STATE.scoreRed;
+                document.getElementById('end-title').innerText = won ? 'VICTORY' : 'DEFEAT';
+                document.getElementById('end-title').className = `text-6xl font-teko tracking-wider ${won ? 'text-emerald-400' : 'text-red-500'}`;
+                document.getElementById('end-kills').innerText = STATE.kills;
+                document.getElementById('end-deaths').innerText = STATE.deaths;
+                const acc = STATE.shotsFired > 0 ? Math.round((STATE.shotsHit / STATE.shotsFired) * 100) : 0;
+                document.getElementById('end-acc').innerText = acc + '%';
+            }
+        }
+
+        function showHitMarker() {
+            const hm = document.getElementById('hit-marker');
+            hm.style.opacity = '1';
+            setTimeout(() => hm.style.opacity = '0', 100);
+        }
+
+        // ==========================================
+        // 10. HUD, MINIMAP & RENDERING UPDATES
+        // ==========================================
+        function updateHUD() {
+            document.getElementById('hud-hp').innerText = Math.max(0, Math.round(player.hp));
+            document.getElementById('hp-bar-fill').style.width = Math.max(0, player.hp) + '%';
+            document.getElementById('hud-ammo-curr').innerText = currentAmmo;
+            document.getElementById('hud-ammo-reserve').innerText = reserveAmmo;
+            document.getElementById('hud-weapon-name').innerText = currentWeapon.name;
+            document.getElementById('hud-score-blue').innerText = STATE.scoreBlue;
+            document.getElementById('hud-score-red').innerText = STATE.scoreRed;
+
+            const mins = Math.floor(STATE.matchTime / 60);
+            const secs = Math.floor(STATE.matchTime % 60);
+            document.getElementById('hud-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function updateMinimap() {
+            const canvas = document.getElementById('minimap-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = canvas.width / 160;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Draw Player
+            ctx.fillStyle = '#60a5fa';
+            ctx.beginPath();
+            ctx.arc(cx + player.position.x * scale, cy + player.position.z * scale, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Bots
+            bots.forEach(b => {
+                if (b.hp <= 0) return;
+                ctx.fillStyle = b.team === 'blue' ? '#3b82f6' : (b.team === 'red' ? '#ef4444' : '#10b981');
+                ctx.beginPath();
+                ctx.arc(cx + b.mesh.position.x * scale, cy + b.mesh.position.z * scale, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function updateProjectiles(delta) {}
+        function updateParticles(delta) {}
+
+        function togglePause() {
+            STATE.isPaused = !STATE.isPaused;
+            const pauseMenu = document.getElementById('menu-pause');
+            if (STATE.isPaused) {
+                pauseMenu.classList.remove('hidden');
+                document.exitPointerLock();
+            } else {
+                pauseMenu.classList.add('hidden');
+                renderer.domElement.requestPointerLock();
+            }
+        }
+
+        function restartMatch() { startGame(); }
+        function returnToMainMenu() {
+            STATE.isPlaying = false;
+            document.exitPointerLock();
+            document.getElementById('hud-game').classList.add('hidden');
+            document.getElementById('menu-pause').classList.add('hidden');
+            document.getElementById('menu-gameover').classList.add('hidden');
+            switchMenu('main');
+        }
+
+        function onWindowResize() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // Initialize Engine on Window Load
+        window.onload = function() {
+            initEngine();
+        };
+    </script>
 </body>
 </html>
