@@ -1,1169 +1,915 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CODJR — FRONTLINE COMBAT</title>
-    <!-- Tailwind CSS for UI and Menus -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Military & HUD Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Three.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap');
-        
-        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-        body { font-family: 'Rajdhani', sans-serif; background-color: #0b0f19; color: #f3f4f6; overflow: hidden; margin: 0; padding: 0; }
-        .font-teko { font-family: 'Teko', sans-serif; }
-        
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.8); }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
-
-        /* Tactical UI Glows & Scans */
-        .hud-border { clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px)); }
-        .btn-military {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
-            border: 1px solid #60a5fa;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: all 0.2s ease;
-        }
-        .btn-military:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            transform: translateY(-2px);
-        }
-        .btn-military:active { transform: translateY(1px); }
-
-        .card-select {
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
-            transition: all 0.2s ease;
-        }
-        .card-select:hover { border-color: rgba(96, 165, 250, 0.8); background: rgba(30, 58, 138, 0.4); }
-        .card-select.selected {
-            border-color: #60a5fa;
-            background: rgba(37, 99, 235, 0.3);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-        }
-
-        /* Animations */
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-        .animate-glow { animation: pulseGlow 2s infinite ease-in-out; }
-
-        @keyframes hitVignette {
-            0% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
-            50% { box-shadow: inset 0 0 120px rgba(239, 68, 68, 0.8); }
-            100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
-        }
-        .hit-damage { animation: hitVignette 0.4s ease-out; }
-
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        #ui-container * { pointer-events: auto; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CODJR — Frontline Combat (Step 1)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #000; font-family: Arial, Helvetica, sans-serif; user-select: none; }
+  #game { position: fixed; inset: 0; }
+  canvas { display: block; }
+  .overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.78); color: #fff; text-align: center; z-index: 10; padding: 20px; box-sizing: border-box; }
+  .overlay h1 { font-size: 56px; margin: 0; letter-spacing: 4px; color: #e8c26a; }
+  .overlay h2 { font-size: 20px; margin: 6px 0 16px; letter-spacing: 2px; color: #ddd; font-weight: normal; }
+  .overlay p { font-size: 17px; max-width: 640px; line-height: 1.5; margin: 6px 0; }
+  .overlay button { background: #e8c26a; color: #111; border: 0; padding: 14px 44px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 18px; }
+  .overlay button:hover { background: #ffd98a; }
+  .overlay button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+  #deathScreen { pointer-events: none; background: rgba(120,0,0,0.55); }
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #fff; text-shadow: 0 0 4px #000; z-index: 5; }
+  #crosshair { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); }
+  #crosshair::before, #crosshair::after { content: ""; position: absolute; background: #fff; box-shadow: 0 0 2px #000; }
+  #crosshair::before { left: 9px; top: 0; width: 2px; height: 20px; }
+  #crosshair::after { top: 9px; left: 0; width: 20px; height: 2px; }
+  #hitmarker { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%) rotate(45deg); border: 3px solid #ff3b3b; opacity: 0; box-sizing: border-box; }
+  #vignette { position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,0,0,0) 45%, rgba(255,0,0,0.9) 100%); opacity: 0; }
+  #kd { position: absolute; top: 14px; left: 14px; font-size: 22px; font-weight: bold; }
+  #enemies { position: absolute; top: 44px; left: 14px; font-size: 14px; color: #ffd98a; }
+  #feed { position: absolute; top: 14px; right: 14px; text-align: right; font-size: 15px; }
+  #feed div { margin-bottom: 4px; }
+  #msg { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 26px; font-weight: bold; letter-spacing: 2px; color: #ffd98a; opacity: 0; }
+  #health { position: absolute; bottom: 20px; left: 20px; font-size: 30px; font-weight: bold; }
+  #ammo { position: absolute; bottom: 20px; right: 20px; font-size: 30px; font-weight: bold; }
+  #ammo small { font-size: 16px; color: #ffd98a; }
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
 
-    <!-- 3D Viewport Background Canvas Container -->
-    <div id="canvas-container"></div>
+<div id="game"></div>
 
-    <!-- UI & Menu System -->
-    <div id="ui-container" class="flex flex-col justify-between p-4 md:p-8">
+<div id="hud" class="hidden">
+  <div id="kd">K 0 &nbsp; D 0</div>
+  <div id="enemies"></div>
+  <div id="feed"></div>
+  <div id="msg"></div>
+  <div id="crosshair"></div>
+  <div id="hitmarker"></div>
+  <div id="vignette"></div>
+  <div id="health">HP 100</div>
+  <div id="ammo">30 / 120</div>
+</div>
 
-        <!-- MAIN MENU SCREEN -->
-        <div id="menu-main" class="flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
-            <!-- Top Header Bar -->
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl hud-border">
-                <div class="flex items-center space-x-4">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white font-teko text-3xl px-4 tracking-wider shadow-lg shadow-blue-500/50">CODJR</div>
-                    <div>
-                        <h1 class="text-xl md:text-3xl font-teko font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-200">FRONTLINE COMBAT</h1>
-                        <p class="text-xs text-blue-300 font-mono tracking-wider">TACTICAL OPS v2.6.4 — VERIFIED BROWSER BUILD</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="hidden md:flex flex-col text-right">
-                        <span class="text-xs text-slate-400">PLAYER RANK</span>
-                        <span class="text-sm font-bold text-blue-400 font-teko text-lg">COLONEL LVL. 88</span>
-                    </div>
-                    <button onclick="switchMenu('settings')" class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-lg text-blue-400 transition">
-                        <i class="fa-solid fa-gear text-lg"></i>
-                    </button>
-                    <button onclick="switchMenu('help')" class="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-lg text-blue-400 transition">
-                        <i class="fa-solid fa-circle-question text-lg"></i>
-                    </button>
-                </div>
-            </div>
+<div id="startScreen" class="overlay">
+  <h1>CODJR</h1>
+  <h2>FRONTLINE COMBAT — STEP 1</h2>
+  <p>Map: <b>OUTPOST</b> &nbsp;|&nbsp; 3 bots: New, Pro, Ultra</p>
+  <p>WASD: move &nbsp;·&nbsp; Mouse: look &nbsp;·&nbsp; Left click: fire &nbsp;·&nbsp; Shift: sprint &nbsp;·&nbsp; Space: jump &nbsp;·&nbsp; R: reload &nbsp;·&nbsp; Esc: pause</p>
+  <button id="startBtn">START MATCH</button>
+  <p id="loadStatus"></p>
+</div>
 
-            <!-- Center Menu Body -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 my-auto py-6">
-                <!-- Left Column: Navigation Actions -->
-                <div class="flex flex-col space-y-3 justify-center lg:col-span-1">
-                    <button onclick="startGame()" class="btn-military py-5 px-6 text-2xl font-teko tracking-widest text-white flex items-center justify-between group shadow-xl">
-                        <span><i class="fa-solid fa-play mr-3"></i> DEPLOY MATCH</span>
-                        <i class="fa-solid fa-chevron-right text-sm group-hover:translate-x-1 transition"></i>
-                    </button>
-                    <button onclick="switchMenu('map')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
-                        <div>
-                            <span class="text-xs text-blue-400 font-mono">SELECTED MAP</span>
-                            <div id="btn-map-label" class="text-lg font-teko font-bold tracking-wider text-white">OUTPOST</div>
-                        </div>
-                        <i class="fa-solid fa-map-location-dot text-blue-400 group-hover:scale-110 transition"></i>
-                    </button>
-                    <button onclick="switchMenu('loadout')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
-                        <div>
-                            <span class="text-xs text-blue-400 font-mono">PRIMARY WEAPON</span>
-                            <div id="btn-weapon-label" class="text-lg font-teko font-bold tracking-wider text-white">M4-A1 CARBINE</div>
-                        </div>
-                        <i class="fa-solid fa-gun text-blue-400 group-hover:scale-110 transition"></i>
-                    </button>
-                    <button onclick="switchMenu('mode')" class="card-select py-4 px-6 text-left flex items-center justify-between rounded-lg group">
-                        <div>
-                            <span class="text-xs text-blue-400 font-mono">GAME MODE</span>
-                            <div id="btn-mode-label" class="text-lg font-teko font-bold tracking-wider text-white">TEAM DEATHMATCH</div>
-                        </div>
-                        <i class="fa-solid fa-shield-halved text-blue-400 group-hover:scale-110 transition"></i>
-                    </button>
-                </div>
+<div id="pauseScreen" class="overlay hidden">
+  <h1>PAUSED</h1>
+  <p>Click karke wapas khelein (mouse capture hoga)</p>
+</div>
 
-                <!-- Center/Right Column: Preview and Stats Summary -->
-                <div class="lg:col-span-3 bg-slate-900/60 backdrop-blur-md border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hud-border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="bg-blue-600/30 border border-blue-500/50 text-blue-300 px-3 py-1 rounded text-xs font-mono">READY ROOM</span>
-                            <h2 id="preview-title" class="text-4xl font-teko tracking-wider mt-2 text-white">OPERATION OUTPOST</h2>
-                            <p id="preview-desc" class="text-slate-300 text-sm max-w-xl">Desert military outpost featuring concrete fortifications, sandbag cover structures, and multi-lane flanking routes.</p>
-                        </div>
-                        <div class="text-right hidden sm:block">
-                            <span class="text-xs font-mono text-slate-400">COMBATANTS</span>
-                            <div id="preview-combatants" class="text-2xl font-teko text-blue-400">20 PLAYERS (1V19)</div>
-                        </div>
-                    </div>
+<div id="deathScreen" class="overlay hidden">
+  <h1>YOU DIED</h1>
+  <p id="respawnText"></p>
+</div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
-                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
-                            <span class="text-xs text-slate-400">LOADOUT TIER</span>
-                            <div class="text-xl font-teko text-blue-300 mt-1">ASSAULT RIFLE</div>
-                        </div>
-                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
-                            <span class="text-xs text-slate-400">DAMAGE / RPM</span>
-                            <div id="stat-dmg-rpm" class="text-xl font-teko text-emerald-400 mt-1">32 DMG / 750 RPM</div>
-                        </div>
-                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
-                            <span class="text-xs text-slate-400">MAGAZINE SIZE</span>
-                            <div id="stat-mag" class="text-xl font-teko text-yellow-400 mt-1">30 RDS</div>
-                        </div>
-                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
-                            <span class="text-xs text-slate-400">BOT DIFFICULTY</span>
-                            <div class="text-xl font-teko text-purple-400 mt-1">MIXED (3+5+2)</div>
-                        </div>
-                    </div>
+<script>
+(function () {
+  'use strict';
 
-                    <div class="flex justify-between items-center pt-4 border-t border-slate-800 text-xs text-slate-400">
-                        <span>ENGINE: THREE.JS WEBGL RENDERER</span>
-                        <span class="text-emerald-400 flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping"></span>SYSTEM ONLINE</span>
-                    </div>
-                </div>
-            </div>
+  const $ = id => document.getElementById(id);
+  const loadStatus = $('loadStatus');
 
-            <!-- Bottom Quick Info Footer -->
-            <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs text-slate-400">
-                <span>CONTROLS: WASD / MOUSE / SPACE / SHIFT / R / 1-2 / ESC</span>
-                <span class="text-blue-400">CODJR — BUILT FOR BROWSER COMBAT</span>
-            </div>
-        </div>
+  // ---------- Startup checks ----------
+  if (typeof THREE === 'undefined') {
+    loadStatus.textContent = 'ERROR: Three.js load nahi hua. Internet connection check karein aur page reload karein.';
+    $('startBtn').disabled = true;
+    return;
+  }
 
-        <!-- SUBMENU: SELECT MAP -->
-        <div id="menu-map" class="hidden flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
-                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-map mr-2 text-blue-400"></i> SELECT COMBAT MAP</h2>
-                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 my-auto">
-                <!-- Map 1 -->
-                <div onclick="selectMap(0)" id="map-card-0" class="card-select p-4 rounded-xl cursor-pointer group selected">
-                    <div class="h-32 bg-amber-900/40 rounded-lg mb-3 flex items-center justify-center border border-amber-600/30 group-hover:border-blue-400">
-                        <i class="fa-solid fa-mountain-sun text-4xl text-amber-500"></i>
-                    </div>
-                    <h3 class="text-2xl font-teko font-bold text-white">OUTPOST</h3>
-                    <p class="text-xs text-slate-400 mt-1">Desert military base with watchtowers, concrete barriers, and sandbag cover.</p>
-                </div>
-                <!-- Map 2 -->
-                <div onclick="selectMap(1)" id="map-card-1" class="card-select p-4 rounded-xl cursor-pointer group">
-                    <div class="h-32 bg-slate-800/60 rounded-lg mb-3 flex items-center justify-center border border-slate-600/30 group-hover:border-blue-400">
-                        <i class="fa-solid fa-warehouse text-4xl text-slate-400"></i>
-                    </div>
-                    <h3 class="text-2xl font-teko font-bold text-white">WAREHOUSE</h3>
-                    <p class="text-xs text-slate-400 mt-1">Industrial indoor/outdoor zone with cargo containers and metal walkways.</p>
-                </div>
-                <!-- Map 3 -->
-                <div onclick="selectMap(2)" id="map-card-2" class="card-select p-4 rounded-xl cursor-pointer group">
-                    <div class="h-32 bg-blue-950/40 rounded-lg mb-3 flex items-center justify-center border border-blue-600/30 group-hover:border-blue-400">
-                        <i class="fa-solid fa-building-columns text-4xl text-blue-400"></i>
-                    </div>
-                    <h3 class="text-2xl font-teko font-bold text-white">RAID</h3>
-                    <p class="text-xs text-slate-400 mt-1">Modern luxury compound with central courtyard, balconies, and side routes.</p>
-                </div>
-                <!-- Map 4 -->
-                <div onclick="selectMap(3)" id="map-card-3" class="card-select p-4 rounded-xl cursor-pointer group">
-                    <div class="h-32 bg-zinc-900/60 rounded-lg mb-3 flex items-center justify-center border border-zinc-600/30 group-hover:border-blue-400">
-                        <i class="fa-solid fa-ship text-4xl text-zinc-400"></i>
-                    </div>
-                    <h3 class="text-2xl font-teko font-bold text-white">CARGO</h3>
-                    <p class="text-xs text-slate-400 mt-1">Shipping yard with stacked containers, narrow corridors, and crane sightlines.</p>
-                </div>
-                <!-- Map 5 -->
-                <div onclick="selectMap(4)" id="map-card-4" class="card-select p-4 rounded-xl cursor-pointer group">
-                    <div class="h-32 bg-cyan-950/40 rounded-lg mb-3 flex items-center justify-center border border-cyan-600/30 group-hover:border-blue-400">
-                        <i class="fa-solid fa-snowflake text-4xl text-cyan-400"></i>
-                    </div>
-                    <h3 class="text-2xl font-teko font-bold text-white">SUMMIT</h3>
-                    <p class="text-xs text-slate-400 mt-1">Snowy mountain installation with radar domes and bunker interiors.</p>
-                </div>
-            </div>
-            <div></div>
-        </div>
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+  } catch (e) {
+    loadStatus.textContent = 'ERROR: Is browser mein WebGL available nahi hai.';
+    $('startBtn').disabled = true;
+    return;
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  $('game').appendChild(renderer.domElement);
 
-        <!-- SUBMENU: SELECT WEAPON / LOADOUT -->
-        <div id="menu-loadout" class="hidden flex flex-col justify-between h-full w-full max-w-7xl mx-auto">
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
-                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-gun mr-2 text-blue-400"></i> WEAPON LOADOUT (15 SELECTABLE)</h2>
-                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
-            </div>
-            <!-- Category Tabs & Weapon Grid -->
-            <div class="my-auto overflow-y-auto max-h-[70vh] pr-2">
-                <div id="weapon-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <!-- Populated dynamically via JS -->
-                </div>
-            </div>
-            <div></div>
-        </div>
+  // ---------- Config & helpers ----------
+  const CFG = {
+    EYE: 1.6, R: 0.4, GRAV: -22, JUMP: 7.5, WALK: 5.5, SPRINT: 8.5,
+    MAG: 30, RES: 120, RELOAD: 1.8, FIRE: 0.1, PDMG: 25, HEADX: 2,
+    BDMG: 12, BOUND: 38, PRESP: 3, BRESP: 4, SENS: 0.0022
+  };
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-        <!-- SUBMENU: GAME MODE -->
-        <div id="menu-mode" class="hidden flex flex-col justify-between h-full w-full max-w-5xl mx-auto">
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
-                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> SELECT GAME MODE</h2>
-                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
-                <div onclick="selectMode('tdm')" id="mode-card-tdm" class="card-select p-6 rounded-xl cursor-pointer group selected border-2">
-                    <div class="flex justify-between items-start mb-4">
-                        <i class="fa-solid fa-users text-4xl text-blue-400"></i>
-                        <span class="bg-blue-600/30 text-blue-300 px-3 py-1 rounded text-xs font-mono">20 COMBATANTS</span>
-                    </div>
-                    <h3 class="text-3xl font-teko font-bold text-white">TEAM DEATHMATCH (TDM)</h3>
-                    <p class="text-slate-300 text-sm mt-2">Two teams (Blue vs Red). 10 combatants per team (1 Human + 19 Bots). First team to 40 kills wins the match.</p>
-                </div>
-                <div onclick="selectMode('ffa')" id="mode-card-ffa" class="card-select p-6 rounded-xl cursor-pointer group border-2">
-                    <div class="flex justify-between items-start mb-4">
-                        <i class="fa-solid fa-skull text-4xl text-red-400"></i>
-                        <span class="bg-red-600/30 text-red-300 px-3 py-1 rounded text-xs font-mono">10 COMBATANTS</span>
-                    </div>
-                    <h3 class="text-3xl font-teko font-bold text-white">SOLO FREE-FOR-ALL (FFA)</h3>
-                    <p class="text-slate-300 text-sm mt-2">Every operator for themselves. 10 total combatants (1 Human + 9 Bots). First to 20 kills takes top honors.</p>
-                </div>
-            </div>
-            <div></div>
-        </div>
+  // ---------- Scene ----------
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xd9c49a);
+  scene.fog = new THREE.Fog(0xd9c49a, 55, 130);
 
-        <!-- SUBMENU: SETTINGS -->
-        <div id="menu-settings" class="hidden flex flex-col justify-between h-full w-full max-w-4xl mx-auto">
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
-                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-gear mr-2 text-blue-400"></i> COMBAT SETTINGS</h2>
-                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
-            </div>
-            <div class="bg-slate-900/70 backdrop-blur-md border border-slate-700/60 p-6 rounded-xl my-auto space-y-6">
-                <div>
-                    <label class="block text-sm font-mono text-slate-300 mb-2">MOUSE SENSITIVITY: <span id="val-sens" class="text-blue-400">1.2</span></label>
-                    <input type="range" min="0.2" max="3.0" step="0.1" value="1.2" oninput="updateSetting('sensitivity', this.value)" class="w-full accent-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-mono text-slate-300 mb-2">FIELD OF VIEW (FOV): <span id="val-fov" class="text-blue-400">75</span></label>
-                    <input type="range" min="60" max="100" step="1" value="75" oninput="updateSetting('fov', this.value)" class="w-full accent-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-mono text-slate-300 mb-2">GRAPHICS QUALITY TIER</label>
-                    <div class="grid grid-cols-4 gap-3">
-                        <button onclick="setGraphicsTier('low')" id="gfx-low" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">LOW</button>
-                        <button onclick="setGraphicsTier('medium')" id="gfx-medium" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">MED</button>
-                        <button onclick="setGraphicsTier('high')" id="gfx-high" class="py-2 bg-blue-600 border border-blue-400 rounded font-teko text-lg">HIGH</button>
-                        <button onclick="setGraphicsTier('ultra')" id="gfx-ultra" class="py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg">ULTRA</button>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center pt-4 border-t border-slate-800">
-                    <span class="text-sm font-mono text-slate-300">MASTER AUDIO SFX</span>
-                    <input type="checkbox" checked oninput="toggleAudio(this.checked)" class="w-5 h-5 accent-blue-500">
-                </div>
-            </div>
-            <div></div>
-        </div>
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 300);
+  camera.rotation.order = 'YXZ';
+  scene.add(camera);
 
-        <!-- SUBMENU: HELP / CONTROLS -->
-        <div id="menu-help" class="hidden flex flex-col justify-between h-full w-full max-w-4xl mx-auto">
-            <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-blue-500/30 p-4 rounded-xl">
-                <h2 class="text-3xl font-teko tracking-wider text-white"><i class="fa-solid fa-circle-question mr-2 text-blue-400"></i> CONTROLS & MANUAL</h2>
-                <button onclick="switchMenu('main')" class="btn-military px-6 py-2 font-teko text-lg">BACK TO MENU</button>
-            </div>
-            <div class="bg-slate-900/70 backdrop-blur-md border border-slate-700/60 p-6 rounded-xl my-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-xl font-teko text-blue-400 mb-3 border-b border-slate-700 pb-1">DESKTOP COMBAT</h3>
-                    <ul class="space-y-2 text-sm text-slate-300 font-mono">
-                        <li><span class="text-blue-400 font-bold">W, A, S, D:</span> Operator Movement</li>
-                        <li><span class="text-blue-400 font-bold">MOUSE:</span> Aim / Look Around</li>
-                        <li><span class="text-blue-400 font-bold">LEFT CLICK:</span> Fire Weapon</li>
-                        <li><span class="text-blue-400 font-bold">RIGHT CLICK:</span> Aim Down Sights (ADS)</li>
-                        <li><span class="text-blue-400 font-bold">SHIFT:</span> Tactical Sprint</li>
-                        <li><span class="text-blue-400 font-bold">SPACE:</span> Jump</li>
-                        <li><span class="text-blue-400 font-bold">C / CTRL:</span> Crouch</li>
-                        <li><span class="text-blue-400 font-bold">R:</span> Reload Magazine</li>
-                        <li><span class="text-blue-400 font-bold">1 / 2:</span> Switch Weapon Slots</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-xl font-teko text-blue-400 mb-3 border-b border-slate-700 pb-1">MOBILE & TACTICAL</h3>
-                    <p class="text-sm text-slate-300 mb-4">On touchscreen devices, virtual joysticks and dedicated action buttons appear automatically on the HUD.</p>
-                    <h3 class="text-xl font-teko text-blue-400 mb-2 border-b border-slate-700 pb-1">BOT AI ARCHITECTURE</h3>
-                    <p class="text-xs text-slate-300">Bots utilize Finite State Machines (Roam, Search, Cover, Strafe, Flank, Retreat). They feature 3 tiers: New Player, Pro, and Ultra-Pro with raycast line-of-sight checks.</p>
-                </div>
-            </div>
-            <div></div>
-        </div>
+  scene.add(new THREE.HemisphereLight(0xfff3dc, 0x7a6040, 0.9));
+  const sun = new THREE.DirectionalLight(0xfff0d0, 1.1);
+  sun.position.set(-30, 50, 20);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -45; sun.shadow.camera.right = 45;
+  sun.shadow.camera.top = 45; sun.shadow.camera.bottom = -45;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 150;
+  sun.shadow.camera.updateProjectionMatrix();
+  scene.add(sun);
+  scene.add(sun.target);
 
-        <!-- MATCH HUD OVERLAY (Active during gameplay) -->
-        <div id="hud-game" class="hidden flex flex-col justify-between h-full w-full">
-            <!-- Top HUD Bar -->
-            <div class="flex justify-between items-start pointer-events-none">
-                <!-- Scoreboard / Match info -->
-                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-xl flex items-center space-x-6 pointer-events-auto hud-border">
-                    <div class="text-center">
-                        <span class="text-xs font-mono text-blue-400">BLUE TEAM</span>
-                        <div id="hud-score-blue" class="text-3xl font-teko font-bold text-blue-400">0</div>
-                    </div>
-                    <div class="text-center px-4 border-x border-slate-700">
-                        <span id="hud-timer" class="text-xl font-teko text-amber-400">08:00</span>
-                        <div class="text-xs font-mono text-slate-400">TIME REMAINING</div>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-xs font-mono text-red-400">RED TEAM</span>
-                        <div id="hud-score-red" class="text-3xl font-teko font-bold text-red-400">0</div>
-                    </div>
-                </div>
+  // Ground
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(80, 80),
+    new THREE.MeshLambertMaterial({ color: 0xc9a66b })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+  for (let i = 0; i < 14; i++) {
+    const p = new THREE.Mesh(
+      new THREE.CircleGeometry(rnd(3, 7), 16),
+      new THREE.MeshLambertMaterial({ color: 0xb8925a })
+    );
+    p.rotation.x = -Math.PI / 2;
+    p.position.set(rnd(-34, 34), 0.01, rnd(-34, 34));
+    p.receiveShadow = true;
+    scene.add(p);
+  }
 
-                <!-- Minimap & Kill Feed container -->
-                <div class="flex flex-col items-end space-y-2 pointer-events-auto">
-                    <!-- Minimap Canvas -->
-                    <div class="w-36 h-36 bg-slate-900/90 border-2 border-slate-700 rounded-lg overflow-hidden relative shadow-2xl">
-                        <canvas id="minimap-canvas" width="144" height="144" class="w-full h-full"></canvas>
-                        <div class="absolute bottom-1 right-1 text-[9px] font-mono bg-black/60 px-1 rounded text-slate-300">RADAR</div>
-                    </div>
-                    <!-- Kill Feed -->
-                    <div id="kill-feed" class="flex flex-col space-y-1 items-end max-w-xs">
-                        <!-- Dynamic kill feed items -->
-                    </div>
-                </div>
-            </div>
+  // ---------- Map: OUTPOST ----------
+  // Each obstacle is a box: x, z center; w (x size), d (z size), h (height), c (color)
+  const OBST = [
+    // Perimeter walls
+    { x: 0, z: -40, w: 80, d: 1, h: 4, c: 0xb08d57 },
+    { x: 0, z: 40, w: 80, d: 1, h: 4, c: 0xb08d57 },
+    { x: -40, z: 0, w: 1, d: 80, h: 4, c: 0xb08d57 },
+    { x: 40, z: 0, w: 1, d: 80, h: 4, c: 0xb08d57 },
+    // Main buildings
+    { x: -16, z: -14, w: 12, d: 8, h: 5, c: 0xe0c8a0 },
+    { x: 16, z: 14, w: 12, d: 8, h: 5, c: 0xe0c8a0 },
+    { x: 18, z: -16, w: 6, d: 6, h: 4, c: 0xd6b98a },
+    { x: -18, z: 16, w: 6, d: 6, h: 4, c: 0xd6b98a },
+    // Center barriers
+    { x: -6, z: 0, w: 1, d: 6, h: 1.3, c: 0x9a9a92 },
+    { x: 6, z: 0, w: 1, d: 6, h: 1.3, c: 0x9a9a92 },
+    { x: -8, z: -28, w: 6, d: 1, h: 1.3, c: 0x9a9a92 },
+    { x: 8, z: 28, w: 6, d: 1, h: 1.3, c: 0x9a9a92 },
+    { x: 28, z: -6, w: 1, d: 8, h: 1.3, c: 0x9a9a92 },
+    { x: -28, z: 6, w: 1, d: 8, h: 1.3, c: 0x9a9a92 },
+    // Crates
+    { x: -4, z: -22, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: -2.5, z: -22, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: 4, z: 22, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: 24, z: -26, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: -24, z: 26, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: 12, z: -4, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    { x: -12, z: 4, w: 1.5, d: 1.5, h: 1.5, c: 0x6b4f2a },
+    // Watchtowers
+    { x: -30, z: -22, w: 3, d: 3, h: 7, c: 0x8a7a60 },
+    { x: 30, z: 22, w: 3, d: 3, h: 7, c: 0x8a7a60 },
+    // Mid cover
+    { x: 0, z: -16, w: 4, d: 1, h: 2.5, c: 0xc0a878 }
+  ];
 
-            <!-- Center Crosshair & Hit Marker -->
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
-                <div id="crosshair" class="relative w-6 h-6 flex items-center justify-center">
-                    <div class="absolute w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400"></div>
-                    <div class="absolute w-3 h-0.5 bg-cyan-400/80 -left-3"></div>
-                    <div class="absolute w-3 h-0.5 bg-cyan-400/80 -right-3"></div>
-                    <div class="absolute w-0.5 h-3 bg-cyan-400/80 -top-3"></div>
-                    <div class="absolute w-0.5 h-3 bg-cyan-400/80 -bottom-3"></div>
-                </div>
-                <div id="hit-marker" class="absolute w-6 h-6 border-2 border-red-500 rotate-45 opacity-0 transition-opacity duration-100"></div>
-            </div>
+  const colliders = [];   // AABBs used for movement collision
+  const wallMeshes = [];  // meshes used for bullet / line-of-sight raycasts
 
-            <!-- Bottom HUD Bar -->
-            <div class="flex justify-between items-end pointer-events-none">
-                <!-- Health & Status -->
-                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl flex items-center space-x-4 pointer-events-auto hud-border">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-mono text-slate-400">OPERATOR HEALTH</span>
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-heart-pulse text-red-500 text-xl"></i>
-                            <span id="hud-hp" class="text-3xl font-teko font-bold text-white">100</span>
-                        </div>
-                    </div>
-                    <div class="w-32 bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
-                        <div id="hp-bar-fill" class="bg-red-500 h-full w-full transition-all duration-200"></div>
-                    </div>
-                </div>
+  OBST.forEach(o => {
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(o.w, o.h, o.d),
+      new THREE.MeshLambertMaterial({ color: o.c })
+    );
+    m.position.set(o.x, o.h / 2, o.z);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    scene.add(m);
+    wallMeshes.push(m);
+    colliders.push({ minX: o.x - o.w / 2, maxX: o.x + o.w / 2, minZ: o.z - o.d / 2, maxZ: o.z + o.d / 2 });
+  });
 
-                <!-- Weapon & Ammo Display -->
-                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl flex items-center space-x-6 pointer-events-auto hud-border text-right">
-                    <div>
-                        <span id="hud-weapon-name" class="text-xs font-mono text-blue-400">M4-A1 CARBINE</span>
-                        <div class="flex items-baseline justify-end space-x-1">
-                            <span id="hud-ammo-curr" class="text-4xl font-teko font-bold text-white">30</span>
-                            <span class="text-xl font-teko text-slate-400">/</span>
-                            <span id="hud-ammo-reserve" class="text-xl font-teko text-slate-400">120</span>
-                        </div>
-                    </div>
-                    <button onclick="togglePause()" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-white">
-                        <i class="fa-solid fa-pause"></i>
-                    </button>
-                </div>
-            </div>
+  // Push a circle (radius r) out of all colliders and keep inside bounds
+  function resolve(p, r) {
+    for (let i = 0; i < colliders.length; i++) {
+      const c = colliders[i];
+      if (p.x < c.minX - r || p.x > c.maxX + r || p.z < c.minZ - r || p.z > c.maxZ + r) continue;
+      const cx = clamp(p.x, c.minX, c.maxX);
+      const cz = clamp(p.z, c.minZ, c.maxZ);
+      const dx = p.x - cx, dz = p.z - cz;
+      const d2 = dx * dx + dz * dz;
+      if (d2 >= r * r) continue;
+      if (d2 > 1e-9) {
+        const d = Math.sqrt(d2), k = (r - d) / d;
+        p.x += dx * k; p.z += dz * k;
+      } else {
+        const l = p.x - c.minX, rt = c.maxX - p.x, b = p.z - c.minZ, f = c.maxZ - p.z;
+        const m = Math.min(l, rt, b, f);
+        if (m === l) p.x = c.minX - r;
+        else if (m === rt) p.x = c.maxX + r;
+        else if (m === b) p.z = c.minZ - r;
+        else p.z = c.maxZ + r;
+      }
+    }
+    p.x = clamp(p.x, -CFG.BOUND, CFG.BOUND);
+    p.z = clamp(p.z, -CFG.BOUND, CFG.BOUND);
+  }
 
-            <!-- Mobile Touch Controls Overlay (Visible if touch device or forced) -->
-            <div id="mobile-controls" class="hidden absolute inset-0 pointer-events-none p-6 justify-between items-end">
-                <div class="w-40 h-40 bg-white/10 border-2 border-white/20 rounded-full relative pointer-events-auto flex items-center justify-center" id="touch-joystick">
-                    <div class="w-16 h-16 bg-blue-500/60 rounded-full absolute" id="touch-stick"></div>
-                </div>
-                <div class="flex flex-col space-y-3 pointer-events-auto">
-                    <button id="touch-fire" class="w-20 h-20 bg-red-600/80 border-2 border-red-400 rounded-full text-white font-teko text-2xl flex items-center justify-center shadow-lg">FIRE</button>
-                    <div class="flex space-x-2">
-                        <button id="touch-ads" class="w-14 h-14 bg-blue-600/80 rounded-full text-white font-teko">ADS</button>
-                        <button id="touch-reload" class="w-14 h-14 bg-amber-600/80 rounded-full text-white font-teko">RCL</button>
-                        <button id="touch-jump" class="w-14 h-14 bg-slate-700/80 rounded-full text-white font-teko">JMP</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+  function isFree(x, z, r) {
+    if (Math.abs(x) > CFG.BOUND - 1 || Math.abs(z) > CFG.BOUND - 1) return false;
+    for (const c of colliders) {
+      if (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) return false;
+    }
+    return true;
+  }
 
-        <!-- PAUSE MENU -->
-        <div id="menu-pause" class="hidden absolute inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50">
-            <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-md text-center space-y-6 hud-border shadow-2xl">
-                <h2 class="text-4xl font-teko tracking-wider text-white">GAME PAUSED</h2>
-                <div class="flex flex-col space-y-3">
-                    <button onclick="togglePause()" class="btn-military py-3 font-teko text-xl">RESUME COMBAT</button>
-                    <button onclick="restartMatch()" class="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-teko text-xl text-white">RESTART MATCH</button>
-                    <button onclick="returnToMainMenu()" class="py-3 bg-red-950/80 hover:bg-red-900 border border-red-800 rounded-lg font-teko text-xl text-red-300">QUIT TO MAIN MENU</button>
-                </div>
-            </div>
-        </div>
+  // Navigation waypoints (random free points on the map)
+  const WPS = [];
+  for (let i = 0; i < 400 && WPS.length < 60; i++) {
+    const x = rnd(-34, 34), z = rnd(-34, 34);
+    if (isFree(x, z, 1.2)) WPS.push({ x, z });
+  }
 
-        <!-- MATCH END SCREEN -->
-        <div id="menu-gameover" class="hidden absolute inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center z-50">
-            <div class="bg-slate-900 border-2 border-blue-500/60 p-8 rounded-2xl w-full max-w-2xl text-center space-y-6 hud-border shadow-2xl">
-                <span id="end-status" class="bg-blue-600/30 text-blue-300 px-4 py-1 rounded-full text-sm font-mono border border-blue-500">MATCH CONCLUDED</span>
-                <h2 id="end-title" class="text-6xl font-teko tracking-wider text-white">VICTORY</h2>
-                <div class="grid grid-cols-3 gap-4 my-6">
-                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
-                        <span class="text-xs text-slate-400">FINAL KILLS</span>
-                        <div id="end-kills" class="text-3xl font-teko text-emerald-400">0</div>
-                    </div>
-                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
-                        <span class="text-xs text-slate-400">DEATHS</span>
-                        <div id="end-deaths" class="text-3xl font-teko text-red-400">0</div>
-                    </div>
-                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
-                        <span class="text-xs text-slate-400">ACCURACY</span>
-                        <div id="end-acc" class="text-3xl font-teko text-blue-400">0%</div>
-                    </div>
-                </div>
-                <div class="flex justify-center space-x-4">
-                    <button onclick="restartMatch()" class="btn-military py-3 px-8 font-teko text-2xl">PLAY AGAIN</button>
-                    <button onclick="returnToMainMenu()" class="py-3 px-8 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-teko text-2xl text-white">MAIN MENU</button>
-                </div>
-            </div>
-        </div>
+  const SPAWNS = [
+    { x: -32, z: -32 }, { x: 32, z: 32 }, { x: 32, z: -32 }, { x: -32, z: 32 },
+    { x: 0, z: -34 }, { x: 0, z: 34 }, { x: -34, z: 0 }, { x: 34, z: 0 }
+  ];
 
-    </div>
+  // ---------- Line of sight ----------
+  const _ray = new THREE.Raycaster();
+  const _o = new THREE.Vector3();
+  const _d = new THREE.Vector3();
+  const _tmp = new THREE.Vector3();
 
-    <!-- Main Game & Engine Script -->
-    <script>
-        // ==========================================
-        // 1. GAME CONFIGURATION & STATE
-        // ==========================================
-        const CONFIG = {
-            sensitivity: 1.2,
-            fov: 75,
-            graphics: 'high',
-            audioEnabled: true
-        };
+  function hasLOS(ox, oy, oz, tx, ty, tz) {
+    _o.set(ox, oy, oz);
+    _d.set(tx - ox, ty - oy, tz - oz);
+    const dist = _d.length();
+    _d.divideScalar(dist);
+    _ray.set(_o, _d);
+    _ray.far = dist;
+    return _ray.intersectObjects(wallMeshes, false).length === 0;
+  }
 
-        const STATE = {
-            currentMenu: 'main',
-            selectedMapIndex: 0,
-            selectedWeaponIndex: 5, // Default M4
-            gameMode: 'tdm', // 'tdm' or 'ffa'
-            isPlaying: false,
-            isPaused: false,
-            isGameOver: false,
-            matchTime: 480, // 8 minutes default
-            scoreBlue: 0,
-            scoreRed: 0,
-            kills: 0,
-            deaths: 0,
-            shotsFired: 0,
-            shotsHit: 0
-        };
+  // ---------- Effects (tracers, sparks) ----------
+  const effects = [];
+  const sparkGeo = new THREE.SphereGeometry(0.06, 6, 6);
 
-        // ==========================================
-        // 2. WEAPON DATABASE (15 SELECTABLE WEAPONS)
-        // ==========================================
-        const WEAPONS = [
-            // SMGs (5)
-            { id: 0, name: "Vector-9 SMG", category: "SMG", damage: 24, fireRate: 950, magSize: 35, reloadTime: 1.5, range: 40, spread: 0.04 },
-            { id: 1, name: "MP5 Tactical", category: "SMG", damage: 28, fireRate: 800, magSize: 30, reloadTime: 1.8, range: 45, spread: 0.03 },
-            { id: 2, name: "P90 PDW", category: "SMG", damage: 22, fireRate: 900, magSize: 50, reloadTime: 2.2, range: 40, spread: 0.035 },
-            { id: 3, name: "Uzi Compact", category: "SMG", damage: 26, fireRate: 850, magSize: 32, reloadTime: 1.6, range: 35, spread: 0.045 },
-            { id: 4, name: "Modern MPX", category: "SMG", damage: 27, fireRate: 830, magSize: 30, reloadTime: 1.7, range: 48, spread: 0.028 },
-            // Assault Rifles (5)
-            { id: 5, name: "M4-A1 Carbine", category: "Assault Rifle", damage: 32, fireRate: 750, magSize: 30, reloadTime: 2.0, range: 80, spread: 0.02 },
-            { id: 6, name: "AK-47 Heavy", category: "Assault Rifle", damage: 42, fireRate: 600, magSize: 30, reloadTime: 2.4, range: 85, spread: 0.03 },
-            { id: 7, name: "SCAR-H Battle", category: "Assault Rifle", damage: 40, fireRate: 650, magSize: 20, reloadTime: 2.2, range: 90, spread: 0.022 },
-            { id: 8, name: "M16 Burst", category: "Assault Rifle", damage: 35, fireRate: 700, magSize: 30, reloadTime: 2.0, range: 95, spread: 0.015 },
-            { id: 9, name: "Bullpup AUG", category: "Assault Rifle", damage: 33, fireRate: 780, magSize: 30, reloadTime: 2.1, range: 82, spread: 0.018 },
-            // Shotguns (3)
-            { id: 10, name: "Pump-Action 870", category: "Shotgun", damage: 90, fireRate: 90, magSize: 8, reloadTime: 3.0, range: 18, spread: 0.09 },
-            { id: 11, name: "Semi-Auto S12", category: "Shotgun", damage: 75, fireRate: 240, magSize: 10, reloadTime: 2.8, range: 22, spread: 0.08 },
-            { id: 12, name: "Combat Breacher", category: "Shotgun", damage: 95, fireRate: 110, magSize: 6, reloadTime: 2.5, range: 15, spread: 0.1 },
-            // Sniper Rifles (2)
-            { id: 13, name: "Bolt-Action Mosin", category: "Sniper", damage: 98, fireRate: 45, magSize: 5, reloadTime: 3.2, range: 250, spread: 0.002 },
-            { id: 14, name: "Semi-Auto SVD", category: "Sniper", damage: 75, fireRate: 180, magSize: 10, reloadTime: 2.6, range: 200, spread: 0.005 }
-        ];
+  function addEffect(obj, life) {
+    scene.add(obj);
+    effects.push({ o: obj, t: life });
+  }
+  function tracer(a, b, color) {
+    const g = new THREE.BufferGeometry().setFromPoints([a, b]);
+    const m = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.85 });
+    addEffect(new THREE.Line(g, m), 0.06);
+  }
+  function spark(p, color) {
+    const m = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color: color }));
+    m.position.copy(p);
+    addEffect(m, 0.12);
+  }
+  function updateEffects(dt) {
+    for (let i = effects.length - 1; i >= 0; i--) {
+      const e = effects[i];
+      e.t -= dt;
+      if (e.t <= 0) {
+        scene.remove(e.o);
+        if (e.o.geometry !== sparkGeo) e.o.geometry.dispose();
+        e.o.material.dispose();
+        effects.splice(i, 1);
+      }
+    }
+  }
 
-        let currentWeapon = { ...WEAPONS[5] };
-        let currentAmmo = currentWeapon.magSize;
-        let reserveAmmo = currentWeapon.magSize * 4;
-        let isReloading = false;
-        let lastShotTime = 0;
+  // ---------- Player's gun (attached to camera) ----------
+  const gun = new THREE.Group();
+  const gunMat = new THREE.MeshLambertMaterial({ color: 0x2b2b2b });
+  const gunDark = new THREE.MeshLambertMaterial({ color: 0x111111 });
+  const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.6), gunMat);
+  gunBody.position.set(0, 0, -0.35);
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8), gunDark);
+  barrel.rotation.x = Math.PI / 2;
+  barrel.position.set(0, 0.02, -0.72);
+  const mag = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.2, 0.1), gunDark);
+  mag.position.set(0, -0.16, -0.3);
+  const stock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.25), gunMat);
+  stock.position.set(0, -0.02, -0.02);
+  gun.add(gunBody, barrel, mag, stock);
+  gun.position.set(0.28, -0.26, 0);
+  camera.add(gun);
 
-        // ==========================================
-        // 3. MAP DATABASE (5 MAPS)
-        // ==========================================
-        const MAPS = [
-            { id: 0, name: "OUTPOST", desc: "Desert military base with watchtowers and concrete barriers.", theme: "desert" },
-            { id: 1, name: "WAREHOUSE", desc: "Industrial indoor/outdoor zone with cargo containers and metal walkways.", theme: "industrial" },
-            { id: 2, name: "RAID", desc: "Modern luxury compound with central courtyard and balconies.", theme: "compound" },
-            { id: 3, name: "CARGO", desc: "Shipping yard with stacked containers and narrow corridors.", theme: "cargo" },
-            { id: 4, name: "SUMMIT", desc: "Snowy mountain installation with radar domes and bunker interiors.", theme: "snow" }
-        ];
+  const _muzzle = new THREE.Vector3();
+  function muzzleWorld() {
+    camera.updateMatrixWorld();
+    _muzzle.set(0, 0.02, -0.85);
+    gun.localToWorld(_muzzle);
+    return _muzzle.clone();
+  }
 
-        // ==========================================
-        // 4. THREE.JS ENGINE & SCENE SETUP
-        // ==========================================
-        let scene, camera, renderer;
-        let mapGroup = new THREE.Group();
-        let bots = [];
-        let bullets = [];
-        let particles = [];
-        let raycaster = new THREE.Raycaster();
+  // ---------- Bots ----------
+  const TIERS = {
+    NEW:   { name: 'NEW',   color: 0x3f7fd0, reaction: 1.2, spread: 0.12, speed: 3.2, fire: 0.6,  strafeMin: 1.5, strafeMax: 3.0, pref: 16 },
+    PRO:   { name: 'PRO',   color: 0xd04a3a, reaction: 0.6, spread: 0.05, speed: 4.4, fire: 0.3,  strafeMin: 0.9, strafeMax: 2.0, pref: 14 },
+    ULTRA: { name: 'ULTRA', color: 0x8a3ad0, reaction: 0.3, spread: 0.03, speed: 5.0, fire: 0.22, strafeMin: 0.6, strafeMax: 1.4, pref: 12 }
+  };
 
-        // Player State
-        const player = {
-            position: new THREE.Vector3(0, 1.7, 0),
-            velocity: new THREE.Vector3(),
-            rotation: { x: 0, y: 0 },
-            hp: 100,
-            speed: 6.5,
-            jumpSpeed: 10,
-            isGrounded: false,
-            team: 'blue'
-        };
+  function makeBotModel(color) {
+    const g = new THREE.Group();
+    const uni = new THREE.MeshLambertMaterial({ color: color });
+    const legMat = new THREE.MeshLambertMaterial({ color: 0x3a3a3a });
+    const skin = new THREE.MeshLambertMaterial({ color: 0xd8b08c });
+    const gear = new THREE.MeshLambertMaterial({ color: 0x222222 });
+    const hits = [];
+    function part(geo, mat, x, y, z, tag) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.userData.part = tag;
+      g.add(m);
+      hits.push(m);
+      return m;
+    }
+    part(new THREE.BoxGeometry(0.35, 0.8, 0.35), legMat, -0.18, 0.4, 0, 'legs');
+    part(new THREE.BoxGeometry(0.35, 0.8, 0.35), legMat, 0.18, 0.4, 0, 'legs');
+    part(new THREE.BoxGeometry(0.8, 0.9, 0.45), uni, 0, 1.25, 0, 'body');
+    part(new THREE.BoxGeometry(0.22, 0.75, 0.22), uni, -0.55, 1.25, 0, 'body');
+    part(new THREE.BoxGeometry(0.22, 0.75, 0.22), uni, 0.55, 1.25, 0, 'body');
+    part(new THREE.SphereGeometry(0.22, 12, 10), skin, 0, 1.8, 0, 'head');
+    part(new THREE.BoxGeometry(0.5, 0.18, 0.5), gear, 0, 1.95, 0, 'head');
+    // Gun (visual only)
+    const bg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.6), gear);
+    bg.position.set(0.3, 1.3, -0.35);
+    g.add(bg);
+    return { group: g, hits: hits };
+  }
 
-        // Input Controls State
-        const keys = {};
-        let mouseLook = { x: 0, y: 0 };
-        let isMouseDown = false;
-        let isADS = false;
+  const BOTS = [];
+  const SPH_BODY = new THREE.Sphere(new THREE.Vector3(), 0.5);
+  const SPH_HEAD = new THREE.Sphere(new THREE.Vector3(), 0.25);
 
-        function initEngine() {
-            const container = document.getElementById('canvas-container');
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x111827, 0.015);
+  function pickSpawn(self) {
+    const others = [P, ...BOTS].filter(e => e !== self && (e === P ? P.alive : !e.dead));
+    const scored = SPAWNS.map(s => ({
+      s: s,
+      d: others.length ? Math.min(...others.map(e => Math.hypot(s.x - e.x, s.z - e.z))) : 999
+    }));
+    scored.sort((a, b) => b.d - a.d);
+    const top = scored.slice(0, 4);
+    return top[Math.floor(Math.random() * top.length)].s;
+  }
 
-            camera = new THREE.PerspectiveCamera(CONFIG.fov, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            container.appendChild(renderer.domElement);
+  function createBot(index, tierKey) {
+    const t = TIERS[tierKey];
+    const model = makeBotModel(t.color);
+    scene.add(model.group);
+    const b = {
+      name: t.name + '-0' + (index + 1),
+      t: t, group: model.group, hits: model.hits,
+      x: 0, z: 0, yaw: 0, hp: 100, dead: false, respT: 0,
+      state: 'roam', fireCd: 0, seenT: 0, lostT: 0, searchT: 0,
+      lastSeen: null, wp: null, strafeDir: Math.random() < 0.5 ? 1 : -1, strafeT: 1,
+      stuckT: 0, lastX: 0, lastZ: 0, sinceHit: 99
+    };
+    model.hits.forEach(m => { m.userData.bot = b; });
+    placeBot(b);
+    BOTS.push(b);
+    return b;
+  }
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
+  function placeBot(b) {
+    const s = pickSpawn(b);
+    b.x = s.x + rnd(-1, 1);
+    b.z = s.z + rnd(-1, 1);
+    resolve(b, 0.45);
+    b.lastX = b.x; b.lastZ = b.z;
+    b.yaw = rnd(0, Math.PI * 2);
+    b.group.rotation.set(0, b.yaw, 0);
+    b.group.position.set(b.x, 0, b.z);
+  }
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
-            sunLight.position.set(50, 100, 50);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 2048;
-            sunLight.shadow.mapSize.height = 2048;
-            scene.add(sunLight);
+  function setState(b, s) {
+    b.state = s;
+    b.searchT = 0;
+    b.wp = null;
+  }
 
-            scene.add(mapGroup);
+  function pickWP(b) {
+    for (let i = 0; i < 8; i++) {
+      const w = WPS[Math.floor(Math.random() * WPS.length)];
+      if (Math.hypot(w.x - b.x, w.z - b.z) > 6) return w;
+    }
+    return WPS[0];
+  }
 
-            // Event Listeners
-            window.addEventListener('resize', onWindowResize);
-            window.addEventListener('keydown', (e) => { keys[e.code] = true; handleKeyDown(e); });
-            window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!STATE.isPlaying || STATE.isPaused) return;
-                if (document.pointerLockElement === renderer.domElement) {
-                    player.rotation.y -= e.movementX * 0.002 * CONFIG.sensitivity;
-                    player.rotation.x -= e.movementY * 0.002 * CONFIG.sensitivity;
-                    player.rotation.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.rotation.x));
-                }
-            });
+  function pickCover(b) {
+    let best = null, bestD = 1e9;
+    for (const w of WPS) {
+      const d = Math.hypot(w.x - b.x, w.z - b.z);
+      if (d > 14 || d >= bestD) continue;
+      if (!hasLOS(w.x, 1.2, w.z, P.x, 1.1, P.z)) { best = w; bestD = d; }
+    }
+    return best || pickWP(b);
+  }
 
-            renderer.domElement.addEventListener('mousedown', (e) => {
-                if (!STATE.isPlaying || STATE.isPaused) return;
-                if (document.pointerLockElement !== renderer.domElement) {
-                    renderer.domElement.requestPointerLock();
-                } else if (e.button === 0) {
-                    isMouseDown = true;
-                } else if (e.button === 2) {
-                    toggleADS(true);
-                }
-            });
+  // Move toward a point; returns true if arrived
+  function moveTo(e, tx, tz, speed, dt) {
+    const dx = tx - e.x, dz = tz - e.z, d = Math.hypot(dx, dz);
+    if (d < 0.15) return true;
+    const s = Math.min(d, speed * dt);
+    e.x += dx / d * s;
+    e.z += dz / d * s;
+    resolve(e, 0.45);
+    return false;
+  }
 
-            renderer.domElement.addEventListener('mouseup', (e) => {
-                if (e.button === 0) isMouseDown = false;
-                if (e.button === 2) toggleADS(false);
-            });
+  function turnTo(e, tx, tz, dt) {
+    const target = Math.atan2(-(tx - e.x), -(tz - e.z));
+    let diff = target - e.yaw;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    e.yaw += diff * Math.min(1, dt * 8);
+  }
 
-            renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+  const _bRay = new THREE.Ray();
+  function botShoot(b) {
+    if (!P.alive) return;
+    const dist = Math.hypot(P.x - b.x, P.z - b.z);
+    const err = b.t.spread * dist;
+    const tx = P.x + rnd(-err, err);
+    const ty = 1.1 + rnd(-err, err) * 0.6;
+    const tz = P.z + rnd(-err, err);
+    _o.set(b.x, 1.45, b.z);
+    _d.set(tx - b.x, ty - 1.45, tz - b.z).normalize();
 
-            buildWeaponLoadoutUI();
-            buildProceduralMap(STATE.selectedMapIndex);
-            
-            // Animation Loop
-            let lastTime = performance.now();
-            function animate(now) {
-                requestAnimationFrame(animate);
-                const delta = (now - lastTime) / 1000;
-                lastTime = now;
+    let endD = 200;
+    _ray.set(_o, _d);
+    _ray.far = 200;
+    const wh = _ray.intersectObjects(wallMeshes, false);
+    if (wh.length) endD = wh[0].distance;
 
-                if (STATE.isPlaying && !STATE.isPaused) {
-                    updatePlayer(delta);
-                    updateBots(delta);
-                    updateProjectiles(delta);
-                    updateParticles(delta);
-                    updateHUD();
-                    updateMinimap();
-                }
-                renderer.render(scene, camera);
-            }
-            requestAnimationFrame(animate);
+    SPH_BODY.center.set(P.x, 1.1, P.z);
+    SPH_HEAD.center.set(P.x, 1.6, P.z);
+    _bRay.set(_o, _d);
+    let hitPlayer = false;
+    if (_bRay.intersectSphere(SPH_BODY, _tmp)) {
+      const d = _o.distanceTo(_tmp);
+      if (d < endD) { endD = d; hitPlayer = true; }
+    }
+    if (_bRay.intersectSphere(SPH_HEAD, _tmp)) {
+      const d = _o.distanceTo(_tmp);
+      if (d < endD) { endD = d; hitPlayer = true; }
+    }
+
+    const from = _o.clone();
+    const end = _o.clone().addScaledVector(_d, endD);
+    tracer(from, end, 0xffaa33);
+    if (hitPlayer) {
+      spark(end, 0xff3b3b);
+      damagePlayer(CFG.BDMG, b.name);
+    } else if (wh.length) {
+      spark(end, 0xd9b77e);
+    }
+  }
+
+  function botKilled(b, headshot) {
+    b.dead = true;
+    b.respT = CFG.BRESP;
+    b.group.rotation.x = -Math.PI / 2;
+    b.group.position.y = 0.05;
+    K.kills++;
+    feed('You eliminated ' + b.name + (headshot ? ' (HEADSHOT)' : ''), '#ffd98a');
+    showMsg(headshot ? 'HEADSHOT!' : 'ELIMINATED');
+  }
+
+  function respawnBot(b) {
+    b.dead = false;
+    b.hp = 100;
+    b.sinceHit = 99;
+    b.lastSeen = null;
+    b.seenT = 0;
+    b.lostT = 99;
+    b.group.rotation.set(0, 0, 0);
+    setState(b, 'roam');
+    placeBot(b);
+  }
+
+  function updateBot(b, dt) {
+    if (b.dead) {
+      b.respT -= dt;
+      if (b.respT <= 0) respawnBot(b);
+      return;
+    }
+    const t = b.t;
+    b.fireCd -= dt;
+    b.sinceHit += dt;
+    if (b.sinceHit > 4 && b.hp < 100) b.hp = Math.min(100, b.hp + 6 * dt);
+
+    // Stuck detection
+    b.stuckT += dt;
+    if (b.stuckT >= 0.8) {
+      if (Math.hypot(b.x - b.lastX, b.z - b.lastZ) < 0.15 && (b.state === 'roam' || b.state === 'search')) {
+        b.wp = null;
+      }
+      b.lastX = b.x; b.lastZ = b.z; b.stuckT = 0;
+    }
+
+    // Perception
+    const dist = Math.hypot(P.x - b.x, P.z - b.z);
+    const see = P.alive && dist < 55 && hasLOS(b.x, 1.6, b.z, P.x, 1.1, P.z);
+    if (see) {
+      b.lastSeen = { x: P.x, z: P.z };
+      b.seenT += dt;
+      b.lostT = 0;
+    } else {
+      b.seenT = 0;
+      b.lostT += dt;
+    }
+    const aware = see && b.seenT >= t.reaction;
+
+    // State transitions
+    if (b.state === 'roam') {
+      if (aware) setState(b, 'combat');
+    } else if (b.state === 'combat') {
+      if (b.hp < 30) setState(b, 'cover');
+      else if (!see && b.lostT > 1.5) setState(b, 'search');
+    } else if (b.state === 'search') {
+      if (aware) setState(b, 'combat');
+      else if (b.searchT > 5) setState(b, 'roam');
+    } else if (b.state === 'cover') {
+      if (b.hp >= 60 || b.lostT > 3) setState(b, (see && P.alive) ? 'combat' : 'roam');
+    }
+
+    // State behaviour
+    b.searchT += dt;
+    switch (b.state) {
+      case 'roam': {
+        if (!b.wp) b.wp = pickWP(b);
+        turnTo(b, b.wp.x, b.wp.z, dt);
+        if (moveTo(b, b.wp.x, b.wp.z, t.speed * 0.6, dt)) b.wp = null;
+        break;
+      }
+      case 'search': {
+        if (!b.lastSeen) { setState(b, 'roam'); break; }
+        turnTo(b, b.lastSeen.x, b.lastSeen.z, dt);
+        if (moveTo(b, b.lastSeen.x, b.lastSeen.z, t.speed * 0.8, dt)) setState(b, 'roam');
+        break;
+      }
+      case 'combat': {
+        turnTo(b, P.x, P.z, dt);
+        const dd = Math.max(dist, 0.01);
+        const dx = (P.x - b.x) / dd, dz = (P.z - b.z) / dd;
+        let mx = 0, mz = 0;
+        if (dist > t.pref + 3) { mx += dx; mz += dz; }
+        else if (dist < t.pref - 3) { mx -= dx; mz -= dz; }
+        mx += -dz * b.strafeDir * 0.9;
+        mz += dx * b.strafeDir * 0.9;
+        const ml = Math.hypot(mx, mz) || 1;
+        const s = t.speed * dt;
+        const ox = b.x, oz = b.z;
+        b.x += mx / ml * s;
+        b.z += mz / ml * s;
+        resolve(b, 0.45);
+        if (Math.hypot(b.x - ox, b.z - oz) < s * 0.3) b.strafeDir *= -1; // blocked, reverse
+        b.strafeT -= dt;
+        if (b.strafeT <= 0) {
+          b.strafeDir *= -1;
+          b.strafeT = rnd(t.strafeMin, t.strafeMax);
         }
-
-        // ==========================================
-        // 5. MENU & UI CONTROLLER FUNCTIONS
-        // ==========================================
-        function switchMenu(menuName) {
-            STATE.currentMenu = menuName;
-            ['menu-main', 'menu-map', 'menu-loadout', 'menu-mode', 'menu-settings', 'menu-help'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(`menu-${menuName}`).classList.remove('hidden');
+        if (see && aware && b.fireCd <= 0) {
+          botShoot(b);
+          b.fireCd = t.fire;
         }
-
-        function selectMap(index) {
-            STATE.selectedMapIndex = index;
-            document.querySelectorAll('[id^="map-card-"]').forEach((el, idx) => {
-                if (idx === index) el.classList.add('selected');
-                else el.classList.remove('selected');
-            });
-            const m = MAPS[index];
-            document.getElementById('btn-map-label').innerText = m.name;
-            document.getElementById('preview-title').innerText = "OPERATION " + m.name;
-            document.getElementById('preview-desc').innerText = m.desc;
-            buildProceduralMap(index);
+        break;
+      }
+      case 'cover': {
+        if (!b.wp) b.wp = pickCover(b);
+        const arrived = Math.hypot(b.wp.x - b.x, b.wp.z - b.z) < 0.5;
+        if (!arrived) {
+          turnTo(b, b.wp.x, b.wp.z, dt);
+          moveTo(b, b.wp.x, b.wp.z, t.speed * 1.1, dt);
+        } else if (see) {
+          turnTo(b, P.x, P.z, dt);
+          if (aware && b.fireCd <= 0) {
+            botShoot(b);
+            b.fireCd = t.fire;
+          }
         }
-
-        function selectWeapon(index) {
-            STATE.selectedWeaponIndex = index;
-            currentWeapon = { ...WEAPONS[index] };
-            currentAmmo = currentWeapon.magSize;
-            reserveAmmo = currentWeapon.magSize * 4;
-            document.getElementById('btn-weapon-label').innerText = currentWeapon.name;
-            document.getElementById('stat-dmg-rpm').innerText = `${currentWeapon.damage} DMG / ${currentWeapon.fireRate} RPM`;
-            document.getElementById('stat-mag').innerText = `${currentWeapon.magSize} RDS`;
-            
-            document.querySelectorAll('.weapon-card').forEach((el, idx) => {
-                if (idx === index) el.classList.add('selected');
-                else el.classList.remove('selected');
-            });
-        }
-
-        function selectMode(mode) {
-            STATE.gameMode = mode;
-            document.getElementById('mode-card-tdm').classList.toggle('selected', mode === 'tdm');
-            document.getElementById('mode-card-ffa').classList.toggle('selected', mode === 'ffa');
-            document.getElementById('btn-mode-label').innerText = mode === 'tdm' ? 'TEAM DEATHMATCH' : 'SOLO FREE-FOR-ALL';
-            document.getElementById('preview-combatants').innerText = mode === 'tdm' ? '20 PLAYERS (1V19)' : '10 PLAYERS (FFA)';
-        }
-
-        function updateSetting(key, val) {
-            CONFIG[key] = parseFloat(val);
-            if (key === 'sensitivity') document.getElementById('val-sens').innerText = val;
-            if (key === 'fov') {
-                document.getElementById('val-fov').innerText = val;
-                if (camera) { camera.fov = parseFloat(val); camera.updateProjectionMatrix(); }
-            }
-        }
-
-        function setGraphicsTier(tier) {
-            CONFIG.graphics = tier;
-            ['low', 'medium', 'high', 'ultra'].forEach(t => {
-                const btn = document.getElementById(`gfx-${t}`);
-                if (t === tier) {
-                    btn.className = "py-2 bg-blue-600 border border-blue-400 rounded font-teko text-lg";
-                } else {
-                    btn.className = "py-2 bg-slate-800 border border-slate-600 rounded font-teko text-lg";
-                }
-            });
-            if (renderer) {
-                renderer.shadowMap.enabled = (tier === 'high' || tier === 'ultra');
-            }
-        }
-
-        function toggleAudio(enabled) { CONFIG.audioEnabled = enabled; }
-
-        function buildWeaponLoadoutUI() {
-            const grid = document.getElementById('weapon-grid');
-            grid.innerHTML = '';
-            WEAPONS.forEach((w, idx) => {
-                const isSelected = idx === STATE.selectedWeaponIndex ? 'selected' : '';
-                grid.innerHTML += `
-                    <div onclick="selectWeapon(${idx})" class="weapon-card card-select p-4 rounded-xl cursor-pointer group ${isSelected}">
-                        <div class="h-20 bg-slate-800/80 rounded-lg mb-2 flex items-center justify-center border border-slate-700">
-                            <i class="fa-solid fa-gun text-3xl text-blue-400 group-hover:scale-110 transition"></i>
-                        </div>
-                        <span class="text-[10px] font-mono text-blue-400">${w.category}</span>
-                        <h4 class="text-xl font-teko font-bold text-white">${w.name}</h4>
-                        <div class="text-xs text-slate-400 mt-1">${w.damage} DMG | ${w.fireRate} RPM</div>
-                    </div>
-                `;
-            });
-        }
-
-        // ==========================================
-        // 6. PROCEDURAL 3D MAP GENERATOR
-        // ==========================================
-        function buildProceduralMap(mapIndex) {
-            while (mapGroup.children.length > 0) {
-                mapGroup.remove(mapGroup.children[0]);
-            }
-
-            const mapDef = MAPS[mapIndex];
-            
-            // Ground
-            let groundColor = 0xc2b280; // Desert
-            if (mapDef.theme === 'industrial') groundColor = 0x334155;
-            if (mapDef.theme === 'compound') groundColor = 0x1e293b;
-            if (mapDef.theme === 'cargo') groundColor = 0x18181b;
-            if (mapDef.theme === 'snow') groundColor = 0xf8fafc;
-
-            const groundGeo = new THREE.PlaneGeometry(160, 160);
-            const groundMat = new THREE.MeshStandardMaterial({ color: groundColor, roughness: 0.8 });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            mapGroup.add(ground);
-
-            // Grid Walls & Obstacles
-            const wallMat = new THREE.MeshStandardMaterial({ 
-                color: mapDef.theme === 'snow' ? 0x94a3b8 : (mapDef.theme === 'desert' ? 0xd4a373 : 0x475569), 
-                roughness: 0.7 
-            });
-
-            // Boundary Walls
-            const boundSize = 75;
-            createWall(0, 5, -boundSize, 150, 10, 2, wallMat);
-            createWall(0, 5, boundSize, 150, 10, 2, wallMat);
-            createWall(-boundSize, 5, 0, 2, 10, 150, wallMat);
-            createWall(boundSize, 5, 0, 2, 10, 150, wallMat);
-
-            // Procedural Buildings and Cover
-            const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-            for (let i = 0; i < 25; i++) {
-                const x = (Math.random() - 0.5) * 120;
-                const z = (Math.random() - 0.5) * 120;
-                if (Math.abs(x) < 10 && Math.abs(z) < 10) continue; // Keep spawn clean
-
-                const w = 6 + Math.random() * 10;
-                const h = 4 + Math.random() * 6;
-                const d = 6 + Math.random() * 10;
-
-                const bMesh = new THREE.Mesh(boxGeo, wallMat);
-                bMesh.position.set(x, h/2, z);
-                bMesh.scale.set(w, h, d);
-                bMesh.castShadow = true;
-                bMesh.receiveShadow = true;
-                mapGroup.add(bMesh);
-            }
-        }
-
-        function createWall(x, y, z, w, h, d, mat) {
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            mapGroup.add(mesh);
-        }
-
-        // ==========================================
-        // 7. MATCH INITIALIZATION & BOT SPAWNING
-        // ==========================================
-        function startGame() {
-            STATE.isPlaying = true;
-            STATE.isPaused = false;
-            STATE.isGameOver = false;
-            STATE.scoreBlue = 0;
-            STATE.scoreRed = 0;
-            STATE.kills = 0;
-            STATE.deaths = 0;
-            STATE.shotsFired = 0;
-            STATE.shotsHit = 0;
-            STATE.matchTime = STATE.gameMode === 'tdm' ? 480 : 360;
-
-            // Reset Player
-            player.position.set(0, 1.7, 0);
-            player.hp = 100;
-            player.velocity.set(0, 0, 0);
-
-            // Hide menus, show HUD
-            document.getElementById('menu-main').classList.add('hidden');
-            document.getElementById('menu-pause').classList.add('hidden');
-            document.getElementById('menu-gameover').classList.add('hidden');
-            document.getElementById('hud-game').classList.remove('hidden');
-
-            // Request Pointer Lock
-            renderer.domElement.requestPointerLock();
-
-            // Spawn Bots based on Mode
-            spawnBots();
-        }
-
-        function spawnBots() {
-            bots = [];
-            const totalBots = STATE.gameMode === 'tdm' ? 19 : 9;
-
-            // Difficulty distribution: 3 New Player, 5 Pro, 2 Ultra-Pro
-            for (let i = 0; i < totalBots; i++) {
-                let diff = 'newbie';
-                if (i >= 3 && i < 8) diff = 'pro';
-                if (i >= 8) diff = 'ultra';
-
-                const botTeam = STATE.gameMode === 'tdm' ? (i % 2 === 0 ? 'blue' : 'red') : 'ffa';
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 20 + Math.random() * 40;
-
-                const botMeshGroup = new THREE.Group();
-                const bodyMat = new THREE.MeshStandardMaterial({ color: botTeam === 'blue' ? 0x2563eb : (botTeam === 'red' ? 0xdc2626 : 0x10b981) });
-                
-                // Torso
-                const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), bodyMat);
-                torso.position.y = 0.6;
-                torso.castShadow = true;
-                botMeshGroup.add(torso);
-
-                // Head
-                const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
-                head.position.y = 1.4;
-                botMeshGroup.add(head);
-
-                const x = Math.cos(angle) * dist;
-                const z = Math.sin(angle) * dist;
-                botMeshGroup.position.set(x, 0, z);
-                scene.add(botMeshGroup);
-
-                bots.push({
-                    mesh: botMeshGroup,
-                    team: botTeam,
-                    difficulty: diff,
-                    hp: 100,
-                    state: 'roam',
-                    targetPos: new THREE.Vector3(x, 0, z),
-                    shootCooldown: 0,
-                    stateTimer: 0
-                });
-            }
-        }
-
-        // ==========================================
-        // 8. GAME LOOP & PLAYER CONTROLS
-        // ==========================================
-        function updatePlayer(delta) {
-            // Movement vector
-            const moveDir = new THREE.Vector3();
-            const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-            const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-
-            if (keys['KeyW']) moveDir.add(forward);
-            if (keys['KeyS']) moveDir.sub(forward);
-            if (keys['KeyD']) moveDir.add(right);
-            if (keys['KeyA']) moveDir.sub(right);
-            moveDir.normalize();
-
-            let speed = player.speed;
-            if (keys['ShiftKey']) speed *= 1.4;
-
-            player.position.x += moveDir.x * speed * delta;
-            player.position.z += moveDir.z * speed * delta;
-
-            // Boundaries
-            player.position.x = Math.max(-70, Math.min(70, player.position.x));
-            player.position.z = Math.max(-70, Math.min(70, player.position.z));
-
-            // Camera Sync
-            camera.position.copy(player.position);
-            camera.rotation.set(0, 0, 0);
-            camera.rotation.y = player.rotation.y;
-            camera.rotation.x = player.rotation.x;
-
-            // Firing
-            if (isMouseDown && performance.now() - lastShotTime > (60000 / currentWeapon.fireRate)) {
-                fireWeapon();
-            }
-
-            // Weapon Switch Keys
-            if (keys['Digit1']) selectWeapon(5); // Default assault rifle
-            if (keys['Digit2']) selectWeapon(0); // Default SMG
-            if (keys['KeyR'] && !isReloading) reloadWeapon();
-
-            // Match Timer
-            STATE.matchTime -= delta;
-            if (STATE.matchTime <= 0) checkMatchOver(true);
-        }
-
-        function fireWeapon() {
-            if (isReloading) return;
-            if (currentAmmo <= 0) { reloadWeapon(); return; }
-
-            currentAmmo--;
-            lastShotTime = performance.now();
-            STATE.shotsFired++;
-
-            // Muzzle flash / recoil kick
-            player.rotation.x += 0.015;
-
-            // Raycast for hits
-            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-
-            if (intersects.length > 0) {
-                const hit = intersects[0];
-                if (hit.distance < currentWeapon.range * 3) {
-                    STATE.shotsHit++;
-                    // Check if hit bot
-                    bots.forEach(b => {
-                        if (b.mesh === hit.object.parent || b.mesh.children.includes(hit.object)) {
-                            damageBot(b, currentWeapon.damage);
-                        }
-                    });
-                }
-            }
-        }
-
-        function reloadWeapon() {
-            if (reserveAmmo <= 0 || currentAmmo === currentWeapon.magSize) return;
-            isReloading = true;
-            setTimeout(() => {
-                const needed = currentWeapon.magSize - currentAmmo;
-                const take = Math.min(needed, reserveAmmo);
-                currentAmmo += take;
-                reserveAmmo -= take;
-                isReloading = false;
-            }, currentWeapon.reloadTime * 1000);
-        }
-
-        function toggleADS(active) {
-            isADS = active;
-            camera.fov = active ? CONFIG.fov * 0.75 : CONFIG.fov;
-            camera.updateProjectionMatrix();
-        }
-
-        // ==========================================
-        // 9. SMART BOT AI (FSM & RAYCASTING)
-        // ==========================================
-        function updateBots(delta) {
-            bots.forEach(b => {
-                if (b.hp <= 0) return;
-
-                // FSM AI Decision Logic
-                b.stateTimer += delta;
-                const distToPlayer = b.mesh.position.distanceTo(player.position);
-
-                if (distToPlayer < 35) {
-                    b.state = 'combat';
-                } else if (b.stateTimer > 5) {
-                    b.state = Math.random() > 0.4 ? 'roam' : 'search';
-                    b.stateTimer = 0;
-                    b.targetPos.set((Math.random() - 0.5) * 100, 0, (Math.random() - 0.5) * 100);
-                }
-
-                if (b.state === 'roam' || b.state === 'search') {
-                    const dir = new THREE.Vector3().subVectors(b.targetPos, b.mesh.position);
-                    if (dir.length() > 2) {
-                        dir.normalize();
-                        b.mesh.position.addScaledVector(dir, 3.5 * delta);
-                        b.mesh.lookAt(b.targetPos);
-                    }
-                } else if (b.state === 'combat') {
-                    b.mesh.lookAt(player.position);
-                    const dirToPlayer = new THREE.Vector3().subVectors(player.position, b.mesh.position).normalize();
-                    b.mesh.position.addScaledVector(dirToPlayer, 2.5 * delta); // Advance or strafe
-
-                    // Bot Shooting
-                    b.shootCooldown += delta;
-                    let fireInterval = b.difficulty === 'ultra' ? 0.4 : (b.difficulty === 'pro' ? 0.7 : 1.2);
-                    if (b.shootCooldown > fireInterval) {
-                        b.shootCooldown = 0;
-                        if (Math.random() < (b.difficulty === 'ultra' ? 0.6 : 0.3)) {
-                            damagePlayer(b.difficulty === 'ultra' ? 18 : 12);
-                        }
-                    }
-                }
-            });
-        }
-
-        function damageBot(bot, amount) {
-            bot.hp -= amount;
-            showHitMarker();
-            if (bot.hp <= 0) {
-                scene.remove(bot.mesh);
-                STATE.kills++;
-                if (STATE.gameMode === 'tdm') {
-                    if (bot.team === 'red') STATE.scoreBlue++;
-                    else STATE.scoreRed++;
-                } else {
-                    STATE.scoreBlue++;
-                }
-                checkMatchOver(false);
-                respawnBot(bot);
-            }
-        }
-
-        function respawnBot(bot) {
-            bot.hp = 100;
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 30 + Math.random() * 40;
-            bot.mesh.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
-            scene.add(bot.mesh);
-        }
-
-        function damagePlayer(amount) {
-            player.hp -= amount;
-            document.body.classList.add('hit-damage');
-            setTimeout(() => document.body.classList.remove('hit-damage'), 400);
-
-            if (player.hp <= 0) {
-                STATE.deaths++;
-                player.hp = 100;
-                player.position.set(0, 1.7, 0);
-                if (STATE.gameMode === 'tdm') STATE.scoreRed++;
-                checkMatchOver(false);
-            }
-        }
-
-        function checkMatchOver(timeOut) {
-            const targetScore = STATE.gameMode === 'tdm' ? 40 : 20;
-            if (timeOut || STATE.scoreBlue >= targetScore || STATE.scoreRed >= targetScore) {
-                STATE.isPlaying = false;
-                document.exitPointerLock();
-                document.getElementById('hud-game').classList.add('hidden');
-                document.getElementById('menu-gameover').classList.remove('hidden');
-
-                const won = STATE.scoreBlue >= STATE.scoreRed;
-                document.getElementById('end-title').innerText = won ? 'VICTORY' : 'DEFEAT';
-                document.getElementById('end-title').className = `text-6xl font-teko tracking-wider ${won ? 'text-emerald-400' : 'text-red-500'}`;
-                document.getElementById('end-kills').innerText = STATE.kills;
-                document.getElementById('end-deaths').innerText = STATE.deaths;
-                const acc = STATE.shotsFired > 0 ? Math.round((STATE.shotsHit / STATE.shotsFired) * 100) : 0;
-                document.getElementById('end-acc').innerText = acc + '%';
-            }
-        }
-
-        function showHitMarker() {
-            const hm = document.getElementById('hit-marker');
-            hm.style.opacity = '1';
-            setTimeout(() => hm.style.opacity = '0', 100);
-        }
-
-        // ==========================================
-        // 10. HUD, MINIMAP & RENDERING UPDATES
-        // ==========================================
-        function updateHUD() {
-            document.getElementById('hud-hp').innerText = Math.max(0, Math.round(player.hp));
-            document.getElementById('hp-bar-fill').style.width = Math.max(0, player.hp) + '%';
-            document.getElementById('hud-ammo-curr').innerText = currentAmmo;
-            document.getElementById('hud-ammo-reserve').innerText = reserveAmmo;
-            document.getElementById('hud-weapon-name').innerText = currentWeapon.name;
-            document.getElementById('hud-score-blue').innerText = STATE.scoreBlue;
-            document.getElementById('hud-score-red').innerText = STATE.scoreRed;
-
-            const mins = Math.floor(STATE.matchTime / 60);
-            const secs = Math.floor(STATE.matchTime % 60);
-            document.getElementById('hud-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-
-        function updateMinimap() {
-            const canvas = document.getElementById('minimap-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const scale = canvas.width / 160;
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-
-            // Draw Player
-            ctx.fillStyle = '#60a5fa';
-            ctx.beginPath();
-            ctx.arc(cx + player.position.x * scale, cy + player.position.z * scale, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw Bots
-            bots.forEach(b => {
-                if (b.hp <= 0) return;
-                ctx.fillStyle = b.team === 'blue' ? '#3b82f6' : (b.team === 'red' ? '#ef4444' : '#10b981');
-                ctx.beginPath();
-                ctx.arc(cx + b.mesh.position.x * scale, cy + b.mesh.position.z * scale, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-
-        function updateProjectiles(delta) {}
-        function updateParticles(delta) {}
-
-        function togglePause() {
-            STATE.isPaused = !STATE.isPaused;
-            const pauseMenu = document.getElementById('menu-pause');
-            if (STATE.isPaused) {
-                pauseMenu.classList.remove('hidden');
-                document.exitPointerLock();
-            } else {
-                pauseMenu.classList.add('hidden');
-                renderer.domElement.requestPointerLock();
-            }
-        }
-
-        function restartMatch() { startGame(); }
-        function returnToMainMenu() {
-            STATE.isPlaying = false;
-            document.exitPointerLock();
-            document.getElementById('hud-game').classList.add('hidden');
-            document.getElementById('menu-pause').classList.add('hidden');
-            document.getElementById('menu-gameover').classList.add('hidden');
-            switchMenu('main');
-        }
-
-        function onWindowResize() {
-            if (camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        }
-
-        // Initialize Engine on Window Load
-        window.onload = function() {
-            initEngine();
-        };
-    </script>
+        break;
+      }
+    }
+  }
+
+  // Create the 3 bots: one New, one Pro, one Ultra
+  function initBots() {
+    BOTS.forEach(b => scene.remove(b.group));
+    BOTS.length = 0;
+    createBot(0, 'NEW');
+    createBot(1, 'PRO');
+    createBot(2, 'ULTRA');
+  }
+
+  // ---------- Player ----------
+  const P = {
+    x: 0, y: 0, z: 0, vy: 0, onGround: true, yaw: 0, pitch: 0,
+    hp: 100, alive: true, respT: 0,
+    mag: CFG.MAG, res: CFG.RES, reloadT: 0, fireCd: 0,
+    bloom: 0, kick: 0, moveAmt: 0, bobT: 0, damageT: 0, lastHitBy: ''
+  };
+  const K = { kills: 0, deaths: 0 };
+
+  function respawnPlayer() {
+    const s = pickSpawn(P);
+    P.x = s.x + rnd(-1, 1);
+    P.z = s.z + rnd(-1, 1);
+    resolve(P, CFG.R);
+    P.y = 0; P.vy = 0; P.onGround = true;
+    P.hp = 100; P.alive = true; P.reloadT = 0;
+    P.yaw = Math.atan2(-(0 - P.x), -(0 - P.z));
+    P.pitch = 0;
+    $('deathScreen').classList.add('hidden');
+  }
+
+  function killPlayer(by) {
+    P.alive = false;
+    P.respT = CFG.PRESP;
+    P.reloadT = 0;
+    K.deaths++;
+    feed(by + ' eliminated YOU', '#ff6b6b');
+    $('deathScreen').classList.remove('hidden');
+  }
+
+  function damagePlayer(dmg, by) {
+    if (!P.alive) return;
+    P.hp -= dmg;
+    P.damageT = 0.35;
+    P.lastHitBy = by;
+    if (P.hp <= 0) {
+      P.hp = 0;
+      killPlayer(by);
+    }
+  }
+
+  function startReload() {
+    if (P.reloadT > 0 || P.res <= 0 || P.mag === CFG.MAG || !P.alive) return;
+    P.reloadT = CFG.RELOAD;
+  }
+
+  let locked = false;
+  let mouseDown = false;
+  const hitMarkerEl = $('hitmarker');
+  let hitMarkerT = 0;
+
+  function playerShoot() {
+    if (!P.alive || P.reloadT > 0 || P.fireCd > 0) return;
+    if (P.mag <= 0) { startReload(); return; }
+    P.mag--;
+    P.fireCd = CFG.FIRE;
+    P.kick = 1;
+    P.pitch = clamp(P.pitch + 0.008, -1.4, 1.4);
+    P.yaw += (Math.random() - 0.5) * 0.004;
+    P.bloom = Math.min(0.03, P.bloom + 0.004);
+
+    const spread = 0.002 + P.moveAmt * 0.02 + P.bloom;
+    camera.updateMatrixWorld();
+    const camPos = new THREE.Vector3();
+    camera.getWorldPosition(camPos);
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    dir.addScaledVector(right, rnd(-spread, spread)).addScaledVector(up, rnd(-spread, spread)).normalize();
+
+    const targets = wallMeshes.concat(BOTS.reduce((arr, b) => arr.concat(b.hits), []));
+    _ray.set(camPos, dir);
+    _ray.far = 300;
+    const hits = _ray.intersectObjects(targets, false).filter(h => !(h.object.userData.bot && h.object.userData.bot.dead));
+
+    const muzzle = muzzleWorld();
+    let end = camPos.clone().addScaledVector(dir, 100);
+    let hitBot = null, part = null;
+    if (hits.length) {
+      const h = hits[0];
+      end = h.point.clone();
+      if (h.object.userData.bot) {
+        hitBot = h.object.userData.bot;
+        part = h.object.userData.part;
+      }
+    }
+
+    tracer(muzzle, end, 0xfff2a0);
+    spark(muzzle, 0xffcc66);
+
+    if (hitBot) {
+      let dmg = CFG.PDMG;
+      const head = part === 'head';
+      if (head) dmg *= CFG.HEADX;
+      hitBot.hp -= dmg;
+      hitBot.sinceHit = 0;
+      // Being shot makes the bot instantly aware of the player
+      hitBot.lastSeen = { x: P.x, z: P.z };
+      hitBot.seenT = hitBot.t.reaction;
+      hitBot.lostT = 0;
+      hitMarkerT = 0.12;
+      spark(end, head ? 0xffffff : 0xff3b3b);
+      if (hitBot.hp <= 0) botKilled(hitBot, head);
+    } else if (hits.length) {
+      spark(end, 0xd9b77e);
+    }
+  }
+
+  // ---------- Input ----------
+  const keys = {};
+  document.addEventListener('keydown', e => {
+    keys[e.code] = true;
+    if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
+    if (e.code === 'KeyR') startReload();
+  });
+  document.addEventListener('keyup', e => { keys[e.code] = false; });
+  window.addEventListener('blur', () => {
+    for (const k in keys) keys[k] = false;
+    mouseDown = false;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!locked || !P.alive) return;
+    P.yaw -= e.movementX * CFG.SENS;
+    P.pitch = clamp(P.pitch - e.movementY * CFG.SENS, -1.4, 1.4);
+  });
+  document.addEventListener('mousedown', e => { if (e.button === 0 && locked) mouseDown = true; });
+  document.addEventListener('mouseup', e => { if (e.button === 0) mouseDown = false; });
+
+  function requestLock() {
+    try { renderer.domElement.requestPointerLock(); } catch (e) { /* ignore */ }
+  }
+
+  document.addEventListener('pointerlockchange', () => {
+    locked = document.pointerLockElement === renderer.domElement;
+    $('pauseScreen').classList.toggle('hidden', !started || locked);
+    if (!locked) mouseDown = false;
+  });
+  document.addEventListener('pointerlockerror', () => {
+    $('pauseScreen').querySelector('p').textContent = 'Mouse capture fail hua. Page par dobara click karein.';
+  });
+  $('pauseScreen').addEventListener('click', requestLock);
+
+  // ---------- HUD ----------
+  const feedEl = $('feed');
+  const msgEl = $('msg');
+  let msgT = 0;
+
+  function feed(text, color) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    d.style.color = color || '#fff';
+    feedEl.insertBefore(d, feedEl.firstChild);
+    while (feedEl.children.length > 5) feedEl.removeChild(feedEl.lastChild);
+    setTimeout(() => { if (d.parentNode) d.parentNode.removeChild(d); }, 4000);
+  }
+
+  function showMsg(text) {
+    msgEl.textContent = text;
+    msgT = 1.6;
+  }
+
+  function updateHUD(dt) {
+    $('kd').textContent = 'K ' + K.kills + '   D ' + K.deaths;
+    const alive = BOTS.filter(b => !b.dead).length;
+    $('enemies').textContent = 'BOTS ALIVE: ' + alive + ' / ' + BOTS.length;
+    $('health').textContent = 'HP ' + Math.ceil(P.hp);
+    $('health').style.color = P.hp > 40 ? '#fff' : '#ff5555';
+    $('ammo').innerHTML = P.reloadT > 0
+      ? 'RELOADING <small>...</small>'
+      : P.mag + ' / ' + P.res;
+
+    hitMarkerT -= dt;
+    hitMarkerEl.style.opacity = hitMarkerT > 0 ? 1 : 0;
+
+    msgT -= dt;
+    msgEl.style.opacity = msgT > 0 ? Math.min(1, msgT) : 0;
+
+    $('vignette').style.opacity = P.damageT > 0 ? Math.min(0.7, P.damageT * 2) : 0;
+  }
+
+  // ---------- Update ----------
+  function updatePlayer(dt) {
+    P.fireCd -= dt;
+    P.damageT -= dt;
+    P.bloom = Math.max(0, P.bloom - dt * 0.08);
+
+    if (!P.alive) {
+      P.respT -= dt;
+      $('respawnText').textContent = 'Respawn in ' + Math.max(0, Math.ceil(P.respT)) + '...';
+      if (P.respT <= 0) respawnPlayer();
+      return;
+    }
+
+    if (P.reloadT > 0) {
+      P.reloadT -= dt;
+      if (P.reloadT <= 0) {
+        const take = Math.min(CFG.MAG - P.mag, P.res);
+        P.mag += take;
+        P.res -= take;
+        P.reloadT = 0;
+      }
+    }
+
+    const f = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
+    const r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+    let mx = -Math.sin(P.yaw) * f + Math.cos(P.yaw) * r;
+    let mz = -Math.cos(P.yaw) * f - Math.sin(P.yaw) * r;
+    const ml = Math.hypot(mx, mz);
+    P.moveAmt = 0;
+    if (ml > 0) {
+      mx /= ml; mz /= ml;
+      const sprint = (keys.ShiftLeft || keys.ShiftRight) && f > 0 && P.reloadT <= 0;
+      const sp = sprint ? CFG.SPRINT : CFG.WALK;
+      P.x += mx * sp * dt;
+      P.z += mz * sp * dt;
+      P.moveAmt = sprint ? 1 : 0.6;
+    }
+    resolve(P, CFG.R);
+
+    if (keys.Space && P.onGround) {
+      P.vy = CFG.JUMP;
+      P.onGround = false;
+    }
+    P.vy += CFG.GRAV * dt;
+    P.y += P.vy * dt;
+    if (P.y <= 0) { P.y = 0; P.vy = 0; P.onGround = true; }
+
+    P.bobT += dt * (P.moveAmt > 0 ? 9 : 0);
+
+    if (mouseDown) playerShoot();
+  }
+
+  function updateCameraAndGun(dt) {
+    const bob = P.moveAmt > 0 ? Math.sin(P.bobT) * 0.035 : 0;
+    camera.position.set(P.x, P.y + CFG.EYE + bob, P.z);
+    camera.rotation.set(P.pitch, P.yaw, 0);
+
+    P.kick = Math.max(0, P.kick - dt * 4);
+    const prog = P.reloadT > 0 ? 1 - P.reloadT / CFG.RELOAD : 0;
+    const dip = P.reloadT > 0 ? Math.sin(prog * Math.PI) * 0.2 : 0;
+    gun.position.set(0.28, -0.26 - dip, 0);
+    gun.rotation.set(P.kick * 0.25, 0, 0);
+  }
+
+  function update(dt) {
+    updatePlayer(dt);
+    for (const b of BOTS) updateBot(b, dt);
+    updateCameraAndGun(dt);
+    updateEffects(dt);
+    updateHUD(dt);
+  }
+
+  // ---------- Start ----------
+  let started = false;
+
+  $('startBtn').addEventListener('click', () => {
+    if (started) return;
+    started = true;
+    K.kills = 0; K.deaths = 0;
+    P.alive = true; P.hp = 100; P.mag = CFG.MAG; P.res = CFG.RES; P.reloadT = 0;
+    const s = SPAWNS[0];
+    P.x = s.x; P.z = s.z; P.y = 0; P.vy = 0; P.onGround = true;
+    P.yaw = Math.atan2(-(0 - P.x), -(0 - P.z));
+    P.pitch = 0;
+    initBots();
+    $('startScreen').classList.add('hidden');
+    $('hud').classList.remove('hidden');
+    showMsg('MATCH START');
+    requestLock();
+  });
+
+  // ---------- Resize ----------
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- Loop ----------
+  let last = performance.now();
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (started && locked) update(dt);
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+
+  loadStatus.textContent = 'Ready. START MATCH par click karein.';
+})();
+</script>
 </body>
 </html>
