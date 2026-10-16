@@ -12,90 +12,396 @@
 <meta property="og:url" content="https://pooreyoutuber.github.io/live-preview.html">
 <meta name="robots" content="index, follow">
 <style>
-:root{
-  --bg:#f1f5f9;--panel:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
-  --accent:#6d5efc;--accent-soft:#eeecff;--accent2:#06b6d4;
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --panel2: #334155;
+  --line: #334155;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --accent: #8b5cf6;
+  --accent2: #06b6d4;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --radius: 10px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "SF Mono", Consolas, Menlo, "Courier New", monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
-a{color:var(--accent)}
-button,input,select{font-family:inherit}
 
-/* ---------- Header ---------- */
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
-.logo{font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
-.nav{display:flex;gap:4px;flex-wrap:wrap}
-.nav a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.88rem}
-.nav a:hover{background:#f1f5f9}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ---------- Toolbar ---------- */
-.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line)}
-.toolbar .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.toolbar label{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
-.btn{background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.84rem;white-space:nowrap;transition:opacity .15s,background .15s}
-.btn:hover{opacity:.92}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.alt{background:#fff;color:var(--text);border-color:var(--line)}
-.btn.alt:hover{background:#f8fafc;opacity:1}
-.btn.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
-.btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
 
-/* ---------- Workspace: always two columns (code | preview) ---------- */
-.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:calc(100vh - 112px);height:calc(100dvh - 112px);min-height:520px}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-/* Editor */
-.editor-panel{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-width:0;min-height:0}
-.tabs{display:flex;border-bottom:1px solid var(--line);background:#f8fafc}
-.tab{padding:10px 16px;font-size:.85rem;cursor:pointer;border:0;background:none;color:var(--muted);border-bottom:2px solid transparent}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-.editor-wrap{flex:1;min-height:0;position:relative}
-textarea.code{display:block;width:100%;height:100%;border:0;padding:14px;font-family:Consolas,Menlo,"Courier New",monospace;font-size:13px;line-height:1.55;resize:none;outline:none;background:#fbfdff;color:var(--text);tab-size:2;white-space:pre;overflow:auto}
-.editor-status{padding:6px 12px;font-size:.75rem;color:var(--muted);border-top:1px solid var(--line);background:#f8fafc;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+/* ========== HEADER ========== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 48px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.logo {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.logo span { color: var(--accent); }
+.nav { display: flex; gap: 4px; }
+.nav a {
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+.nav a:hover { background: var(--panel2); color: var(--text); text-decoration: none; }
 
-/* Preview */
-.preview-panel{display:flex;flex-direction:column;background:#e2e8f0;min-width:0;min-height:0}
-.preview-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line)}
-.device-btns{display:flex;gap:6px;flex-wrap:wrap}
-.device-meta{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted)}
-.scale-badge{background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:999px;font-weight:600}
+/* ========== TOOLBAR ========== */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.toolbar .group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: scale(0.97); }
+.btn.alt {
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid transparent;
+}
+.btn.alt:hover { border-color: var(--muted); }
+.btn.ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.btn.ghost:hover { color: var(--text); border-color: var(--muted); }
+.btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn.success { background: var(--success); }
+input[type="file"] {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: var(--panel2);
+  color: var(--text);
+  max-width: 160px;
+}
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
 
-.preview-stage{position:relative;flex:1;min-height:0;overflow:hidden}
-.device-frame{position:absolute;left:50%;top:50%;transform-origin:center center;background:#0f172a;border-radius:28px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.device-frame.tablet{border-radius:22px;padding:14px}
-.device-frame.desktop{border-radius:10px;padding:8px}
-.device-notch{height:18px;margin-bottom:6px;display:flex;align-items:center;justify-content:center}
-.device-notch span{width:60px;height:6px;background:#334155;border-radius:4px}
-.device-frame.tablet .device-notch,
-.device-frame.desktop .device-notch{display:none}
-.device-screen{background:#fff;border-radius:18px;overflow:hidden;position:relative}
-.device-frame.tablet .device-screen{border-radius:10px}
-.device-frame.desktop .device-screen{border-radius:4px}
-iframe#preview{width:100%;height:100%;border:0;background:#fff;display:block}
+/* ========== MAIN LAYOUT (always side-by-side) ========== */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - 48px - 49px);
+  min-height: 0;
+}
 
-/* ---------- Info section ---------- */
-.about{max-width:900px;margin:30px auto;padding:0 20px 40px}
-.about h2{margin-bottom:10px}
-.about p,.about li{color:#334155;line-height:1.65}
-.about h3{margin:18px 0 6px;color:var(--accent);font-size:1.05rem}
-footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);background:#fff}
+/* ========== EDITOR ========== */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  min-height: 0;
+  min-width: 0;
+}
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  background: #0f172a;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.08);
+}
+.editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+textarea.code {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  background: #0b1120;
+  color: #e2e8f0;
+  tab-size: 2;
+}
+.editor-status {
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  background: #0f172a;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+}
 
-/* ---------- Narrow screens: keep the same layout, just tighten it ---------- */
-@media (max-width:600px){
-  .header{padding:8px 10px}
-  .toolbar{padding:6px 8px}
-  .toolbar .group{gap:4px}
-  .btn{padding:6px 9px;font-size:.8rem}
-  .tab{padding:8px 10px;font-size:.8rem}
-  textarea.code{font-size:11.5px;padding:10px}
-  .device-meta{font-size:.72rem}
+/* ========== PREVIEW ========== */
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  background: #0b1120;
+  min-height: 0;
+  min-width: 0;
+}
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.device-btns {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.device-info {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.preview-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+  background:
+    radial-gradient(ellipse at center, #1e293b 0%, #0b1120 70%);
+}
+
+/* Device frame – always scaled to fit, never takes full screen */
+.device-scaler {
+  transform-origin: center center;
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+.device-frame {
+  background: #1e293b;
+  border-radius: 32px;
+  padding: 10px;
+  box-shadow:
+    0 0 0 2px #334155,
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+}
+.device-frame.desktop {
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow:
+    0 0 0 1px #475569,
+    0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+.device-notch {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.device-notch span {
+  width: 70px;
+  height: 7px;
+  background: #0f172a;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+}
+.device-frame.desktop .device-notch { display: none; }
+.device-screen {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.device-frame.desktop .device-screen {
+  border-radius: 6px;
+}
+iframe#preview {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+  display: block;
+}
+
+/* Scale indicator */
+.scale-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.85);
+  padding: 3px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ========== ABOUT (scrollable below if needed, but hidden in full height) ========== */
+.about-toggle {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 50;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.about-toggle:hover { color: var(--text); border-color: var(--muted); }
+
+.about-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.about-modal.open { display: flex; }
+.about-box {
+  background: var(--panel);
+  border-radius: 14px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid var(--line);
+}
+.about-box h2 { margin-bottom: 10px; font-size: 1.25rem; }
+.about-box h3 { margin: 16px 0 6px; color: var(--accent); font-size: 1rem; }
+.about-box p, .about-box li {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+.about-box ol { padding-left: 1.3rem; }
+.about-close {
+  margin-top: 18px;
+  width: 100%;
+}
+
+/* ========== RESPONSIVE: stack only on very small screens ========== */
+@media (max-width: 700px) {
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .editor-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+  .header .nav { display: none; }
+  .toolbar { padding: 6px 10px; gap: 6px; }
+  .btn { padding: 6px 10px; font-size: 0.8rem; }
 }
 </style>
 </head>
 <body>
 
 <header class="header">
-  <a href="https://pooreyoutuber.github.io/" class="logo">🚀 Pooreyoutuber</a>
+  <a href="https://pooreyoutuber.github.io/" class="logo">🚀 <span>Pooreyoutuber</span></a>
   <nav class="nav">
     <a href="https://pooreyoutuber.github.io/">Home</a>
     <a href="css-tools.html">CSS Tools</a>
@@ -105,29 +411,30 @@ footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border
 
 <div class="toolbar">
   <div class="group">
-    <button class="btn" id="btn-run" title="Run (Ctrl/Cmd + Enter)">Run ▶</button>
+    <button class="btn" id="btn-run" title="Run preview (Ctrl+Enter)">▶ Run</button>
     <button class="btn alt" id="btn-copy">Copy Code</button>
     <button class="btn alt" id="btn-download">Download .html</button>
     <button class="btn ghost" id="btn-reset">Reset</button>
   </div>
   <div class="group">
-    <label>Upload HTML <input type="file" id="file-upload" accept=".html,.htm,.txt"></label>
+    <label>Upload</label>
+    <input type="file" id="file-upload" accept=".html,.htm,.txt">
   </div>
   <div class="group">
-    <label><input type="checkbox" id="auto-run" checked> Auto run</label>
+    <label><input type="checkbox" id="auto-run" checked> Auto-run</label>
   </div>
 </div>
 
-<div class="workspace">
+<div class="main">
   <!-- LEFT: Editor -->
   <div class="editor-panel">
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="html" role="tab">HTML</button>
-      <button class="tab" data-tab="css" role="tab">CSS</button>
-      <button class="tab" data-tab="js" role="tab">JS</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="html">HTML</button>
+      <button class="tab" data-tab="css">CSS</button>
+      <button class="tab" data-tab="js">JS</button>
     </div>
     <div class="editor-wrap">
-      <textarea class="code" id="code-html" spellcheck="false" wrap="off"><!DOCTYPE html>
+      <textarea class="code" id="code-html" spellcheck="false"><!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -142,10 +449,10 @@ footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border
   </div>
 </body>
 </html></textarea>
-      <textarea class="code" id="code-css" spellcheck="false" wrap="off" style="display:none">* { box-sizing: border-box; margin: 0; padding: 0; }
+      <textarea class="code" id="code-css" spellcheck="false" style="display:none">* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg, #6d5efc, #06b6d4);
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -164,22 +471,23 @@ body {
 h1 { font-size: 1.4rem; margin-bottom: 10px; color: #0f172a; }
 p { color: #64748b; margin-bottom: 18px; line-height: 1.5; }
 button {
-  background: #6d5efc;
+  background: #8b5cf6;
   color: #fff;
   border: 0;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  transition: transform 0.1s;
 }
-button:active { transform: scale(.97); }</textarea>
-      <textarea class="code" id="code-js" spellcheck="false" wrap="off" style="display:none">document.getElementById('btn')?.addEventListener('click', () => {
+button:active { transform: scale(0.97); }</textarea>
+      <textarea class="code" id="code-js" spellcheck="false" style="display:none">document.getElementById('btn')?.addEventListener('click', () => {
   alert('Working! Your code is running live.');
 });</textarea>
     </div>
     <div class="editor-status">
       <span id="status">Ready · Auto-run on</span>
-      <span>Tab = indent · Ctrl/Cmd + Enter = run</span>
+      <span id="char-count">0 chars</span>
     </div>
   </div>
 
@@ -190,275 +498,294 @@ button:active { transform: scale(.97); }</textarea>
         <button class="btn active" data-device="s23">S23 Ultra</button>
         <button class="btn alt" data-device="tablet">Tablet</button>
         <button class="btn alt" data-device="desktop">Desktop</button>
-        <button class="btn alt" id="btn-rotate" title="Rotate device">⟳ Rotate</button>
       </div>
-      <div class="device-meta">
-        <span id="device-info"></span>
-        <span class="scale-badge" id="scale-badge">100%</span>
-      </div>
+      <div class="device-info" id="device-info">390 × 844 · Samsung Galaxy S23 Ultra</div>
     </div>
     <div class="preview-stage" id="preview-stage">
-      <div class="device-frame mobile" id="device-frame">
-        <div class="device-notch"><span></span></div>
-        <div class="device-screen" id="device-screen">
-          <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups" title="Live preview"></iframe>
+      <div class="device-scaler" id="device-scaler">
+        <div class="device-frame" id="device-frame">
+          <div class="device-notch"><span></span></div>
+          <div class="device-screen">
+            <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups" title="Live preview"></iframe>
+          </div>
         </div>
       </div>
+      <div class="scale-badge" id="scale-badge">100%</div>
     </div>
   </div>
 </div>
 
-<section class="about">
-  <h2>Live Code Preview – Multi Device Tool</h2>
-  <p>Write HTML, CSS and JavaScript on the left and see how it looks on a device frame on the right. Default view is <strong>Samsung Galaxy S23 Ultra</strong>. Switch to Tablet or Desktop anytime. The preview is scaled to fit its panel, so the code editor always stays visible next to it.</p>
+<button class="about-toggle" id="about-toggle">ℹ️ About</button>
 
-  <h3>How to use</h3>
-  <ol style="padding-left:1.3rem">
-    <li>Edit HTML, CSS or JS using the tabs on the left.</li>
-    <li>The preview updates automatically (or press Run / Ctrl + Enter).</li>
-    <li>Change device with the buttons: S23 Ultra / Tablet / Desktop.</li>
-    <li>Use Rotate to view phone and tablet in landscape.</li>
-    <li>Click the button in the preview to test your own JavaScript.</li>
-    <li>Copy code or Download .html when done.</li>
-  </ol>
+<div class="about-modal" id="about-modal">
+  <div class="about-box">
+    <h2>Live Code Preview – Multi Device</h2>
+    <p>Write HTML, CSS and JavaScript on the left and instantly see how it looks inside a real device frame on the right. Layout stays side-by-side — device size only changes the preview frame (scaled to fit).</p>
 
-  <h3>Why device frames matter</h3>
-  <p>Different phones have different screen sizes and aspect ratios. What looks perfect on a large desktop can break on a narrow mobile screen. This tool helps you catch layout issues early by showing your page inside realistic device sizes.</p>
+    <h3>How to use</h3>
+    <ol>
+      <li>Edit HTML, CSS or JS using the tabs.</li>
+      <li>Preview updates automatically (or press Run / Ctrl+Enter).</li>
+      <li>Switch device: S23 Ultra / Tablet / Desktop — frame size changes, tool layout does not.</li>
+      <li>Click the button in the preview to test your JavaScript.</li>
+      <li>Copy code or Download a complete .html file when done.</li>
+    </ol>
 
-  <h3>Privacy</h3>
-  <p>Everything runs in your browser. Your code is never uploaded to any server.</p>
-</section>
+    <h3>Why device frames matter</h3>
+    <p>Different screens have different sizes and aspect ratios. What looks perfect on desktop can break on a narrow mobile screen. This tool shows your page inside realistic device dimensions (scaled to fit the panel).</p>
 
-<footer>Made with ❤️ by <a href="https://pooreyoutuber.github.io/">Pooreyoutuber</a> · Live Code Preview</footer>
+    <h3>Privacy</h3>
+    <p>Everything runs in your browser. Your code is never uploaded to any server.</p>
+
+    <button class="btn about-close" id="about-close">Close</button>
+  </div>
+</div>
 
 <script>
-const $ = id => document.getElementById(id);
-const htmlEl     = $('code-html');
-const cssEl      = $('code-css');
-const jsEl       = $('code-js');
-const frame      = $('preview');
-const frameEl    = $('device-frame');
-const screenEl   = $('device-screen');
-const stageEl    = $('preview-stage');
-const statusEl   = $('status');
-const infoEl     = $('device-info');
-const scaleEl    = $('scale-badge');
-const autoRunEl  = $('auto-run');
-const rotateBtn  = $('btn-rotate');
+(function () {
+  const $ = id => document.getElementById(id);
+  const htmlEl = $('code-html');
+  const cssEl  = $('code-css');
+  const jsEl   = $('code-js');
+  const frame  = $('preview');
+  const deviceFrame = $('device-frame');
+  const deviceScaler = $('device-scaler');
+  const previewStage = $('preview-stage');
+  const status = $('status');
+  const deviceInfo = $('device-info');
+  const scaleBadge = $('scale-badge');
+  const charCount = $('char-count');
 
-/* Default example, kept so "Reset" works without reloading the page */
-const DEFAULTS = { html: htmlEl.value, css: cssEl.value, js: jsEl.value };
+  /* Logical CSS pixel sizes of devices */
+  const DEVICES = {
+    s23:     { w: 390,  h: 844,  label: '390 × 844 · Samsung Galaxy S23 Ultra', mobile: true },
+    tablet:  { w: 768,  h: 1024, label: '768 × 1024 · Tablet', mobile: true },
+    desktop: { w: 1280, h: 800,  label: '1280 × 800 · Desktop', mobile: false }
+  };
 
-/* Device sizes in logical CSS pixels (what a real device reports to the page) */
-const DEVICES = {
-  s23:     { name: 'Samsung Galaxy S23 Ultra', w: 390,  h: 844,  type: 'mobile' },
-  tablet:  { name: 'Tablet',                   w: 768,  h: 1024, type: 'tablet' },
-  desktop: { name: 'Desktop',                  w: 1280, h: 800,  type: 'desktop' }
-};
+  let currentDevice = 's23';
+  let runTimer = null;
+  let currentScale = 1;
 
-let currentDevice = 's23';
-let landscape = false;
-let runTimer = null;
-
-/* ---------- Tabs ---------- */
-const editors = { html: htmlEl, css: cssEl, js: jsEl };
-function showTab(name){
-  document.querySelectorAll('.tab').forEach(t => {
-    const active = t.dataset.tab === name;
-    t.classList.toggle('active', active);
-    t.setAttribute('aria-selected', active);
-  });
-  for (const key in editors) editors[key].style.display = key === name ? 'block' : 'none';
-}
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => showTab(tab.dataset.tab));
-});
-
-/* ---------- Device switching ---------- */
-function applyDevice(){
-  const d = DEVICES[currentDevice];
-  const rot = landscape && d.type !== 'desktop';
-  const W = rot ? d.h : d.w;
-  const H = rot ? d.w : d.h;
-
-  screenEl.style.width  = W + 'px';
-  screenEl.style.height = H + 'px';
-  frameEl.className = 'device-frame ' + d.type;
-  infoEl.textContent = `${W} × ${H} · ${d.name}${rot ? ' (landscape)' : ''}`;
-  rotateBtn.disabled = d.type === 'desktop';
-
-  fitFrame();
-}
-
-/* Scale the device frame down so it always fits inside its panel (never clipped, never scrolls) */
-function fitFrame(){
-  const fw = frameEl.offsetWidth;
-  const fh = frameEl.offsetHeight;
-  const availW = stageEl.clientWidth  - 32;
-  const availH = stageEl.clientHeight - 32;
-  const s = Math.max(0.1, Math.min(1, availW / fw, availH / fh));
-  frameEl.style.transform = `translate(-50%, -50%) scale(${s})`;
-  scaleEl.textContent = Math.round(s * 100) + '%';
-}
-new ResizeObserver(fitFrame).observe(stageEl);
-
-document.querySelectorAll('[data-device]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-device]').forEach(b => {
-      b.classList.toggle('active', b === btn);
-      b.classList.toggle('alt', b !== btn);
+  /* ---- Tabs ---- */
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const name = tab.dataset.tab;
+      htmlEl.style.display = name === 'html' ? 'block' : 'none';
+      cssEl.style.display  = name === 'css'  ? 'block' : 'none';
+      jsEl.style.display   = name === 'js'   ? 'block' : 'none';
+      updateCharCount();
     });
-    currentDevice = btn.dataset.device;
-    applyDevice();
   });
-});
 
-rotateBtn.addEventListener('click', () => {
-  landscape = !landscape;
-  applyDevice();
-});
+  /* ---- Device switch ---- */
+  document.querySelectorAll('[data-device]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-device]').forEach(b => {
+        b.classList.remove('active');
+        b.classList.add('alt');
+      });
+      btn.classList.add('active');
+      btn.classList.remove('alt');
+      currentDevice = btn.dataset.device;
+      applyDevice();
+    });
+  });
 
-/* ---------- Build & run ---------- */
-/* Escape "</script" inside user JS so it cannot close our wrapper script early */
-function safeScript(code){
-  return code.replace(/<\/script/gi, '<\\/script');
-}
+  function applyDevice() {
+    const d = DEVICES[currentDevice];
+    // Set the real (logical) size of the frame
+    deviceFrame.style.width  = d.w + 'px';
+    deviceFrame.style.height = d.h + 'px';
+    deviceFrame.classList.toggle('desktop', !d.mobile);
+    deviceInfo.textContent = d.label;
+    // Scale to fit available space
+    requestAnimationFrame(fitScale);
+  }
 
-function buildDoc(){
-  const html = htmlEl.value;
-  const css  = cssEl.value;
-  const js   = jsEl.value;
+  function fitScale() {
+    const d = DEVICES[currentDevice];
+    const stage = previewStage;
+    const pad = 24; // padding around
+    const availW = stage.clientWidth - pad * 2;
+    const availH = stage.clientHeight - pad * 2;
 
-  let doc = html;
+    if (availW <= 0 || availH <= 0) return;
 
-  /* Function replacers are used so "$&", "$1" etc. inside user code are kept literally */
-  if (css.trim()) {
-    if (/<\/head>/i.test(doc)) {
-      doc = doc.replace(/<\/head>/i, () => `<style>${css}</style>\n</head>`);
-    } else {
-      doc = `<style>${css}</style>\n` + doc;
+    // Frame has padding (notch + bezel). Approximate extra height for notch on mobile.
+    const bezelExtra = d.mobile ? 36 : 12;
+    const frameW = d.w;
+    const frameH = d.h + bezelExtra;
+
+    const scaleX = availW / frameW;
+    const scaleY = availH / frameH;
+    currentScale = Math.min(scaleX, scaleY, 1); // never upscale beyond 100%
+
+    // Apply scale via transform on the scaler wrapper
+    deviceScaler.style.transform = `scale(${currentScale})`;
+    scaleBadge.textContent = Math.round(currentScale * 100) + '%';
+  }
+
+  /* ---- Build full HTML document ---- */
+  function buildDoc() {
+    let html = htmlEl.value;
+    const css = cssEl.value.trim();
+    const js  = jsEl.value.trim();
+
+    // Inject CSS
+    if (css) {
+      if (/<\/head>/i.test(html)) {
+        html = html.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+      } else if (/<html[^>]*>/i.test(html)) {
+        html = html.replace(/<html[^>]*>/i, match => match + `\n<head><style>\n${css}\n</style></head>`);
+      } else {
+        html = `<style>\n${css}\n</style>\n` + html;
+      }
+    }
+
+    // Inject JS
+    if (js) {
+      if (/<\/body>/i.test(html)) {
+        html = html.replace(/<\/body>/i, `<script>\n${js}\n<\/script>\n</body>`);
+      } else {
+        html += `\n<script>\n${js}\n<\/script>`;
+      }
+    }
+    return html;
+  }
+
+  function runPreview() {
+    try {
+      const doc = buildDoc();
+      frame.srcdoc = doc;
+      status.textContent = 'Updated · ' + new Date().toLocaleTimeString();
+    } catch (err) {
+      status.textContent = 'Error · ' + err.message;
     }
   }
-  if (js.trim()) {
-    const tag = `<script>${safeScript(js)}</script>`;
-    if (/<\/body>/i.test(doc)) {
-      doc = doc.replace(/<\/body>/i, () => `${tag}\n</body>`);
-    } else {
-      doc += `\n${tag}`;
-    }
+
+  function scheduleRun() {
+    if (!$('auto-run').checked) return;
+    clearTimeout(runTimer);
+    runTimer = setTimeout(runPreview, 350);
   }
-  return doc;
-}
 
-function runPreview(){
-  frame.srcdoc = buildDoc();
-  statusEl.textContent = 'Updated · ' + new Date().toLocaleTimeString();
-}
+  function updateCharCount() {
+    const active = document.querySelector('.tab.active')?.dataset.tab || 'html';
+    const el = active === 'html' ? htmlEl : active === 'css' ? cssEl : jsEl;
+    charCount.textContent = el.value.length.toLocaleString() + ' chars';
+  }
 
-function scheduleRun(){
-  if (!autoRunEl.checked) return;
-  clearTimeout(runTimer);
-  runTimer = setTimeout(runPreview, 400);
-}
+  [htmlEl, cssEl, jsEl].forEach(el => {
+    el.addEventListener('input', () => {
+      scheduleRun();
+      updateCharCount();
+    });
+  });
 
-[htmlEl, cssEl, jsEl].forEach(el => el.addEventListener('input', scheduleRun));
+  $('btn-run').addEventListener('click', runPreview);
+  $('auto-run').addEventListener('change', () => {
+    status.textContent = $('auto-run').checked ? 'Ready · Auto-run on' : 'Ready · Auto-run off';
+    if ($('auto-run').checked) runPreview();
+  });
 
-/* Tab key inserts two spaces instead of moving focus; Ctrl/Cmd+Enter runs */
-[htmlEl, cssEl, jsEl].forEach(el => {
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Tab' && !e.shiftKey) {
+  /* Keyboard shortcut: Ctrl/Cmd + Enter to run */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      el.setRangeText('  ', el.selectionStart, el.selectionEnd, 'end');
-      el.dispatchEvent(new Event('input'));
-    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      clearTimeout(runTimer);
       runPreview();
     }
   });
-});
 
-$('btn-run').addEventListener('click', runPreview);
+  /* Copy */
+  $('btn-copy').addEventListener('click', () => {
+    const text = buildDoc();
+    const done = () => {
+      const btn = $('btn-copy');
+      const old = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('success');
+      setTimeout(() => {
+        btn.textContent = old;
+        btn.classList.remove('success');
+      }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
 
-autoRunEl.addEventListener('change', () => {
-  statusEl.textContent = autoRunEl.checked ? 'Ready · Auto-run on' : 'Ready · Auto-run off';
-  if (autoRunEl.checked) runPreview();
-});
-
-/* ---------- Copy ---------- */
-function copyText(text){
-  if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text);
-  }
-  return new Promise((resolve, reject) => {
+  function fallbackCopy(text, done) {
     const ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
-    ta.style.opacity = '0';
+    ta.style.left = '-9999px';
     document.body.appendChild(ta);
     ta.select();
-    const ok = document.execCommand('copy');
+    try { document.execCommand('copy'); } catch (_) {}
     ta.remove();
-    ok ? resolve() : reject(new Error('copy failed'));
+    done();
+  }
+
+  /* Download */
+  $('btn-download').addEventListener('click', () => {
+    const blob = new Blob([buildDoc()], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'preview.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   });
-}
 
-$('btn-copy').addEventListener('click', () => {
-  const btn = $('btn-copy');
-  const original = btn.textContent;
-  copyText(buildDoc()).then(() => {
-    btn.textContent = 'Copied!';
-  }).catch(() => {
-    btn.textContent = 'Copy failed';
-  }).finally(() => {
-    setTimeout(() => btn.textContent = original, 1200);
+  /* Reset */
+  $('btn-reset').addEventListener('click', () => {
+    if (!confirm('Reset all code to the default example?')) return;
+    location.reload();
   });
-});
 
-/* ---------- Download ---------- */
-$('btn-download').addEventListener('click', () => {
-  const blob = new Blob([buildDoc()], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'my-page.html';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-});
+  /* File upload */
+  $('file-upload').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      htmlEl.value = reader.result;
+      cssEl.value = '';
+      jsEl.value = '';
+      // Switch to HTML tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'html'));
+      htmlEl.style.display = 'block';
+      cssEl.style.display = 'none';
+      jsEl.style.display = 'none';
+      runPreview();
+      updateCharCount();
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // allow re-upload same file
+  });
 
-/* ---------- Reset (restores the default example, no page reload) ---------- */
-$('btn-reset').addEventListener('click', () => {
-  if (!confirm('Reset all code to default example?')) return;
-  htmlEl.value = DEFAULTS.html;
-  cssEl.value  = DEFAULTS.css;
-  jsEl.value   = DEFAULTS.js;
-  showTab('html');
+  /* About modal */
+  $('about-toggle').addEventListener('click', () => $('about-modal').classList.add('open'));
+  $('about-close').addEventListener('click', () => $('about-modal').classList.remove('open'));
+  $('about-modal').addEventListener('click', e => {
+    if (e.target === $('about-modal')) $('about-modal').classList.remove('open');
+  });
+
+  /* Resize observer – re-fit scale when panel size changes */
+  const ro = new ResizeObserver(() => fitScale());
+  ro.observe(previewStage);
+
+  /* Init */
+  applyDevice();
   runPreview();
-});
-
-/* ---------- Upload ---------- */
-$('file-upload').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    htmlEl.value = reader.result;
-    cssEl.value = '';
-    jsEl.value = '';
-    showTab('html');
-    runPreview();
-  };
-  reader.onerror = () => { statusEl.textContent = 'Could not read file'; };
-  reader.readAsText(file);
-  e.target.value = ''; // allow re-uploading the same file
-});
-
-/* ---------- Init ---------- */
-showTab('html');
-applyDevice();
-runPreview();
+  updateCharCount();
+})();
 </script>
 </body>
 </html>
