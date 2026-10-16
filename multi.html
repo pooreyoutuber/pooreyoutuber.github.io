@@ -12,71 +12,90 @@
 <meta property="og:url" content="https://pooreyoutuber.github.io/live-preview.html">
 <meta name="robots" content="index, follow">
 <style>
-:root{--bg:#f1f5f9;--panel:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#6d5efc;--accent2:#06b6d4;--dark:#0f172a}
+:root{
+  --bg:#f1f5f9;--panel:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
+  --accent:#6d5efc;--accent-soft:#eeecff;--accent2:#06b6d4;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+html,body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
 a{color:var(--accent)}
+button,input,select{font-family:inherit}
 
-/* Header */
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line)}
-.logo{font-weight:800;font-size:1.1rem;color:var(--text);text-decoration:none}
-.nav a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.9rem}
+/* ---------- Header ---------- */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.88rem}
 .nav a:hover{background:#f1f5f9}
 
-/* Toolbar */
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+/* ---------- Toolbar ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line)}
 .toolbar .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.toolbar label{font-size:.8rem;color:var(--muted)}
-.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.85rem;font-family:inherit}
+.toolbar label{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.btn{background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.84rem;white-space:nowrap;transition:opacity .15s,background .15s}
 .btn:hover{opacity:.92}
-.btn.alt{background:#fff;color:var(--text);border:1px solid var(--line)}
-.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.alt{background:#fff;color:var(--text);border-color:var(--line)}
+.btn.alt:hover{background:#f8fafc;opacity:1}
+.btn.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
 .btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-select,input[type=file]{padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:.85rem;font-family:inherit;background:#fff}
+.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
 
-/* Main layout */
-.main{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 110px);min-height:480px}
-@media(max-width:900px){
-  .main{grid-template-columns:1fr;grid-template-rows:1fr 1fr;height:auto;min-height:0}
-  .preview-panel{min-height:420px}
-}
+/* ---------- Workspace: always two columns (code | preview) ---------- */
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:calc(100vh - 112px);height:calc(100dvh - 112px);min-height:520px}
 
-/* Editor side */
-.editor-panel{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);background:#f8fafc}
-.tab{padding:10px 16px;font-size:.85rem;cursor:pointer;border:0;background:none;font-family:inherit;color:var(--muted);border-bottom:2px solid transparent}
+/* Editor */
+.editor-panel{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-width:0;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:#f8fafc}
+.tab{padding:10px 16px;font-size:.85rem;cursor:pointer;border:0;background:none;color:var(--muted);border-bottom:2px solid transparent}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .editor-wrap{flex:1;min-height:0;position:relative}
-textarea.code{width:100%;height:100%;border:0;padding:14px;font-family:Consolas,Menlo,"Courier New",monospace;font-size:13.5px;line-height:1.5;resize:none;outline:none;background:#fbfdff;color:var(--text)}
-.editor-status{padding:6px 12px;font-size:.75rem;color:var(--muted);border-top:1px solid var(--line);background:#f8fafc}
+textarea.code{display:block;width:100%;height:100%;border:0;padding:14px;font-family:Consolas,Menlo,"Courier New",monospace;font-size:13px;line-height:1.55;resize:none;outline:none;background:#fbfdff;color:var(--text);tab-size:2;white-space:pre;overflow:auto}
+.editor-status{padding:6px 12px;font-size:.75rem;color:var(--muted);border-top:1px solid var(--line);background:#f8fafc;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 
-/* Preview side */
-.preview-panel{display:flex;flex-direction:column;background:#e2e8f0;min-height:0}
+/* Preview */
+.preview-panel{display:flex;flex-direction:column;background:#e2e8f0;min-width:0;min-height:0}
 .preview-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line)}
 .device-btns{display:flex;gap:6px;flex-wrap:wrap}
-.device-info{font-size:.78rem;color:var(--muted)}
-.preview-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;min-height:0}
-.device-frame{background:#0f172a;border-radius:28px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.25);transition:width .25s,height .25s}
+.device-meta{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted)}
+.scale-badge{background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:999px;font-weight:600}
+
+.preview-stage{position:relative;flex:1;min-height:0;overflow:hidden}
+.device-frame{position:absolute;left:50%;top:50%;transform-origin:center center;background:#0f172a;border-radius:28px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.device-frame.tablet{border-radius:22px;padding:14px}
 .device-frame.desktop{border-radius:10px;padding:8px}
-.device-notch{height:18px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.device-notch{height:18px;margin-bottom:6px;display:flex;align-items:center;justify-content:center}
 .device-notch span{width:60px;height:6px;background:#334155;border-radius:4px}
-.device-screen{background:#fff;border-radius:18px;overflow:hidden;width:100%;height:100%;position:relative}
-.device-frame.desktop .device-screen{border-radius:6px}
+.device-frame.tablet .device-notch,
 .device-frame.desktop .device-notch{display:none}
+.device-screen{background:#fff;border-radius:18px;overflow:hidden;position:relative}
+.device-frame.tablet .device-screen{border-radius:10px}
+.device-frame.desktop .device-screen{border-radius:4px}
 iframe#preview{width:100%;height:100%;border:0;background:#fff;display:block}
 
-/* About */
+/* ---------- Info section ---------- */
 .about{max-width:900px;margin:30px auto;padding:0 20px 40px}
 .about h2{margin-bottom:10px}
 .about p,.about li{color:#334155;line-height:1.65}
 .about h3{margin:18px 0 6px;color:var(--accent);font-size:1.05rem}
 footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);background:#fff}
+
+/* ---------- Narrow screens: keep the same layout, just tighten it ---------- */
+@media (max-width:600px){
+  .header{padding:8px 10px}
+  .toolbar{padding:6px 8px}
+  .toolbar .group{gap:4px}
+  .btn{padding:6px 9px;font-size:.8rem}
+  .tab{padding:8px 10px;font-size:.8rem}
+  textarea.code{font-size:11.5px;padding:10px}
+  .device-meta{font-size:.72rem}
+}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+  <a href="https://pooreyoutuber.github.io/" class="logo">🚀 Pooreyoutuber</a>
   <nav class="nav">
     <a href="https://pooreyoutuber.github.io/">Home</a>
     <a href="css-tools.html">CSS Tools</a>
@@ -86,30 +105,29 @@ footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border
 
 <div class="toolbar">
   <div class="group">
-    <button class="btn" id="btn-run">Run ▶</button>
+    <button class="btn" id="btn-run" title="Run (Ctrl/Cmd + Enter)">Run ▶</button>
     <button class="btn alt" id="btn-copy">Copy Code</button>
     <button class="btn alt" id="btn-download">Download .html</button>
     <button class="btn ghost" id="btn-reset">Reset</button>
   </div>
   <div class="group">
-    <label>Upload HTML</label>
-    <input type="file" id="file-upload" accept=".html,.htm,.txt">
+    <label>Upload HTML <input type="file" id="file-upload" accept=".html,.htm,.txt"></label>
   </div>
   <div class="group">
     <label><input type="checkbox" id="auto-run" checked> Auto run</label>
   </div>
 </div>
 
-<div class="main">
+<div class="workspace">
   <!-- LEFT: Editor -->
   <div class="editor-panel">
-    <div class="tabs">
-      <button class="tab active" data-tab="html">HTML</button>
-      <button class="tab" data-tab="css">CSS</button>
-      <button class="tab" data-tab="js">JS</button>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="html" role="tab">HTML</button>
+      <button class="tab" data-tab="css" role="tab">CSS</button>
+      <button class="tab" data-tab="js" role="tab">JS</button>
     </div>
     <div class="editor-wrap">
-      <textarea class="code" id="code-html" spellcheck="false"><!DOCTYPE html>
+      <textarea class="code" id="code-html" spellcheck="false" wrap="off"><!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -124,7 +142,7 @@ footer{text-align:center;padding:16px;font-size:.85rem;color:var(--muted);border
   </div>
 </body>
 </html></textarea>
-      <textarea class="code" id="code-css" spellcheck="false" style="display:none">* { box-sizing: border-box; margin: 0; padding: 0; }
+      <textarea class="code" id="code-css" spellcheck="false" wrap="off" style="display:none">* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: system-ui, sans-serif;
   background: linear-gradient(135deg, #6d5efc, #06b6d4);
@@ -155,11 +173,14 @@ button {
   cursor: pointer;
 }
 button:active { transform: scale(.97); }</textarea>
-      <textarea class="code" id="code-js" spellcheck="false" style="display:none">document.getElementById('btn')?.addEventListener('click', () => {
+      <textarea class="code" id="code-js" spellcheck="false" wrap="off" style="display:none">document.getElementById('btn')?.addEventListener('click', () => {
   alert('Working! Your code is running live.');
 });</textarea>
     </div>
-    <div class="editor-status" id="status">Ready · Auto-run on</div>
+    <div class="editor-status">
+      <span id="status">Ready · Auto-run on</span>
+      <span>Tab = indent · Ctrl/Cmd + Enter = run</span>
+    </div>
   </div>
 
   <!-- RIGHT: Preview -->
@@ -169,14 +190,18 @@ button:active { transform: scale(.97); }</textarea>
         <button class="btn active" data-device="s23">S23 Ultra</button>
         <button class="btn alt" data-device="tablet">Tablet</button>
         <button class="btn alt" data-device="desktop">Desktop</button>
+        <button class="btn alt" id="btn-rotate" title="Rotate device">⟳ Rotate</button>
       </div>
-      <div class="device-info" id="device-info">390 × 844 · Samsung Galaxy S23 Ultra</div>
+      <div class="device-meta">
+        <span id="device-info"></span>
+        <span class="scale-badge" id="scale-badge">100%</span>
+      </div>
     </div>
-    <div class="preview-stage">
-      <div class="device-frame" id="device-frame">
+    <div class="preview-stage" id="preview-stage">
+      <div class="device-frame mobile" id="device-frame">
         <div class="device-notch"><span></span></div>
-        <div class="device-screen">
-          <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-modals allow-forms" title="Live preview"></iframe>
+        <div class="device-screen" id="device-screen">
+          <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups" title="Live preview"></iframe>
         </div>
       </div>
     </div>
@@ -185,13 +210,14 @@ button:active { transform: scale(.97); }</textarea>
 
 <section class="about">
   <h2>Live Code Preview – Multi Device Tool</h2>
-  <p>Write HTML, CSS and JavaScript on the left and instantly see how it looks on a real device frame on the right. Default view is <strong>Samsung Galaxy S23 Ultra</strong>. Switch to Tablet or Desktop anytime. When you finish, copy the code or download a complete .html file.</p>
+  <p>Write HTML, CSS and JavaScript on the left and see how it looks on a device frame on the right. Default view is <strong>Samsung Galaxy S23 Ultra</strong>. Switch to Tablet or Desktop anytime. The preview is scaled to fit its panel, so the code editor always stays visible next to it.</p>
 
   <h3>How to use</h3>
   <ol style="padding-left:1.3rem">
     <li>Edit HTML, CSS or JS using the tabs on the left.</li>
-    <li>Preview updates automatically (or press Run).</li>
+    <li>The preview updates automatically (or press Run / Ctrl + Enter).</li>
     <li>Change device with the buttons: S23 Ultra / Tablet / Desktop.</li>
+    <li>Use Rotate to view phone and tablet in landscape.</li>
     <li>Click the button in the preview to test your own JavaScript.</li>
     <li>Copy code or Download .html when done.</li>
   </ol>
@@ -207,138 +233,212 @@ button:active { transform: scale(.97); }</textarea>
 
 <script>
 const $ = id => document.getElementById(id);
-const htmlEl = $('code-html');
-const cssEl  = $('code-css');
-const jsEl   = $('code-js');
-const frame  = $('preview');
-const deviceFrame = $('device-frame');
-const status = $('status');
-const deviceInfo = $('device-info');
+const htmlEl     = $('code-html');
+const cssEl      = $('code-css');
+const jsEl       = $('code-js');
+const frame      = $('preview');
+const frameEl    = $('device-frame');
+const screenEl   = $('device-screen');
+const stageEl    = $('preview-stage');
+const statusEl   = $('status');
+const infoEl     = $('device-info');
+const scaleEl    = $('scale-badge');
+const autoRunEl  = $('auto-run');
+const rotateBtn  = $('btn-rotate');
 
-/* Device sizes (logical CSS pixels) */
+/* Default example, kept so "Reset" works without reloading the page */
+const DEFAULTS = { html: htmlEl.value, css: cssEl.value, js: jsEl.value };
+
+/* Device sizes in logical CSS pixels (what a real device reports to the page) */
 const DEVICES = {
-  s23:     { w: 390, h: 844, label: '390 × 844 · Samsung Galaxy S23 Ultra', mobile: true },
-  tablet:  { w: 768, h: 1024, label: '768 × 1024 · Tablet', mobile: true },
-  desktop: { w: 1280, h: 800, label: '1280 × 800 · Desktop', mobile: false }
+  s23:     { name: 'Samsung Galaxy S23 Ultra', w: 390,  h: 844,  type: 'mobile' },
+  tablet:  { name: 'Tablet',                   w: 768,  h: 1024, type: 'tablet' },
+  desktop: { name: 'Desktop',                  w: 1280, h: 800,  type: 'desktop' }
 };
 
 let currentDevice = 's23';
+let landscape = false;
 let runTimer = null;
 
-/* Tabs */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const name = tab.dataset.tab;
-    htmlEl.style.display = name === 'html' ? 'block' : 'none';
-    cssEl.style.display  = name === 'css'  ? 'block' : 'none';
-    jsEl.style.display   = name === 'js'   ? 'block' : 'none';
+/* ---------- Tabs ---------- */
+const editors = { html: htmlEl, css: cssEl, js: jsEl };
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t => {
+    const active = t.dataset.tab === name;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active);
   });
+  for (const key in editors) editors[key].style.display = key === name ? 'block' : 'none';
+}
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => showTab(tab.dataset.tab));
 });
 
-/* Device switch */
+/* ---------- Device switching ---------- */
+function applyDevice(){
+  const d = DEVICES[currentDevice];
+  const rot = landscape && d.type !== 'desktop';
+  const W = rot ? d.h : d.w;
+  const H = rot ? d.w : d.h;
+
+  screenEl.style.width  = W + 'px';
+  screenEl.style.height = H + 'px';
+  frameEl.className = 'device-frame ' + d.type;
+  infoEl.textContent = `${W} × ${H} · ${d.name}${rot ? ' (landscape)' : ''}`;
+  rotateBtn.disabled = d.type === 'desktop';
+
+  fitFrame();
+}
+
+/* Scale the device frame down so it always fits inside its panel (never clipped, never scrolls) */
+function fitFrame(){
+  const fw = frameEl.offsetWidth;
+  const fh = frameEl.offsetHeight;
+  const availW = stageEl.clientWidth  - 32;
+  const availH = stageEl.clientHeight - 32;
+  const s = Math.max(0.1, Math.min(1, availW / fw, availH / fh));
+  frameEl.style.transform = `translate(-50%, -50%) scale(${s})`;
+  scaleEl.textContent = Math.round(s * 100) + '%';
+}
+new ResizeObserver(fitFrame).observe(stageEl);
+
 document.querySelectorAll('[data-device]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-device]').forEach(b => {
-      b.classList.remove('active');
-      b.classList.add('alt');
+      b.classList.toggle('active', b === btn);
+      b.classList.toggle('alt', b !== btn);
     });
-    btn.classList.add('active');
-    btn.classList.remove('alt');
     currentDevice = btn.dataset.device;
     applyDevice();
   });
 });
 
-function applyDevice(){
-  const d = DEVICES[currentDevice];
-  deviceFrame.style.width  = d.w + 'px';
-  deviceFrame.style.height = d.h + 'px';
-  deviceFrame.classList.toggle('desktop', !d.mobile);
-  deviceInfo.textContent = d.label;
+rotateBtn.addEventListener('click', () => {
+  landscape = !landscape;
+  applyDevice();
+});
+
+/* ---------- Build & run ---------- */
+/* Escape "</script" inside user JS so it cannot close our wrapper script early */
+function safeScript(code){
+  return code.replace(/<\/script/gi, '<\\/script');
 }
 
-/* Build full HTML document */
 function buildDoc(){
   const html = htmlEl.value;
   const css  = cssEl.value;
   const js   = jsEl.value;
 
-  // If user already wrote full HTML, inject CSS/JS into it when possible
   let doc = html;
+
+  /* Function replacers are used so "$&", "$1" etc. inside user code are kept literally */
   if (css.trim()) {
     if (/<\/head>/i.test(doc)) {
-      doc = doc.replace(/<\/head>/i, `<style>${css}</style>\n</head>`);
+      doc = doc.replace(/<\/head>/i, () => `<style>${css}</style>\n</head>`);
     } else {
       doc = `<style>${css}</style>\n` + doc;
     }
   }
   if (js.trim()) {
+    const tag = `<script>${safeScript(js)}</script>`;
     if (/<\/body>/i.test(doc)) {
-      doc = doc.replace(/<\/body>/i, `<script>${js}<\/script>\n</body>`);
+      doc = doc.replace(/<\/body>/i, () => `${tag}\n</body>`);
     } else {
-      doc += `\n<script>${js}<\/script>`;
+      doc += `\n${tag}`;
     }
   }
   return doc;
 }
 
 function runPreview(){
-  const doc = buildDoc();
-  frame.srcdoc = doc;
-  status.textContent = 'Updated · ' + new Date().toLocaleTimeString();
+  frame.srcdoc = buildDoc();
+  statusEl.textContent = 'Updated · ' + new Date().toLocaleTimeString();
 }
 
 function scheduleRun(){
-  if (!$('auto-run').checked) return;
+  if (!autoRunEl.checked) return;
   clearTimeout(runTimer);
   runTimer = setTimeout(runPreview, 400);
 }
 
+[htmlEl, cssEl, jsEl].forEach(el => el.addEventListener('input', scheduleRun));
+
+/* Tab key inserts two spaces instead of moving focus; Ctrl/Cmd+Enter runs */
 [htmlEl, cssEl, jsEl].forEach(el => {
-  el.addEventListener('input', scheduleRun);
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      el.setRangeText('  ', el.selectionStart, el.selectionEnd, 'end');
+      el.dispatchEvent(new Event('input'));
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      clearTimeout(runTimer);
+      runPreview();
+    }
+  });
 });
 
 $('btn-run').addEventListener('click', runPreview);
-$('auto-run').addEventListener('change', () => {
-  status.textContent = $('auto-run').checked ? 'Ready · Auto-run on' : 'Ready · Auto-run off';
-  if ($('auto-run').checked) runPreview();
+
+autoRunEl.addEventListener('change', () => {
+  statusEl.textContent = autoRunEl.checked ? 'Ready · Auto-run on' : 'Ready · Auto-run off';
+  if (autoRunEl.checked) runPreview();
 });
 
-/* Copy */
-$('btn-copy').addEventListener('click', () => {
-  const text = buildDoc();
-  const done = () => {
-    const o = $('btn-copy').textContent;
-    $('btn-copy').textContent = 'Copied!';
-    setTimeout(() => $('btn-copy').textContent = o, 1200);
-  };
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done);
-  else {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); ta.remove(); done();
+/* ---------- Copy ---------- */
+function copyText(text){
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
   }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    ok ? resolve() : reject(new Error('copy failed'));
+  });
+}
+
+$('btn-copy').addEventListener('click', () => {
+  const btn = $('btn-copy');
+  const original = btn.textContent;
+  copyText(buildDoc()).then(() => {
+    btn.textContent = 'Copied!';
+  }).catch(() => {
+    btn.textContent = 'Copy failed';
+  }).finally(() => {
+    setTimeout(() => btn.textContent = original, 1200);
+  });
 });
 
-/* Download */
+/* ---------- Download ---------- */
 $('btn-download').addEventListener('click', () => {
   const blob = new Blob([buildDoc()], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'preview.html';
+  a.href = url;
+  a.download = 'my-page.html';
+  document.body.appendChild(a);
   a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
-/* Reset */
+/* ---------- Reset (restores the default example, no page reload) ---------- */
 $('btn-reset').addEventListener('click', () => {
   if (!confirm('Reset all code to default example?')) return;
-  location.reload();
+  htmlEl.value = DEFAULTS.html;
+  cssEl.value  = DEFAULTS.css;
+  jsEl.value   = DEFAULTS.js;
+  showTab('html');
+  runPreview();
 });
 
-/* File upload */
+/* ---------- Upload ---------- */
 $('file-upload').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -347,17 +447,16 @@ $('file-upload').addEventListener('change', e => {
     htmlEl.value = reader.result;
     cssEl.value = '';
     jsEl.value = '';
-    // switch to HTML tab
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'html'));
-    htmlEl.style.display = 'block';
-    cssEl.style.display = 'none';
-    jsEl.style.display = 'none';
+    showTab('html');
     runPreview();
   };
+  reader.onerror = () => { statusEl.textContent = 'Could not read file'; };
   reader.readAsText(file);
+  e.target.value = ''; // allow re-uploading the same file
 });
 
-/* Init */
+/* ---------- Init ---------- */
+showTab('html');
 applyDevice();
 runPreview();
 </script>
