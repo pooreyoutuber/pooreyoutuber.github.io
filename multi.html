@@ -113,61 +113,96 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Header (Navigation) */
+      /* Header (Navigation) */
         header {
             background: var(--yt-red);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 25px;
+            padding: 10px 20px;
             flex-wrap: wrap;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            gap: 8px;
         }
 
-        .logo-container { display: flex; align-items: center; gap: 10px; }
-        .logo { height: 38px; width: 38px; border-radius: 6px; }
-        .home-link { color: #fff; font-size: 22px; font-weight: bold; text-decoration: none; }
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            flex-shrink: 0;
+        }
+        .logo { 
+            height: 34px; 
+            width: 34px; 
+            border-radius: 6px; 
+        }
+        .home-link { 
+            color: #fff; 
+            font-size: 18px; 
+            font-weight: bold; 
+            text-decoration: none; 
+            white-space: nowrap;
+        }
 
-        .nav-controls { display: flex; align-items: center; gap: 18px; }
-        nav { display: flex; gap: 18px; }
-        nav a { color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
-        nav a:hover { opacity: 0.8; }
+        .nav-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        nav { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: 500; 
+            transition: opacity 0.2s; 
+            font-size: 13px;
+        }
+        nav a:hover { opacity: 0.85; }
 
           /* Highlighted Articles Link with Glow & Notification Badge */
         .article-btn {
             position: relative;
-            padding: 6px 14px;
-            border: 2px solid #ffffff;
-            border-radius: 20px;
+            padding: 5px 11px;
+            border: 1.5px solid #ffffff;
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.15);
-            font-weight: bold !important;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            font-weight: 600 !important;
+            font-size: 12.5px !important;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
             animation: pulse-glow 2s infinite alternate;
+            white-space: nowrap;
         }
 
         .article-btn .badge-new {
             position: absolute;
-            top: -10px;
-            right: -10px;
+            top: -8px;
+            right: -8px;
             background-color: #ff0000;
             color: #ffffff;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 1px 5px;
+            border-radius: 8px;
             border: 1.5px solid #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 0.5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            letter-spacing: 0.3px;
         }
 
         @keyframes pulse-glow {
             0% {
-                box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
                 transform: scale(1);
             }
             100% {
-                box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
-                transform: scale(1.03);
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
+                transform: scale(1.02);
             }
         }
           
@@ -179,30 +214,31 @@
         .dropbtn {
             background-color: #00b4d8 !important;
             color: #ffffff !important;
-            padding: 6px 16px;
-            font-size: 15px;
-            font-weight: 700;
+            padding: 5px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
             border: none;
-            border-radius: 20px;
+            border-radius: 16px;
             cursor: pointer;
             font-family: inherit;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            gap: 3px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.18);
             transition: transform 0.2s ease, background-color 0.2s ease !important;
+            white-space: nowrap;
         }
         .dropbtn:hover {
             background-color: #0096c7 !important;
-            transform: scale(1.05);
+            transform: scale(1.04);
             opacity: 1 !important;
         }
         .dropdown-content {
             display: none;
             position: absolute;
             background-color: var(--yt-card);
-            min-width: 150px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
+            min-width: 140px;
+            box-shadow: 0px 6px 14px 0px rgba(0,0,0,0.22);
             z-index: 100;
             border-radius: 10px;
             overflow: hidden;
@@ -213,11 +249,11 @@
         }
         .dropdown-content a {
             color: var(--yt-text) !important;
-            padding: 10px 16px;
+            padding: 9px 14px;
             text-decoration: none;
             display: block;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             transition: background-color 0.2s;
         }
@@ -232,19 +268,21 @@
         .donate-coffee-btn {
             background-color: #ffdd00 !important;
             color: #000000 !important;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 700 !important;
+            padding: 5px 11px;
+            border-radius: 16px;
+            font-weight: 600 !important;
+            font-size: 12.5px !important;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            gap: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.18);
             transition: transform 0.2s ease, background-color 0.2s ease !important;
+            white-space: nowrap;
         }
         .donate-coffee-btn:hover {
             opacity: 1 !important;
             background-color: #ffea61 !important;
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
  
         /* Dark Mode Toggle Button */
@@ -252,11 +290,13 @@
             background: white;
             color: var(--yt-black);
             border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
+            padding: 5px 10px;
+            border-radius: 6px;
             font-weight: 600;
+            font-size: 12.5px;
             cursor: pointer;
             transition: background 0.3s, color 0.3s;
+            white-space: nowrap;
         }
         body.dark-mode #dark-mode-toggle { background: #333; color: #fff; }
 
