@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Networking Tools | Pooreyoutuber</title>
-<meta name="description" content="Free networking tools by Pooreyoutuber: accessibility checker, postcode validator, bulk URL checker, HREF extractor, port checker, HTTP/2 checker, HTTP request checker, traceroute helper, IPv4/IPv6 converter, domain to IP lookup, domain extractor and IP address search.">
+<title>Free Networking Tools Online | Port Checker, DNS, Postcode Finder & More | Pooreyoutuber</title>
+<meta name="description" content="Free online networking tools by Pooreyoutuber: accessibility checker, postcode validator & location finder, bulk URL checker, HREF extractor, port checker, HTTP/2 & HTTP/3 checker, HTTP request checker, traceroute helper, IPv4/IPv6 converter, domain to IP, domain extractor, IP search, subnet calculator, ping helper, MX lookup, SSL checker and more. No install, works in browser.">
+<meta name="keywords" content="networking tools, port checker, DNS lookup, postcode finder, postcode validator, bulk URL checker, traceroute, IPv4 IPv6 converter, domain to IP, accessibility checker, HTTP/2 checker, free online tools, Pooreyoutuber">
+<meta name="author" content="Pooreyoutuber">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pooreyoutuber.github.io/networking-tools.html">
+<meta property="og:title" content="Free Networking Tools Online | Pooreyoutuber">
+<meta property="og:description" content="Twelve+ free networking utilities: port checker, DNS, postcode location finder, bulk URL checker, traceroute commands, IPv4/IPv6, HTTP request checker and more. Browser-based, no signup.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pooreyoutuber.github.io/networking-tools.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="geo.region" content="IN">
+<meta name="language" content="English">
 <style>
 :root{--bg:#f8fafc;--card:#fff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#6d5efc;--accent2:#06b6d4;--ok:#047857;--warn:#b45309;--bad:#b91c1c}
 *{box-sizing:border-box}
@@ -110,13 +121,14 @@ footer .brandname{color:var(--accent);font-weight:700}
 <section class="hero">
     <div class="brand">Pooreyoutuber · Networking Tools</div>
     <h1>Networking Tools</h1>
-    <p>Twelve utilities for checking websites, URLs, ports, HTTP requests, IP addresses and domains. Find problems faster, convert addresses, and understand what a network is doing.</p>
-    <div class="notice"><strong>Before you start:</strong> a web page cannot open raw network connections, so true port scans and traceroutes must run on your own computer. For those tools we give you the exact commands to run, and the other tools use public services that allow browser access. Results from browser checks are helpful but limited; they are explained on each tool.</div>
+    <p>Seventeen free utilities for checking websites, URLs, ports, HTTP requests, IP addresses, domains, postcodes and more. Find problems faster, convert addresses, look up locations and understand what a network is doing.</p>
+    <div class="notice"><strong>Before you start:</strong> A web page cannot open raw network connections, so true port scans and traceroutes must run on your own computer. For those tools we give you the exact commands to copy and run. The other tools use public services that allow browser access. Browser-based results are helpful for quick checks but have limits — each tool explains what it can and cannot show.</div>
 </section>
 
 <nav class="chips">
     <a href="#a11y">Accessibility</a>
-    <a href="#postcode">Postcode</a>
+    <a href="#postcode">Postcode Validator</a>
+    <a href="#pcfind">Postcode Finder</a>
     <a href="#bulk">Bulk URL</a>
     <a href="#hrefx">HREF Extractor</a>
     <a href="#port">Port Checker</a>
@@ -127,6 +139,11 @@ footer .brandname{color:var(--accent);font-weight:700}
     <a href="#dns">Domain to IP</a>
     <a href="#domx">Domain Extractor</a>
     <a href="#ipsearch">IP Search</a>
+    <a href="#subnet">Subnet Calculator</a>
+    <a href="#ping">Ping Helper</a>
+    <a href="#mx">MX Lookup</a>
+    <a href="#ssl">SSL Checker</a>
+    <a href="#ua">User-Agent</a>
 </nav>
 
 <div class="wrap">
@@ -164,6 +181,37 @@ footer .brandname{color:var(--accent);font-weight:700}
             <div class="fld"><label for="pc-code">Postal code</label><input type="text" id="pc-code" value="560001" placeholder="Enter a postal code"></div>
         </div>
         <div class="res" id="pc-out"></div>
+    </section>
+
+    <!-- 2b POSTCODE FINDER -->
+    <section class="tool" id="pcfind">
+        <div class="th"><h2>Postcode Location Finder</h2><span class="badge api">Public postcode service</span></div>
+        <p class="desc">Enter a postal / ZIP code and choose a country to see the city, state/district and coordinates. Data comes from the free Zippopotam service (GeoNames). Not every country or code is covered, and results are approximate.</p>
+        <div class="ctrls">
+            <div class="fld"><label for="pf-country">Country</label>
+                <select id="pf-country">
+                    <option value="in">India</option>
+                    <option value="us">United States</option>
+                    <option value="gb">United Kingdom</option>
+                    <option value="ca">Canada</option>
+                    <option value="de">Germany</option>
+                    <option value="fr">France</option>
+                    <option value="au">Australia</option>
+                    <option value="jp">Japan</option>
+                    <option value="br">Brazil</option>
+                    <option value="nl">Netherlands</option>
+                    <option value="es">Spain</option>
+                    <option value="it">Italy</option>
+                    <option value="mx">Mexico</option>
+                    <option value="za">South Africa</option>
+                    <option value="sg">Singapore</option>
+                </select>
+            </div>
+            <div class="fld"><label for="pf-code">Postal / ZIP code</label><input type="text" id="pf-code" value="560001" placeholder="e.g. 560001 or 90210"></div>
+        </div>
+        <div class="btns"><button class="btn" id="pf-run">Find location</button></div>
+        <div class="res" id="pf-out" style="margin-top:12px"></div>
+        <p class="note">Coverage varies by country. For some places only partial codes are available. Always verify important addresses with an official source.</p>
     </section>
 
     <!-- 3 BULK URL -->
@@ -313,10 +361,66 @@ Content-Length: 40
         <p class="note">Location data is approximate and comes from a third-party service, which may limit how many lookups you can make in a short time.</p>
     </section>
 
+    <!-- 13 SUBNET CALCULATOR -->
+    <section class="tool" id="subnet">
+        <div class="th"><h2>Subnet Calculator</h2><span class="badge local">Runs in your browser</span></div>
+        <p class="desc">Enter an IPv4 address and CIDR prefix (or a dotted netmask) to calculate the network address, broadcast, usable host range, total hosts and wildcard mask. Useful for planning LANs and understanding routing.</p>
+        <div class="ctrls">
+            <div class="fld"><label for="sn-ip">IPv4 address</label><input type="text" id="sn-ip" value="192.168.1.10" style="min-width:180px"></div>
+            <div class="fld"><label for="sn-cidr">CIDR / prefix</label><input type="text" id="sn-cidr" value="24" style="min-width:100px" placeholder="e.g. 24"></div>
+        </div>
+        <div class="res" id="sn-out"></div>
+    </section>
+
+    <!-- 14 PING HELPER -->
+    <section class="tool" id="ping">
+        <div class="th"><h2>Ping Helper</h2><span class="badge api">Run on your computer</span></div>
+        <p class="desc">Ping measures round-trip time to a host. A browser cannot send ICMP packets, so enter a target and copy the ready-made commands for Windows, macOS or Linux.</p>
+        <div class="ctrls">
+            <div class="fld"><label for="pg-target">Target host or IP</label><input type="text" id="pg-target" value="8.8.8.8"></div>
+            <div class="fld"><label for="pg-count">Count (optional)</label><input type="text" id="pg-count" value="4" style="min-width:90px"></div>
+        </div>
+        <div class="cmdwrap" id="pg-cmd"></div>
+        <p class="note">High or increasing latency, or packet loss, can point to congestion or a problem on the path. Some hosts and firewalls block ping.</p>
+    </section>
+
+    <!-- 15 MX LOOKUP -->
+    <section class="tool" id="mx">
+        <div class="th"><h2>MX Record Lookup</h2><span class="badge api">Public DNS service</span></div>
+        <p class="desc">Look up the mail servers (MX records) for a domain. Results come from Google’s public DNS-over-HTTPS. Priority numbers show which server is preferred (lower number = higher priority).</p>
+        <div class="ctrls">
+            <div class="fld"><label for="mx-in">Domain</label><input type="text" id="mx-in" value="gmail.com"></div>
+        </div>
+        <div class="btns"><button class="btn" id="mx-run">Look up MX</button></div>
+        <div class="res" id="mx-out" style="margin-top:12px"></div>
+    </section>
+
+    <!-- 16 SSL / CERT CHECKER (command helper) -->
+    <section class="tool" id="ssl">
+        <div class="th"><h2>SSL / Certificate Checker</h2><span class="badge api">Run on your computer</span></div>
+        <p class="desc">A browser cannot freely inspect another site’s certificate chain. Enter a domain to get the OpenSSL and curl commands that show certificate subject, issuer, dates and protocol support.</p>
+        <div class="ctrls">
+            <div class="fld"><label for="ssl-domain">Domain</label><input type="text" id="ssl-domain" value="pooreyoutuber.github.io"></div>
+        </div>
+        <div class="cmdwrap" id="ssl-cmd"></div>
+        <p class="note">Look for the “notAfter” date (expiry), the issuer, and whether the common name or SAN matches the domain you expect.</p>
+    </section>
+
+    <!-- 17 USER-AGENT PARSER -->
+    <section class="tool" id="ua">
+        <div class="th"><h2>User-Agent Parser</h2><span class="badge local">Runs in your browser</span></div>
+        <p class="desc">Paste a User-Agent string (or use the one from this browser) to see a simple breakdown of browser, OS and device hints. Useful when reading server logs or debugging client-specific issues.</p>
+        <div class="ctrls">
+            <div class="fld" style="flex:1;min-width:280px"><label for="ua-in">User-Agent string</label><input type="text" id="ua-in" style="min-width:100%;width:100%"></div>
+        </div>
+        <div class="btns"><button class="btn alt" id="ua-self">Use this browser</button></div>
+        <div class="res" id="ua-out" style="margin-top:12px"></div>
+    </section>
+
     <!-- HOMEPAGE GUIDE -->
     <section class="about">
         <h2>About Pooreyoutuber Networking Tools</h2>
-        <p>Pooreyoutuber Networking Tools is a free set of utilities for developers, system administrators, students and website owners. Networking problems are often hard to see: a page does not load, a link is broken, a form is unusable for some visitors, or a domain points to the wrong server. These tools help you look at each part of the problem in a simple way. There is nothing to install and no account to create. Open the page, enter your input, and read the result.</p>
+        <p>Pooreyoutuber Networking Tools is a free set of utilities for developers, system administrators, students and website owners. Networking problems are often hard to see: a page does not load, a link is broken, a form is unusable for some visitors, or a domain points to the wrong server. These tools (accessibility, postcode validator &amp; location finder, bulk URL, HREF extractor, port checker, HTTP/2, HTTP request, traceroute, IPv4/IPv6, domain to IP, domain extractor, IP search, subnet calculator, ping helper, MX lookup, SSL checker and user-agent parser) help you look at each part of the problem in a simple way. There is nothing to install and no account to create. Open the page, enter your input, and read the result.</p>
 
         <h3>How to use this page</h3>
         <p>Use the chips at the top to jump to any tool, or scroll through the list. Each tool has a short description, the input you need, and a results area. Some tools run entirely in your browser, so your data stays on your device. Others use a public service, and the description tells you which one. A few tools, such as the port checker and traceroute helper, need access to your network that a web page cannot have, so they provide the exact commands to run on your own computer.</p>
@@ -359,6 +463,15 @@ Content-Length: 40
 
         <h3>IP Address Search</h3>
         <p>An IP address can reveal approximate location, the organisation that owns the network, and the time zone. The search tool checks locally whether an address is public, private, loopback, link-local or multicast, then looks up the public details through a third-party service. Use it to investigate suspicious traffic or to understand where a visitor is connecting from. Location is approximate, usually at city level.</p>
+
+        <h3>Postcode Location Finder</h3>
+        <p>Enter a postal or ZIP code and a country to see the city, state or district, and map coordinates. The tool uses the free Zippopotam service. Coverage is good for many countries but not complete; always confirm important addresses with an official source.</p>
+
+        <h3>Subnet Calculator</h3>
+        <p>Plan IP ranges by entering an address and CIDR prefix (or netmask). The calculator shows network address, broadcast, usable host range, total hosts and wildcard mask.</p>
+
+        <h3>Ping Helper, MX Lookup, SSL Checker &amp; User-Agent Parser</h3>
+        <p>Ping and SSL tools give you the exact commands to run on your computer because browsers cannot send ICMP or freely inspect certificates. MX lookup uses public DNS to list mail servers for a domain. The User-Agent parser gives a quick read of browser, OS and device from a log string.</p>
 
         <h3>Tips for the best results</h3>
         <p>Start with the simplest check. If a page does not load, test the domain with the DNS tool, then the port with the command, and then the HTTP request. Keep sensitive information such as passwords and tokens out of request checks, and remove them before you share a result. When you run commands on your computer, read the output carefully, because a timeout can mean a firewall rather than a broken service.</p>
@@ -820,6 +933,179 @@ async function runIpSearch(){
   }
 }
 $('is-run').addEventListener('click', runIpSearch);
+
+/* ---------- POSTCODE FINDER (Zippopotam) ---------- */
+async function runPf(){
+  const country = $('pf-country').value;
+  const code = $('pf-code').value.trim().replace(/\s+/g,'');
+  const out = $('pf-out');
+  if(!code){ out.innerHTML = '<div style="padding:12px" class="err">Enter a postal code.</div>'; return; }
+  out.innerHTML = '<div style="padding:12px;color:#64748b">Looking up…</div>';
+  try{
+    const r = await timedFetch(`https://api.zippopotam.us/${country}/${encodeURIComponent(code)}`, {}, 8000);
+    if(r.status === 404){ out.innerHTML = `<div style="padding:12px" class="err">No results for <strong>${esc(code)}</strong> in the selected country. Try another country or check the code format.</div>`; return; }
+    if(!r.ok) throw new Error('Service error ' + r.status);
+    const j = await r.json();
+    const places = j.places || [];
+    if(!places.length){ out.innerHTML = '<div style="padding:12px" class="err">No place data returned.</div>'; return; }
+    const rows = places.map(p => {
+      const map = (p.latitude && p.longitude) ? `https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=12/${p.latitude}/${p.longitude}` : '';
+      return `<tr>
+        <td>${esc(p['place name'] || '—')}</td>
+        <td>${esc(p.state || '—')} ${p['state abbreviation'] ? '('+esc(p['state abbreviation'])+')' : ''}</td>
+        <td>${esc(p.latitude || '—')}, ${esc(p.longitude || '—')}</td>
+        <td>${map ? `<a href="${esc(map)}" target="_blank" rel="noopener">Map</a>` : '—'}</td>
+      </tr>`;
+    }).join('');
+    out.innerHTML = `<div class="kv">
+      <div>Postal code</div><div>${esc(j['post code'] || code)}</div>
+      <div>Country</div><div>${esc(j.country || '')} (${esc(j['country abbreviation'] || country.toUpperCase())})</div>
+    </div>
+    <div style="padding:10px 12px 0;font-size:.9rem;color:#334155">${places.length} place(s)</div>
+    <table><thead><tr><th>City / Place</th><th>State / District</th><th>Coordinates</th><th>Map</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){
+    out.innerHTML = `<div style="padding:12px" class="err">Lookup failed: ${esc(e.message)}. Check your connection or try again later.</div>`;
+  }
+}
+$('pf-run').addEventListener('click', runPf);
+
+/* ---------- SUBNET CALCULATOR ---------- */
+function ipToInt(ip){
+  return ip.split('.').reduce((a,b) => (a << 8) + (+b), 0) >>> 0;
+}
+function intToIp(n){
+  return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+}
+function runSubnet(){
+  const ip = $('sn-ip').value.trim();
+  let cidr = $('sn-cidr').value.trim();
+  const out = $('sn-out');
+  if(!isV4(ip)){ out.innerHTML = '<div style="padding:12px" class="err">Enter a valid IPv4 address.</div>'; return; }
+  if(cidr.includes('.')){
+    // dotted mask → CIDR
+    if(!isV4(cidr)){ out.innerHTML = '<div style="padding:12px" class="err">Invalid netmask.</div>'; return; }
+    const m = ipToInt(cidr);
+    let bits = 0;
+    for(let i=31;i>=0;i--){ if(m & (1<<i)) bits++; else break; }
+    cidr = String(bits);
+  }
+  const prefix = parseInt(cidr,10);
+  if(isNaN(prefix) || prefix < 0 || prefix > 32){ out.innerHTML = '<div style="padding:12px" class="err">CIDR must be 0–32.</div>'; return; }
+  const mask = prefix === 0 ? 0 : (0xFFFFFFFF << (32-prefix)) >>> 0;
+  const ipInt = ipToInt(ip);
+  const network = (ipInt & mask) >>> 0;
+  const broadcast = (network | (~mask >>> 0)) >>> 0;
+  const hosts = prefix >= 31 ? (prefix === 32 ? 1 : 2) : (Math.pow(2, 32-prefix) - 2);
+  const first = prefix >= 31 ? network : (network + 1) >>> 0;
+  const last = prefix >= 31 ? broadcast : (broadcast - 1) >>> 0;
+  const wildcard = (~mask) >>> 0;
+  out.innerHTML = `<div class="kv">
+    <div>Address</div><div>${esc(ip)}</div>
+    <div>CIDR</div><div>/${prefix}</div>
+    <div>Netmask</div><div>${intToIp(mask)}</div>
+    <div>Wildcard</div><div>${intToIp(wildcard)}</div>
+    <div>Network</div><div>${intToIp(network)}/${prefix}</div>
+    <div>Broadcast</div><div>${intToIp(broadcast)}</div>
+    <div>First usable</div><div>${intToIp(first)}</div>
+    <div>Last usable</div><div>${intToIp(last)}</div>
+    <div>Usable hosts</div><div>${hosts}</div>
+    <div>Total addresses</div><div>${Math.pow(2, 32-prefix)}</div>
+  </div>`;
+}
+$('subnet').addEventListener('input', runSubnet);
+runSubnet();
+
+/* ---------- PING HELPER ---------- */
+function renderPing(){
+  const t = $('pg-target').value.trim() || 'example.com';
+  const c = parseInt($('pg-count').value,10) || 4;
+  $('pg-cmd').innerHTML = `
+    <div><div class="cmdlbl">Windows</div><div class="cmd">ping -n ${c} ${esc(t)}</div></div>
+    <div><div class="cmdlbl">macOS / Linux</div><div class="cmd">ping -c ${c} ${esc(t)}</div></div>
+    <div><div class="cmdlbl">Continuous (Ctrl+C to stop)</div><div class="cmd">ping ${esc(t)}</div></div>`;
+}
+$('ping').addEventListener('input', renderPing);
+renderPing();
+
+/* ---------- MX LOOKUP ---------- */
+async function runMx(){
+  const d = $('mx-in').value.trim().replace(/^https?:\/\//,'').split('/')[0];
+  const out = $('mx-out');
+  if(!d){ out.innerHTML = '<div style="padding:12px" class="err">Enter a domain.</div>'; return; }
+  out.innerHTML = '<div style="padding:12px;color:#64748b">Looking up…</div>';
+  try{
+    const j = await lookup(d, 'MX');
+    const ans = (j.Answer || []).filter(a => a.type === 15);
+    if(!ans.length){
+      out.innerHTML = `<div style="padding:12px">${pill('Info')} No MX records found (DNS status ${j.Status === 3 ? 'NXDOMAIN' : j.Status}). Domain may not accept email or may use different records.</div>`;
+      return;
+    }
+    const rows = ans.map(a => {
+      const parts = String(a.data).trim().split(/\s+/);
+      const prio = parts[0], host = parts.slice(1).join(' ').replace(/\.$/,'');
+      return `<tr><td>${esc(prio)}</td><td>${esc(host)}</td><td>${a.TTL} s</td></tr>`;
+    }).join('');
+    out.innerHTML = `<div style="padding:10px 12px;font-size:.9rem;color:#334155">Domain: <strong>${esc(d)}</strong></div>
+      <table><thead><tr><th>Priority</th><th>Mail server</th><th>TTL</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){
+    out.innerHTML = `<div style="padding:12px" class="err">Lookup failed: ${esc(e.message)}</div>`;
+  }
+}
+$('mx-run').addEventListener('click', runMx);
+
+/* ---------- SSL / CERT COMMANDS ---------- */
+function renderSsl(){
+  let d = $('ssl-domain').value.trim().replace(/^https?:\/\//,'').split('/')[0] || 'example.com';
+  $('ssl-cmd').innerHTML = `
+    <div><div class="cmdlbl">OpenSSL (certificate details)</div><div class="cmd">echo | openssl s_client -servername ${esc(d)} -connect ${esc(d)}:443 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName</div></div>
+    <div><div class="cmdlbl">curl (show cert + protocol)</div><div class="cmd">curl -vI --http2 https://${esc(d)} 2>&1 | grep -E "subject:|issuer:|expire|SSL connection|HTTP/"</div></div>
+    <div><div class="cmdlbl">Windows (PowerShell – basic TLS test)</div><div class="cmd">Test-NetConnection ${esc(d)} -Port 443</div></div>`;
+}
+$('ssl').addEventListener('input', renderSsl);
+renderSsl();
+
+/* ---------- USER-AGENT PARSER ---------- */
+function parseUA(ua){
+  const r = [];
+  if(!ua) return [['Input','(empty)']];
+  r.push(['Raw', ua.slice(0,180) + (ua.length>180?'…':'')]);
+  // Browser
+  let browser = 'Unknown';
+  if(/Edg\//i.test(ua)) browser = 'Microsoft Edge';
+  else if(/OPR\/|Opera/i.test(ua)) browser = 'Opera';
+  else if(/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = 'Google Chrome';
+  else if(/Firefox\//i.test(ua)) browser = 'Mozilla Firefox';
+  else if(/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+  else if(/MSIE |Trident\//i.test(ua)) browser = 'Internet Explorer';
+  r.push(['Browser (guess)', browser]);
+  // OS
+  let os = 'Unknown';
+  if(/Windows NT 10/i.test(ua)) os = 'Windows 10 / 11';
+  else if(/Windows NT 6\.3/i.test(ua)) os = 'Windows 8.1';
+  else if(/Windows NT 6\.1/i.test(ua)) os = 'Windows 7';
+  else if(/Mac OS X|Macintosh/i.test(ua)) os = 'macOS';
+  else if(/Android/i.test(ua)) os = 'Android';
+  else if(/iPhone|iPad|iPod/i.test(ua)) os = 'iOS / iPadOS';
+  else if(/Linux/i.test(ua)) os = 'Linux';
+  else if(/CrOS/i.test(ua)) os = 'Chrome OS';
+  r.push(['OS (guess)', os]);
+  // Device
+  let device = 'Desktop / Laptop';
+  if(/Mobile|Android.*Mobile/i.test(ua)) device = 'Mobile phone';
+  else if(/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)) device = 'Tablet';
+  r.push(['Device (guess)', device]);
+  // Bot
+  if(/bot|crawler|spider|slurp|bingpreview/i.test(ua)) r.push(['Note', 'Looks like a bot or crawler']);
+  return r;
+}
+function runUA(){
+  const rows = parseUA($('ua-in').value.trim());
+  $('ua-out').innerHTML = `<div class="kv">${rows.map(r => `<div>${esc(r[0])}</div><div>${esc(r[1])}</div>`).join('')}</div>`;
+}
+$('ua-self').addEventListener('click', () => { $('ua-in').value = navigator.userAgent; runUA(); });
+$('ua').addEventListener('input', runUA);
+$('ua-in').value = navigator.userAgent;
+runUA();
 </script>
 </body>
 </html>
