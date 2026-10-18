@@ -1,1686 +1,1432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>Photo Studio Print Designer – Passport Photo Maker & A4 Layout | PooreYouTuber</title>
-  <meta name="description" content="Create custom-size photos, passport and ID photo layouts, multiple copies on A4 or 4×6 paper, crop and edit images, and download print-ready PDF, JPG and PNG files with PooreYouTuber.">
-  <meta name="author" content="PooreYouTuber">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://pooreyoutuber.github.io/photo.html">
-
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Photo Studio Print Designer – Passport Photo Maker & A4 Layout | PooreYouTuber">
-  <meta property="og:description" content="Create custom-size photos, passport and ID photo layouts, multiple copies on A4 or 4×6 paper, crop and edit images, and download print-ready PDF, JPG and PNG files with PooreYouTuber.">
-  <meta property="og:url" content="https://pooreyoutuber.github.io/photo.html">
-  <meta property="og:image" content="https://pooreyoutuber.github.io/banner.jpg">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Photo Studio Print Designer – Passport Photo Maker & A4 Layout">
-  <meta name="twitter:description" content="Create custom-size photos, multiple copies on A4 or 4×6 paper, crop & edit, and download print-ready PDF/JPG/PNG. 100% browser-based.">
-  <meta name="twitter:image" content="https://pooreyoutuber.github.io/banner.jpg">
-
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #ffffff;
-      --surface: #f8fafc;
-      --surface-2: #f1f5f9;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      font-size: 15px;
-    }
-
-    /* ===== HEADER (user provided + polish) ===== */
-    .header {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: var(--shadow);
-    }
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text);
-      text-decoration: none;
-      white-space: nowrap;
-    }
-    .logo:hover { color: var(--accent); }
-    .nav-controls nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .nav-controls a, .dropbtn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--text);
-      background: transparent;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .nav-controls a:hover, .dropbtn:hover {
-      background: var(--surface);
-      border-color: var(--border);
-    }
-    .home-btn { background: var(--surface); border-color: var(--border); }
-    .badge-new {
-      background: #ef4444;
-      color: #fff;
-      font-size: 0.65rem;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-weight: 700;
-      margin-left: 2px;
-    }
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background: #fff;
-      min-width: 180px;
-      box-shadow: var(--shadow-md);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      z-index: 100;
-      overflow: hidden;
-    }
-    .dropdown-content a {
-      display: block;
-      padding: 10px 16px;
-      color: var(--text);
-      text-decoration: none;
-      border-radius: 0;
-    }
-    .dropdown-content a:hover { background: var(--surface); }
-    .dropdown:hover .dropdown-content { display: block; }
-
-    /* ===== MAIN LAYOUT ===== */
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px 16px 60px;
-    }
-
-    .breadcrumb {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-    .breadcrumb a { color: var(--accent); text-decoration: none; }
-    .breadcrumb a:hover { text-decoration: underline; }
-
-    .page-header {
-      margin-bottom: 28px;
-    }
-    .page-header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-      line-height: 1.3;
-    }
-    .page-header p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 720px;
-    }
-
-    /* ===== TOOL GRID ===== */
-    .tool-grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
-      margin-bottom: 48px;
-    }
-    @media (max-width: 960px) {
-      .tool-grid { grid-template-columns: 1fr; }
-    }
-
-    .panel {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .panel-header {
-      padding: 14px 18px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .panel-body { padding: 18px; }
-
-    /* Upload Zone */
-    .upload-zone {
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s;
-      background: var(--surface);
-    }
-    .upload-zone:hover, .upload-zone.dragover {
-      border-color: var(--accent);
-      background: #eff6ff;
-    }
-    .upload-zone i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
-    .upload-zone h3 { font-size: 1.1rem; margin-bottom: 6px; }
-    .upload-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-    }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: var(--surface-2); }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-success:hover { background: #047857; }
-    .btn-danger { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-    .btn-danger:hover { background: #fee2e2; }
-    .btn-sm { padding: 7px 12px; font-size: 0.82rem; }
-    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    .file-info {
-      display: none;
-      margin-top: 16px;
-      padding: 14px;
-      background: var(--surface);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      font-size: 0.88rem;
-    }
-    .file-info.visible { display: block; }
-    .file-info strong { display: block; margin-bottom: 4px; }
-    .file-meta { color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
-
-    /* Controls */
-    .control-group {
-      margin-bottom: 18px;
-    }
-    .control-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-    .control-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    input[type="number"], select, input[type="text"] {
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.9rem;
-      background: #fff;
-      color: var(--text);
-      min-width: 0;
-    }
-    input[type="number"] { width: 100px; }
-    input[type="range"] { width: 100%; accent-color: var(--accent); }
-    .unit-toggle {
-      display: flex;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .unit-toggle button {
-      flex: 1;
-      padding: 8px 12px;
-      border: none;
-      background: #fff;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-    .unit-toggle button.active {
-      background: var(--accent);
-      color: #fff;
-    }
-    .preset-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .preset-btn {
-      padding: 10px 8px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #fff;
-      font-size: 0.8rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-    .preset-btn:hover { border-color: var(--accent); }
-    .preset-btn.active {
-      background: #eff6ff;
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    /* Editor Canvas Area */
-    .editor-area {
-      position: relative;
-      background: #1e293b;
-      border-radius: 10px;
-      min-height: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .editor-area img {
-      max-width: 100%;
-      max-height: 420px;
-      display: block;
-    }
-    .editor-placeholder {
-      color: #94a3b8;
-      text-align: center;
-      padding: 40px;
-    }
-    .editor-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* Preview */
-    .print-preview-wrap {
-      background: #e2e8f0;
-      border-radius: 10px;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 280px;
-      overflow: auto;
-    }
-    .paper-sheet {
-      background: #fff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      position: relative;
-      transform-origin: top center;
-    }
-    .photo-slot {
-      position: absolute;
-      border: 1px solid #94a3b8;
-      background: #f1f5f9;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .photo-slot img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .cutting-guide {
-      position: absolute;
-      border: 1px dashed #ef4444;
-      pointer-events: none;
-    }
-
-    /* Quality Report */
-    .quality-box {
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      font-size: 0.88rem;
-    }
-    .quality-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 0.82rem;
-      margin-bottom: 10px;
-    }
-    .quality-good { background: #d1fae5; color: #065f46; }
-    .quality-ok { background: #fef3c7; color: #92400e; }
-    .quality-low { background: #fee2e2; color: #991b1b; }
-
-    /* Layout info */
-    .layout-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
-      font-size: 0.85rem;
-    }
-    .stat-item {
-      background: var(--surface);
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    .stat-item span { color: var(--text-muted); display: block; font-size: 0.78rem; }
-    .stat-item strong { font-size: 1.05rem; }
-
-    /* Warning */
-    .alert {
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      margin-top: 12px;
-      display: none;
-    }
-    .alert.visible { display: block; }
-    .alert-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
-    .alert-info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; }
-    .alert-success { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
-
-    /* Collapsible on mobile */
-    .mobile-section { margin-bottom: 16px; }
-    @media (max-width: 960px) {
-      .panel-header { cursor: pointer; }
-      .panel-body.collapsed { display: none; }
-    }
-
-    /* ===== EDUCATIONAL CONTENT ===== */
-    .edu-section {
-      max-width: 800px;
-      margin: 0 auto;
-      padding-top: 20px;
-    }
-    .edu-section h2 {
-      font-size: 1.45rem;
-      font-weight: 700;
-      margin: 36px 0 14px;
-      color: var(--text);
-      border-bottom: 2px solid var(--surface-2);
-      padding-bottom: 8px;
-    }
-    .edu-section h3 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin: 24px 0 10px;
-    }
-    .edu-section p, .edu-section li {
-      color: #334155;
-      margin-bottom: 12px;
-      line-height: 1.7;
-    }
-    .edu-section ul, .edu-section ol {
-      padding-left: 22px;
-      margin-bottom: 16px;
-    }
-    .edu-section li { margin-bottom: 8px; }
-    .faq-item {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-    .faq-q {
-      padding: 14px 18px;
-      font-weight: 600;
-      cursor: pointer;
-      background: var(--surface);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .faq-q:hover { background: var(--surface-2); }
-    .faq-a {
-      padding: 0 18px;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-    }
-    .faq-item.open .faq-a {
-      max-height: 400px;
-      padding: 14px 18px 18px;
-    }
-
-    /* Footer */
-    .app-footer {
-      text-align: center;
-      padding: 30px 16px;
-      border-top: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      margin-top: 40px;
-    }
-    .app-footer a { color: var(--accent); text-decoration: none; }
-
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .loading-overlay.visible { display: flex; }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Utility */
-    .hidden { display: none !important; }
-    .text-muted { color: var(--text-muted); }
-    .mt-2 { margin-top: 8px; }
-    .mt-3 { margin-top: 12px; }
-    .mb-2 { margin-bottom: 8px; }
-    .flex { display: flex; }
-    .gap-2 { gap: 8px; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .w-full { width: 100%; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passport Photo Maker Online – Custom Size, Background Remover &amp; Print Layout | PooreYouTuber</title>
+<meta name="description" content="Make passport-style photos online. Upload any photo, crop, adjust brightness and contrast, remove the background, pick a colour, then print 1, 8 or 16 copies on A4, B4 or 4×6 paper. Free PDF, JPG and PNG download.">
+<link rel="canonical" href="https://pooreyoutuber.github.io/passport-photo-maker.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Passport Photo Maker – Background Remover & Print Layout | PooreYouTuber">
+<meta property="og:description" content="Upload a photo, edit it live, remove the background and print copies on A4, B4 or 4×6 paper.">
+<meta property="og:url" content="https://pooreyoutuber.github.io/passport-photo-maker.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Passport Photo Maker | PooreYouTuber">
+<meta name="twitter:description" content="Passport-size photos with background removal and A4/B4 print layouts, exported as PDF, JPG or PNG.">
+<style>
+:root{--bg:#fff;--surface:#f6f7f9;--border:#e2e6ec;--text:#1f2328;--muted:#5b6470;--accent:#1d5fd1;--accent-soft:#e9f1fd;--ok:#17703a;--warn:#8a5a00;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:16px}
+a{color:var(--accent)}
+.container{max-width:1180px;margin:0 auto;padding:0 16px}
+:focus-visible{outline:3px solid #8fb8f5;outline-offset:2px}
+h1{font-size:1.6rem;line-height:1.25;margin:6px 0}
+h2{font-size:1.1rem;margin:0 0 12px}
+h3{font-size:1rem;margin:16px 0 4px}
+.lead{color:var(--muted);margin:0 0 16px;max-width:780px}
+.small{font-size:.88rem;color:var(--muted);margin:6px 0}
+.hidden{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.nofs{border:0;margin:0;padding:0;min-width:0}
+ 
+/* header (site navigation) */
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:50}
+.logo{font-weight:700;color:var(--text);text-decoration:none;font-size:1.1rem}
+.nav-controls nav{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.nav-controls nav a,.dropbtn{display:inline-flex;align-items:center;min-height:40px;padding:6px 12px;border-radius:10px;border:1px solid transparent;color:var(--text);text-decoration:none;background:none;font:inherit;cursor:pointer}
+.nav-controls nav a:hover,.dropbtn:hover{background:var(--surface)}
+.donate-coffee-btn{border:1px solid var(--accent)!important;color:var(--accent)!important}
+.badge-new{background:var(--accent);color:#fff;font-size:.62rem;padding:1px 5px;border-radius:6px;margin-left:4px}
+.dropdown{position:relative}
+.dropdown-content{display:none;position:absolute;right:0;top:100%;min-width:220px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 6px 16px rgba(0,0,0,.07);z-index:60}
+.dropdown-content a{display:block;padding:9px 10px;border-radius:8px}
+.dropdown:hover .dropdown-content,.dropdown:focus-within .dropdown-content{display:block}
+ 
+/* panels */
+.crumbs{font-size:.9rem;color:var(--muted);padding:14px 0 4px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){.grid3{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr 1fr}}
+.editor{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.editor{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}}
+.preview-col{position:relative}
+@media(min-width:900px){.preview-col{position:sticky;top:76px;align-self:start}}
+ 
+/* buttons & inputs */
+button{font:inherit;cursor:pointer;border:1px solid #c9d0da;background:#fff;color:var(--text);border-radius:10px;padding:9px 13px;min-height:44px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.big{width:100%;font-size:1.05rem;padding:12px}
+button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+input[type=number],input[type=text],select{font:inherit;width:100%;min-height:44px;padding:8px 10px;border:1px solid #c9d0da;border-radius:10px;background:#fff;color:var(--text)}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--accent)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+input[type=color]{width:56px;height:44px;padding:2px;border:1px solid #c9d0da;border-radius:10px;background:#fff}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.field > label{font-size:.92rem;color:var(--muted)}
+.check{display:flex;align-items:center;gap:10px;min-height:44px}
+ 
+/* options accordion */
+.opt{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.opt summary{cursor:pointer;list-style:none;padding:12px 14px;min-height:48px;display:flex;align-items:center;gap:10px;font-weight:600}
+.opt summary::-webkit-details-marker{display:none}
+.opt summary::after{content:"+";margin-left:auto;color:var(--muted);font-size:1.2rem}
+.opt[open] summary::after{content:"−"}
+.opt .body{padding:0 14px 14px}
+.num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:.85rem;flex:none}
+ 
+/* upload */
+.dropzone{border:2px dashed #aab4c3;border-radius:14px;padding:22px 16px;text-align:center;background:#fff}
+.dropzone.drag{border-color:var(--accent);background:var(--accent-soft)}
+.thumbrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.info{font-size:.92rem;margin:0}
+.info b{font-weight:600}
+ 
+/* canvases */
+#cropCanvas{touch-action:none;cursor:grab;width:100%;max-width:520px;height:auto;background:#e9edf2;border-radius:10px;border:1px solid var(--border);display:block;margin:0 auto}
+#cropCanvas:active{cursor:grabbing}
+#photoCanvas{display:block;margin:12px auto 0;width:200px;max-width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+#sheetCanvas{display:block;margin:8px auto;max-width:100%;max-height:60vh;width:auto;background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.status{font-size:.95rem;min-height:1.3em;margin:8px 0 4px}
+.msg-ok{color:var(--ok)}.msg-warn{color:var(--warn)}.msg-error{color:var(--bad)}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.9rem;border:1px solid currentColor;background:#fff}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0;font-size:.9rem}
+.qgrid div{background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 9px}
+.qgrid dt{color:var(--muted);font-size:.78rem}
+.qgrid dd{margin:0;font-weight:600}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+@media(min-width:700px){.stats{grid-template-columns:repeat(3,1fr)}}
+.stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.stat span{display:block;font-size:.8rem;color:var(--muted)}
+.stat b{font-size:1rem}
+progress{width:100%;height:14px;margin-top:8px;accent-color:var(--accent)}
+.empty{background:#fff;border:1px dashed #c9d0da;border-radius:12px;padding:28px 14px;color:var(--muted);text-align:center}
+ 
+/* education */
+.edu{max-width:840px;margin:36px auto 0;padding-bottom:24px}
+.edu h2{font-size:1.3rem;margin:30px 0 10px}
+.edu ol{padding-left:22px}
+.edu li{margin-bottom:6px}
+.keyfacts{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px}
+.related{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.related a{padding:10px 14px;border:1px solid var(--border);border-radius:10px;text-decoration:none;background:#fff}
+footer{border-top:1px solid var(--border);margin-top:24px;padding:20px 0;color:var(--muted);font-size:.9rem}
+</style>
 </head>
 <body>
-  <!-- HEADER (exactly as requested + polish) -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
-      <div class="nav-controls">
+ 
+<header class="header">
+    <a href="https://pooreyoutuber.github.io/" class="logo">🚀Pooreyoutuber</a>
+    <div class="nav-controls">
         <nav>
-          <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
-          <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
-          <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
-          <div class="dropdown">
-            <button class="dropbtn">🛒 Shop ▾</button>
-            <div class="dropdown-content">
-              <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
-              <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+<a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+               <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
+ 
+            <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
+            <div class="dropdown">
+                <button class="dropbtn">🛒 Shop ▾</button>
+                <div class="dropdown-content">
+                <a href="https://www.amazon.in/s?rh=n%3A1571271031%2Cn%3A1968024031%2Cn%3A1968120031%2Cn%3A1968123031&dc=&qid=1788251573&rnid=1968120031&linkCode=ll2&tag=pooreyoutuber-21&linkId=ba8be395bbaf234732ec7e8ea3a414da&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇮🇳 India Deals</a>
+                        <a href="https://www.amazon.com/s?i=fashion-mens-intl-ship&bbn=16225019011&rh=n%3A7141123011%2Cn%3A16225019011%2Cn%3A7147441011%2Cn%3A1040658%2Cn%3A15697821011&dc=&ds=v1%3A%2BcjJStJY0S4ekGo6W1WjS2TTbZ6dAsHfR2iGhsGG688&qid=1788252554&rnid=1040658&linkCode=ll2&tag=pooreyoutuber-20&linkId=bb68d90582861a2a46445bb453b20f90&language=en_US&ref_=as_li_ss_tl" target="_blank" rel="nofollow">🇺🇸 US Deals</a>
+                  </div>
             </div>
-          </div>
-          <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
+            <a href="calculadoras.html" class="donate-coffee-btn">Calculator</a>
         </nav>
+    </div>
+</header>
+ 
+<main class="container" id="main">
+ 
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="https://pooreyoutuber.github.io/">Home</a> → <span>Photo Tools</span> → <span aria-current="page">Passport Photo Maker</span>
+</nav>
+ 
+<h1>Passport Photo Maker – Custom Size, Background Remover &amp; Print Layout</h1>
+<p class="lead">Upload any photo, edit it live, remove the background, and print copies on A4, B4 or 4×6 paper. Everything runs in your browser, and you can download a PDF, JPG or PNG file for free.</p>
+ 
+<!-- STEP 1: UPLOAD -->
+<section class="panel" aria-labelledby="hUpload">
+  <h2 id="hUpload">Step 1 · Upload your photo</h2>
+  <div id="dropzone" class="dropzone">
+    <p><strong>Drag and drop a photo here</strong></p>
+    <p class="small">JPG, PNG or WebP · maximum 25 MB</p>
+    <button type="button" id="browseBtn" class="primary">Browse files</button>
+    <p class="small">On a phone, this opens your gallery or camera roll.</p>
+  </div>
+  <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden>
+  <p id="uploadMsg" class="status" role="status" aria-live="polite"></p>
+  <div id="fileBar" class="hidden">
+    <div class="thumbrow">
+      <img id="thumb" class="thumb" alt="Thumbnail of your uploaded photo">
+      <div class="info">
+        <div><b id="infoName">—</b></div>
+        <div id="infoPx">—</div>
+        <div id="infoBytes">—</div>
+      </div>
+      <div class="row" style="margin-left:auto">
+        <button type="button" id="replaceBtn">Replace photo</button>
       </div>
     </div>
-  </header>
-
+  </div>
+</section>
+ 
+<!-- STEP 2: EDITOR -->
+<section class="panel" aria-labelledby="hEdit">
+  <h2 id="hEdit">Step 2 · Edit live</h2>
+  <p id="emptyNote" class="empty">Upload a photo above to start editing. Every change appears instantly in the preview.</p>
+ 
+  <div id="workspace" class="hidden">
+    <div class="toolbar" role="toolbar" aria-label="Editing actions">
+      <button type="button" id="backBtn" disabled aria-keyshortcuts="Control+Z">⟲ Back (undo)</button>
+      <button type="button" id="fwdBtn" disabled aria-keyshortcuts="Control+Y">⟳ Forward (redo)</button>
+      <button type="button" id="resetBtn">Reset all edits</button>
+      <button type="button" id="clearBtn">Clear photo</button>
+    </div>
+ 
+    <div class="editor">
+      <!-- Live preview column -->
+      <div class="preview-col">
+        <canvas id="cropCanvas" tabindex="0" aria-label="Crop area. Drag the photo or use arrow keys while focused."></canvas>
+        <p class="small" style="text-align:center">Drag the photo to position it. Arrow keys also work.</p>
+        <canvas id="photoCanvas" aria-label="Live result at the selected size"></canvas>
+        <p class="small" style="text-align:center">Live result at the selected size</p>
+        <dl class="qgrid">
+          <div><dt>Original resolution</dt><dd id="qOrig">—</dd></div>
+          <div><dt>Print size</dt><dd id="qPhys">—</dd></div>
+          <div><dt>Required pixels</dt><dd id="qReq">—</dd></div>
+          <div><dt>Effective resolution</dt><dd id="qEff">—</dd></div>
+        </dl>
+        <p style="text-align:center"><span id="qStatus" class="badge">—</span></p>
+        <p id="qNote" class="small"></p>
+      </div>
+ 
+      <!-- Options column: 12 options -->
+      <div>
+        <details class="opt" open>
+          <summary><span class="num">1</span> Photo size</summary>
+          <div class="body">
+            <div class="field">
+              <label for="unit">Unit</label>
+              <select id="unit">
+                <option value="mm">Millimeters (mm)</option>
+                <option value="cm">Centimeters (cm)</option>
+                <option value="in">Inches (in)</option>
+              </select>
+            </div>
+            <div class="grid2">
+              <div class="field"><label for="pw" id="pwLabel">Width (mm)</label><input id="pw" type="number" inputmode="decimal" step="0.1" min="5" max="297"></div>
+              <div class="field"><label for="ph" id="phLabel">Height (mm)</label><input id="ph" type="number" inputmode="decimal" step="0.1" min="5" max="297"></div>
+            </div>
+            <p id="dimMsg" class="status" role="status" aria-live="polite"></p>
+            <p class="small">Common preset sizes (convenience only, not official requirements):</p>
+            <div id="presets" class="row" role="group" aria-label="Preset photo sizes"></div>
+            <p class="small" id="fPhys"></p>
+            <p class="small">2 × 2 in equals 50.8 × 50.8 mm. Always check the exact specification of the office or portal you are submitting to.</p>
+          </div>
+        </details>
+ 
+        <details class="opt" open>
+          <summary><span class="num">2</span> Crop &amp; zoom</summary>
+          <div class="body">
+            <div class="field">
+              <label for="zoom">Zoom <span id="zoomVal">100%</span></label>
+              <input type="range" id="zoom" min="1" max="4" step="0.01" value="1">
+            </div>
+            <p class="small">The crop always keeps the exact proportions of your photo size, so nothing is stretched.</p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">3</span> Rotate &amp; flip</summary>
+          <div class="body">
+            <div class="row">
+              <button type="button" id="rotL" aria-label="Rotate 90 degrees left">↺ Rotate left</button>
+              <button type="button" id="rotR" aria-label="Rotate 90 degrees right">↻ Rotate right</button>
+            </div>
+            <div class="row">
+              <button type="button" id="flipH">⇆ Flip horizontal</button>
+              <button type="button" id="flipV">⇅ Flip vertical</button>
+            </div>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">4</span> Brightness</summary>
+          <div class="body">
+            <input type="range" id="bright" min="-100" max="100" step="1" value="0" aria-label="Brightness">
+            <p class="small">Value: <span id="brightVal">0</span></p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">5</span> Contrast</summary>
+          <div class="body">
+            <input type="range" id="contrast" min="-100" max="100" step="1" value="0" aria-label="Contrast">
+            <p class="small">Value: <span id="contrastVal">0</span></p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">6</span> Saturation (colour strength)</summary>
+          <div class="body">
+            <input type="range" id="sat" min="-100" max="100" step="1" value="0" aria-label="Saturation">
+            <p class="small">Value: <span id="satVal">0</span></p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">7</span> Sharpness</summary>
+          <div class="body">
+            <input type="range" id="sharp" min="0" max="100" step="1" value="0" aria-label="Sharpness">
+            <p class="small">Value: <span id="sharpVal">0</span>. Sharpening can exaggerate noise, so use it gently.</p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">8</span> Black &amp; white</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" id="gray"> Convert to grayscale</label>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">9</span> Auto enhance</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" id="autoEnh"> Stretch levels automatically for a cleaner, balanced look</label>
+          </div>
+        </details>
+ 
+        <details class="opt" open>
+          <summary><span class="num">10</span> Remove background</summary>
+          <div class="body">
+            <button type="button" id="bgBtn" aria-pressed="false">Remove background</button>
+            <p id="bgMsg" class="status" role="status" aria-live="polite"></p>
+            <p class="small">Uses an AI segmentation model that runs in your browser. The model downloads once, so an internet connection is needed the first time. It works best with a single person facing the camera. Check the result and use crop or colour options if edges need work.</p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">11</span> Background colour</summary>
+          <div class="body">
+            <div class="row">
+              <select id="bgPreset" aria-label="Background colour preset">
+                <option value="#ffffff">White</option>
+                <option value="#9fd3f5">Light blue</option>
+                <option value="#e5e7eb">Light grey</option>
+                <option value="#e53935">Red</option>
+                <option value="custom">Custom colour…</option>
+              </select>
+              <input type="color" id="bgCustom" value="#ffffff" aria-label="Custom background colour">
+            </div>
+            <p class="small">Applies behind the subject after background removal. Use white for most formal documents unless the office asks otherwise.</p>
+          </div>
+        </details>
+ 
+        <details class="opt">
+          <summary><span class="num">12</span> Photo border &amp; cut lines</summary>
+          <div class="body">
+            <div class="field">
+              <label for="borderMm">Thin black border around each photo (mm, 0 = none)</label>
+              <input type="number" id="borderMm" min="0" max="2" step="0.1" value="0">
+            </div>
+            <p class="small">Cutting guides on the printed sheet are set in step 3.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- STEP 3: PAPER & COPIES -->
+<section class="panel" aria-labelledby="hLay">
+  <h2 id="hLay">Step 3 · Paper, copies and layout</h2>
+  <div class="grid3">
+    <div class="field">
+      <label for="paper">Paper size</label>
+      <select id="paper">
+        <option value="a3">A3 (297 × 420 mm)</option>
+        <option value="a4" selected>A4 (210 × 297 mm)</option>
+        <option value="b4">B4 (250 × 353 mm)</option>
+        <option value="a5">A5 (148 × 210 mm)</option>
+        <option value="b5">B5 (176 × 250 mm)</option>
+        <option value="4x6">Photo paper 4 × 6 in</option>
+        <option value="5x7">Photo paper 5 × 7 in</option>
+        <option value="custom">Custom paper</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="orient">Orientation</label>
+      <select id="orient"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+    </div>
+    <div class="field">
+      <label for="copies">Number of photos</label>
+      <select id="copies">
+        <option value="1">1 photo</option>
+        <option value="4">4 photos</option>
+        <option value="8" selected>8 photos</option>
+        <option value="12">12 photos</option>
+        <option value="16">16 photos</option>
+        <option value="20">20 photos</option>
+        <option value="custom">Custom count</option>
+      </select>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="field hidden" id="customPaper">
+      <div class="grid2">
+        <div><label for="cpw" class="small">Width (mm)</label><input type="number" id="cpw" min="20" step="0.1" value="210"></div>
+        <div><label for="cph" class="small">Height (mm)</label><input type="number" id="cph" min="20" step="0.1" value="297"></div>
+      </div>
+    </div>
+    <div class="field hidden" id="copiesCustomWrap">
+      <label for="copiesCustom">Custom count (1–500)</label>
+      <input type="number" id="copiesCustom" min="1" max="500" step="1" value="10">
+    </div>
+    <div class="field"><label for="margin">Page margin (mm)</label><input type="number" id="margin" min="0" step="0.5" value="5"></div>
+    <div class="field"><label for="gapX">Horizontal gap (mm)</label><input type="number" id="gapX" min="0" step="0.5" value="2"></div>
+    <div class="field"><label for="gapY">Vertical gap (mm)</label><input type="number" id="gapY" min="0" step="0.5" value="2"></div>
+  </div>
+  <div class="row">
+    <label class="check"><input type="checkbox" id="guides" checked> Show cutting guides</label>
+    <button type="button" id="fillBtn">Fill the sheet (max photos)</button>
+  </div>
+  <p id="layoutMsg" class="status" role="status" aria-live="polite"></p>
+  <div class="stats">
+    <div class="stat"><span>Total photos</span><b id="statCopies">—</b></div>
+    <div class="stat"><span>Max per sheet</span><b id="statPerSheet">—</b></div>
+    <div class="stat"><span>Sheets needed</span><b id="statSheets">—</b></div>
+    <div class="stat"><span>Rows × columns</span><b id="statGrid">—</b></div>
+    <div class="stat"><span>Unused paper</span><b id="statUnused">—</b></div>
+    <div class="stat"><span>Paper</span><b id="statPaper">—</b></div>
+  </div>
+  <div class="field hidden" id="sheetRow">
+    <label for="sheetNum">Preview sheet</label>
+    <select id="sheetNum"></select>
+  </div>
+  <canvas id="sheetCanvas" aria-label="Print preview of the sheet at real proportions"></canvas>
+  <p class="small" style="text-align:center">Preview is scaled to your screen. The file uses the real paper size.</p>
+</section>
+ 
+<!-- STEP 4: DOWNLOAD -->
+<section class="panel" aria-labelledby="hExp">
+  <h2 id="hExp">Step 4 · Download</h2>
+  <div class="grid3">
+    <div class="field">
+      <label for="fmt">File format</label>
+      <select id="fmt">
+        <option value="pdf">Print-ready PDF (exact paper size)</option>
+        <option value="jpg">JPG image (current sheet)</option>
+        <option value="png">PNG image (current sheet)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="dpi">Resolution (DPI)</label>
+      <select id="dpi"><option value="200">200 DPI (draft)</option><option value="300" selected>300 DPI (recommended)</option></select>
+    </div>
+    <div class="field hidden" id="jpgRow">
+      <label for="jpgQ">JPG quality <span id="jpgQVal">92%</span></label>
+      <input type="range" id="jpgQ" min="60" max="100" step="1" value="92">
+    </div>
+  </div>
+  <button type="button" id="exportBtn" class="primary big" disabled>Download file</button>
+  <progress id="progress" value="0" max="100" hidden aria-label="Export progress"></progress>
+  <p id="exportMsg" class="status" role="status" aria-live="polite"></p>
+  <p class="small">Print at "Actual size" (100%) with "Fit to page" turned off. Printer scaling and borderless settings can slightly change the final size.</p>
+</section>
+ 
+<!-- Long-form guide -->
+<article class="edu">
+ 
+<h2>What Is the Passport Photo Maker?</h2>
+<p>The PooreYouTuber Passport Photo Maker is a free, browser-based tool that turns an ordinary photograph into a passport-style photo and arranges copies on a printable sheet. You upload a picture from your phone or computer, adjust it with live controls, remove or replace the background, and choose the paper size and number of copies. The result can be downloaded as a print-ready PDF, JPG or PNG file.</p>
+<p>The tool is made for people who need printed photos quickly: photo studios serving walk-in customers, cyber cafes preparing forms for applications, students preparing admission or exam documents, and families who want several prints of one picture. It does not require design software, an account or a payment.</p>
+ 
+<div class="keyfacts">
+<h2>Key facts at a glance</h2>
+<p><strong>What it does:</strong> creates custom-size photos and multi-copy print sheets in your browser.</p>
+<p><strong>Photo sizes:</strong> 35 × 45 mm, 35 × 35 mm, 25 × 35 mm, 45 × 35 mm, 50 × 50 mm, 2 × 2 in, 65 × 95 mm and any custom size in mm, cm or inches.</p>
+<p><strong>Paper sizes:</strong> A3, A4, B4, A5, B5, 4 × 6 in photo paper, 5 × 7 in photo paper and custom paper, in portrait or landscape.</p>
+<p><strong>Editing tools:</strong> crop and zoom, rotate, flip, brightness, contrast, saturation, sharpness, black and white, auto enhance, background removal, background colour and a photo border.</p>
+<p><strong>Export formats:</strong> print-ready PDF at the exact paper size, JPG and PNG at 200 or 300 DPI.</p>
+<p><strong>Privacy:</strong> your photo is processed on your device and is not uploaded to a server by this tool.</p>
+</div>
+ 
+<h2>Key Features of the Online Passport Photo Tool</h2>
+<p>The editor is organised as twelve numbered options. Photo size comes first, followed by crop and zoom, rotation and flipping, four tone controls (brightness, contrast, saturation and sharpness), black and white, auto enhance, background removal, background colour and a thin border. Every change appears in the live result immediately. The Back button undoes your last change, Forward redoes it, Reset returns the photo to its original state, and Clear removes the photo so you can start again. Ctrl+Z also works on a computer keyboard.</p>
+<p>The layout engine works out how many photos fit on the chosen paper. It subtracts the margins, fits as many photo widths and heights as possible with the gaps you set, and centres the grid. If you ask for more photos than fit on one sheet, the tool does not shrink them. It creates extra sheets, and each sheet becomes one page in the PDF. The "Fill the sheet" button sets the count to the maximum that fits.</p>
+ 
+<h2>How to Make a Passport Photo Online</h2>
+<ol>
+  <li><strong>Upload a photograph.</strong> Use Browse files, drag a picture onto the upload area, or pick one from your phone gallery. Use a photo that is sharp, well lit and taken from the front.</li>
+  <li><strong>Choose the photo size.</strong> Select a preset such as 35 × 45 mm, or type your own width and height in millimeters, centimeters or inches.</li>
+  <li><strong>Crop and zoom.</strong> Drag the photo in the preview until the face is where you want it, then use the zoom slider.</li>
+  <li><strong>Adjust the look.</strong> Use brightness, contrast, saturation and sharpness. Try auto enhance if the photo looks dull.</li>
+  <li><strong>Remove the background.</strong> Press Remove background and wait for the model to load the first time. Choose a background colour such as white or light blue.</li>
+  <li><strong>Add a border if you need cut lines.</strong> A thin border helps you see the edges of each photo after printing.</li>
+  <li><strong>Choose paper and copies.</strong> Select A4, B4, 4 × 6 or another paper, then 4, 8, 16 or a custom number of photos. Adjust margins and gaps if needed.</li>
+  <li><strong>Download.</strong> Choose PDF for printing at a print shop or JPG/PNG for other programs, then press Download file.</li>
+</ol>
+ 
+<h2>How to Print Multiple Passport Photos on A4 Paper</h2>
+<p>Printing several photos on one A4 sheet saves paper and gives you spares. The tool works from the physical size of the photo and the physical size of the paper. For example, a 35 × 45 mm photo on A4 portrait (210 × 297 mm) with a 5 mm margin and 2 mm gaps leaves 200 mm of usable width, which fits five photos across. The 287 mm usable height fits six rows. That gives thirty photos on one sheet. Choose "Fill the sheet" to use the full capacity, or pick a smaller number if you only need eight.</p>
+<p>Print at actual size and turn off "Fit to page" in your printer dialog. Many printers scale a document unless told not to. Borderless printing can also shift the image slightly. Print one test copy on plain paper and measure a photo with a ruler before you print the full sheet on photo paper.</p>
+ 
+<h2>Understanding Photo Size, Pixels and 300 DPI</h2>
+<p>A physical size is measured in millimeters or inches, while a digital image is measured in pixels. DPI, or dots per inch, links the two. The formula is pixels = physical size in inches × DPI. One inch equals 25.4 mm. A 35 mm wide photo is 35 ÷ 25.4 = 1.38 inches, which is about 413 pixels at 300 DPI. A 45 mm height is 1.77 inches, or about 531 pixels. So a 35 × 45 mm photo at 300 DPI is roughly 413 × 531 pixels.</p>
+<p>300 DPI does not add detail. It only tells the printer how many dots to place per inch. If your original photo is 400 pixels wide and you print it at 35 mm, the image has far fewer pixels than the 413 required, and the quality report will show a low status. Use the largest, sharpest original you have. Photos taken with modern phones usually have enough resolution for passport-size prints.</p>
+ 
+<h2>Background Removal and Background Colour</h2>
+<p>Background removal separates the person from the background using an AI segmentation model that runs in your browser. The result is a cut-out that can be placed on white, light blue, light grey, red or any custom colour. The method works best when the person is clearly separated from the background, faces the camera and is not blocked by other objects. Hair, glasses and busy backgrounds can produce soft or uneven edges, so check the preview and adjust the crop if needed.</p>
+<p>Some offices require a plain white or light background. Others specify a colour or a certain style of photo. Always follow the specification given by the organisation that asked for the photo.</p>
+ 
+<h2>Who Can Use This Tool?</h2>
+<p>Photo studios can prepare sheets for walk-in customers in the sizes they most often print, without opening a separate design program. Cyber cafes and document centres can produce photos for application forms while the customer waits. Students can prepare photos for school, college or competitive exam forms. Families can print several copies of one picture for relatives. Small printing businesses can create layouts quickly for their clients. The tool helps with the layout and sizing work, but it cannot decide which specification a particular form requires, so please confirm the rules before you print.</p>
+ 
+<h2>Benefits of Using the PooreYouTuber Passport Photo Maker</h2>
+<p>The main benefit is time. Measuring photos by hand, pasting them in a document and checking the spacing can take a long time. Here the calculations are automatic and the preview shows the result before you print. Because the tool runs in the browser, there is nothing to install, and it works on a phone, tablet or computer. Flexible units make it easy to work in millimeters, centimeters or inches. The live quality report tells you when the source photo is too small for the size you selected, which saves paper and ink.</p>
+ 
+<h2>Privacy and Image Processing</h2>
+<p>Your photo is read and processed on your own device using the browser's built-in image tools. This tool does not upload your photo to a server, an image-processing service or any third party, and it does not store photos after you leave the page. The background removal model and the PDF library are downloaded as program files. Your picture is not part of those downloads. The page itself does not include analytics code that sends image contents or file names anywhere. Clearing the photo or closing the tab removes it from memory. Browser extensions or hosting services outside this tool may have their own policies.</p>
+ 
+<h2>Frequently Asked Questions</h2>
+ 
+<h3>Can I make a passport photo online for free?</h3>
+<p>Yes. The tool has no login, subscription or payment step. You can crop, edit, remove the background and download the result without creating an account.</p>
+ 
+<h3>Can I create a 35 × 45 mm passport photo?</h3>
+<p>Yes. The 35 × 45 mm preset is included, and you can enter any custom size. Confirm the exact size and background that your application requires before printing.</p>
+ 
+<h3>Can I make a 65 × 95 mm or 2 × 2 inch photo?</h3>
+<p>Yes. Both are available as presets, and any custom size in millimeters, centimeters or inches works too.</p>
+ 
+<h3>Can I print 8 or 16 photos on one sheet?</h3>
+<p>Yes. Choose 8, 16 or a custom number in step 3. The tool shows how many fit on the selected paper. If your number does not fit on one sheet, the layout creates more sheets and tells you so.</p>
+ 
+<h3>Can I use A4, B4 or 4 × 6 paper?</h3>
+<p>Yes. A3, A4, B4, A5, B5, 4 × 6 inch and 5 × 7 inch photo paper are available, as is custom paper. You can select portrait or landscape orientation.</p>
+ 
+<h3>Can I download a PDF for printing?</h3>
+<p>Yes. The PDF uses the exact physical size of the selected paper, with one page per sheet. Choose PDF in step 4 and press Download file.</p>
+ 
+<h3>Does the tool remove the background automatically?</h3>
+<p>Yes, when you press Remove background. The AI model needs an internet connection the first time it loads. After that, the processing happens on your device. Results are best with a clear, front-facing portrait. You can change the background colour afterwards.</p>
+ 
+<h3>What does 300 DPI mean?</h3>
+<p>DPI means dots per inch. At 300 DPI the file contains 300 pixels for every inch of printed length, which is a common standard for photo printing.</p>
+ 
+<h3>Will a low-quality photo become sharp after export?</h3>
+<p>No. The export cannot add detail the original photo does not contain. The quality report shows whether your source is good, acceptable or low for the size and DPI you selected.</p>
+ 
+<h3>Can I use the tool on a mobile phone?</h3>
+<p>Yes. The layout adapts to small screens, and you can upload photos from your gallery. Download behaviour depends on your phone's browser.</p>
+ 
+<h3>Are my photos uploaded to a server?</h3>
+<p>No. Editing, background removal and PDF creation happen in your browser. The tool does not send your photo to a server.</p>
+ 
+<h3>Does an output from this tool meet official passport or visa requirements?</h3>
+<p>The tool provides common sizes and layout options, but it does not check any government or embassy specification. Requirements for passports, visas and ID documents differ by country and by document, and they can change. Always check the current official rules before you submit a photo.</p>
+ 
+<h3>Can I undo a mistake?</h3>
+<p>Yes. Press Back, or Ctrl+Z on a keyboard, to undo your last change. Press Forward to redo it. Reset all edits returns the photo to its original state.</p>
+ 
+<h2>Related PooreYouTuber Resources</h2>
+<div class="related">
+  <a href="youtubehelp.html">YouTube help guides on PooreYouTuber</a>
+  <a href="Articals.html">Read PooreYouTuber articles</a>
+  <a href="calculadoras.html">Open the PooreYouTuber calculators</a>
+  <a href="https://pooreyoutuber.github.io/">Return to the PooreYouTuber home page</a>
+</div>
+ 
+</article>
+</main>
+ 
+<footer>
   <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="https://pooreyoutuber.github.io/">Home</a> → 
-      <a href="https://pooreyoutuber.github.io/">Photo Tools</a> → 
-      <span>Photo Studio Print Designer</span>
-    </nav>
-
-    <header class="page-header">
-      <h1>Photo Studio Print Designer – Custom Photo Sizes & Print Layout</h1>
-      <p>Create custom-size photos, arrange multiple copies on A4 or 4×6 paper, edit images, and download high-quality print-ready files. 100% browser-based — your photos never leave your device.</p>
-    </header>
-
-    <!-- ========== MAIN TOOL ========== -->
-    <div class="tool-grid">
-      <!-- LEFT: Editor + Preview -->
-      <div>
-        <!-- Upload -->
-        <div class="panel" style="margin-bottom:20px;">
-          <div class="panel-header"><i class="fas fa-upload"></i> Upload Photograph</div>
-          <div class="panel-body">
-            <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload photograph">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <h3>Drag & drop your photo here</h3>
-              <p>or click to browse • JPG, PNG, WebP supported • Max 25 MB</p>
-              <button type="button" class="btn btn-primary" id="browseBtn">
-                <i class="fas fa-folder-open"></i> Browse Files
-              </button>
-              <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/jpg" hidden>
-            </div>
-            <div class="file-info" id="fileInfo">
-              <strong id="fileName">—</strong>
-              <div class="file-meta">
-                <span id="fileDims">—</span>
-                <span id="fileSize">—</span>
-              </div>
-              <div class="mt-3 flex gap-2">
-                <button class="btn btn-secondary btn-sm" id="replaceBtn"><i class="fas fa-sync"></i> Replace</button>
-                <button class="btn btn-danger btn-sm" id="removeBtn"><i class="fas fa-trash"></i> Remove</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Crop / Edit -->
-        <div class="panel" style="margin-bottom:20px;">
-          <div class="panel-header"><i class="fas fa-crop-alt"></i> Crop & Edit Photo</div>
-          <div class="panel-body">
-            <div class="editor-area" id="editorArea">
-              <div class="editor-placeholder" id="editorPlaceholder">
-                <i class="fas fa-image fa-3x" style="margin-bottom:12px;opacity:0.5;"></i>
-                <p>Upload a photo to start editing</p>
-              </div>
-              <img id="editImage" class="hidden" alt="Photo being edited">
-            </div>
-            <div class="editor-toolbar" id="editorToolbar" style="display:none;">
-              <button class="btn btn-secondary btn-sm" id="rotateLeftBtn" title="Rotate left 90°"><i class="fas fa-undo"></i></button>
-              <button class="btn btn-secondary btn-sm" id="rotateRightBtn" title="Rotate right 90°"><i class="fas fa-redo"></i></button>
-              <button class="btn btn-secondary btn-sm" id="flipHBtn" title="Flip horizontal"><i class="fas fa-arrows-alt-h"></i></button>
-              <button class="btn btn-secondary btn-sm" id="flipVBtn" title="Flip vertical"><i class="fas fa-arrows-alt-v"></i></button>
-              <button class="btn btn-secondary btn-sm" id="resetCropBtn" title="Reset crop"><i class="fas fa-expand"></i> Reset Crop</button>
-              <button class="btn btn-primary btn-sm" id="applyCropBtn"><i class="fas fa-check"></i> Apply Crop</button>
-            </div>
-            <div class="control-group mt-3" id="adjustControls" style="display:none;">
-              <label>Brightness <span id="brightVal">100%</span></label>
-              <input type="range" id="brightnessRange" min="50" max="150" value="100">
-              <label class="mt-2">Contrast <span id="contrastVal">100%</span></label>
-              <input type="range" id="contrastRange" min="50" max="150" value="100">
-              <button class="btn btn-secondary btn-sm mt-2" id="resetAdjustBtn">Reset Adjustments</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Print Preview -->
-        <div class="panel">
-          <div class="panel-header"><i class="fas fa-print"></i> Live Print Preview</div>
-          <div class="panel-body">
-            <div class="print-preview-wrap" id="previewWrap">
-              <div class="paper-sheet" id="paperSheet"></div>
-            </div>
-            <p class="text-muted mt-2" style="font-size:0.82rem;text-align:center;">Preview is scaled for screen. Export uses exact physical dimensions at selected DPI.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Controls -->
-      <div>
-        <!-- Photo Dimensions -->
-        <div class="panel" style="margin-bottom:16px;">
-          <div class="panel-header"><i class="fas fa-ruler-combined"></i> Photo Dimensions</div>
-          <div class="panel-body">
-            <div class="control-group">
-              <label>Unit</label>
-              <div class="unit-toggle" id="unitToggle">
-                <button type="button" data-unit="mm" class="active">mm</button>
-                <button type="button" data-unit="cm">cm</button>
-                <button type="button" data-unit="in">in</button>
-              </div>
-            </div>
-            <div class="control-group">
-              <label>Presets (common sizes — not official government standards)</label>
-              <div class="preset-grid" id="photoPresets">
-                <button type="button" class="preset-btn active" data-w="65" data-h="95" data-unit="mm">65×95 mm</button>
-                <button type="button" class="preset-btn" data-w="35" data-h="45" data-unit="mm">35×45 mm</button>
-                <button type="button" class="preset-btn" data-w="25" data-h="35" data-unit="mm">25×35 mm</button>
-                <button type="button" class="preset-btn" data-w="45" data-h="35" data-unit="mm">45×35 mm</button>
-                <button type="button" class="preset-btn" data-w="50" data-h="50" data-unit="mm">50×50 mm</button>
-                <button type="button" class="preset-btn" data-w="2" data-h="2" data-unit="in">2×2 in</button>
-                <button type="button" class="preset-btn" data-w="0" data-h="0" data-unit="mm">Custom</button>
-              </div>
-            </div>
-            <div class="control-row">
-              <div>
-                <label>Width</label>
-                <input type="number" id="photoWidth" value="65" min="5" max="500" step="0.1">
-              </div>
-              <div>
-                <label>Height</label>
-                <input type="number" id="photoHeight" value="95" min="5" max="500" step="0.1">
-              </div>
-            </div>
-            <div class="mt-2 text-muted" style="font-size:0.82rem;">
-              Aspect: <span id="aspectRatio">—</span> · 
-              At 300 DPI: <span id="pixelDims">—</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Paper Size -->
-        <div class="panel" style="margin-bottom:16px;">
-          <div class="panel-header"><i class="fas fa-file"></i> Paper Size</div>
-          <div class="panel-body">
-            <div class="control-group">
-              <label>Preset</label>
-              <select id="paperPreset" class="w-full">
-                <option value="A4">A4 (210 × 297 mm)</option>
-                <option value="A5">A5 (148 × 210 mm)</option>
-                <option value="4x6">4×6 in (101.6 × 152.4 mm)</option>
-                <option value="5x7">5×7 in (127 × 177.8 mm)</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-            <div class="control-row" id="customPaperRow" style="display:none;">
-              <div>
-                <label>Width (mm)</label>
-                <input type="number" id="paperW" value="210" min="50" max="600">
-              </div>
-              <div>
-                <label>Height (mm)</label>
-                <input type="number" id="paperH" value="297" min="50" max="600">
-              </div>
-            </div>
-            <div class="control-group">
-              <label>Orientation</label>
-              <div class="unit-toggle" id="orientToggle">
-                <button type="button" data-orient="portrait" class="active">Portrait</button>
-                <button type="button" data-orient="landscape">Landscape</button>
-              </div>
-            </div>
-            <div class="control-row">
-              <div>
-                <label>Margin (mm)</label>
-                <input type="number" id="margin" value="5" min="0" max="50" step="0.5">
-              </div>
-              <div>
-                <label>Spacing (mm)</label>
-                <input type="number" id="spacing" value="3" min="0" max="30" step="0.5">
-              </div>
-            </div>
-            <div class="control-group mt-2">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" id="cuttingGuides" checked> Show cutting guides
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Copies -->
-        <div class="panel" style="margin-bottom:16px;">
-          <div class="panel-header"><i class="fas fa-th"></i> Multiple Copies</div>
-          <div class="panel-body">
-            <div class="control-group">
-              <label>Number of copies</label>
-              <div class="preset-grid" id="copyPresets">
-                <button type="button" class="preset-btn" data-copies="1">1</button>
-                <button type="button" class="preset-btn active" data-copies="4">4</button>
-                <button type="button" class="preset-btn" data-copies="6">6</button>
-                <button type="button" class="preset-btn" data-copies="8">8</button>
-                <button type="button" class="preset-btn" data-copies="12">12</button>
-                <button type="button" class="preset-btn" data-copies="16">16</button>
-              </div>
-              <div class="mt-2">
-                <input type="number" id="customCopies" value="4" min="1" max="64" style="width:100%;">
-              </div>
-            </div>
-            <div class="layout-stats" id="layoutStats">
-              <div class="stat-item"><span>Fits on page</span><strong id="fitCount">—</strong></div>
-              <div class="stat-item"><span>Rows × Cols</span><strong id="gridInfo">—</strong></div>
-              <div class="stat-item"><span>Unused area</span><strong id="unusedInfo">—</strong></div>
-              <div class="stat-item"><span>Pages needed</span><strong id="pagesNeeded">1</strong></div>
-            </div>
-            <div class="alert alert-warning" id="layoutWarning"></div>
-          </div>
-        </div>
-
-        <!-- Quality -->
-        <div class="panel" style="margin-bottom:16px;">
-          <div class="panel-header"><i class="fas fa-check-circle"></i> Print Quality Report</div>
-          <div class="panel-body">
-            <div class="quality-box" id="qualityBox">
-              <div class="quality-status quality-ok" id="qualityStatus">Upload a photo</div>
-              <div id="qualityDetails" class="text-muted">Source resolution, required pixels, and effective DPI will appear here.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Export -->
-        <div class="panel">
-          <div class="panel-header"><i class="fas fa-download"></i> Export</div>
-          <div class="panel-body">
-            <div class="control-group">
-              <label>DPI (for export)</label>
-              <select id="exportDpi" class="w-full">
-                <option value="150">150 DPI (draft)</option>
-                <option value="300" selected>300 DPI (print quality)</option>
-                <option value="600">600 DPI (high detail)</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>JPG Quality</label>
-              <input type="range" id="jpgQuality" min="60" max="100" value="92">
-              <span class="text-muted" style="font-size:0.8rem;"><span id="jpgQVal">92</span>%</span>
-            </div>
-            <div class="flex gap-2" style="flex-direction:column;">
-              <button class="btn btn-primary w-full" id="exportJpgBtn" disabled>
-                <i class="fas fa-file-image"></i> Download JPG
-              </button>
-              <button class="btn btn-secondary w-full" id="exportPngBtn" disabled>
-                <i class="fas fa-file-image"></i> Download PNG
-              </button>
-              <button class="btn btn-success w-full" id="exportPdfBtn" disabled>
-                <i class="fas fa-file-pdf"></i> Download Print-Ready PDF
-              </button>
-            </div>
-            <p class="text-muted mt-2" style="font-size:0.78rem;">Filenames include size and DPI. Processing happens entirely in your browser.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========== EDUCATIONAL CONTENT (≥600 words) ========== -->
-    <article class="edu-section">
-      <h2>What Is the PooreYouTuber Photo Studio Print Designer?</h2>
-      <p>The PooreYouTuber Photo Studio Print Designer is a free, browser-based tool that lets you create custom-size photographs and arrange multiple copies of the same photo on standard paper sizes such as A4, A5, 4×6 inch, and 5×7 inch. It is designed for Indian photo studios, photographers, cyber cafés, students, families, and anyone who needs print-ready ID photos, passport photos, or multi-copy layouts without installing software or sending images to a server.</p>
-      <p>You upload a photograph, choose a physical size (for example 65×95 mm or 35×45 mm), crop and adjust the image, select how many copies you want, pick a paper size, set margins and spacing, and then download a high-resolution JPG, PNG, or print-ready PDF. All image processing happens locally in your browser. Your photos are never uploaded to any remote server.</p>
-
-      <h2>Key Features of the Online Photo Studio Tool</h2>
-      <p>The tool focuses on practical studio workflows rather than decorative effects. Core capabilities include:</p>
-      <ul>
-        <li><strong>Custom photo dimensions</strong> in millimetres, centimetres, and inches with accurate unit conversion.</li>
-        <li><strong>Common size presets</strong> such as 65×95 mm, 35×45 mm, 25×35 mm, 45×35 mm, 50×50 mm, and 2×2 inches. These are convenient starting points and are fully editable; they are not claimed to meet any specific government official requirement.</li>
-        <li><strong>Interactive crop</strong> with aspect-ratio lock, free crop, rotate 90°, horizontal and vertical flip, brightness, and contrast controls.</li>
-        <li><strong>Multiple-copy layout engine</strong> that automatically calculates how many photos fit on the chosen paper while respecting physical size, margins, and spacing. You can request 1, 4, 6, 8, 12, 16, or any custom number of copies.</li>
-        <li><strong>Paper presets</strong> for A4 (210×297 mm), A5 (148×210 mm), 4×6 inch photo paper, and 5×7 inch photo paper, plus custom paper sizes and portrait/landscape orientation.</li>
-        <li><strong>Cutting guides</strong> that can be toggled on or off so studios can cut photos cleanly after printing.</li>
-        <li><strong>Print-quality report</strong> that compares the original image resolution against the pixels required at the selected DPI and clearly labels the result as Good, Acceptable, or Low resolution.</li>
-        <li><strong>Export options</strong> for high-quality JPG, PNG, and multi-page PDF at 150, 300, or 600 DPI with meaningful filenames.</li>
-      </ul>
-
-      <h2>How to Use the Photo Studio Print Designer</h2>
-      <ol>
-        <li><strong>Upload a photograph</strong> by dragging it onto the upload zone or clicking Browse Files. Supported formats are JPG, PNG, and WebP. A clear file-size limit is enforced and corrupted files are rejected with a helpful message.</li>
-        <li><strong>Select a photo size</strong> from the presets or enter custom width and height. Switch between mm, cm, and inches; the physical size stays the same when you change units.</li>
-        <li><strong>Crop and adjust the photograph</strong>. Use the interactive crop box (locked to the chosen aspect ratio), rotate, flip, and fine-tune brightness and contrast. Apply the crop when you are satisfied.</li>
-        <li><strong>Choose the paper size</strong> (A4, A5, 4×6, 5×7, or custom) and orientation.</li>
-        <li><strong>Select the number of copies</strong>. The layout engine shows how many photos actually fit, the grid (rows × columns), unused paper area, and whether multiple pages are needed.</li>
-        <li><strong>Adjust spacing, margins, and cutting guides</strong> to match your cutting preference and printer capabilities.</li>
-        <li><strong>Review the quality report</strong>. It tells you the original resolution, the pixels required at the chosen DPI, and whether the source image is good enough for the print size.</li>
-        <li><strong>Export the finished file</strong> as JPG, PNG, or print-ready PDF. The PDF preserves exact physical page dimensions so printers receive the correct size.</li>
-      </ol>
-
-      <h2>How to Print Multiple Photos on A4 Paper</h2>
-      <p>When you select A4 paper and a photo size such as 35×45 mm, the tool calculates the maximum number of photos that fit after applying the chosen margins and spacing. It places the photos in a clean grid, optionally draws cutting guides, and shows a live scaled preview. The export never silently shrinks your photos to force a fit; if the requested copy count cannot fit on one page, the tool warns you and offers either a multi-page PDF or a reduction in the number of copies.</p>
-      <p>To avoid unexpected scaling at the printer, always use the “Actual size” or “100%” print option and disable borderless printing if your printer adds its own margins. The PDF is generated with the true millimetre dimensions of the selected paper so that professional print shops and home printers receive consistent results when configured correctly.</p>
-
-      <h2>Understanding Photo Size and 300 DPI</h2>
-      <p>Physical print size and digital pixel dimensions are different. A 35×45 mm photo at 300 DPI needs approximately 413 × 531 pixels. The conversion is straightforward:</p>
-      <p>pixels = physical size in inches × DPI<br>
-      1 inch = 25.4 mm</p>
-      <p>So for a 65×95 mm photo at 300 DPI: width in inches = 65 ÷ 25.4 ≈ 2.559 in → 2.559 × 300 ≈ 768 pixels. Height = 95 ÷ 25.4 ≈ 3.740 in → 3.740 × 300 ≈ 1122 pixels.</p>
-      <p>Setting the DPI metadata of a low-resolution image to 300 does not create missing detail. If the original photograph only contains 300×400 pixels, exporting it as a large physical size at 300 DPI will produce a soft or pixelated print. The quality report on this tool compares the source pixel dimensions with the required pixel dimensions and warns you when the source is insufficient. Always start with the highest-resolution source image available.</p>
-
-      <h2>Who Can Use This Tool?</h2>
-      <p>Photo studios and small printing shops can generate consistent multi-copy sheets for customers without dedicated software. Cyber cafés can offer a simple “make ID photos” service. Photographers can prepare client proofs or print sheets quickly. Students and families can create passport or school ID photos at home. The interface is designed for non-technical users: large buttons, clear labels, and immediate visual feedback. No account, no installation, and no payment is required.</p>
-
-      <h2>Benefits of Using PooreYouTuber Photo Studio Print Designer</h2>
-      <ul>
-        <li>Works entirely in the browser — no software download or installation.</li>
-        <li>Accurate physical dimensions and layout calculations reduce wasted paper and reprints.</li>
-        <li>Flexible sizes and copy counts cover the most common studio requests.</li>
-        <li>Cutting guides and quality warnings help produce professional-looking results.</li>
-        <li>Privacy-friendly: images stay on the user’s device.</li>
-        <li>Mobile-friendly interface so you can prepare layouts on a phone or tablet when needed.</li>
-      </ul>
-
-      <h2>Privacy and Image Processing</h2>
-      <p>All image loading, cropping, adjustment, layout calculation, and export happen inside your web browser using the HTML5 Canvas API and client-side JavaScript libraries. The original photograph is never sent to a PooreYouTuber server or any third-party image-processing API. Temporary object URLs created for previews are revoked when no longer needed. The tool does not store personal photographs and does not send image contents or original filenames to analytics services. You can use the tool offline once the page has loaded (subject to browser caching of the required libraries).</p>
-
-      <h2>Frequently Asked Questions</h2>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I create a 65×95 mm photo? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. Select the 65×95 mm preset or enter those values manually. You can also switch units and the physical size will be preserved.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I make 35×45 mm ID photos? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. 35×45 mm is one of the built-in presets. Crop the photo to the correct aspect ratio and export at 300 DPI for best results.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I print 8 or 16 copies on one sheet? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. Choose 8 or 16 from the copy presets or type any custom number. The layout engine will show how many actually fit on the selected paper and warn you if multiple pages are required.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I create a layout for A4 or 4×6 paper? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. A4, A5, 4×6 inch, and 5×7 inch paper sizes are available as presets, along with custom paper dimensions and portrait/landscape orientation.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I download a PDF? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. The “Download Print-Ready PDF” button generates a PDF with the exact physical page size, correct image placement, and optional cutting guides. Multi-page PDFs are created when more than one sheet is needed.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What does 300 DPI mean? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">DPI (dots per inch) describes how many pixels are used for each inch of physical print. 300 DPI is the common standard for high-quality photographic prints. The tool calculates the required pixel dimensions from your chosen physical size and DPI.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Will a low-quality image become high quality after export? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">No. Exporting at 300 DPI does not invent missing detail. If the source image has fewer pixels than required, the quality report will mark it as Low resolution and the print may look soft. Always start with the highest-resolution original possible.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I use the tool on a mobile phone? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. The interface is responsive and works on modern mobile browsers. You can upload from the phone gallery, crop, set sizes, and export directly.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Are my photos uploaded to a server? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">No. All processing is performed locally in your browser. Photos are not uploaded to PooreYouTuber servers or any external image service.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I use the tool for free? <i class="fas fa-chevron-down"></i></div>
-        <div class="faq-a">Yes. The Photo Studio Print Designer is completely free to use. No registration or payment is required.</div>
-      </div>
-    </article>
+    <p>Passport Photo Maker runs in your browser. Preset sizes are convenience options and not official government requirements. Printer settings can change the final size.</p>
+    <p>© PooreYouTuber</p>
   </div>
-
-  <footer class="app-footer">
-    <p>© 2026 PooreYouTuber · Free browser-based tools · <a href="https://pooreyoutuber.github.io/">All Tools</a> · <a href="Privacy-Policy.html">Privacy</a></p>
-    <p style="margin-top:6px;font-size:0.8rem;">This tool does not claim to meet any specific government ID-photo standard. Always verify official size requirements for the document you need.</p>
-  </footer>
-
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div id="loadingText">Processing…</div>
-  </div>
-
-  <script>
-  (function () {
-    'use strict';
-
-    // ===== Constants & Utilities =====
-    const MM_PER_INCH = 25.4;
-    const MAX_FILE_MB = 25;
-
-    const PAPER_PRESETS = {
-      A4:  { w: 210, h: 297 },
-      A5:  { w: 148, h: 210 },
-      '4x6': { w: 101.6, h: 152.4 },
-      '5x7': { w: 127, h: 177.8 }
-    };
-
-    function mmToIn(mm) { return mm / MM_PER_INCH; }
-    function inToMm(inch) { return inch * MM_PER_INCH; }
-    function cmToMm(cm) { return cm * 10; }
-    function mmToCm(mm) { return mm / 10; }
-
-    function toMm(value, unit) {
-      if (unit === 'mm') return value;
-      if (unit === 'cm') return cmToMm(value);
-      if (unit === 'in') return inToMm(value);
-      return value;
+</footer>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function () {
+'use strict';
+ 
+/* ================= Constants ================= */
+const $ = id => document.getElementById(id);
+const MM_PER_IN = 25.4;
+const UNIT_MM = { mm: 1, cm: 10, in: 25.4 };
+const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_SIDE = 12000;
+const MAX_PIXELS = 80e6;
+const WORK_MAX_SIDE = 6000;
+const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/';
+const PAPERS = {
+  a3: { label: 'A3', w: 297, h: 420 },
+  a4: { label: 'A4', w: 210, h: 297 },
+  b4: { label: 'B4', w: 250, h: 353 },
+  a5: { label: 'A5', w: 148, h: 210 },
+  b5: { label: 'B5', w: 176, h: 250 },
+  '4x6': { label: '4×6 in photo paper', w: 101.6, h: 152.4 },
+  '5x7': { label: '5×7 in photo paper', w: 127, h: 177.8 }
+};
+const PRESETS = [
+  { w: 35, h: 45 }, { w: 35, h: 35 }, { w: 25, h: 35 }, { w: 45, h: 35 },
+  { w: 50, h: 50 }, { w: 50.8, h: 50.8 }, { w: 65, h: 95 }
+];
+const DEFAULT_EDIT = {
+  rot: 0, flipH: false, flipV: false, zoom: 1, cx: 0, cy: 0,
+  bright: 0, contrast: 0, sat: 0, sharp: 0, gray: false, autoEnh: false,
+  bgRemove: false, bgColor: '#ffffff', borderMm: 0
+};
+ 
+/* ================= State ================= */
+const state = {
+  img: null, objUrl: null, fileName: '', fileSize: 0,
+  cutout: null,                 // canvas with transparent background (base size)
+  work: null, workScale: 1,     // oriented working canvas; original px per working px
+  edit: { ...DEFAULT_EDIT },
+  pwMm: 35, phMm: 45, unit: 'mm',
+  history: [], future: [], preSnap: null,
+  photo: null, pvScale: 1,
+  dragging: false, lastX: 0, lastY: 0,
+  pending: false, bgBusy: false
+};
+ 
+/* ================= Utilities ================= */
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const fmtMm = n => String(Math.round(n * 10) / 10);
+const fileTag = n => fmtMm(n).replace('.', 'p');
+const fmtBytes = b => b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+const setMsg = (el, text, kind) => { el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); };
+const toDisplay = (mm, unit) => {
+  const v = mm / UNIT_MM[unit];
+  return unit === 'mm' ? fmtMm(v) : String(Math.round(v * 100) / 100);
+};
+const scheduleRender = () => {
+  if (state.pending) return;
+  state.pending = true;
+  requestAnimationFrame(() => { state.pending = false; renderAll(); });
+};
+ 
+/* ================= History (Back / Forward) ================= */
+const snap = () => JSON.parse(JSON.stringify({ edit: state.edit, pwMm: state.pwMm, phMm: state.phMm }));
+ 
+function pushHistory(s) {
+  state.history.push(s || snap());
+  if (state.history.length > 100) state.history.shift();
+  state.future = [];
+  updateHistoryButtons();
+}
+ 
+function restore(s) {
+  state.edit = s.edit;
+  state.pwMm = s.pwMm; state.phMm = s.phMm;
+  buildWork();
+  syncControls();
+  scheduleRender();
+}
+ 
+function undo() {
+  if (!state.history.length) return;
+  state.future.push(snap());
+  restore(state.history.pop());
+  updateHistoryButtons();
+}
+ 
+function redo() {
+  if (!state.future.length) return;
+  state.history.push(snap());
+  restore(state.future.pop());
+  updateHistoryButtons();
+}
+ 
+function updateHistoryButtons() {
+  $('backBtn').disabled = !state.history.length || !state.img;
+  $('fwdBtn').disabled = !state.future.length || !state.img;
+}
+ 
+/* Continuous controls: snapshot on start, commit on change if something changed */
+function bindCommit(el) {
+  const start = () => { state.preSnap = snap(); };
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('keydown', start);
+  el.addEventListener('focus', start);
+  el.addEventListener('change', () => {
+    if (state.preSnap && JSON.stringify(state.preSnap) !== JSON.stringify(snap())) pushHistory(state.preSnap);
+    state.preSnap = null;
+  });
+}
+ 
+/* ================= Photo size ================= */
+function updateUnitLabels() {
+  const u = state.unit;
+  $('unit').value = u;
+  $('pwLabel').textContent = `Width (${u})`;
+  $('phLabel').textContent = `Height (${u})`;
+  $('pw').step = $('ph').step = u === 'mm' ? '0.1' : '0.01';
+  $('pw').value = toDisplay(state.pwMm, u);
+  $('ph').value = toDisplay(state.phMm, u);
+}
+ 
+function readDims() {
+  const f = UNIT_MM[state.unit];
+  const w = parseFloat($('pw').value) * f;
+  const h = parseFloat($('ph').value) * f;
+  if (!(w >= 5 && w <= 297 && h >= 5 && h <= 297)) {
+    setMsg($('dimMsg'), 'Enter a width and height between 5 mm and 297 mm (about 0.2 to 11.7 in).', 'msg-error');
+    return false;
+  }
+  state.pwMm = w; state.phMm = h;
+  setMsg($('dimMsg'), '', '');
+  return true;
+}
+ 
+function renderPresets() {
+  const box = $('presets');
+  box.innerHTML = '';
+  let matched = false;
+  PRESETS.forEach(p => {
+    const active = Math.abs(p.w - state.pwMm) < 0.05 && Math.abs(p.h - state.phMm) < 0.05;
+    if (active) matched = true;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = `${fmtMm(p.w)} × ${fmtMm(p.h)} mm`;
+    b.setAttribute('aria-pressed', String(active));
+    b.addEventListener('click', () => {
+      pushHistory();
+      state.pwMm = p.w; state.phMm = p.h;
+      updateUnitLabels(); renderPresets(); scheduleRender();
+    });
+    box.appendChild(b);
+  });
+  const c = document.createElement('button');
+  c.type = 'button';
+  c.textContent = 'Custom size';
+  c.setAttribute('aria-pressed', String(!matched));
+  c.addEventListener('click', () => $('pw').focus());
+  box.appendChild(c);
+}
+ 
+function updateSizeInfo() {
+  const dpi = +$('dpi').value;
+  const pw = state.pwMm, ph = state.phMm;
+  $('fPhys').textContent = `Selected: ${fmtMm(pw)} × ${fmtMm(ph)} mm (${(pw / MM_PER_IN).toFixed(2)} × ${(ph / MM_PER_IN).toFixed(2)} in). Aspect ratio ${(pw / ph).toFixed(3)} : 1. Output: ${Math.round(pw / MM_PER_IN * dpi)} × ${Math.round(ph / MM_PER_IN * dpi)} px at ${dpi} DPI.`;
+}
+ 
+/* ================= Upload ================= */
+function handleFile(file) {
+  const msg = $('uploadMsg');
+  if (!file) return;
+  const okType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+  if (!okType) { setMsg(msg, 'Unsupported file. Please choose a JPG, PNG or WebP image.', 'msg-error'); return; }
+  if (file.size > MAX_FILE_BYTES) { setMsg(msg, 'This file is larger than 25 MB. Please choose a smaller image.', 'msg-error'); return; }
+  setMsg(msg, 'Loading photo…', '');
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) { URL.revokeObjectURL(url); setMsg(msg, 'This image could not be decoded.', 'msg-error'); return; }
+    if (Math.max(w, h) > MAX_SIDE || w * h > MAX_PIXELS) {
+      URL.revokeObjectURL(url);
+      setMsg(msg, 'This image is too large (max 12,000 px per side). Please resize it and try again.', 'msg-error');
+      return;
     }
-    function fromMm(mm, unit) {
-      if (unit === 'mm') return mm;
-      if (unit === 'cm') return mmToCm(mm);
-      if (unit === 'in') return mmToIn(mm);
-      return mm;
-    }
-    function round(n, d = 2) {
-      const f = Math.pow(10, d);
-      return Math.round(n * f) / f;
-    }
-
-    function pixelsNeeded(mmW, mmH, dpi) {
-      return {
-        w: Math.round(mmToIn(mmW) * dpi),
-        h: Math.round(mmToIn(mmH) * dpi)
-      };
-    }
-
-    // ===== State =====
-    const state = {
-      unit: 'mm',
-      photoWmm: 65,
-      photoHmm: 95,
-      paperKey: 'A4',
-      paperWmm: 210,
-      paperHmm: 297,
-      orientation: 'portrait',
-      marginMm: 5,
-      spacingMm: 3,
-      copies: 4,
-      cuttingGuides: true,
-      dpi: 300,
-      jpgQuality: 0.92,
-      sourceImage: null,       // HTMLImageElement
-      sourceCanvas: null,      // high-res working canvas after crop/adjust
-      cropper: null,
-      brightness: 100,
-      contrast: 100,
-      objectUrl: null
-    };
-
-    // ===== DOM refs =====
-    const $ = id => document.getElementById(id);
-    const uploadZone = $('uploadZone');
-    const fileInput = $('fileInput');
-    const fileInfo = $('fileInfo');
-    const editImage = $('editImage');
-    const editorPlaceholder = $('editorPlaceholder');
-    const editorToolbar = $('editorToolbar');
-    const adjustControls = $('adjustControls');
-    const paperSheet = $('paperSheet');
-    const loadingOverlay = $('loadingOverlay');
-
-    // ===== Upload =====
-    function showLoading(msg) {
-      $('loadingText').textContent = msg || 'Processing…';
-      loadingOverlay.classList.add('visible');
-    }
-    function hideLoading() {
-      loadingOverlay.classList.remove('visible');
-    }
-
-    function handleFile(file) {
-      if (!file) return;
-      const valid = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      if (!valid.includes(file.type)) {
-        alert('Unsupported format. Please use JPG, PNG, or WebP.');
-        return;
-      }
-      if (file.size > MAX_FILE_MB * 1024 * 1024) {
-        alert(`File is too large. Maximum allowed size is ${MAX_FILE_MB} MB.`);
-        return;
-      }
-
-      showLoading('Loading image…');
-      if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
-      state.objectUrl = URL.createObjectURL(file);
-
-      const img = new Image();
-      img.onload = () => {
-        state.sourceImage = img;
-        if (state.cropper) {
-          state.cropper.destroy();
-          state.cropper = null;
-        }
-        editImage.src = state.objectUrl;
-        editImage.classList.remove('hidden');
-        editorPlaceholder.classList.add('hidden');
-        editorToolbar.style.display = 'flex';
-        adjustControls.style.display = 'block';
-
-        // Init cropper with current aspect
-        const aspect = state.photoWmm / state.photoHmm;
-        state.cropper = new Cropper(editImage, {
-          aspectRatio: aspect,
-          viewMode: 1,
-          autoCropArea: 0.9,
-          responsive: true,
-          background: false,
-          guides: true,
-          center: true,
-          highlight: false,
-          cropBoxMovable: true,
-          cropBoxResizable: true,
-          toggleDragModeOnDblclick: false
-        });
-
-        $('fileName').textContent = file.name;
-        $('fileDims').textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
-        $('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
-        fileInfo.classList.add('visible');
-
-        // Create initial working canvas (full image)
-        applyCropAndAdjust(true);
-        updateQualityReport();
-        updateLayout();
-        enableExport(true);
-        hideLoading();
-      };
-      img.onerror = () => {
-        hideLoading();
-        alert('Could not load the image. The file may be corrupted or unsupported.');
-      };
-      img.src = state.objectUrl;
-    }
-
-    uploadZone.addEventListener('click', () => fileInput.click());
-    $('browseBtn').addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
-    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-    uploadZone.addEventListener('dragover', e => {
-      e.preventDefault();
-      uploadZone.classList.add('dragover');
-    });
-    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-    uploadZone.addEventListener('drop', e => {
-      e.preventDefault();
-      uploadZone.classList.remove('dragover');
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-    });
-
-    $('replaceBtn').addEventListener('click', () => fileInput.click());
-    $('removeBtn').addEventListener('click', () => {
-      if (state.cropper) { state.cropper.destroy(); state.cropper = null; }
-      if (state.objectUrl) { URL.revokeObjectURL(state.objectUrl); state.objectUrl = null; }
-      state.sourceImage = null;
-      state.sourceCanvas = null;
-      editImage.src = '';
-      editImage.classList.add('hidden');
-      editorPlaceholder.classList.remove('hidden');
-      editorToolbar.style.display = 'none';
-      adjustControls.style.display = 'none';
-      fileInfo.classList.remove('visible');
-      fileInput.value = '';
-      paperSheet.innerHTML = '';
-      enableExport(false);
-      updateQualityReport();
-    });
-
-    // ===== Cropper controls =====
-    $('rotateLeftBtn').addEventListener('click', () => state.cropper && state.cropper.rotate(-90));
-    $('rotateRightBtn').addEventListener('click', () => state.cropper && state.cropper.rotate(90));
-    $('flipHBtn').addEventListener('click', () => {
-      if (!state.cropper) return;
-      const data = state.cropper.getData();
-      state.cropper.scaleX(-(data.scaleX || 1));
-    });
-    $('flipVBtn').addEventListener('click', () => {
-      if (!state.cropper) return;
-      const data = state.cropper.getData();
-      state.cropper.scaleY(-(data.scaleY || 1));
-    });
-    $('resetCropBtn').addEventListener('click', () => state.cropper && state.cropper.reset());
-    $('applyCropBtn').addEventListener('click', () => {
-      applyCropAndAdjust(false);
-      updateQualityReport();
-      updateLayout();
-    });
-
-    $('brightnessRange').addEventListener('input', e => {
-      state.brightness = +e.target.value;
-      $('brightVal').textContent = state.brightness + '%';
-      applyCropAndAdjust(false);
-      updateLayout();
-    });
-    $('contrastRange').addEventListener('input', e => {
-      state.contrast = +e.target.value;
-      $('contrastVal').textContent = state.contrast + '%';
-      applyCropAndAdjust(false);
-      updateLayout();
-    });
-    $('resetAdjustBtn').addEventListener('click', () => {
-      state.brightness = 100;
-      state.contrast = 100;
-      $('brightnessRange').value = 100;
-      $('contrastRange').value = 100;
-      $('brightVal').textContent = '100%';
-      $('contrastVal').textContent = '100%';
-      applyCropAndAdjust(false);
-      updateLayout();
-    });
-
-    function applyCropAndAdjust(useFullImage) {
-      if (!state.sourceImage) return;
-      let canvas;
-      if (state.cropper && !useFullImage) {
-        // Get cropped canvas at high resolution
-        const req = pixelsNeeded(state.photoWmm, state.photoHmm, Math.max(state.dpi, 300));
-        canvas = state.cropper.getCroppedCanvas({
-          width: Math.max(req.w, 400),
-          height: Math.max(req.h, 400),
-          imageSmoothingEnabled: true,
-          imageSmoothingQuality: 'high'
-        });
-      } else {
-        // Full image
-        canvas = document.createElement('canvas');
-        canvas.width = state.sourceImage.naturalWidth;
-        canvas.height = state.sourceImage.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(state.sourceImage, 0, 0);
-      }
-
-      // Apply brightness / contrast via filter
-      if (state.brightness !== 100 || state.contrast !== 100) {
-        const ctx = canvas.getContext('2d');
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d = imgData.data;
-        const b = (state.brightness - 100) * 2.55;
-        const c = state.contrast / 100;
-        const factor = (259 * (c * 255 + 255)) / (255 * (259 - c * 255));
-        for (let i = 0; i < d.length; i += 4) {
-          d[i]     = clamp(factor * (d[i] - 128) + 128 + b);
-          d[i + 1] = clamp(factor * (d[i + 1] - 128) + 128 + b);
-          d[i + 2] = clamp(factor * (d[i + 2] - 128) + 128 + b);
-        }
-        ctx.putImageData(imgData, 0, 0);
-      }
-      state.sourceCanvas = canvas;
-    }
-
-    function clamp(v) { return Math.max(0, Math.min(255, v)); }
-
-    // ===== Dimension controls =====
-    document.querySelectorAll('#unitToggle button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newUnit = btn.dataset.unit;
-        if (newUnit === state.unit) return;
-        // Convert displayed values
-        const wMm = state.photoWmm;
-        const hMm = state.photoHmm;
-        state.unit = newUnit;
-        document.querySelectorAll('#unitToggle button').forEach(b => b.classList.toggle('active', b.dataset.unit === newUnit));
-        $('photoWidth').value = round(fromMm(wMm, newUnit), newUnit === 'in' ? 3 : 1);
-        $('photoHeight').value = round(fromMm(hMm, newUnit), newUnit === 'in' ? 3 : 1);
-        updateAspectAndPixels();
-      });
-    });
-
-    document.querySelectorAll('#photoPresets .preset-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#photoPresets .preset-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (btn.dataset.w === '0') return; // custom
-        const u = btn.dataset.unit;
-        state.unit = u;
-        document.querySelectorAll('#unitToggle button').forEach(b => b.classList.toggle('active', b.dataset.unit === u));
-        state.photoWmm = toMm(+btn.dataset.w, u);
-        state.photoHmm = toMm(+btn.dataset.h, u);
-        $('photoWidth').value = +btn.dataset.w;
-        $('photoHeight').value = +btn.dataset.h;
-        if (state.cropper) {
-          state.cropper.setAspectRatio(state.photoWmm / state.photoHmm);
-        }
-        updateAspectAndPixels();
-        updateQualityReport();
-        updateLayout();
-      });
-    });
-
-    function onPhotoSizeChange() {
-      const w = parseFloat($('photoWidth').value) || 0;
-      const h = parseFloat($('photoHeight').value) || 0;
-      state.photoWmm = toMm(w, state.unit);
-      state.photoHmm = toMm(h, state.unit);
-      document.querySelectorAll('#photoPresets .preset-btn').forEach(b => b.classList.remove('active'));
-      if (state.cropper) {
-        state.cropper.setAspectRatio(state.photoWmm / state.photoHmm || NaN);
-      }
-      updateAspectAndPixels();
-      updateQualityReport();
-      updateLayout();
-    }
-    $('photoWidth').addEventListener('input', onPhotoSizeChange);
-    $('photoHeight').addEventListener('input', onPhotoSizeChange);
-
-    function updateAspectAndPixels() {
-      const ar = state.photoWmm / state.photoHmm;
-      $('aspectRatio').textContent = isFinite(ar) ? ar.toFixed(3) : '—';
-      const px = pixelsNeeded(state.photoWmm, state.photoHmm, state.dpi);
-      $('pixelDims').textContent = `${px.w} × ${px.h} px`;
-    }
-
-    // ===== Paper & Layout =====
-    $('paperPreset').addEventListener('change', e => {
-      state.paperKey = e.target.value;
-      if (state.paperKey === 'custom') {
-        $('customPaperRow').style.display = 'flex';
-        state.paperWmm = parseFloat($('paperW').value) || 210;
-        state.paperHmm = parseFloat($('paperH').value) || 297;
-      } else {
-        $('customPaperRow').style.display = 'none';
-        const p = PAPER_PRESETS[state.paperKey];
-        state.paperWmm = p.w;
-        state.paperHmm = p.h;
-      }
-      applyOrientation();
-      updateLayout();
-    });
-    $('paperW').addEventListener('input', () => {
-      state.paperWmm = parseFloat($('paperW').value) || 210;
-      updateLayout();
-    });
-    $('paperH').addEventListener('input', () => {
-      state.paperHmm = parseFloat($('paperH').value) || 297;
-      updateLayout();
-    });
-
-    document.querySelectorAll('#orientToggle button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.orientation = btn.dataset.orient;
-        document.querySelectorAll('#orientToggle button').forEach(b => b.classList.toggle('active', b.dataset.orient === state.orientation));
-        applyOrientation();
-        updateLayout();
-      });
-    });
-
-    function applyOrientation() {
-      // Ensure portrait numbers are stored as base; swap for landscape
-      // We keep paperWmm / paperHmm as the physical size in current orientation
-      let w = state.paperKey === 'custom' ? (parseFloat($('paperW').value) || 210) : PAPER_PRESETS[state.paperKey].w;
-      let h = state.paperKey === 'custom' ? (parseFloat($('paperH').value) || 297) : PAPER_PRESETS[state.paperKey].h;
-      if (state.orientation === 'landscape' && w < h) {
-        state.paperWmm = h;
-        state.paperHmm = w;
-      } else if (state.orientation === 'portrait' && w > h) {
-        state.paperWmm = h;
-        state.paperHmm = w;
-      } else {
-        state.paperWmm = w;
-        state.paperHmm = h;
+    if (state.objUrl) URL.revokeObjectURL(state.objUrl);
+    state.img = img; state.objUrl = url;
+    state.fileName = file.name; state.fileSize = file.size;
+    state.cutout = null;
+    state.edit = { ...DEFAULT_EDIT };
+    state.history = []; state.future = [];
+    buildWork(); recenter();
+    $('thumb').src = url;
+    $('infoName').textContent = file.name;
+    $('infoPx').textContent = `${w} × ${h} px original`;
+    $('infoBytes').textContent = fmtBytes(file.size);
+    $('fileBar').classList.remove('hidden');
+    $('dropzone').classList.add('hidden');
+    $('workspace').classList.remove('hidden');
+    $('emptyNote').classList.add('hidden');
+    $('exportBtn').disabled = false;
+    const small = w < 600 || h < 600;
+    setMsg(msg, small ? 'Photo loaded. This image is small, so print sharpness may be limited.' : 'Photo loaded successfully.', small ? 'msg-warn' : 'msg-ok');
+    setMsg($('bgMsg'), '', '');
+    syncControls();
+    scheduleRender();
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    setMsg(msg, 'This file could not be read. It may be corrupted or in an unsupported format.', 'msg-error');
+  };
+  img.src = url;
+}
+ 
+function clearPhoto() {
+  if (!state.img) return;
+  if (!confirm('Clear this photo and start again?')) return;
+  if (state.objUrl) URL.revokeObjectURL(state.objUrl);
+  state.img = null; state.objUrl = null; state.cutout = null; state.work = null; state.photo = null;
+  state.history = []; state.future = [];
+  $('fileBar').classList.add('hidden');
+  $('dropzone').classList.remove('hidden');
+  $('workspace').classList.add('hidden');
+  $('emptyNote').classList.remove('hidden');
+  $('exportBtn').disabled = true;
+  $('thumb').removeAttribute('src');
+  setMsg($('uploadMsg'), 'Photo cleared. Upload a new one to start.', '');
+  updateHistoryButtons();
+  renderAll();
+}
+ 
+/* ================= Image pipeline ================= */
+function baseDims() {
+  const W0 = state.img.naturalWidth, H0 = state.img.naturalHeight;
+  const s = Math.min(1, WORK_MAX_SIDE / Math.max(W0, H0));
+  return { W0, H0, dw: Math.max(1, Math.round(W0 * s)), dh: Math.max(1, Math.round(H0 * s)) };
+}
+ 
+function buildWork() {
+  if (!state.img) return;
+  const { W0, dw, dh } = baseDims();
+  const rot = state.edit.rot, swap = rot % 180 !== 0;
+  const cw = swap ? dh : dw, ch = swap ? dw : dh;
+  const source = (state.edit.bgRemove && state.cutout) ? state.cutout : state.img;
+  const c = document.createElement('canvas');
+  c.width = cw; c.height = ch;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = 'high';
+  g.translate(cw / 2, ch / 2);
+  g.rotate(rot * Math.PI / 180);
+  g.scale(state.edit.flipH ? -1 : 1, state.edit.flipV ? -1 : 1);
+  g.drawImage(source, -dw / 2, -dh / 2, dw, dh);
+  state.work = c;
+  state.workScale = W0 / dw;
+}
+ 
+function recenter() {
+  if (!state.work) return;
+  state.edit.cx = state.work.width / 2;
+  state.edit.cy = state.work.height / 2;
+}
+ 
+function cropRect() {
+  const cw = state.work.width, ch = state.work.height;
+  const aspect = state.pwMm / state.phMm;
+  let bw, bh;
+  if (cw / ch > aspect) { bh = ch; bw = ch * aspect; } else { bw = cw; bh = cw / aspect; }
+  const w = bw / state.edit.zoom, h = bh / state.edit.zoom;
+  state.edit.cx = clamp(state.edit.cx, w / 2, cw - w / 2);
+  state.edit.cy = clamp(state.edit.cy, h / 2, ch - h / 2);
+  return { x: state.edit.cx - w / 2, y: state.edit.cy - h / 2, w, h };
+}
+ 
+function drawCropPreview() {
+  const c = $('cropCanvas');
+  const cw = state.work.width, ch = state.work.height;
+  const sc = Math.min(520 / cw, 420 / ch);
+  state.pvScale = sc;
+  c.width = Math.round(cw * sc); c.height = Math.round(ch * sc);
+  const ctx = c.getContext('2d');
+  const r = cropRect();
+  ctx.fillStyle = '#e9edf2';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(state.work, 0, 0, c.width, c.height);
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(state.work, r.x, r.y, r.w, r.h, r.x * sc, r.y * sc, r.w * sc, r.h * sc);
+  ctx.lineWidth = 2; ctx.strokeStyle = '#1d5fd1';
+  ctx.strokeRect(r.x * sc + 1, r.y * sc + 1, r.w * sc - 2, r.h * sc - 2);
+}
+ 
+function sharpen(ctx, w, h, a) {
+  const id = ctx.getImageData(0, 0, w, h);
+  const d = id.data, src = new Uint8ClampedArray(d);
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = (y * w + x) * 4;
+      for (let k = 0; k < 3; k++) {
+        const v = src[i + k] * (1 + 4 * a) - a * (src[i - w * 4 + k] + src[i + w * 4 + k] + src[i - 4 + k] + src[i + 4 + k]);
+        d[i + k] = v < 0 ? 0 : v > 255 ? 255 : v;
       }
     }
-
-    $('margin').addEventListener('input', e => {
-      state.marginMm = parseFloat(e.target.value) || 0;
-      updateLayout();
-    });
-    $('spacing').addEventListener('input', e => {
-      state.spacingMm = parseFloat(e.target.value) || 0;
-      updateLayout();
-    });
-    $('cuttingGuides').addEventListener('change', e => {
-      state.cuttingGuides = e.target.checked;
-      updateLayout();
-    });
-
-    document.querySelectorAll('#copyPresets .preset-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#copyPresets .preset-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.copies = +btn.dataset.copies;
-        $('customCopies').value = state.copies;
-        updateLayout();
-      });
-    });
-    $('customCopies').addEventListener('input', e => {
-      state.copies = Math.max(1, Math.min(64, parseInt(e.target.value) || 1));
-      document.querySelectorAll('#copyPresets .preset-btn').forEach(b => b.classList.remove('active'));
-      updateLayout();
-    });
-
-    function calcLayout() {
-      const usableW = state.paperWmm - 2 * state.marginMm;
-      const usableH = state.paperHmm - 2 * state.marginMm;
-      const pw = state.photoWmm;
-      const ph = state.photoHmm;
-      const sp = state.spacingMm;
-
-      if (pw <= 0 || ph <= 0 || usableW < pw || usableH < ph) {
-        return { cols: 0, rows: 0, fit: 0, pages: 0, unused: 100 };
+  }
+  ctx.putImageData(id, 0, 0);
+}
+ 
+function adjustPixels(ctx, w, h, e) {
+  const any = e.autoEnh || e.bright || e.contrast || e.sat || e.gray || e.sharp;
+  if (!any) return;
+  const id = ctx.getImageData(0, 0, w, h);
+  const d = id.data;
+  let lo = 0, hi = 255;
+  if (e.autoEnh) {
+    const hist = new Uint32Array(256); let cnt = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 128) continue;
+      hist[Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2])]++; cnt++;
+    }
+    if (cnt) {
+      let acc = 0, found = false; lo = 0; hi = 255;
+      for (let v = 0; v < 256; v++) {
+        acc += hist[v];
+        if (!found && acc >= cnt * 0.01) { lo = v; found = true; }
+        if (acc >= cnt * 0.99) { hi = v; break; }
       }
-
-      const cols = Math.floor((usableW + sp) / (pw + sp));
-      const rows = Math.floor((usableH + sp) / (ph + sp));
-      const fit = cols * rows;
-      const pages = fit > 0 ? Math.ceil(state.copies / fit) : 0;
-      const usedArea = fit * pw * ph;
-      const totalArea = state.paperWmm * state.paperHmm;
-      const unused = Math.max(0, 100 - (usedArea / totalArea) * 100);
-
-      return { cols, rows, fit, pages, unused: round(unused, 1) };
+      if (hi <= lo) { lo = 0; hi = 255; }
     }
-
-    function updateLayout() {
-      const layout = calcLayout();
-      $('fitCount').textContent = layout.fit > 0 ? layout.fit : '0';
-      $('gridInfo').textContent = layout.fit > 0 ? `${layout.rows} × ${layout.cols}` : '—';
-      $('unusedInfo').textContent = layout.fit > 0 ? layout.unused + '%' : '—';
-      $('pagesNeeded').textContent = layout.pages || '—';
-
-      const warn = $('layoutWarning');
-      if (layout.fit === 0) {
-        warn.textContent = 'Photo does not fit on the selected paper with current margins and spacing. Reduce photo size, margins, or spacing.';
-        warn.classList.add('visible');
-      } else if (state.copies > layout.fit) {
-        warn.textContent = `Only ${layout.fit} photos fit on one page. ${layout.pages} pages will be generated in the PDF.`;
-        warn.classList.add('visible');
-      } else {
-        warn.classList.remove('visible');
+  }
+  const k = 255 / (hi - lo);
+  const b = e.bright * 2.55, c = e.contrast * 2.55;
+  const F = (259 * (c + 255)) / (255 * (259 - c));
+  const s = 1 + e.sat / 100;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue;
+    let r = d[i], g = d[i + 1], bl = d[i + 2];
+    if (e.autoEnh) { r = (r - lo) * k; g = (g - lo) * k; bl = (bl - lo) * k; }
+    r += b; g += b; bl += b;
+    r = F * (r - 128) + 128; g = F * (g - 128) + 128; bl = F * (bl - 128) + 128;
+    const gray = 0.299 * r + 0.587 * g + 0.114 * bl;
+    if (e.gray) { r = g = bl = gray; }
+    else { r = gray + (r - gray) * s; g = gray + (g - gray) * s; bl = gray + (bl - gray) * s; }
+    d[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    d[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    d[i + 2] = bl < 0 ? 0 : bl > 255 ? 255 : bl;
+  }
+  ctx.putImageData(id, 0, 0);
+  if (e.sharp > 0) sharpen(ctx, w, h, e.sharp / 100);
+}
+ 
+function drawPhotoOutput() {
+  const dpi = +$('dpi').value;
+  const ow = Math.round(state.pwMm / MM_PER_IN * dpi);
+  const oh = Math.round(state.phMm / MM_PER_IN * dpi);
+  const r = cropRect();
+  const tmp = document.createElement('canvas');
+  tmp.width = ow; tmp.height = oh;
+  const tg = tmp.getContext('2d');
+  tg.imageSmoothingEnabled = true;
+  tg.imageSmoothingQuality = 'high';
+  tg.drawImage(state.work, r.x, r.y, r.w, r.h, 0, 0, ow, oh);
+  adjustPixels(tg, ow, oh, state.edit);
+ 
+  const out = $('photoCanvas');
+  out.width = ow; out.height = oh;
+  const og = out.getContext('2d');
+  og.fillStyle = state.edit.bgColor;
+  og.fillRect(0, 0, ow, oh);
+  og.drawImage(tmp, 0, 0);
+  if (state.edit.borderMm > 0) {
+    const lw = Math.max(1, state.edit.borderMm / MM_PER_IN * dpi);
+    og.strokeStyle = '#000000';
+    og.lineWidth = lw;
+    og.strokeRect(lw / 2, lw / 2, ow - lw, oh - lw);
+  }
+  state.photo = out;
+}
+ 
+function updateQuality() {
+  const st = $('qStatus');
+  if (!state.work) {
+    ['qOrig', 'qPhys', 'qReq', 'qEff'].forEach(id => $(id).textContent = '—');
+    st.textContent = 'Waiting for photo'; st.className = 'badge';
+    $('qNote').textContent = '';
+    return;
+  }
+  const dpi = +$('dpi').value;
+  const r = cropRect();
+  const inW = state.pwMm / MM_PER_IN, inH = state.phMm / MM_PER_IN;
+  const eff = Math.min(r.w * state.workScale / inW, r.h * state.workScale / inH);
+  const ratio = eff / dpi;
+  $('qOrig').textContent = `${state.img.naturalWidth} × ${state.img.naturalHeight} px`;
+  $('qPhys').textContent = `${fmtMm(state.pwMm)} × ${fmtMm(state.phMm)} mm`;
+  $('qReq').textContent = `${Math.round(inW * dpi)} × ${Math.round(inH * dpi)} px`;
+  $('qEff').textContent = `${Math.round(eff)} PPI`;
+  let text, cls;
+  if (ratio >= 1) { text = 'Good resolution'; cls = 'msg-ok'; }
+  else if (ratio >= 0.66) { text = 'Acceptable resolution'; cls = 'msg-warn'; }
+  else { text = 'Low resolution — consider a better source photo'; cls = 'msg-error'; }
+  st.textContent = text; st.className = 'badge ' + cls;
+  let note = 'Printer scaling, borderless settings and paper handling can change final dimensions.';
+  if (ratio < 1) note = 'The crop has fewer pixels than the target DPI needs, so it will be enlarged. Enlarging cannot add detail. ' + note;
+  $('qNote').textContent = note;
+}
+ 
+/* ================= Background removal ================= */
+function loadMediaPipe() {
+  if (window.SelfieSegmentation) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = MP_BASE + 'selfie_segmentation.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = () => res();
+    s.onerror = () => rej(new Error('the model script could not be downloaded'));
+    document.head.appendChild(s);
+  });
+}
+ 
+async function computeCutout() {
+  await loadMediaPipe();
+  const seg = new window.SelfieSegmentation({ locateFile: f => MP_BASE + f });
+  seg.setOptions({ modelSelection: 1 });
+  let mask = null;
+  seg.onResults(r => { mask = r.segmentationMask; });
+  if (seg.initialize) await seg.initialize();
+  await seg.send({ image: state.img });
+  if (seg.close) seg.close();
+  if (!mask) throw new Error('no subject was detected');
+  const { dw, dh } = baseDims();
+  const photo = document.createElement('canvas');
+  photo.width = dw; photo.height = dh;
+  photo.getContext('2d').drawImage(state.img, 0, 0, dw, dh);
+  const cut = document.createElement('canvas');
+  cut.width = dw; cut.height = dh;
+  const g = cut.getContext('2d');
+  g.drawImage(mask, 0, 0, dw, dh);
+  g.globalCompositeOperation = 'source-in';
+  g.drawImage(photo, 0, 0, dw, dh);
+  return cut;
+}
+ 
+async function toggleBackground() {
+  if (!state.img || state.bgBusy) return;
+  const msg = $('bgMsg'), btn = $('bgBtn');
+  pushHistory();
+  if (state.edit.bgRemove) {
+    state.edit.bgRemove = false;
+    buildWork(); syncControls(); scheduleRender();
+    setMsg(msg, 'Original background restored.', '');
+    return;
+  }
+  state.bgBusy = true;
+  btn.disabled = true;
+  try {
+    if (!state.cutout) {
+      setMsg(msg, 'Loading the background model (first time only, needs internet). Please wait…', '');
+      state.cutout = await computeCutout();
+    }
+    state.edit.bgRemove = true;
+    buildWork(); syncControls(); scheduleRender();
+    setMsg(msg, 'Background removed. Pick a background colour in option 11.', 'msg-ok');
+  } catch (err) {
+    state.edit.bgRemove = false;
+    buildWork(); syncControls(); scheduleRender();
+    setMsg(msg, `Background removal failed: ${err.message}. Check your connection and try again. Crop, colour and border tools still work.`, 'msg-error');
+  } finally {
+    state.bgBusy = false;
+    btn.disabled = false;
+  }
+}
+ 
+/* ================= Paper & layout ================= */
+function getPaper() {
+  const key = $('paper').value;
+  let w, h, label;
+  if (key === 'custom') {
+    w = parseFloat($('cpw').value); h = parseFloat($('cph').value);
+    if (!(w > 0 && h > 0)) return null;
+    label = 'Custom paper';
+  } else {
+    ({ w, h, label } = PAPERS[key]);
+  }
+  const lo = Math.min(w, h), hi = Math.max(w, h);
+  return $('orient').value === 'landscape'
+    ? { PW: hi, PH: lo, label, key }
+    : { PW: lo, PH: hi, label, key };
+}
+ 
+function getCopies() {
+  if ($('copies').value === 'custom') return clamp(parseInt($('copiesCustom').value, 10) || 1, 1, 500);
+  return +$('copies').value;
+}
+ 
+function arrange(k, L) {
+  let best = null;
+  for (let c = 1; c <= L.maxCols; c++) {
+    const r = Math.ceil(k / c);
+    if (r > L.maxRows) continue;
+    const empty = c * r - k, sq = Math.abs(c - r);
+    if (!best || empty < best.empty || (empty === best.empty && sq < best.sq)) best = { c, r, empty, sq };
+  }
+  const { c, r } = best;
+  const gridH = r * L.ph + (r - 1) * L.gy;
+  const y0 = L.m + (L.UH - gridH) / 2;
+  const items = [];
+  for (let row = 0; row < r; row++) {
+    const n = Math.min(c, k - row * c);
+    const rowW = n * L.pw + (n - 1) * L.gx;
+    const x0 = L.m + (L.UW - rowW) / 2;
+    for (let j = 0; j < n; j++) {
+      items.push({ x: x0 + j * (L.pw + L.gx), y: y0 + row * (L.ph + L.gy), w: L.pw, h: L.ph });
+    }
+  }
+  return { cols: c, rows: r, items };
+}
+ 
+function computeLayout() {
+  const p = getPaper();
+  if (!p) return { error: 'Enter a valid custom paper size (both sides must be greater than 0 mm).' };
+  const m = parseFloat($('margin').value), gx = parseFloat($('gapX').value), gy = parseFloat($('gapY').value);
+  if (![m, gx, gy].every(v => isFinite(v) && v >= 0)) return { error: 'Margins and gaps must be 0 mm or more.' };
+  const pw = state.pwMm, ph = state.phMm;
+  const UW = p.PW - 2 * m, UH = p.PH - 2 * m;
+  if (UW <= 0 || UH <= 0) return { error: 'The margins are too large for this paper.' };
+  const maxCols = pw <= UW ? Math.floor((UW + gx) / (pw + gx)) : 0;
+  const maxRows = ph <= UH ? Math.floor((UH + gy) / (ph + gy)) : 0;
+  const capacity = maxCols * maxRows;
+  if (capacity < 1) {
+    return { error: `One ${fmtMm(pw)} × ${fmtMm(ph)} mm photo does not fit on ${p.label} with these margins. Try smaller margins, a larger paper, or a smaller photo size. Your photo size has not been changed.` };
+  }
+  const N = getCopies();
+  const sheetCount = Math.ceil(N / capacity);
+  const L = { m, gx, gy, pw, ph, UW, UH, maxCols, maxRows };
+  const sheets = [];
+  for (let s = 0; s < sheetCount; s++) sheets.push(arrange(Math.min(capacity, N - s * capacity), L));
+  return { p, N, capacity, sheetCount, sheets };
+}
+ 
+function drawSheet(cv, L, idx, ppm, guides) {
+  cv.width = Math.round(L.p.PW * ppm);
+  cv.height = Math.round(L.p.PH * ppm);
+  const g = cv.getContext('2d');
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, cv.width, cv.height);
+  const sheet = L.sheets[idx];
+  if (!sheet) return;
+  sheet.items.forEach(it => {
+    const x = it.x * ppm, y = it.y * ppm, w = it.w * ppm, h = it.h * ppm;
+    if (state.photo) g.drawImage(state.photo, x, y, w, h);
+    else { g.fillStyle = '#eef1f5'; g.fillRect(x, y, w, h); }
+    if (guides) {
+      g.strokeStyle = '#6b7280';
+      g.lineWidth = Math.max(1, 0.2 * ppm);
+      g.setLineDash([]);
+      g.strokeRect(x, y, w, h);
+    }
+  });
+}
+ 
+function renderLayout() {
+  const msg = $('layoutMsg');
+  const L = computeLayout();
+  if (L.error) {
+    setMsg(msg, L.error, 'msg-error');
+    ['statCopies', 'statPerSheet', 'statSheets', 'statGrid', 'statUnused', 'statPaper'].forEach(id => $(id).textContent = '—');
+    const cv = $('sheetCanvas'); cv.width = 200; cv.height = 120;
+    return;
+  }
+  const s0 = L.sheets[0];
+  const used = s0.items.length * state.pwMm * state.phMm;
+  const unused = Math.max(0, 100 * (1 - used / (L.p.PW * L.p.PH)));
+  if (L.N > L.capacity) {
+    setMsg(msg, `You asked for ${L.N} photos, but ${L.p.label} fits ${L.capacity} per sheet at this size and margin. The layout uses ${L.sheetCount} sheets (one page each in the PDF). Your photo size has not been changed.`, 'msg-warn');
+  } else {
+    setMsg(msg, `All ${L.N} ${L.N === 1 ? 'photo fits' : 'photos fit'} on one sheet: ${s0.rows} row${s0.rows > 1 ? 's' : ''} × ${s0.cols} column${s0.cols > 1 ? 's' : ''}.`, 'msg-ok');
+  }
+  $('statCopies').textContent = L.N;
+  $('statPerSheet').textContent = `${L.capacity} max`;
+  $('statSheets').textContent = L.sheetCount;
+  $('statGrid').textContent = `${s0.rows} × ${s0.cols}`;
+  $('statUnused').textContent = `${unused.toFixed(1)}%`;
+  $('statPaper').textContent = `${L.p.label}: ${fmtMm(L.p.PW)} × ${fmtMm(L.p.PH)} mm`;
+ 
+  const sel = $('sheetNum');
+  if (sel.options.length !== L.sheetCount) {
+    sel.innerHTML = '';
+    for (let i = 1; i <= L.sheetCount; i++) {
+      const o = document.createElement('option');
+      o.value = String(i); o.textContent = `Sheet ${i} of ${L.sheetCount}`;
+      sel.appendChild(o);
+    }
+  }
+  const cur = clamp(parseInt(sel.value, 10) || 1, 1, L.sheetCount);
+  sel.value = String(cur);
+  $('sheetRow').classList.toggle('hidden', L.sheetCount < 2);
+  drawSheet($('sheetCanvas'), L, cur - 1, Math.min(680 / L.p.PW, 760 / L.p.PH), $('guides').checked);
+  return L;
+}
+ 
+/* ================= Render ================= */
+function renderAll() {
+  if (state.work) {
+    drawCropPreview();
+    drawPhotoOutput();
+  } else {
+    state.photo = null;
+  }
+  updateSizeInfo();
+  updateQuality();
+  renderLayout();
+  updateHistoryButtons();
+}
+ 
+function syncControls() {
+  const e = state.edit;
+  updateUnitLabels();
+  renderPresets();
+  $('zoom').value = e.zoom; $('zoomVal').textContent = Math.round(e.zoom * 100) + '%';
+  $('bright').value = e.bright; $('brightVal').textContent = e.bright;
+  $('contrast').value = e.contrast; $('contrastVal').textContent = e.contrast;
+  $('sat').value = e.sat; $('satVal').textContent = e.sat;
+  $('sharp').value = e.sharp; $('sharpVal').textContent = e.sharp;
+  $('gray').checked = e.gray;
+  $('autoEnh').checked = e.autoEnh;
+  $('borderMm').value = e.borderMm;
+  $('bgBtn').setAttribute('aria-pressed', String(e.bgRemove));
+  $('bgBtn').textContent = e.bgRemove ? 'Restore original background' : 'Remove background';
+  const known = ['#ffffff', '#9fd3f5', '#e5e7eb', '#e53935'];
+  $('bgPreset').value = known.includes(e.bgColor) ? e.bgColor : 'custom';
+  $('bgCustom').value = e.bgColor;
+  updateHistoryButtons();
+}
+ 
+function geometryChanged() {
+  if (!state.img) return;
+  buildWork(); recenter(); scheduleRender();
+}
+ 
+/* ================= Export ================= */
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+ 
+const nextTick = () => new Promise(r => setTimeout(r, 0));
+ 
+async function exportFile() {
+  const msg = $('exportMsg'), bar = $('progress');
+  if (!state.img || !state.work) { setMsg(msg, 'Upload a photo before downloading.', 'msg-error'); return; }
+  renderAll();
+  const L = computeLayout();
+  if (L.error) { setMsg(msg, L.error, 'msg-error'); return; }
+  const fmt = $('fmt').value;
+  const dpi = +$('dpi').value;
+  const ppm = dpi / MM_PER_IN;
+  const guides = $('guides').checked;
+  const base = `pooreyoutuber-passport-${L.p.key}-${fileTag(state.pwMm)}x${fileTag(state.phMm)}mm-${dpi}dpi`;
+ 
+  $('exportBtn').disabled = true;
+  bar.hidden = false; bar.value = 0;
+  setMsg(msg, 'Preparing file…', '');
+  try {
+    if (fmt === 'pdf') {
+      const Ctor = window.jspdf && window.jspdf.jsPDF;
+      if (!Ctor) throw new Error('the PDF library did not load. Check your connection, or download JPG/PNG instead');
+      const orient = L.p.PW > L.p.PH ? 'landscape' : 'portrait';
+      const doc = new Ctor({ unit: 'mm', format: [L.p.PW, L.p.PH], orientation: orient });
+      for (let i = 0; i < L.sheets.length; i++) {
+        if (i > 0) doc.addPage([L.p.PW, L.p.PH], orient);
+        const cv = document.createElement('canvas');
+        drawSheet(cv, L, i, ppm, guides);
+        doc.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, L.p.PW, L.p.PH);
+        bar.value = Math.round((i + 1) / L.sheets.length * 90);
+        setMsg(msg, `Building page ${i + 1} of ${L.sheets.length}…`, '');
+        await nextTick();
       }
-
-      renderPreview(layout);
+      doc.save(`${base}.pdf`);
+      bar.value = 100;
+      setMsg(msg, `Downloaded ${base}.pdf (${L.sheets.length} page${L.sheets.length > 1 ? 's' : ''}). Print at actual size with "Fit to page" off.`, 'msg-ok');
+    } else {
+      const idx = clamp(parseInt($('sheetNum').value, 10) || 1, 1, L.sheetCount) - 1;
+      const cv = document.createElement('canvas');
+      drawSheet(cv, L, idx, ppm, guides);
+      bar.value = 60;
+      const mime = fmt === 'png' ? 'image/png' : 'image/jpeg';
+      const q = fmt === 'jpg' ? (+$('jpgQ').value) / 100 : undefined;
+      const blob = await new Promise((res, rej) =>
+        cv.toBlob(b => b ? res(b) : rej(new Error('the image could not be encoded')), mime, q));
+      const name = `${base}${L.sheets.length > 1 ? '-sheet' + (idx + 1) : ''}.${fmt}`;
+      downloadBlob(blob, name);
+      bar.value = 100;
+      setMsg(msg, `Downloaded ${name}. Print at actual size with "Fit to page" off.`, 'msg-ok');
     }
-
-    function renderPreview(layout) {
-      const sheet = paperSheet;
-      sheet.innerHTML = '';
-
-      // Scale preview so longest side is ~320 px
-      const maxPreview = 320;
-      const scale = Math.min(maxPreview / state.paperWmm, maxPreview / state.paperHmm);
-      const dispW = state.paperWmm * scale;
-      const dispH = state.paperHmm * scale;
-      sheet.style.width = dispW + 'px';
-      sheet.style.height = dispH + 'px';
-
-      if (!layout || layout.fit === 0) return;
-
-      const toShow = Math.min(state.copies, layout.fit);
-      const imgSrc = state.sourceCanvas ? state.sourceCanvas.toDataURL('image/jpeg', 0.85) : null;
-
-      for (let i = 0; i < toShow; i++) {
-        const col = i % layout.cols;
-        const row = Math.floor(i / layout.cols);
-        const xMm = state.marginMm + col * (state.photoWmm + state.spacingMm);
-        const yMm = state.marginMm + row * (state.photoHmm + state.spacingMm);
-
-        const slot = document.createElement('div');
-        slot.className = 'photo-slot';
-        slot.style.left = (xMm * scale) + 'px';
-        slot.style.top = (yMm * scale) + 'px';
-        slot.style.width = (state.photoWmm * scale) + 'px';
-        slot.style.height = (state.photoHmm * scale) + 'px';
-
-        if (imgSrc) {
-          const img = document.createElement('img');
-          img.src = imgSrc;
-          img.alt = 'Photo copy';
-          slot.appendChild(img);
-        }
-
-        if (state.cuttingGuides) {
-          const guide = document.createElement('div');
-          guide.className = 'cutting-guide';
-          guide.style.left = '-1px';
-          guide.style.top = '-1px';
-          guide.style.width = 'calc(100% + 2px)';
-          guide.style.height = 'calc(100% + 2px)';
-          slot.appendChild(guide);
-        }
-        sheet.appendChild(slot);
-      }
-    }
-
-    // ===== Quality Report =====
-    function updateQualityReport() {
-      const statusEl = $('qualityStatus');
-      const detailsEl = $('qualityDetails');
-      if (!state.sourceImage && !state.sourceCanvas) {
-        statusEl.className = 'quality-status quality-ok';
-        statusEl.textContent = 'Upload a photo';
-        detailsEl.textContent = 'Source resolution, required pixels, and effective DPI will appear here.';
-        return;
-      }
-
-      const srcW = state.sourceCanvas ? state.sourceCanvas.width : state.sourceImage.naturalWidth;
-      const srcH = state.sourceCanvas ? state.sourceCanvas.height : state.sourceImage.naturalHeight;
-      const req = pixelsNeeded(state.photoWmm, state.photoHmm, state.dpi);
-      const effectiveDpiW = srcW / mmToIn(state.photoWmm);
-      const effectiveDpiH = srcH / mmToIn(state.photoHmm);
-      const effectiveDpi = Math.min(effectiveDpiW, effectiveDpiH);
-
-      let statusClass = 'quality-good';
-      let statusText = 'Good resolution';
-      if (effectiveDpi < 150) {
-        statusClass = 'quality-low';
-        statusText = 'Low resolution — consider using a better source image';
-      } else if (effectiveDpi < 250) {
-        statusClass = 'quality-ok';
-        statusText = 'Acceptable resolution';
-      }
-
-      statusEl.className = 'quality-status ' + statusClass;
-      statusEl.textContent = statusText;
-      detailsEl.innerHTML = `
-        Original / working image: ${srcW} × ${srcH} px<br>
-        Requested photo: ${round(state.photoWmm,1)} × ${round(state.photoHmm,1)} mm<br>
-        Target DPI: ${state.dpi}<br>
-        Required pixels: ${req.w} × ${req.h}<br>
-        Estimated effective DPI: ~${Math.round(effectiveDpi)}
-      `;
-    }
-
-    // ===== Export =====
-    function enableExport(on) {
-      $('exportJpgBtn').disabled = !on;
-      $('exportPngBtn').disabled = !on;
-      $('exportPdfBtn').disabled = !on;
-    }
-
-    $('exportDpi').addEventListener('change', e => {
-      state.dpi = +e.target.value;
-      updateAspectAndPixels();
-      updateQualityReport();
+  } catch (err) {
+    bar.value = 0;
+    setMsg(msg, `Download failed: ${err.message}. Try 200 DPI or fewer photos.`, 'msg-error');
+  } finally {
+    $('exportBtn').disabled = false;
+    setTimeout(() => { bar.hidden = true; }, 1500);
+  }
+}
+ 
+/* ================= Wiring ================= */
+function onLayoutInput() {
+  $('customPaper').classList.toggle('hidden', $('paper').value !== 'custom');
+  $('copiesCustomWrap').classList.toggle('hidden', $('copies').value !== 'custom');
+  scheduleRender();
+}
+ 
+function init() {
+  // Upload
+  $('browseBtn').addEventListener('click', () => $('fileInput').click());
+  $('replaceBtn').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    handleFile(f);
+  });
+  const dz = $('dropzone');
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => e.preventDefault());
+ 
+  // Toolbar
+  $('backBtn').addEventListener('click', undo);
+  $('fwdBtn').addEventListener('click', redo);
+  $('resetBtn').addEventListener('click', () => {
+    if (!state.img) return;
+    pushHistory();
+    state.edit = { ...DEFAULT_EDIT };
+    buildWork(); recenter(); syncControls(); scheduleRender();
+  });
+  $('clearBtn').addEventListener('click', clearPhoto);
+  document.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (e.target.matches('input[type=text],input[type=number],select')) return;
+    if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+    if (e.key === 'y' || e.key === 'Y') { e.preventDefault(); redo(); }
+  });
+ 
+  // 1. Photo size
+  $('unit').addEventListener('change', e => { state.unit = e.target.value; updateUnitLabels(); scheduleRender(); });
+  ['pw', 'ph'].forEach(id => {
+    bindCommit($(id));
+    $(id).addEventListener('input', () => { if (readDims()) { renderPresets(); scheduleRender(); } });
+  });
+ 
+  // 2. Crop & zoom (drag + keyboard)
+  const cc = $('cropCanvas');
+  cc.addEventListener('pointerdown', e => {
+    if (!state.work) return;
+    state.preSnap = snap();
+    state.dragging = true;
+    state.lastX = e.clientX; state.lastY = e.clientY;
+    cc.setPointerCapture(e.pointerId);
+  });
+  cc.addEventListener('pointermove', e => {
+    if (!state.dragging || !state.work) return;
+    const rect = cc.getBoundingClientRect();
+    const cssScale = cc.width / rect.width;
+    state.edit.cx -= (e.clientX - state.lastX) * cssScale / state.pvScale;
+    state.edit.cy -= (e.clientY - state.lastY) * cssScale / state.pvScale;
+    state.lastX = e.clientX; state.lastY = e.clientY;
+    scheduleRender();
+  });
+  const endDrag = () => {
+    if (!state.dragging) return;
+    state.dragging = false;
+    if (state.preSnap && JSON.stringify(state.preSnap) !== JSON.stringify(snap())) pushHistory(state.preSnap);
+    state.preSnap = null;
+  };
+  cc.addEventListener('pointerup', endDrag);
+  cc.addEventListener('pointercancel', endDrag);
+  cc.addEventListener('keydown', e => {
+    if (!state.work) return;
+    const step = state.work.width * 0.01;
+    const map = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (!map[e.key]) return;
+    e.preventDefault();
+    pushHistory();
+    state.edit.cx += map[e.key][0]; state.edit.cy += map[e.key][1];
+    scheduleRender();
+  });
+  bindCommit($('zoom'));
+  $('zoom').addEventListener('input', e => {
+    state.edit.zoom = +e.target.value;
+    $('zoomVal').textContent = Math.round(state.edit.zoom * 100) + '%';
+    scheduleRender();
+  });
+ 
+  // 3. Rotate & flip
+  $('rotL').addEventListener('click', () => { pushHistory(); state.edit.rot = (state.edit.rot + 270) % 360; geometryChanged(); });
+  $('rotR').addEventListener('click', () => { pushHistory(); state.edit.rot = (state.edit.rot + 90) % 360; geometryChanged(); });
+  $('flipH').addEventListener('click', () => { pushHistory(); state.edit.flipH = !state.edit.flipH; geometryChanged(); });
+  $('flipV').addEventListener('click', () => { pushHistory(); state.edit.flipV = !state.edit.flipV; geometryChanged(); });
+ 
+  // 4–7. Tone sliders
+  [['bright', 'brightVal'], ['contrast', 'contrastVal'], ['sat', 'satVal'], ['sharp', 'sharpVal']].forEach(([id, out]) => {
+    bindCommit($(id));
+    $(id).addEventListener('input', e => {
+      state.edit[id] = +e.target.value;
+      $(out).textContent = e.target.value;
+      scheduleRender();
     });
-    $('jpgQuality').addEventListener('input', e => {
-      state.jpgQuality = e.target.value / 100;
-      $('jpgQVal').textContent = e.target.value;
-    });
-
-    function getExportCanvas(singlePhoto) {
-      // Returns a canvas of one photo at the requested DPI
-      const req = pixelsNeeded(state.photoWmm, state.photoHmm, state.dpi);
-      const canvas = document.createElement('canvas');
-      canvas.width = req.w;
-      canvas.height = req.h;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, req.w, req.h);
-      if (state.sourceCanvas) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(state.sourceCanvas, 0, 0, req.w, req.h);
-      }
-      return canvas;
-    }
-
-    function filenameBase() {
-      const w = round(state.photoWmm, 1);
-      const h = round(state.photoHmm, 1);
-      return `pooreyoutuber-photo-${w}x${h}mm-${state.dpi}dpi`;
-    }
-
-    $('exportJpgBtn').addEventListener('click', () => {
-      if (!state.sourceCanvas) return;
-      showLoading('Creating JPG…');
-      setTimeout(() => {
-        try {
-          const layout = calcLayout();
-          const canvas = buildSheetCanvas(layout, 0); // first page only for raster
-          canvas.toBlob(blob => {
-            downloadBlob(blob, filenameBase() + '.jpg');
-            hideLoading();
-          }, 'image/jpeg', state.jpgQuality);
-        } catch (err) {
-          hideLoading();
-          alert('Export failed: ' + err.message);
-        }
-      }, 50);
-    });
-
-    $('exportPngBtn').addEventListener('click', () => {
-      if (!state.sourceCanvas) return;
-      showLoading('Creating PNG…');
-      setTimeout(() => {
-        try {
-          const layout = calcLayout();
-          const canvas = buildSheetCanvas(layout, 0);
-          canvas.toBlob(blob => {
-            downloadBlob(blob, filenameBase() + '.png');
-            hideLoading();
-          }, 'image/png');
-        } catch (err) {
-          hideLoading();
-          alert('Export failed: ' + err.message);
-        }
-      }, 50);
-    });
-
-    $('exportPdfBtn').addEventListener('click', async () => {
-      if (!state.sourceCanvas) return;
-      showLoading('Creating PDF…');
-      try {
-        const { jsPDF } = window.jspdf;
-        const layout = calcLayout();
-        if (layout.fit === 0) {
-          hideLoading();
-          alert('Cannot create PDF: photo does not fit on the paper.');
-          return;
-        }
-
-        const pdf = new jsPDF({
-          orientation: state.paperWmm > state.paperHmm ? 'landscape' : 'portrait',
-          unit: 'mm',
-          format: [state.paperWmm, state.paperHmm]
-        });
-
-        const pages = layout.pages;
-        const photoCanvas = getExportCanvas(true);
-        const photoData = photoCanvas.toDataURL('image/jpeg', 0.95);
-
-        for (let p = 0; p < pages; p++) {
-          if (p > 0) pdf.addPage([state.paperWmm, state.paperHmm], state.paperWmm > state.paperHmm ? 'landscape' : 'portrait');
-          const startIdx = p * layout.fit;
-          const endIdx = Math.min(startIdx + layout.fit, state.copies);
-
-          for (let i = startIdx; i < endIdx; i++) {
-            const local = i - startIdx;
-            const col = local % layout.cols;
-            const row = Math.floor(local / layout.cols);
-            const x = state.marginMm + col * (state.photoWmm + state.spacingMm);
-            const y = state.marginMm + row * (state.photoHmm + state.spacingMm);
-            pdf.addImage(photoData, 'JPEG', x, y, state.photoWmm, state.photoHmm);
-
-            if (state.cuttingGuides) {
-              pdf.setDrawColor(200, 50, 50);
-              pdf.setLineWidth(0.15);
-              pdf.setLineDash([1, 1]);
-              pdf.rect(x, y, state.photoWmm, state.photoHmm);
-              pdf.setLineDash([]);
-            }
-          }
-        }
-
-        pdf.save(filenameBase() + '.pdf');
-        hideLoading();
-      } catch (err) {
-        hideLoading();
-        console.error(err);
-        alert('PDF export failed: ' + err.message);
-      }
-    });
-
-    function buildSheetCanvas(layout, pageIndex) {
-      const dpi = state.dpi;
-      const sheetWpx = Math.round(mmToIn(state.paperWmm) * dpi);
-      const sheetHpx = Math.round(mmToIn(state.paperHmm) * dpi);
-      const canvas = document.createElement('canvas');
-      canvas.width = sheetWpx;
-      canvas.height = sheetHpx;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, sheetWpx, sheetHpx);
-
-      if (layout.fit === 0 || !state.sourceCanvas) return canvas;
-
-      const photoCanvas = getExportCanvas(true);
-      const start = pageIndex * layout.fit;
-      const end = Math.min(start + layout.fit, state.copies);
-
-      for (let i = start; i < end; i++) {
-        const local = i - start;
-        const col = local % layout.cols;
-        const row = Math.floor(local / layout.cols);
-        const xMm = state.marginMm + col * (state.photoWmm + state.spacingMm);
-        const yMm = state.marginMm + row * (state.photoHmm + state.spacingMm);
-        const x = Math.round(mmToIn(xMm) * dpi);
-        const y = Math.round(mmToIn(yMm) * dpi);
-        const w = Math.round(mmToIn(state.photoWmm) * dpi);
-        const h = Math.round(mmToIn(state.photoHmm) * dpi);
-        ctx.drawImage(photoCanvas, x, y, w, h);
-
-        if (state.cuttingGuides) {
-          ctx.strokeStyle = '#dc2626';
-          ctx.lineWidth = Math.max(1, dpi / 150);
-          ctx.setLineDash([dpi / 40, dpi / 40]);
-          ctx.strokeRect(x, y, w, h);
-          ctx.setLineDash([]);
-        }
-      }
-      return canvas;
-    }
-
-    function downloadBlob(blob, name) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-    }
-
-    // ===== Init =====
-    updateAspectAndPixels();
-    applyOrientation();
-    updateLayout();
-  })();
-  </script>
+  });
+ 
+  // 8–9. Checkboxes
+  $('gray').addEventListener('change', e => { pushHistory(); state.edit.gray = e.target.checked; scheduleRender(); });
+  $('autoEnh').addEventListener('change', e => { pushHistory(); state.edit.autoEnh = e.target.checked; scheduleRender(); });
+ 
+  // 10. Background removal
+  $('bgBtn').addEventListener('click', toggleBackground);
+ 
+  // 11. Background colour
+  $('bgPreset').addEventListener('change', e => {
+    pushHistory();
+    state.edit.bgColor = e.target.value === 'custom' ? $('bgCustom').value : e.target.value;
+    syncControls(); scheduleRender();
+  });
+  bindCommit($('bgCustom'));
+  $('bgCustom').addEventListener('input', e => {
+    state.edit.bgColor = e.target.value;
+    $('bgPreset').value = 'custom';
+    scheduleRender();
+  });
+ 
+  // 12. Border
+  bindCommit($('borderMm'));
+  $('borderMm').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    state.edit.borderMm = isFinite(v) && v >= 0 ? Math.min(v, 2) : 0;
+    scheduleRender();
+  });
+ 
+  // Step 3: layout
+  $('fillBtn').addEventListener('click', () => {
+    const p = getPaper();
+    if (!p) return;
+    const m = parseFloat($('margin').value) || 0, gx = parseFloat($('gapX').value) || 0, gy = parseFloat($('gapY').value) || 0;
+    const cols = Math.floor((p.PW - 2 * m + gx) / (state.pwMm + gx));
+    const rows = Math.floor((p.PH - 2 * m + gy) / (state.phMm + gy));
+    const n = cols * rows;
+    if (n < 1) { setMsg($('layoutMsg'), 'This photo size does not fit on the selected paper.', 'msg-error'); return; }
+    $('copies').value = 'custom';
+    $('copiesCustom').value = n;
+    onLayoutInput();
+  });
+  ['paper', 'orient', 'copies', 'copiesCustom', 'margin', 'gapX', 'gapY', 'guides', 'cpw', 'cph', 'sheetNum'].forEach(id => {
+    $(id).addEventListener('input', onLayoutInput);
+    $(id).addEventListener('change', onLayoutInput);
+  });
+ 
+  // Step 4: download
+  $('dpi').addEventListener('change', scheduleRender);
+  $('fmt').addEventListener('change', () => $('jpgRow').classList.toggle('hidden', $('fmt').value !== 'jpg'));
+  $('jpgQ').addEventListener('input', e => { $('jpgQVal').textContent = e.target.value + '%'; });
+  $('exportBtn').addEventListener('click', exportFile);
+ 
+  // Initial state
+  updateUnitLabels();
+  renderPresets();
+  $('exportBtn').disabled = true;
+  $('jpgRow').classList.toggle('hidden', $('fmt').value !== 'jpg');
+  onLayoutInput();
+  scheduleRender();
+}
+ 
+init();
+})();
+</script>
 </body>
 </html>
+ 
