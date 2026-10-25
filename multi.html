@@ -427,6 +427,41 @@
         }
         footer a:hover { text-decoration: underline; }
 
+
+
+        /* Hero buttons */
+        .hero-bottom { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+        .button.primary {
+            background: var(--sky-primary); color: #fff; text-decoration: none; font-weight: 700;
+            padding: 10px 22px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,168,232,0.25);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .button.primary:hover { background: var(--sky-dark); transform: translateY(-2px); }
+        .trust-note {
+            padding: 8px 16px; border-radius: 30px; background: var(--sky-light);
+            color: var(--sky-dark); font-weight: 700; font-size: 0.95rem;
+        }
+        body.dark-mode .trust-note { background: rgba(56,189,248,0.15); color: var(--sky-primary); }
+
+        /* Search + filters */
+        .quickbar { margin: 10px 0 0; text-align: center; }
+        .search-wrap {
+            display: flex; align-items: center; gap: 10px; max-width: 560px; margin: 0 auto 16px;
+            background: var(--yt-card); border: 1.5px solid var(--yt-border); border-radius: 30px;
+            padding: 10px 18px; color: var(--sky-primary);
+        }
+        .search-wrap:focus-within { border-color: var(--sky-primary); box-shadow: 0 0 0 3px rgba(0,168,232,0.15); }
+        .search-wrap input {
+            flex: 1; border: none; outline: none; background: transparent;
+            font-size: 1rem; font-family: inherit; color: var(--yt-text);
+        }
+        .filters { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .no-results { color: var(--muted-text); margin-top: 20px; }
+
+        /* Smooth jump between Digital Tools and Education Topics */
+        html { scroll-behavior: smooth; }
+        #tools, #explore { scroll-margin-top: 20px; }
+
         /* --- Mobile Responsiveness --- */
         @media (max-width: 768px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 15px; }
@@ -447,7 +482,8 @@
         </div>
         <div class="nav-controls">
             <nav>
-                <a href="#explore">Education Topics →</a>
+                <a href="#tools" onclick="filterCategory('all', document.querySelector('.filter-chip'))">Digital Tools →</a>
+                <a href="#explore" onclick="filterCategory('all', document.querySelector('.filter-chip'))">Education Topics →</a>
                 <a href="youtubehelp.html" class="article-btn">YT <span class="badge-new">NEW</span></a>
                 <a href="Articals.html" class="article-btn">Articles <span class="badge-new">NEW</span></a>
                 <div class="dropdown">
@@ -468,17 +504,96 @@
             <h1>🚀 PooreTools All Free Tools & Learning Topics</h1>
             <p class="hero-subtitle">Discover 20 learning topics and 50+ free browser-based online tools for digital creators, students, developers, and productivity. Fast, free, secure, and no signup required.</p>
             
-            <!-- Category Filter Bar -->
-            <div class="filter-nav">
-                <button class="filter-chip active" onclick="filterCategory('all', this)">All</button>
-                <button class="filter-chip" onclick="filterCategory('free-tools', this)">Free Tools</button>
-                <button class="filter-chip" onclick="filterCategory('business', this)">Business</button>
-                <button class="filter-chip" onclick="filterCategory('technology', this)">Technology</button>
-                <button class="filter-chip" onclick="filterCategory('science', this)">Science & maths</button>
-                <button class="filter-chip" onclick="filterCategory('language', this)">Languages</button>
-                <button class="filter-chip" onclick="filterCategory('career', this)">Career skills</button>
+            <div class="hero-bottom">
+                <a class="button primary" href="#tools">Digital Tools <span aria-hidden="true">→</span></a>
+                <a class="button primary" href="#explore">Education topics <span aria-hidden="true">→</span></a>
+                <span class="trust-note">20 learning topics · 28+ free tools</span>
             </div>
         </div>
+
+        <!-- SEARCH + FILTERS (top) -->
+        <div class="quickbar">
+            <label class="search-wrap" aria-label="Search tools and topics">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <input id="topicSearch" type="search" placeholder="Search tools & topics..." autocomplete="off">
+            </label>
+            <div class="filters" role="group" aria-label="Filter topics">
+                <button class="filter-chip active" data-filter="all" aria-pressed="true">All</button>
+                <button class="filter-chip" data-filter="free-tools" aria-pressed="false">Free Tools</button>
+                <button class="filter-chip" data-filter="business" aria-pressed="false">Business</button>
+                <button class="filter-chip" data-filter="technology" aria-pressed="false">Technology</button>
+                <button class="filter-chip" data-filter="science" aria-pressed="false">Science & maths</button>
+                <button class="filter-chip" data-filter="language" aria-pressed="false">Languages</button>
+                <button class="filter-chip" data-filter="career" aria-pressed="false">Career skills</button>
+            </div>
+            <p class="no-results" id="noResults" style="display:none">No tools or topics found. Try another search.</p>
+        </div>
+
+        <!-- FREE TOOLS SECTION -->
+        <section class="section" id="tools">
+            <h2 class="section-heading">🔥 YouTube & Content Tools</h2>
+            <div class="tools">
+                <div class="tool item-card" data-category="free-tools"><h3>1. Multi Live Browser</h3><a href="multi-live.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>2. Multi Shorts Views</h3><a href="youtube-short-preview.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>3. Multi Browser</h3><a href="multi-browser.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>4. Multi Browser 2.O</h3><a href="multi-browser2.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>5. YouTube Video Views</h3><a href="youtube-view-checker.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>6. YouTube Thumbnail</h3><a href="youtube-thumbnail.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>7. YouTube Description Generator</h3><a href="youtube-tool.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>8. Tags Generate</h3><a href="Tags.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>9. Video Downloader</h3><a href="video-downloader.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>10. Insta Browser</h3><a href="instagram.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>11. Insta live</h3><a href="instaVelocity.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>12. TikTok Browser</h3><a href="tiktok-multi-brower.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>13. Bilibili Browser</h3><a href="bilibili-multi.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>14. Twitch Brower</h3><a href="twitch-browser.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>15. Kick Brower</h3><a href="Kick-browser.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>16. YT-Sine</h3><a href="youtube-sine.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>17. Insta-Sine</h3><a href="insta-sine.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>18. TikTik-Seo</h3><a href="TikTok-seo.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>19. FB Browser</h3><a href="facebook-multi.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>20. FB Live</h3><a href="Fbvolocity.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>21. Anything Qr Code</h3><a href="Anything-qr.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>22. YouTube Audit</h3><a href="youtube-channel-audit.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>23. Website Audit</h3><a href="website-audit.html" class="tool-link">Open Tool</a></div>   
+                <div class="tool item-card" data-category="free-tools"><h3>24. Private Message</h3><a href="private-message.html" class="tool-link">Open Tool</a></div> 
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-heading">⚙️ PDF, Image & Web Utilities</h2>
+            <div class="tools">
+                <div class="tool item-card" data-category="free-tools"><h3>25. Instagram Ai caption</h3><a href="insta-tool.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>26. Video Compressor </h3><a href="Video-Compressor.html" class="tool-link">Open Tool</a></div> 
+                <div class="tool item-card" data-category="free-tools"><h3>27. Website ads1</h3><a href="website-ads1.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>28. Photo Enhancer Online</h3><a href="image-upscaler-enhancer.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>29. Text To Handwriting</h3><a href="handwriting.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>30. Image Background Remover</h3><a href="image-background-remover.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>31. Image Converter</h3><a href="image-converter.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>32. HEIC to JPG </h3><a href="heic-to-jp.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>33. Text to Doc Converter</h3><a href="text-to-doc.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>34. File to ZIP Converter</h3><a href="zip-converter.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>35. Image Compressor</h3><a href="image-compressor.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>36. PDF Compress online</h3><a href="pdf-compress.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>37. Photo to PDF</h3><a href="photo-to-pdf.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>38. PDF to JPG </h3><a href="pdf-to-jpg.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>39. PDF CROP</h3><a href="pdf-crop.html" class="tool-link">Open Tool</a></div> 
+                <div class="tool item-card" data-category="free-tools"><h3>40. PDF Merge</h3><a href="pdf-merge.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>41. Video to Image</h3><a href="video-to-image.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="business free-tools"><h3>42. Calculadoras</h3><a href="calculadoras.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="business free-tools"><h3>43. Business Calculators</h3><a href="business-calculators.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="business free-tools"><h3>44. Financial Suite</h3><a href="financial-suite.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>45. Technical SEO Suite</h3><a href="tech-seo.html" class="tool-link">Open Tool</a></div> 
+                <div class="tool new-tool item-card" data-category="business free-tools"><h3>46. Emi Check online</h3><a href="emi.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="free-tools"><h3>47. mp3</h3><a href="mp3.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="free-tools"><h3>48. Love Percentage</h3><a href="love.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>49. CSS Tools</h3><a href="css-tools.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>50 Coding Tools</h3><a href="coding-tools.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>51 Coding Live Preview</h3><a href="preview-tools.html" class="tool-link">Open Tool</a></div>
+                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>52 Networking Tools</h3><a href="networking-tools.html" class="tool-link">Open Tool</a></div>
+                <div class="tool item-card" data-category="free-tools"><h3>Test</h3><a href="multi.html" class="tool-link">Open Tool</a></div>
+            </div>
+        </section>
 
         <!-- EDUCATION TOPICS SECTION -->
         <section class="section wrap" id="explore">
@@ -631,72 +746,6 @@
             </div>
         </section>
 
-        <!-- FREE TOOLS SECTION -->
-        <section class="section">
-            <h2 class="section-heading">🔥 YouTube & Content Tools</h2>
-            <div class="tools">
-                <div class="tool item-card" data-category="free-tools"><h3>1. Multi Live Browser</h3><a href="multi-live.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>2. Multi Shorts Views</h3><a href="youtube-short-preview.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>3. Multi Browser</h3><a href="multi-browser.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>4. Multi Browser 2.O</h3><a href="multi-browser2.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>5. YouTube Video Views</h3><a href="youtube-view-checker.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>6. YouTube Thumbnail</h3><a href="youtube-thumbnail.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>7. YouTube Description Generator</h3><a href="youtube-tool.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>8. Tags Generate</h3><a href="Tags.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>9. Video Downloader</h3><a href="video-downloader.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>10. Insta Browser</h3><a href="instagram.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>11. Insta live</h3><a href="instaVelocity.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>12. TikTok Browser</h3><a href="tiktok-multi-brower.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>13. Bilibili Browser</h3><a href="bilibili-multi.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>14. Twitch Brower</h3><a href="twitch-browser.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>15. Kick Brower</h3><a href="Kick-browser.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>16. YT-Sine</h3><a href="youtube-sine.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>17. Insta-Sine</h3><a href="insta-sine.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>18. TikTik-Seo</h3><a href="TikTok-seo.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>19. FB Browser</h3><a href="facebook-multi.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>20. FB Live</h3><a href="Fbvolocity.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>21. Anything Qr Code</h3><a href="Anything-qr.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>22. YouTube Audit</h3><a href="youtube-channel-audit.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>23. Website Audit</h3><a href="website-audit.html" class="tool-link">Open Tool</a></div>   
-                <div class="tool item-card" data-category="free-tools"><h3>24. Private Message</h3><a href="private-message.html" class="tool-link">Open Tool</a></div> 
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-heading">⚙️ PDF, Image & Web Utilities</h2>
-            <div class="tools">
-                <div class="tool item-card" data-category="free-tools"><h3>25. Instagram Ai caption</h3><a href="insta-tool.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>26. Video Compressor </h3><a href="Video-Compressor.html" class="tool-link">Open Tool</a></div> 
-                <div class="tool item-card" data-category="free-tools"><h3>27. Website ads1</h3><a href="website-ads1.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>28. Photo Enhancer Online</h3><a href="image-upscaler-enhancer.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>29. Text To Handwriting</h3><a href="handwriting.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>30. Image Background Remover</h3><a href="image-background-remover.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>31. Image Converter</h3><a href="image-converter.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>32. HEIC to JPG </h3><a href="heic-to-jp.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>33. Text to Doc Converter</h3><a href="text-to-doc.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>34. File to ZIP Converter</h3><a href="zip-converter.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>35. Image Compressor</h3><a href="image-compressor.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>36. PDF Compress online</h3><a href="pdf-compress.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>37. Photo to PDF</h3><a href="photo-to-pdf.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>38. PDF to JPG </h3><a href="pdf-to-jpg.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>39. PDF CROP</h3><a href="pdf-crop.html" class="tool-link">Open Tool</a></div> 
-                <div class="tool item-card" data-category="free-tools"><h3>40. PDF Merge</h3><a href="pdf-merge.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>41. Video to Image</h3><a href="video-to-image.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="business free-tools"><h3>42. Calculadoras</h3><a href="calculadoras.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="business free-tools"><h3>43. Business Calculators</h3><a href="business-calculators.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="business free-tools"><h3>44. Financial Suite</h3><a href="financial-suite.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>45. Technical SEO Suite</h3><a href="tech-seo.html" class="tool-link">Open Tool</a></div> 
-                <div class="tool new-tool item-card" data-category="business free-tools"><h3>46. Emi Check online</h3><a href="emi.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="free-tools"><h3>47. mp3</h3><a href="mp3.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="free-tools"><h3>48. Love Percentage</h3><a href="love.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>49. CSS Tools</h3><a href="css-tools.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>50 Coding Tools</h3><a href="coding-tools.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>51 Coding Live Preview</h3><a href="preview-tools.html" class="tool-link">Open Tool</a></div>
-                <div class="tool new-tool item-card" data-category="technology free-tools"><h3>52 Networking Tools</h3><a href="networking-tools.html" class="tool-link">Open Tool</a></div>
-                <div class="tool item-card" data-category="free-tools"><h3>Test</h3><a href="multi.html" class="tool-link">Open Tool</a></div>
-            </div>
-        </section>
-
         <!-- SEO DESCRIPTION -->
         <div class="seo-description">
             <h2>Trusted & Secure Free Online Tools & Educational Learning Topics</h2>
@@ -751,23 +800,43 @@
             }
         }
 
-        // Category Filter Function
-        function filterCategory(cat, btn) {
-            // Update active state on filter chips
-            const chips = document.querySelectorAll('.filter-chip');
-            chips.forEach(c => c.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+        // Search + Category Filter
+        let activeFilter = 'all';
 
-            const items = document.querySelectorAll('.item-card');
-            items.forEach(item => {
-                const itemCats = item.getAttribute('data-category') || '';
-                if (cat === 'all' || itemCats.includes(cat)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
+        function applyFilters() {
+            const q = document.getElementById('topicSearch').value.trim().toLowerCase();
+            let visible = 0;
+            document.querySelectorAll('.item-card').forEach(item => {
+                const cats = item.getAttribute('data-category') || '';
+                const text = ((item.getAttribute('data-search') || '') + ' ' + item.textContent).toLowerCase();
+                const okCat = activeFilter === 'all' || cats.includes(activeFilter);
+                const okSearch = !q || text.includes(q);
+                const show = okCat && okSearch;
+                item.style.display = show ? 'flex' : 'none';
+                if (show) visible++;
             });
+            // hide section headings that have no visible cards
+            document.querySelectorAll('section.section').forEach(sec => {
+                const any = [...sec.querySelectorAll('.item-card')].some(c => c.style.display !== 'none');
+                sec.style.display = any ? '' : 'none';
+            });
+            document.getElementById('noResults').style.display = visible ? 'none' : 'block';
         }
+
+        function filterCategory(cat, btn) {
+            activeFilter = cat;
+            document.querySelectorAll('.filter-chip').forEach(c => {
+                c.classList.remove('active');
+                c.setAttribute('aria-pressed', 'false');
+            });
+            if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
+            applyFilters();
+        }
+
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => filterCategory(chip.dataset.filter, chip));
+        });
+        document.getElementById('topicSearch').addEventListener('input', applyFilters);
     </script>
 </body>
 </html>
