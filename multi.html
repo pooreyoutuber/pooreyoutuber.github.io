@@ -1,1 +1,634 @@
-not av
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F2F4F7">
+  <title>PooreTools — Learn & Digital Tools</title>
+  <meta name="description" content="Learn structured topics and use free digital tools for images, PDFs, video, calculators, coding and more.">
+  <meta name="robots" content="index,follow">
+  <meta property="og:title" content="PooreTools — Learn & Digital Tools">
+  <meta property="og:description" content="20 learning topics + free online tools for images, PDFs, video, calculators, coding and more.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F2F4F7; --surface:#fff; --ink:#0E1726; --muted:#586174; --line:#D3D9E1;
+  --blue:#2336C9; --blue-d:#1A29A0; --marker:#FFD84D;
+  --c-business:#FFE7B0; --c-technology:#E2D9FF; --c-science:#D4E3FF; --c-language:#FFD8E1; --c-career:#CFEFDC;
+  --head:"Bricolage Grotesque","Trebuchet MS",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:128px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body)}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{width:min(1180px,calc(100% - 40px));margin-inline:auto}
+.section[hidden],[hidden]{display:none!important}
+
+/* header */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(242,244,247,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{height:62px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;font:700 21px/1 var(--head);letter-spacing:-.03em}
+.brand-mark{width:30px;height:30px;display:grid;place-items:center;background:var(--blue);color:#fff;border-radius:8px 8px 8px 2px;font-size:17px}
+.brand b{color:var(--blue);font-weight:700}
+.navlinks{display:flex;gap:26px;font-size:15px;color:var(--muted);margin-left:auto}
+.navlinks a{padding:6px 0;border-bottom:2px solid transparent}
+.navlinks a:hover{color:var(--ink);border-color:var(--marker)}
+.nav-actions{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--ink);background:transparent;padding:9px 16px;border-radius:8px;font-weight:600;font-size:14.5px;cursor:pointer}
+.btn.solid{background:var(--ink);color:#fff}
+.btn:hover{background:var(--marker);color:var(--ink);border-color:var(--ink)}
+.menu-toggle{display:none;width:42px;height:42px;padding:0;justify-content:center;font-size:18px}
+
+/* hero */
+.hero{padding:44px 0 30px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.9fr);gap:48px;align-items:end}
+h1{font:700 clamp(36px,5.6vw,66px)/1.02 var(--head);letter-spacing:-.035em;margin:0 0 16px;max-width:12ch}
+.lead{font-size:18px;color:var(--muted);max-width:52ch;margin:0 0 26px}
+.search{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:0 16px;max-width:640px;box-shadow:5px 5px 0 var(--ink)}
+.search:focus-within{box-shadow:5px 5px 0 var(--marker);border-color:var(--ink)}
+.search svg{flex:none;color:var(--ink)}
+.search input{width:100%;min-width:0;border:0;outline:0;background:transparent;padding:17px 0;font-size:17px}
+.suggest{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:20px;font-size:14px;color:var(--muted);align-items:center}
+.suggest button{background:none;border:0;border-bottom:1.5px solid var(--line);padding:2px 0;cursor:pointer;color:var(--ink)}
+.suggest button:hover{border-color:var(--blue);color:var(--blue)}
+.doors{display:grid;gap:12px}
+.door{display:flex;align-items:center;gap:16px;padding:20px 22px;background:var(--surface);border:1.5px solid var(--ink);border-radius:12px}
+.door:hover{background:var(--marker)}
+.door div{flex:1}
+.door strong{display:block;font:700 22px/1.15 var(--head);letter-spacing:-.02em}
+.door span{font-size:14px;color:var(--muted)}
+.door:hover span{color:var(--ink)}
+.door .go{width:24px;height:24px}
+
+/* sticky filters */
+.quickbar{position:sticky;top:62px;z-index:20;background:var(--bg);border-block:1px solid var(--line)}
+.filters{display:flex;gap:8px;padding:11px 0;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:none;white-space:nowrap;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 15px;font-size:14px;cursor:pointer;color:var(--muted)}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+
+/* sections */
+.section{padding:52px 0 8px}
+.shead{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+h2{font:700 clamp(28px,3.6vw,42px)/1.08 var(--head);letter-spacing:-.03em;margin:0}
+.sub{margin:8px 0 0;color:var(--muted);max-width:56ch}
+.mini{display:flex;gap:6px;flex-wrap:wrap}
+.mini .chip{padding:5px 12px;font-size:13px}
+
+/* tools: ruled index */
+.tools{display:grid;grid-template-columns:1fr 1fr;column-gap:36px;border-top:2px solid var(--ink)}
+.tool{display:flex;align-items:center;gap:16px;padding:16px 10px;border-bottom:1px solid var(--line);min-width:0}
+.tool:hover{background:var(--surface);box-shadow:inset 4px 0 0 var(--blue)}
+.ico{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:10px;background:var(--surface);border:1.5px solid var(--ink)}
+.ico svg{width:22px;height:22px}
+.txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.tool strong{font:600 17px/1.25 var(--head);letter-spacing:-.01em}
+.tool small{font-size:13.5px;color:var(--muted);margin-top:2px}
+.kind{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.go{flex:none;width:18px;height:18px;color:var(--muted)}
+.tool:hover .go{color:var(--blue)}
+
+/* topics */
+.tgroup{margin-bottom:34px}
+.tgroup h3{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font:700 21px/1.2 var(--head);letter-spacing:-.02em}
+.tgroup h3 small{font:400 14px var(--body);color:var(--muted)}
+.tgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.topic{display:flex;flex-direction:column;gap:6px;padding:20px;border-radius:16px 16px 16px 4px;background:var(--tint);min-height:178px;border:1.5px solid transparent}
+.topic .ico{background:rgba(255,255,255,.7);border-color:var(--ink);margin-bottom:12px}
+.topic strong{font:700 19px/1.2 var(--head);letter-spacing:-.02em}
+.topic small{font-size:13.5px;line-height:1.45;color:#2b3445}
+.topic:hover{border-color:var(--ink);background:var(--marker)}
+.topic:hover .ico{background:#fff}
+.tgroup[data-group="business"] .topic{--tint:var(--c-business)}
+.tgroup[data-group="technology"] .topic{--tint:var(--c-technology)}
+.tgroup[data-group="science"] .topic{--tint:var(--c-science)}
+.tgroup[data-group="language"] .topic{--tint:var(--c-language)}
+.tgroup[data-group="career"] .topic{--tint:var(--c-career)}
+.empty{display:none;border:2px dashed var(--line);border-radius:12px;padding:30px;text-align:center;color:var(--muted)}
+
+/* how it works */
+.how{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;padding:30px 0 10px}
+.how p{color:var(--muted);max-width:52ch;margin:14px 0 22px}
+.points{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;margin:0;padding:0;list-style:none}
+.points li{border-top:2px solid var(--ink);padding:14px 0 22px}
+.points b{display:block;font:700 17px var(--head);margin-bottom:4px}
+.points span{font-size:14px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:46px;border:1.5px solid var(--ink);border-radius:14px;background:var(--surface);overflow:hidden}
+.step{padding:26px}
+.step+.step{border-left:1.5px solid var(--ink)}
+.step small{font-weight:700;color:var(--blue);font-size:14px}
+.step h3{font:700 20px/1.2 var(--head);margin:8px 0 8px;letter-spacing:-.02em}
+.step p{margin:0;color:var(--muted);font-size:15px}
+.stepshead{margin-top:56px}
+.cta{margin:56px 0 56px;padding:40px;border-radius:18px;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:28px}
+.cta h2{font-size:clamp(26px,3.2vw,38px)}
+.cta p{margin:10px 0 0;color:#B8C0D0;max-width:52ch}
+.cta .btn{background:var(--marker);color:var(--ink);border-color:var(--marker);white-space:nowrap}
+.cta .btn:hover{background:#fff;border-color:#fff}
+
+/* footer */
+.footer{border-top:2px solid var(--ink);padding:34px 0 40px;color:var(--muted);font-size:14px}
+.footer-inner{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
+.footer p{max-width:56ch;margin:12px 0 0}
+.footer-links{display:flex;flex-wrap:wrap;gap:10px 22px;align-content:flex-start}
+.footer-links a:hover{color:var(--blue);text-decoration:underline}
+
+@media(max-width:1000px){
+  .hero{grid-template-columns:1fr;gap:28px}
+  .doors{grid-template-columns:1fr 1fr}
+  .tgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .how{grid-template-columns:1fr;gap:30px}
+}
+@media(max-width:760px){
+  .wrap{width:calc(100% - 28px)}
+  .nav{height:58px}.quickbar{top:58px}
+  .navlinks{display:none;position:absolute;top:58px;left:0;right:0;flex-direction:column;gap:4px;margin:0;padding:12px 20px 18px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .navlinks.open{display:flex}
+  .navlinks a{padding:10px 0}
+  .menu-toggle{display:inline-flex}
+  .nav-actions .solid{display:none}
+  .hero{padding-top:28px}
+  .lead{font-size:16.5px}
+  .doors{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr}
+  .tgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .topic{padding:16px;min-height:170px}
+  .kind{display:none}
+  .steps{grid-template-columns:1fr}
+  .step+.step{border-left:0;border-top:1.5px solid var(--ink)}
+  .cta{flex-direction:column;align-items:flex-start;padding:28px}
+  .cta .btn{width:100%;justify-content:center}
+  .points{grid-template-columns:1fr}
+}
+@media(max-width:400px){.tgrid{grid-template-columns:1fr}.topic{min-height:0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="index.html" aria-label="PooreTools home"><span class="brand-mark">P</span><span>Poore<b>Tools</b></span></a>
+      <nav class="navlinks" id="navlinks" aria-label="Main navigation">
+        <a href="#tools">Digital tools</a>
+        <a href="#explore">Learn topics</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="about.html">About</a>
+        <a href="article.html">Articles</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="btn solid" href="#tools">Digital tools</a>
+        <button class="btn menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="navlinks" aria-label="Toggle navigation">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div>
+        <h1>Do the task. Learn the subject.</h1>
+        <p class="lead">Free online tools for images, PDFs, video, calculators and code, plus structured topics you can learn at your own pace.</p>
+        <label class="search" aria-label="Search tools and topics">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="topicSearch" type="search" placeholder="Search tools & topics..." autocomplete="off">
+        </label>
+        <div class="suggest">
+          <span>Try:</span>
+          <button type="button" data-suggest="pdf merge">PDF merge</button>
+          <button type="button" data-suggest="emi">EMI calculator</button>
+          <button type="button" data-suggest="compress">Compress</button>
+          <button type="button" data-suggest="programming">Programming</button>
+        </div>
+      </div>
+      <div class="doors">
+        <a class="door" href="#tools"><div><strong>Digital Tools</strong><span><b data-count="tools">25</b> free tools, ready to use</span></div><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+        <a class="door" href="#explore"><div><strong>Education topics</strong><span><b data-count="topics">20</b> subjects to learn step by step</span></div><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+      </div>
+    </section>
+
+    <div class="quickbar">
+      <div class="wrap filters" role="group" aria-label="Filter tools and topics">
+        <button class="chip" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="tools" aria-pressed="false">Free Tools</button>
+        <button class="chip" data-filter="business" aria-pressed="false">Business</button>
+        <button class="chip" data-filter="technology" aria-pressed="false">Technology</button>
+        <button class="chip" data-filter="science" aria-pressed="false">Science & maths</button>
+        <button class="chip" data-filter="language" aria-pressed="false">Languages</button>
+        <button class="chip" data-filter="career" aria-pressed="false">Career skills</button>
+      </div>
+    </div>
+
+    <!-- 1. DIGITAL TOOLS -->
+    <section class="section wrap" id="tools">
+      <div class="shead">
+        <div>
+          <h2>Free online tools</h2>
+          <p class="sub">Image, PDF, video, calculators, coding and productivity tools — ready to use.</p>
+        </div>
+        <div class="mini" role="group" aria-label="Tool type">
+          <button class="chip" data-tgroup="all" aria-pressed="true">All</button>
+          <button class="chip" data-tgroup="image" aria-pressed="false">Image</button>
+          <button class="chip" data-tgroup="pdf" aria-pressed="false">PDF</button>
+          <button class="chip" data-tgroup="finance" aria-pressed="false">Finance</button>
+          <button class="chip" data-tgroup="dev" aria-pressed="false">Dev</button>
+          <button class="chip" data-tgroup="other" aria-pressed="false">Other</button>
+        </div>
+      </div>
+      <div class="tools" id="toolGrid">
+        <a class="tool" href="image-upscaler-enhancer.html" data-group="image">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
+          <span class="txt"><strong>Photo Enhancer Online</strong><small>Upscale and enhance photos online.</small></span>
+          <span class="kind">Image</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="handwriting.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+          <span class="txt"><strong>Text To Handwriting</strong><small>Convert text into realistic handwriting.</small></span>
+          <span class="kind">Text</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="image-background-remover.html" data-group="image">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span class="txt"><strong>Image Background Remover</strong><small>Remove background from any image instantly.</small></span>
+          <span class="kind">Image</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="image-converter.html" data-group="image">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12h16M12 4v16"/><path d="m8 8 4-4 4 4M8 16l4 4 4-4"/></svg></span>
+          <span class="txt"><strong>Image Converter</strong><small>Convert images between popular formats.</small></span>
+          <span class="kind">Image</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="heic-to-jp.html" data-group="image">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+          <span class="txt"><strong>HEIC to JPG</strong><small>Convert HEIC photos to JPG easily.</small></span>
+          <span class="kind">Image</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="text-to-doc.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+          <span class="txt"><strong>Text to Doc Converter</strong><small>Turn plain text into downloadable documents.</small></span>
+          <span class="kind">Document</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="zip-converter.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg></span>
+          <span class="txt"><strong>File to ZIP Converter</strong><small>Compress files into ZIP archives online.</small></span>
+          <span class="kind">File</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="image-compressor.html" data-group="image">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></span>
+          <span class="txt"><strong>Image Compressor</strong><small>Reduce image size while keeping quality.</small></span>
+          <span class="kind">Image</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="pdf-compress.html" data-group="pdf">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15h6M9 11h6"/></svg></span>
+          <span class="txt"><strong>PDF Compress Online</strong><small>Compress PDF files to smaller size.</small></span>
+          <span class="kind">PDF</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="photo-to-pdf.html" data-group="pdf">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg></span>
+          <span class="txt"><strong>Photo to PDF</strong><small>Convert photos into a single PDF file.</small></span>
+          <span class="kind">PDF</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="pdf-to-jpg.html" data-group="pdf">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><rect x="8" y="12" width="8" height="6" rx="1"/></svg></span>
+          <span class="txt"><strong>PDF to JPG</strong><small>Convert PDF pages into JPG images.</small></span>
+          <span class="kind">PDF</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="pdf-crop.html" data-group="pdf">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2v4H2M18 2v4h4M6 22v-4H2M18 22v-4h4"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg></span>
+          <span class="txt"><strong>PDF Crop</strong><small>Crop PDF pages to the area you need.</small></span>
+          <span class="kind">PDF</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="pdf-merge.html" data-group="pdf">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+          <span class="txt"><strong>PDF Merge</strong><small>Merge multiple PDF files into one.</small></span>
+          <span class="kind">PDF</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="video-to-image.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg></span>
+          <span class="txt"><strong>Video to Image</strong><small>Extract frames or convert video to images.</small></span>
+          <span class="kind">Video</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="business-calculators.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>
+          <span class="txt"><strong>Business Calculators</strong><small>ROI, margin, break-even and more.</small></span>
+          <span class="kind">Business</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="financial-suite.html" data-group="finance">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20m5-15c0-2-2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2 4-5 4-5-2-5-4"/></svg></span>
+          <span class="txt"><strong>Financial Suite</strong><small>Interest, EMI, investment calculators.</small></span>
+          <span class="kind">Finance</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="tech-seo.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <span class="txt"><strong>Technical SEO Suite</strong><small>Technical SEO checks and helpers.</small></span>
+          <span class="kind">SEO</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="emi.html" data-group="finance">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20m5-15c0-2-2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2 4-5 4-5-2-5-4"/></svg></span>
+          <span class="txt"><strong>EMI Check Online</strong><small>Calculate loan EMI instantly.</small></span>
+          <span class="kind">Finance</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="mp3.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+          <span class="txt"><strong>MP3 Tools</strong><small>Convert and work with MP3 files.</small></span>
+          <span class="kind">Audio</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="love.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></span>
+          <span class="txt"><strong>Love Percentage</strong><small>Fun love percentage calculator.</small></span>
+          <span class="kind">Fun</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="css-tools.html" data-group="dev">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+          <span class="txt"><strong>CSS Tools</strong><small>Useful CSS generators and helpers.</small></span>
+          <span class="kind">Dev</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="coding-tools.html" data-group="dev">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14"/></svg></span>
+          <span class="txt"><strong>Coding Tools</strong><small>Handy tools for developers.</small></span>
+          <span class="kind">Dev</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="Anything-qr.html" data-group="dev">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+          <span class="txt"><strong>QR Generator</strong><small>Universal QR Generator Free.</small></span>
+          <span class="kind">Dev</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="networking-tools.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg></span>
+          <span class="txt"><strong>Networking Tools</strong><small>IP, DNS and network utilities.</small></span>
+          <span class="kind">Network</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <a class="tool" href="multi.html" data-group="other">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20M2 12h20"/></svg></span>
+          <span class="txt"><strong>Test</strong><small>Multi tool testing page.</small></span>
+          <span class="kind">Test</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+
+      </div>
+      <div class="empty" id="toolEmpty">No tools match your search.</div>
+    </section>
+
+    <!-- 2. LEARN TOPICS -->
+    <section class="section wrap" id="explore">
+      <div class="shead">
+        <div>
+          <h2>What would you like to learn?</h2>
+          <p class="sub">Choose a subject to explore its learning path.</p>
+        </div>
+      </div>
+      <div id="courseGrid">
+      <div class="tgroup" data-group="business">
+        <h3><span>Business</span><small>5 topics</small></h3>
+        <div class="tgrid">
+          <a class="topic" href="accounting.html" data-category="business" data-search="accounting bookkeeping finance ledger balance sheets">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 4h2m4 0h2"/></svg></span>
+            <strong>Accounting</strong>
+            <small>Bookkeeping, financial statements and core accounting concepts.</small>
+          </a>
+          <a class="topic" href="business.html" data-category="business" data-search="business management strategy operations">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 12h18m-11 0v3h4v-3"/></svg></span>
+            <strong>Business</strong>
+            <small>Learn business fundamentals, planning, operations and strategy.</small>
+          </a>
+          <a class="topic" href="economics.html" data-category="business" data-search="economics microeconomics macroeconomics markets">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V5m0 14h17M7 15l4-5 3 2 5-7"/></svg></span>
+            <strong>Economics</strong>
+            <small>Understand markets, incentives, trade and economic systems.</small>
+          </a>
+          <a class="topic" href="finance.html" data-category="business" data-search="finance budgeting investing interest financial literacy">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20m5-15c0-2-2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2 4-5 4-5-2-5-4"/></svg></span>
+            <strong>Finance</strong>
+            <small>Explore budgeting, interest, financial planning and money basics.</small>
+          </a>
+          <a class="topic" href="marketing.html" data-category="business" data-search="marketing branding market research digital marketing">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m3 11 18-6v14L3 13v-2Zm0 2 2 7h5l-3-6M21 9a3 3 0 0 1 0 6"/></svg></span>
+            <strong>Marketing</strong>
+            <small>Learn positioning, audience research, branding and promotion.</small>
+          </a>
+        </div>
+      </div>
+      <div class="tgroup" data-group="technology">
+        <h3><span>Technology</span><small>5 topics</small></h3>
+        <div class="tgrid">
+          <a class="topic" href="computer-science.html" data-category="technology" data-search="computer science algorithms operating systems databases">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4m-3-9 2-2-2-2m5 4 2-2"/></svg></span>
+            <strong>Computer Science</strong>
+            <small>Understand algorithms, systems, data and computing foundations.</small>
+          </a>
+          <a class="topic" href="programming.html" data-category="technology" data-search="programming coding python javascript web development">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14"/></svg></span>
+            <strong>Programming</strong>
+            <small>Learn coding concepts, languages and practical problem-solving.</small>
+          </a>
+          <a class="topic" href="data-science.html" data-category="technology" data-search="data science analytics data visualization">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V5m0 14h16M7 15l3-4 3 2 5-7"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="11" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="18" cy="6" r="1"/></svg></span>
+            <strong>Data Science</strong>
+            <small>Learn data analysis, visualization and evidence-based thinking.</small>
+          </a>
+          <a class="topic" href="cybersecurity.html" data-category="technology" data-search="cybersecurity privacy networks digital safety">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <strong>Cybersecurity</strong>
+            <small>Understand online safety, security concepts and digital privacy.</small>
+          </a>
+          <a class="topic" href="web-development.html" data-category="technology" data-search="web development html css javascript frontend">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01m1 7-2 2 2 2m4-4 2 2-2 2"/></svg></span>
+            <strong>Web Development</strong>
+            <small>Understand websites, front-end foundations and web standards.</small>
+          </a>
+        </div>
+      </div>
+      <div class="tgroup" data-group="science">
+        <h3><span>Science & maths</span><small>6 topics</small></h3>
+        <div class="tgrid">
+          <a class="topic" href="mathematics.html" data-category="science" data-search="mathematics algebra geometry calculus statistics">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h14M5 12h14M5 20h14M8 2v4m8 4v4M8 18v4"/></svg></span>
+            <strong>Mathematics</strong>
+            <small>Build confidence with algebra, geometry, statistics and more.</small>
+          </a>
+          <a class="topic" href="physics.html" data-category="science" data-search="physics mechanics energy electricity motion">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/><ellipse cx="12" cy="12" rx="4.5" ry="10" transform="rotate(45 12 12)"/></svg></span>
+            <strong>Physics</strong>
+            <small>Explore motion, forces, energy, electricity and the physical world.</small>
+          </a>
+          <a class="topic" href="chemistry.html" data-category="science" data-search="chemistry atoms molecules reactions periodic table">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3h6m-5 0v7l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3M7 16h10"/></svg></span>
+            <strong>Chemistry</strong>
+            <small>Study atoms, molecules, reactions and chemical principles.</small>
+          </a>
+          <a class="topic" href="biology.html" data-category="science" data-search="biology cells genetics ecology human body">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-8-4.5-8-11a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 6.5-8 11-8 11Z"/><path d="M8 13h8m-4-5v10"/></svg></span>
+            <strong>Biology</strong>
+            <small>Discover cells, genetics, ecosystems and living systems.</small>
+          </a>
+          <a class="topic" href="statistics.html" data-category="science" data-search="statistics probability data analysis">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20V10h4v10m4 0V4h4v16m4 0v-7h4v7" transform="translate(-2 0)"/></svg></span>
+            <strong>Statistics & Probability</strong>
+            <small>Make sense of data, distributions, probability and uncertainty.</small>
+          </a>
+          <a class="topic" href="psychology.html" data-category="science" data-search="psychology behavior memory cognition">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 4a4 4 0 0 0-4 4v1a3 3 0 0 0 0 6v1a4 4 0 0 0 4 4m6-16a4 4 0 0 1 4 4v1a3 3 0 0 1 0 6v1a4 4 0 0 1-4 4M9 4v16m6-16v16M9 9h3m3 6h-3"/></svg></span>
+            <strong>Psychology</strong>
+            <small>Explore cognition, memory, behavior and research basics.</small>
+          </a>
+        </div>
+      </div>
+      <div class="tgroup" data-group="language">
+        <h3><span>Languages</span><small>2 topics</small></h3>
+        <div class="tgrid">
+          <a class="topic" href="english.html" data-category="language" data-search="english grammar vocabulary writing reading">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16M12 5v14m-5 0h10M8 9l-3 7m6-7 3 7M16 9l3 7"/></svg></span>
+            <strong>English</strong>
+            <small>Improve grammar, vocabulary, reading and clear writing.</small>
+          </a>
+          <a class="topic" href="writing.html" data-category="language" data-search="writing communication essays reports">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h4l11-11-4-4L4 16v4Zm9-13 4 4M13 20h7"/></svg></span>
+            <strong>Writing & Communication</strong>
+            <small>Write clearer emails, reports and explanations with confidence.</small>
+          </a>
+        </div>
+      </div>
+      <div class="tgroup" data-group="career">
+        <h3><span>Career skills</span><small>2 topics</small></h3>
+        <div class="tgrid">
+          <a class="topic" href="project-management.html" data-category="career" data-search="project management planning teamwork delivery">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4m8-4v4M3 9h18m-13 5 2 2 4-4"/></svg></span>
+            <strong>Project Management</strong>
+            <small>Plan tasks, manage priorities and deliver projects systematically.</small>
+          </a>
+          <a class="topic" href="critical-thinking.html" data-category="career" data-search="critical thinking logic reasoning problem solving">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 5 2c-1.5 1-2 1.5-2 3m0 3h.01"/></svg></span>
+            <strong>Critical Thinking</strong>
+            <small>Practice logic, reasoning, evaluating claims and solving problems.</small>
+          </a>
+        </div>
+      </div>
+
+      </div>
+      <div class="empty" id="emptyState">No topics match your search. Try another keyword.</div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section wrap" id="how-it-works">
+      <div class="how">
+        <div>
+          <h2>Learn at your pace. Use tools instantly.</h2>
+          <p>Explore concepts in a clear order, work through examples, and check your understanding with practice. Need to get something done? Jump straight to free digital tools.</p>
+          <a class="btn solid" href="#tools">Open Digital Tools</a>
+        </div>
+        <ul class="points">
+          <li><b>Structured topics</b><span>Move from fundamentals to deeper concepts.</span></li>
+          <li><b>Free digital tools</b><span>Images, PDFs, video, calculators & more.</span></li>
+          <li><b>Practice questions</b><span>Check what you understand as you go.</span></li>
+          <li><b>Self-paced learning</b><span>Return to topics when you need a refresher.</span></li>
+        </ul>
+      </div>
+      <div class="stepshead">
+        <h2>Start small. Build real understanding.</h2>
+        <p class="sub">A clear path helps make a big subject easier to approach.</p>
+      </div>
+      <div class="steps">
+        <article class="step"><small>Step 1</small><h3>Choose a topic or tool</h3><p>Pick the subject that fits your goal, or open a tool you need right now.</p></article>
+        <article class="step"><small>Step 2</small><h3>Learn or get work done</h3><p>Read explanations and examples, or use the tool and download your result.</p></article>
+        <article class="step"><small>Step 3</small><h3>Come back anytime</h3><p>Return for more topics or tools whenever you need them.</p></article>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="wrap" id="cta">
+      <div class="cta">
+        <div>
+          <h2>Curiosity is a good place to start.</h2>
+          <p>Choose one subject today, or open a free tool and get something done.</p>
+        </div>
+        <a class="btn" href="#tools">Browse tools & topics</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <a class="brand" href="index.html"><span class="brand-mark">P</span><span>Poore<b>Tools</b></span></a>
+        <p>PooreTools is a place to learn useful subjects and use free digital tools — all in one clean home.</p>
+        <p>© <span id="year"></span> PooreTools. All rights reserved.</p>
+      </div>
+      <div class="footer-links">
+        <a href="about.html">About</a>
+        <a href="article.html">Articles</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms</a>
+        <a href="disclaimer.html">Disclaimer</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const input = $('#topicSearch');
+const tools = $$('.tool'), topics = $$('.topic'), groups = $$('.tgroup');
+const mainFilters = $$('[data-filter]'), toolChips = $$('[data-tgroup]');
+const toolsSec = $('#tools'), topicsSec = $('#explore');
+const extras = [$('#how-it-works'), $('#cta')];
+let active = 'all', toolGroup = 'all';
+
+function update() {
+  const q = input.value.trim().toLowerCase();
+  const showTools = active === 'all' || active === 'tools';
+  const showTopics = active !== 'tools';
+  let vt = 0, vc = 0;
+  tools.forEach(t => {
+    const ok = showTools && (toolGroup === 'all' || t.dataset.group === toolGroup) && (!q || t.innerText.toLowerCase().includes(q));
+    t.style.display = ok ? 'flex' : 'none'; if (ok) vt++;
+  });
+  topics.forEach(t => {
+    const ok = showTopics && (active === 'all' || t.dataset.category === active) && (!q || (t.dataset.search + ' ' + t.innerText).toLowerCase().includes(q));
+    t.style.display = ok ? 'flex' : 'none'; if (ok) vc++;
+  });
+  groups.forEach(g => { g.hidden = !$$('.topic', g).some(t => t.style.display !== 'none'); });
+  toolsSec.hidden = !showTools;
+  topicsSec.hidden = !showTopics;
+  $('#toolEmpty').style.display = showTools && !vt ? 'block' : 'none';
+  $('#emptyState').style.display = showTopics && !vc ? 'block' : 'none';
+  const focused = q || active !== 'all';
+  extras.forEach(e => e.hidden = !!focused);
+}
+input.addEventListener('input', update);
+mainFilters.forEach(b => b.addEventListener('click', () => {
+  active = b.dataset.filter;
+  mainFilters.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  update();
+}));
+toolChips.forEach(b => b.addEventListener('click', () => {
+  toolGroup = b.dataset.tgroup;
+  toolChips.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  update();
+}));
+$$('[data-suggest]').forEach(b => b.addEventListener('click', () => {
+  input.value = b.dataset.suggest; update(); input.focus();
+}));
+$$('[data-count]').forEach(el => {
+  el.textContent = el.dataset.count === 'tools' ? tools.length : topics.length;
+});
+const menuToggle = $('#menuToggle');
+menuToggle.addEventListener('click', () => {
+  const open = $('#navlinks').classList.toggle('open');
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.textContent = open ? '✕' : '☰';
+});
+$$('#navlinks a').forEach(a => a.addEventListener('click', () => {
+  $('#navlinks').classList.remove('open');
+  menuToggle.setAttribute('aria-expanded', 'false');
+  menuToggle.textContent = '☰';
+}));
+$('#year').textContent = new Date().getFullYear();
+update();
+
+  </script>
+</body>
+</html>
